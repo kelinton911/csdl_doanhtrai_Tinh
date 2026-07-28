@@ -15,7 +15,7 @@ import {
   ReviewDecisionDto,
   UpdateBarracksDto,
 } from './dto/barracks.dto';
-import { PaginationQuery } from '../../common/dto/pagination.dto';
+import { PaginationQuery, SearchQuery } from '../../common/dto/pagination.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../identity/roles';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
@@ -28,8 +28,8 @@ export class BarracksController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách doanh trại (phân trang, kèm tên xã/đơn vị, số công trình)' })
-  list(@Query() q: PaginationQuery, @Query('search') search?: string) {
-    return this.service.list(q, search);
+  list(@Query() q: SearchQuery) {
+    return this.service.list(q, q.search);
   }
 
   @Get(':id')

@@ -11,6 +11,21 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { PaginationQuery } from '../../../common/dto/pagination.dto';
+
+export class ListSheetsQuery extends PaginationQuery {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  campaignId?: string;
+}
+
+export class ReviewQueueQuery extends PaginationQuery {
+  @ApiPropertyOptional({ default: 'PENDING' })
+  @IsOptional()
+  @IsString()
+  status?: string;
+}
 
 export class CreateCampaignDto {
   @ApiProperty({ example: 'KK-2026-Q1' })

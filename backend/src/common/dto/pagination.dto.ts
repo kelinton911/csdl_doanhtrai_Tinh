@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 // Phân trang page/size cho danh mục nhỏ (Hồ sơ TKKT §7).
 export class PaginationQuery {
@@ -22,6 +22,14 @@ export class PaginationQuery {
   get skip(): number {
     return (this.page - 1) * this.size;
   }
+}
+
+// Bộ lọc tìm kiếm dùng chung: page/size + q (từ khóa). Mở rộng cho từng endpoint.
+export class SearchQuery extends PaginationQuery {
+  @ApiPropertyOptional({ description: 'Từ khóa tìm kiếm' })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }
 
 export interface Paginated<T> {

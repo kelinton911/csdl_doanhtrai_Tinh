@@ -9,6 +9,19 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { PaginationQuery } from '../../../common/dto/pagination.dto';
+
+export class InventoryFilterQuery extends PaginationQuery {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  storageLocationId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  materialId?: string;
+}
 
 export class CreateStorageLocationDto {
   @ApiProperty({ example: 'KHO-A01' })

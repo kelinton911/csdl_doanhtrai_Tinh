@@ -13,6 +13,7 @@ import { MasterDataService } from './master-data.service';
 import {
   CreateCatalogDto,
   CreateMaterialDto,
+  ListMaterialsQuery,
   UpdateCatalogDto,
   UpdateMaterialDto,
 } from './dto/master-data.dto';
@@ -31,12 +32,8 @@ export class MasterDataController {
   // ------- Materials (đặt trước route :type để tránh nuốt) -------
   @Get('materials')
   @ApiOperation({ summary: 'UC-07: Danh sách vật chất (lọc nhóm/tìm kiếm)' })
-  listMaterials(
-    @Query() q: PaginationQuery,
-    @Query('category') category?: string,
-    @Query('search') search?: string,
-  ) {
-    return this.service.listMaterials(q, category, search);
+  listMaterials(@Query() q: ListMaterialsQuery) {
+    return this.service.listMaterials(q, q.category, q.search);
   }
 
   @Get('materials/:id')

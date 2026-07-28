@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuditService } from './audit.service';
-import { PaginationQuery } from '../../common/dto/pagination.dto';
+import { AuditQuery } from './dto/audit-query.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../identity/roles';
 
@@ -15,13 +15,8 @@ export class AuditController {
 
   @Get()
   @ApiOperation({ summary: 'UC-23: Tra cứu nhật ký (lọc theo actor/entity/correlation)' })
-  list(
-    @Query() q: PaginationQuery,
-    @Query('actorId') actorId?: string,
-    @Query('entityType') entityType?: string,
-    @Query('correlationId') correlationId?: string,
-  ) {
-    return this.service.list(q, { actorId, entityType, correlationId });
+  list(@Query() q: AuditQuery) {
+    return this.service.list(q, { actorId: q.actorId, entityType: q.entityType, correlationId: q.correlationId });
   }
 
   @Get(':id')

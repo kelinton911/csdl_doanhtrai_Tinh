@@ -13,7 +13,9 @@ import { InspectionService } from './inspection.service';
 import {
   CreateCampaignDto,
   CreateSheetDto,
+  ListSheetsQuery,
   ReviewDecisionDto,
+  ReviewQueueQuery,
   UpdateSheetDto,
 } from './dto/inspection.dto';
 import { PaginationQuery } from '../../common/dto/pagination.dto';
@@ -58,8 +60,8 @@ export class InspectionController {
   // ------- Phiếu kiểm kê -------
   @Get('inspection-sheets')
   @ApiOperation({ summary: 'UC-10: Danh sách phiếu kiểm kê' })
-  listSheets(@Query() q: PaginationQuery, @Query('campaignId') campaignId?: string) {
-    return this.service.listSheets(q, campaignId);
+  listSheets(@Query() q: ListSheetsQuery) {
+    return this.service.listSheets(q, q.campaignId);
   }
 
   @Get('inspection-sheets/:id')
@@ -97,8 +99,8 @@ export class InspectionController {
   @Get('review-tasks')
   @Roles(Role.REVIEWER, Role.BARRACKS_OFFICER, Role.SYS_ADMIN)
   @ApiOperation({ summary: 'UC-11: Hàng đợi kiểm duyệt' })
-  listTasks(@Query() q: PaginationQuery, @Query('status') status?: string) {
-    return this.service.listReviewTasks(q, status);
+  listTasks(@Query() q: ReviewQueueQuery) {
+    return this.service.listReviewTasks(q, q.status ?? 'PENDING');
   }
 
   @Get('review-tasks/:id')

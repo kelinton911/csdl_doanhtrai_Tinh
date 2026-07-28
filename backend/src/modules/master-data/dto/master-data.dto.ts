@@ -7,6 +7,19 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { PaginationQuery } from '../../../common/dto/pagination.dto';
+
+export class ListMaterialsQuery extends PaginationQuery {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  search?: string;
+}
 
 // Các loại danh mục được hỗ trợ (UC-03). Dùng cho gợi ý và kiểm tra.
 export const CATALOG_TYPES = [

@@ -5,6 +5,7 @@ import {
   AdjustmentDto,
   CreateStorageLocationDto,
   CreateTransactionDto,
+  InventoryFilterQuery,
 } from './dto/inventory.dto';
 import { PaginationQuery } from '../../common/dto/pagination.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -34,22 +35,14 @@ export class InventoryController {
 
   @Get('balances')
   @ApiOperation({ summary: 'UC-08: Số dư tồn (kèm chênh lệch kiểm kê)' })
-  balances(
-    @Query() q: PaginationQuery,
-    @Query('storageLocationId') storageLocationId?: string,
-    @Query('materialId') materialId?: string,
-  ) {
-    return this.service.listBalances(q, { storageLocationId, materialId });
+  balances(@Query() q: InventoryFilterQuery) {
+    return this.service.listBalances(q, { storageLocationId: q.storageLocationId, materialId: q.materialId });
   }
 
   @Get('transactions')
   @ApiOperation({ summary: 'UC-08: Sổ kho (bút toán, bất biến)' })
-  listTransactions(
-    @Query() q: PaginationQuery,
-    @Query('storageLocationId') storageLocationId?: string,
-    @Query('materialId') materialId?: string,
-  ) {
-    return this.service.listTransactions(q, { storageLocationId, materialId });
+  listTransactions(@Query() q: InventoryFilterQuery) {
+    return this.service.listTransactions(q, { storageLocationId: q.storageLocationId, materialId: q.materialId });
   }
 
   @Post('transactions')
