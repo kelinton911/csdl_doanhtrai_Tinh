@@ -6,6 +6,7 @@ import dataSource from '../data-source';
 import { Organization } from '../../modules/identity/entities/organization.entity';
 import { User } from '../../modules/identity/entities/user.entity';
 import { Role } from '../../modules/identity/roles';
+import { AdministrativeArea } from '../../modules/organization/entities/administrative-area.entity';
 
 async function run() {
   await dataSource.initialize();
@@ -49,6 +50,21 @@ async function run() {
       }),
     );
     console.log(`  + Tạo tài khoản demo: ${u.username} (${u.roles.join(', ')})`);
+  }
+
+  // M02 — một xã giả lập để thử nghiệp vụ doanh trại.
+  const areaRepo = dataSource.getRepository(AdministrativeArea);
+  const existingArea = await areaRepo.findOne({ where: { code: 'XA-A01' } });
+  if (!existingArea) {
+    const area = await areaRepo.save(
+      areaRepo.create({
+        code: 'XA-A01',
+        name: 'Xã A01 (giả lập)',
+        type: 'COMMUNE',
+        status: 'ACTIVE',
+      }),
+    );
+    console.log('  + Tạo xã/phường giả lập:', area.code);
   }
 
   await dataSource.destroy();

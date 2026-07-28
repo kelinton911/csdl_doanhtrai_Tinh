@@ -23,9 +23,9 @@ Tổng hợp từ ba tài liệu trong `docs/`:
 | Module | Phạm vi | Use case | API gốc | Hiện trạng |
 | --- | --- | --- | --- | --- |
 | M01 Identity & Access | Tài khoản, vai trò, phiên | UC-01, UC-02 | `/auth/*`, `/me`, `/users` | ✅ auth + /me; quản lý user là lộ trình |
-| M02 Organization & Area | Đơn vị, xã/phường | UC-04 | `/organizations`, `/administrative-areas` | ⬜ entity Organization đã có |
+| M02 Organization & Area | Đơn vị, xã/phường | UC-04 | `/organizations`, `/administrative-areas` | ✅ list/create area (RBAC); geometry PostGIS |
 | M03 Master Data | Danh mục chuẩn | UC-03, UC-07 | `/master-data/*`, `/materials` | ⬜ |
-| M04 Barracks | Hồ sơ doanh trại | UC-05, UC-06 | `/barracks` | ⬜ |
+| M04 Barracks | Hồ sơ doanh trại | UC-05, UC-06 | `/barracks` | ✅ CRUD + workflow (submit/approve/request-changes), revision, unique-code, no-edit-approved, phân tách nhiệm vụ |
 | M05 Facilities | Công trình, hạ tầng | UC-07 | `/facilities` | ⬜ |
 | M06 Materials & Inventory | Tồn kho, biến động | UC-08 | `/inventory/*` | ⬜ |
 | M07 Inspection | Kiểm kê, kiểm duyệt | UC-09, UC-10, UC-11 | `/inspection-*`, `/review-*` | ⬜ |
