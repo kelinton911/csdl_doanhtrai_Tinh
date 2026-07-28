@@ -14,6 +14,8 @@ import { Barracks } from '../../modules/barracks/entities/barracks.entity';
 import { Facility } from '../../modules/facilities/entities/facility.entity';
 import { StorageLocation } from '../../modules/inventory/entities/storage-location.entity';
 import { StockBalance } from '../../modules/inventory/entities/stock-balance.entity';
+import { InspectionCampaign } from '../../modules/inspection/entities/inspection-campaign.entity';
+import { InspectionStatus } from '../../common/workflow';
 import { WorkflowStatus } from '../../common/workflow';
 import { FacilityStatus } from '../../modules/facilities/facility-status';
 
@@ -231,6 +233,24 @@ async function run() {
       }
     }
     console.log(`  + Kho: ${locs.length} · Dòng tồn kho: ${balCount}`);
+  }
+
+  // 8) Đợt kiểm kê mẫu (đã phát hành OPEN) để dựng phiếu kiểm kê
+  const campaignRepo = dataSource.getRepository(InspectionCampaign);
+  if ((await campaignRepo.count()) === 0) {
+    await campaignRepo.save(
+      campaignRepo.create({
+        code: 'KK-2026-Q1',
+        name: 'Kiểm kê định kỳ Quý I/2026 (giả lập)',
+        scope: { note: 'Toàn tỉnh — dữ liệu giả lập' },
+        status: InspectionStatus.OPEN,
+        plannedFrom: new Date('2026-01-05'),
+        plannedTo: new Date('2026-03-31'),
+        createdBy: authorId,
+        updatedBy: authorId,
+      }),
+    );
+    console.log('  + Đợt kiểm kê: KK-2026-Q1 (OPEN)');
   }
 
   await dataSource.destroy();
