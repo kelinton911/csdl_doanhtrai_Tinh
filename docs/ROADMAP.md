@@ -26,7 +26,7 @@ Tổng hợp từ ba tài liệu trong `docs/`:
 | M02 Organization & Area | Đơn vị, xã/phường | UC-04 | `/organizations`, `/administrative-areas` | ✅ list/create area (RBAC); geometry PostGIS |
 | M03 Master Data | Danh mục chuẩn | UC-03, UC-07 | `/master-data/*`, `/materials` | ⬜ |
 | M04 Barracks | Hồ sơ doanh trại | UC-05, UC-06 | `/barracks` | ✅ CRUD + workflow (submit/approve/request-changes), revision, unique-code, no-edit-approved, phân tách nhiệm vụ |
-| M05 Facilities | Công trình, hạ tầng | UC-07 | `/facilities` | ⬜ |
+| M05 Facilities | Công trình, hạ tầng | UC-07 | `/barracks/:id/facilities`, `/facilities/:id` | ✅ CRUD thuộc doanh trại, mã duy nhất trong doanh trại, decommission thay xóa cứng, geometry Point |
 | M06 Materials & Inventory | Tồn kho, biến động | UC-08 | `/inventory/*` | ⬜ |
 | M07 Inspection | Kiểm kê, kiểm duyệt | UC-09, UC-10, UC-11 | `/inspection-*`, `/review-*` | ⬜ |
 | M08 Documents & Media | Tài liệu, ảnh | UC-12 | `/files/*`, `/documents` | ⬜ (dùng MinIO) |
@@ -42,8 +42,8 @@ Tổng hợp từ ba tài liệu trong `docs/`:
 
 - **Pha 0 — Nền tảng** ✅ *(đã dựng)*: repo, CI/CD-ready, auth, error model (problem+json),
   migration, observability (correlation id, health), CSDL PostGIS, Swagger.
-- **Pha 1 — Dữ liệu lõi**: Organization/Area (M02), Master Data (M03), Barracks (M04),
-  Facilities (M05), Documents (M08 + MinIO).
+- **Pha 1 — Dữ liệu lõi**: Organization/Area (M02 ✅), Barracks (M04 ✅), Facilities (M05 ✅);
+  còn Master Data (M03), Documents (M08 + MinIO).
 - **Pha 2 — Kiểm kê & kiểm duyệt**: Inspection (M07), Workflow/Approval, chênh lệch, thông báo.
 - **Pha 3 — Vật chất & sửa chữa**: Inventory (M06), Maintenance (M09).
 - **Pha 4 — GIS & báo cáo**: GIS (M11), Reporting (M12), snapshot/export.
