@@ -85,15 +85,27 @@ export class BarracksService {
     return paginated(data, total, q);
   }
 
-  async get(id: string): Promise<Barracks & { location: unknown }> {
+  async get(
+    id: string,
+  ): Promise<Barracks & { location: unknown; areaName: string | null; orgName: string | null }> {
     const found = await this.repo.findOne({ where: { id } });
     if (!found) throw new NotFoundException('DATA-001: Không tìm thấy doanh trại');
-    // Chuẩn hoá toạ độ về GeoJSON để frontend dùng trực tiếp trên bản đồ.
-    const geo = await this.repo.query(
-      'SELECT ST_AsGeoJSON(location) AS g FROM barracks WHERE id = $1',
+    // Chuẩn hoá toạ độ về GeoJSON + tên xã/đơn vị để frontend dùng trực tiếp.
+    const rows = await this.repo.query(
+      `SELECT ST_AsGeoJSON(b.location) AS g, a.name AS area_name, o.name AS org_name
+       FROM barracks b
+       LEFT JOIN administrative_areas a ON a.id = b.area_id
+       LEFT JOIN organizations o ON o.id = b.organization_id
+       WHERE b.id = $1`,
       [id],
     );
-    return { ...found, location: geo?.[0]?.g ? JSON.parse(geo[0].g) : null };
+    const r = rows?.[0] ?? {};
+    return {
+      ...found,
+      location: r.g ? JSON.parse(r.g) : null,
+      areaName: r.area_name ?? null,
+      orgName: r.org_name ?? null,
+    };
   }
 
   async create(dto: CreateBarracksDto, user: AuthUser): Promise<Barracks> {
