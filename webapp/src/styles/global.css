@@ -1,0 +1,193 @@
+@import './tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+a {
+  color: var(--color-accent-700);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-accent);
+}
+::selection {
+  background: var(--color-accent-200);
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid var(--color-neutral-400);
+  background: var(--surface-1);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  transition: border-color 0.15s, background 0.15s;
+}
+.btn:hover {
+  border-color: var(--color-accent);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--teal) 85%, black);
+  border-color: color-mix(in srgb, var(--teal) 85%, black);
+}
+.btn-accent {
+  background: var(--color-accent-600);
+  border-color: var(--color-accent-600);
+  color: #fff;
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.btn-danger {
+  color: var(--danger-fg);
+  border-color: var(--danger-bd);
+  background: var(--danger-bg);
+}
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12.5px;
+}
+
+/* Inputs */
+.input,
+select.input,
+textarea.input {
+  background: var(--surface-1);
+  color: var(--color-text);
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  font: inherit;
+  width: 100%;
+}
+.input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+label.field-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+}
+
+/* Surfaces */
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-lg);
+}
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius);
+}
+.divider {
+  height: 1px;
+  background: var(--color-neutral-300);
+}
+.muted {
+  color: var(--color-neutral-600);
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+
+/* Tables */
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.data th {
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+  padding: 10px;
+  border-bottom: 2px solid var(--color-neutral-300);
+  position: sticky;
+  top: 0;
+  background: var(--surface-1);
+  white-space: nowrap;
+}
+table.data td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--color-neutral-200);
+  vertical-align: middle;
+}
+table.data tbody tr:hover {
+  background: var(--color-accent-100);
+}
+
+/* Scrollbar */
+.scrl::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scrl::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-400);
+  border-radius: 6px;
+}
+.scrl::-webkit-scrollbar-track {
+  background: var(--color-neutral-200);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

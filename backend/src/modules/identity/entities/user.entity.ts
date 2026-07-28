@@ -32,6 +32,10 @@ export class User {
   @Column({ name: 'organization_id', type: 'uuid', nullable: true })
   organizationId!: string | null;
 
+  // Phạm vi dữ liệu bổ sung (UC-02): danh sách {type, refId} — đơn vị/xã/phường.
+  @Column({ name: 'data_scopes', type: 'jsonb', default: () => "'[]'" })
+  dataScopes!: Array<{ type: string; refId: string }>;
+
   // ACTIVE | LOCKED | EXPIRED
   @Column({ default: 'ACTIVE' })
   status!: string;

@@ -26,6 +26,15 @@ export class AuthController {
     return this.auth.refresh(dto.refreshToken);
   }
 
+  @Post('auth/logout')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'UC-01: Kết thúc phiên (client hủy token)' })
+  logout() {
+    // Access token ngắn hạn (stateless). Client xóa token; refresh token thu hồi khi
+    // triển khai revocation store (lộ trình). Trả 200 để client dọn phiên.
+    return { ok: true };
+  }
+
   @Get('me')
   @ApiOperation({ summary: 'Thông tin quyền/phạm vi của phiên hiện tại' })
   me(@CurrentUser() user: AuthUser) {

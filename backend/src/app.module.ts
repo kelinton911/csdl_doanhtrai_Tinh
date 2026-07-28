@@ -3,6 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { IdempotencyModule } from './modules/idempotency/idempotency.module';
+import { StorageModule } from './modules/storage/storage.module';
 import { IdentityModule } from './modules/identity/identity.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { BarracksModule } from './modules/barracks/barracks.module';
@@ -22,15 +25,18 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
       envFilePath: ['../.env', '.env'],
     }),
     DatabaseModule,
+    // Nền tảng xuyên suốt (Pha A): audit append-only, idempotency, object storage.
+    AuditModule, // M15 — Audit & Operations (UC-23)
+    IdempotencyModule, // Idempotency-Key cho POST quan trọng
+    StorageModule, // Object storage MinIO (nền cho M08)
     IdentityModule, // M01 — Identity & Access
     OrganizationModule, // M02 — Organization & Area
     BarracksModule, // M04 — Barracks (workflow UC-05/06)
     FacilitiesModule, // M05 — Facilities (công trình thuộc doanh trại, UC-07)
     HealthModule,
-    // Roadmap (Hồ sơ TKKT §3): MasterData(M03), Inventory(M06),
-    // Inspection(M07), Documents(M08), Maintenance(M09), Scenario(M10), GIS(M11),
-    // Reporting(M12), Alert(M13), Integration(M14), Administration(M15).
-    // Xem docs/ROADMAP.md.
+    // Roadmap còn lại: MasterData(M03), Inventory(M06), Inspection(M07),
+    // Documents(M08), Maintenance(M09), Scenario(M10), GIS(M11), Reporting(M12),
+    // Alert(M13), Integration(M14). Xem docs/ROADMAP.md.
   ],
   providers: [
     // Xác thực mặc định toàn hệ thống, endpoint công khai đánh dấu @Public().

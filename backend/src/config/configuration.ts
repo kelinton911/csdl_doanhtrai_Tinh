@@ -20,4 +20,14 @@ export default () => ({
     accessTtl: process.env.JWT_ACCESS_TTL ?? '15m',
     refreshTtl: process.env.JWT_REFRESH_TTL ?? '7d',
   },
+  storage: {
+    // Object storage nội bộ (MinIO tương thích S3).
+    endpoint:
+      process.env.MINIO_ENDPOINT ??
+      `http://${process.env.MINIO_HOST ?? 'localhost'}:${process.env.MINIO_PORT ?? '9000'}`,
+    accessKey: process.env.MINIO_USER ?? 'csdl',
+    secretKey: process.env.MINIO_PASSWORD ?? 'csdl_dev_pw',
+    bucket: process.env.MINIO_BUCKET ?? 'csdl-documents',
+    region: process.env.MINIO_REGION ?? 'us-east-1',
+  },
 });

@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
 import { Organization } from './entities/organization.entity';
 
@@ -13,8 +15,8 @@ import { Organization } from './entities/organization.entity';
     // global: guard xác thực toàn cục (APP_GUARD) trong AppModule cần JwtService.
     JwtModule.register({ global: true }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  controllers: [AuthController, UsersController],
+  providers: [AuthService, UsersService],
+  exports: [AuthService, UsersService],
 })
 export class IdentityModule {}
