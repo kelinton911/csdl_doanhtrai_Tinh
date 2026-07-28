@@ -233,6 +233,8 @@ export function BarracksDetailPage() {
           )}
         </div>
       )}
+
+      {evidence && <EvidenceDrawer entityType="barracks" entityId={id!} onClose={() => setEvidence(false)} />}
     </>
   );
 }
