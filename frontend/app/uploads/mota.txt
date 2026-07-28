@@ -1,0 +1,326 @@
+
+BỘ CHỈ HUY QUÂN SỰ TỈNH
+TÀI LIỆU MÔ TẢ FRONTEND
+HỆ THỐNG CƠ SỞ DỮ LIỆU LỚN VỀ VẬT CHẤT DOANH TRẠI CẤP TỈNHTRONG CHIẾN TRANH BẢO VỆ TỔ QUỐC
+Đặc tả phục vụ Claude Design, thiết kế UI/UX và bàn giao phát triển frontend
+
+Phiên bản tài liệu
+Phiên bản 1.0 - Định hướng thiết kế hiện đại, dữ liệu lớn, GIS, dashboard chỉ huy; triển khai ưu tiên trên mạng nội bộ.
+
+Năm 2026
+
+1. MỤC ĐÍCH VÀ PHẠM VI TÀI LIỆU
+Tài liệu này là đầu vào chính thức để Claude Design, nhóm UI/UX và nhóm phát triển frontend thiết kế giao diện cho hệ thống cơ sở dữ liệu lớn về vật chất doanh trại cấp tỉnh. Tài liệu không thay thế đặc tả nghiệp vụ hoặc thiết kế cơ sở dữ liệu; nó chuyển các yêu cầu nghiệp vụ thành cấu trúc màn hình, luồng thao tác, thành phần giao diện, trạng thái dữ liệu và tiêu chuẩn bàn giao.
+Đối tượng sử dụng: chỉ huy Bộ CHQS tỉnh; cơ quan hậu cần - kỹ thuật; cán bộ ngành doanh trại; Ban CHQS cấp xã; quản trị hệ thống; cán bộ kiểm duyệt dữ liệu.
+Phạm vi tổ chức: cấp tỉnh quản lý trực tiếp cấp xã và các đơn vị trực thuộc; không bố trí cấp huyện trong cấu trúc điều hướng hoặc quy trình dữ liệu.
+Phạm vi nền tảng: ứng dụng web nội bộ, desktop-first; hỗ trợ máy tính bảng cho nhập liệu hiện trường; không coi điện thoại là thiết bị tác nghiệp chính.
+Phạm vi thiết kế: design system, sitemap, dashboard, biểu mẫu, GIS, báo cáo, cảnh báo, phân quyền, trạng thái offline/đồng bộ và các prototype trọng yếu.
+Nguyên tắc cốt lõi
+Dữ liệu trước - quyết định sau; giao diện phải giúp người dùng nắm thực lực, phát hiện bất thường, xử lý hồ sơ và lập phương án bảo đảm nhanh hơn, không biến hệ thống thành một kho biểu mẫu điện tử.
+2. ĐỊNH VỊ SẢN PHẨM VÀ TRIẾT LÝ THIẾT KẾ
+Sản phẩm được định vị là hệ thống điều hành dữ liệu doanh trại cấp tỉnh, kết hợp quản lý hồ sơ, kiểm kê vật chất, bản đồ số, đánh giá khả năng bảo đảm và hỗ trợ chỉ huy. Phong cách cần hiện đại, chắc chắn, kỷ luật, rõ thứ bậc thông tin; tránh hiệu ứng trang trí không phục vụ nhiệm vụ.
+Calm command interface: ít nhiễu, ưu tiên các thông tin phải hành động.
+Evidence-first: mọi con số quan trọng có thể truy nguyên nguồn, thời điểm cập nhật, người xác nhận.
+Map and table duality: người dùng chuyển nhanh giữa bản đồ và bảng mà không mất bộ lọc.
+Progressive disclosure: chỉ hiển thị độ sâu nghiệp vụ khi người dùng cần.
+Role-aware: dashboard và hành động thay đổi theo vai trò, cấp quản lý và quyền dữ liệu.
+Resilient UX: hỗ trợ mất kết nối, dữ liệu chờ đồng bộ, xung đột phiên bản và phục hồi thao tác.
+No generic AI aesthetic: không dùng mặc định nền kem, serif lớn, thẻ bo tròn quá mức hoặc gradient trang trí.
+3. ĐỐI TƯỢNG NGƯỜI DÙNG VÀ NHU CẦU CHÍNH
+Vai trò
+Mục tiêu chính
+Tác vụ thường xuyên
+Ưu tiên giao diện
+Chỉ huy tỉnh
+Nắm thực lực, nguy cơ, khả năng bảo đảm
+Xem dashboard, bản đồ, cảnh báo, phương án
+Tổng quan 1 màn hình, số liệu tin cậy, drill-down nhanh
+Cơ quan HC-KT/Ngành doanh trại
+Quản lý nghiệp vụ toàn tỉnh
+Kiểm duyệt, thống kê, lập kế hoạch, điều phối
+Bảng dữ liệu mạnh, bộ lọc sâu, thao tác hàng loạt
+Ban CHQS cấp xã
+Khai báo và cập nhật dữ liệu địa bàn
+Nhập kiểm kê, ảnh, hồ sơ, biến động
+Biểu mẫu rõ, lưu nháp, kiểm tra lỗi, dùng được khi mạng yếu
+Kiểm duyệt viên
+Bảo đảm chất lượng dữ liệu
+Đối chiếu, yêu cầu bổ sung, phê duyệt
+So sánh trước/sau, lịch sử sửa, bình luận có cấu trúc
+Quản trị hệ thống
+Duy trì cấu hình, tài khoản và an toàn
+Phân quyền, danh mục, nhật ký, sao lưu
+Màn hình chuyên biệt, cảnh báo rủi ro, thao tác có xác nhận
+4. KIẾN TRÚC THÔNG TIN TỔNG THỂ
+Thanh điều hướng chính đề xuất gồm 9 nhóm chức năng:
+Tổng quan chỉ huy
+Bản đồ doanh trại
+Doanh trại và công trình
+Vật chất và vật tư
+Kiểm kê - biến động
+Sửa chữa - khôi phục
+Kế hoạch và tình huống
+Báo cáo - phân tích
+Quản trị hệ thống
+Các tiện ích dùng chung đặt trên thanh trên cùng:
+Tìm kiếm toàn cục theo mã, tên, địa bàn, công trình, vật chất.
+Trung tâm thông báo và cảnh báo.
+Chọn phạm vi dữ liệu: toàn tỉnh, đơn vị trực thuộc, xã/phường.
+Hiển thị thời điểm đồng bộ gần nhất và trạng thái kết nối.
+Hồ sơ người dùng, vai trò hiện tại và chuyển vai trò khi được cấp quyền.
+5. HỆ THỐNG THIẾT KẾ (DESIGN SYSTEM)
+5.1. Ngôn ngữ thị giác
+Giao diện dùng ngôn ngữ thị giác “Command Data System”: nghiêm túc, công vụ, hiện đại, mật độ thông tin trung bình-cao nhưng có khoảng thở. Trọng tâm là các đường biên rõ, nhóm dữ liệu chặt chẽ, màu trạng thái nhất quán và cấu trúc đọc từ tổng quan đến chi tiết.
+5.2. Bảng màu đề xuất
+Token
+Mã màu
+Mục đích
+Navy 900
+#102A43
+Thanh điều hướng, tiêu đề cấp cao
+Slate 700
+#334E68
+Văn bản phụ, icon, đường viền đậm
+Teal 600
+#178F8B
+Hành động chính, dữ liệu đang hoạt động
+Blue 600
+#2563EB
+Liên kết, thông tin điều hướng
+Amber 500
+#F59E0B
+Cảnh báo cần chú ý
+Red 600
+#DC2626
+Nguy hiểm, lỗi, quá hạn nghiêm trọng
+Green 600
+#16A34A
+Đạt yêu cầu, đã xác nhận
+Gray 50
+#F8FAFC
+Nền ứng dụng
+White
+#FFFFFF
+Bề mặt nội dung
+5.3. Kiểu chữ và lưới
+UI đề xuất: Inter hoặc IBM Plex Sans; số liệu và mã có thể dùng IBM Plex Mono.
+Cỡ chữ cơ bản 14-16 px; bảng dữ liệu tối thiểu 13 px; chỉ số KPI 24-32 px.
+Lưới desktop 12 cột, khoảng cách 24 px; vùng nội dung tối đa 1600 px; sidebar 248 px thu gọn còn 72 px.
+Border radius 8 px cho thành phần thông thường; 12 px cho thẻ tổng quan; không sử dụng bo tròn dạng viên thuốc tràn lan.
+Khoảng cách theo thang 4, 8, 12, 16, 24, 32, 48 px.
+5.4. Thành phần bắt buộc
+Thành phần
+Yêu cầu
+App shell
+Sidebar, topbar, breadcrumb, context switcher, trạng thái kết nối
+KPI card
+Giá trị, đơn vị, xu hướng, mức tin cậy, thời điểm cập nhật
+Data table
+Cố định cột, sắp xếp, lọc, nhóm, xuất, chọn hàng loạt, density
+Filter bar
+Bộ lọc nhanh, bộ lọc nâng cao, lưu bộ lọc, hiển thị chip đang áp dụng
+Status badge
+Nháp, chờ duyệt, yêu cầu bổ sung, đã duyệt, quá hạn, mất đồng bộ
+Map panel
+Layer control, legend, cluster, popover, đo khoảng cách, lọc theo viewport
+Timeline
+Lịch sử kiểm kê, sửa chữa, biến động, phê duyệt
+Evidence drawer
+Ảnh, tài liệu, nguồn số liệu, chữ ký/xác nhận
+Command palette
+Tìm nhanh màn hình, hồ sơ, hành động
+Toast/notification
+Thông báo ngắn, có mức độ và hành động tiếp theo
+6. ĐẶC TẢ CÁC MÀN HÌNH TRỌNG YẾU
+6.1. Đăng nhập và xác thực
+Khối đăng nhập gọn, logo đơn vị, tên hệ thống, phiên bản triển khai.
+Trường tài khoản, mật khẩu, mã xác thực khi có; cảnh báo Caps Lock.
+Thông báo môi trường nội bộ, chính sách bảo mật, thời điểm hệ thống.
+Trạng thái: sai thông tin, tài khoản khóa, mật khẩu hết hạn, máy trạm chưa tin cậy.
+6.2. Dashboard chỉ huy cấp tỉnh
+Hàng KPI: tổng số doanh trại, công trình đang khai thác, tỷ lệ dữ liệu đã xác nhận, số cảnh báo trọng yếu, khả năng tiếp nhận lực lượng.
+Bản đồ toàn tỉnh chiếm 40-50% vùng nhìn; màu theo trạng thái bảo đảm hoặc mức nguy cơ.
+Biểu đồ cơ cấu vật chất; xu hướng kiểm kê; danh sách 5 vấn đề cần xử lý.
+Khối 'Báo cáo nhanh cho chỉ huy' có nút xuất bản in/PDF và ghi thời điểm chốt số liệu.
+Cho phép chuyển giữa chế độ Bình thường, SSCĐ, Tình huống giả định.
+6.3. Bản đồ doanh trại
+Bố cục split-view: bản đồ bên trái, danh sách kết quả bên phải; có thể đổi tỷ lệ.
+Layer: địa giới xã/phường, doanh trại, công trình, kho vật tư, điểm dự phòng, tuyến cơ động, vùng nguy cơ.
+Popup không quá tải: tên, mã, trạng thái, khả năng tiếp nhận, cảnh báo, nút mở hồ sơ.
+Không hiển thị dữ liệu vượt quyền; tọa độ nhạy cảm có chế độ che/mờ theo vai trò.
+6.4. Danh sách doanh trại
+Bảng có cột: mã, tên, xã/phường, đơn vị quản lý, diện tích, số công trình, khả năng tiếp nhận, trạng thái dữ liệu, cập nhật cuối.
+Quick filter: thiếu hồ sơ, chưa kiểm kê, có cảnh báo, cần sửa chữa, dữ liệu chờ duyệt.
+Bulk action: yêu cầu cập nhật, gán cán bộ kiểm duyệt, xuất danh sách, tạo đợt kiểm kê.
+Cho phép lưu view cá nhân và view dùng chung.
+6.5. Hồ sơ chi tiết doanh trại
+Header cố định: tên, mã, địa bàn, trạng thái, người phụ trách, cập nhật cuối.
+Tabs: Tổng quan; Công trình; Vật chất; Hạ tầng; Hồ sơ pháp lý; Bản đồ; Kiểm kê; Sửa chữa; Lịch sử.
+Khối đánh giá khả năng bảo đảm trình bày dạng scorecard, có giải thích cách tính.
+Evidence drawer mở bên phải để xem tài liệu mà không rời màn hình.
+6.6. Hồ sơ công trình
+Thông tin kết cấu, năm xây dựng, diện tích, công năng, sức chứa, cấp chất lượng, hiện trạng.
+Ảnh theo thời gian; so sánh ảnh trước/sau sửa chữa.
+Biểu đồ tuổi thọ và lịch bảo trì; cảnh báo kiểm định.
+Không cho xóa cứng nếu đã phát sinh lịch sử; dùng trạng thái ngừng khai thác.
+6.7. Danh mục vật chất và tồn kho
+Phân nhóm vật chất theo danh mục chuẩn; hỗ trợ mã, đơn vị tính, quy cách, cấp chất lượng.
+Bảng tồn theo địa điểm; số sổ sách, số kiểm kê, chênh lệch, khả dụng, dự trữ.
+Hiển thị vật chất thiếu định mức hoặc tồn lâu; hỗ trợ quét mã nếu được triển khai.
+Không dùng màu duy nhất để biểu thị trạng thái; luôn có icon và chữ.
+6.8. Phiếu kiểm kê
+Wizard 4 bước: thông tin đợt; phạm vi; nhập số liệu; xác nhận và gửi duyệt.
+Autosave, lưu nháp, nhập hàng loạt từ tệp mẫu, kiểm tra trùng và sai đơn vị tính.
+Hiển thị tiến độ hoàn thành theo nhóm vật chất/công trình.
+Chế độ ngoại tuyến: gắn nhãn 'Chưa đồng bộ', hàng đợi và nút thử lại.
+6.9. Kiểm duyệt dữ liệu
+Bố cục so sánh hai cột: dữ liệu hiện hành và dữ liệu đề nghị.
+Highlight trường thay đổi; cho phép chấp thuận từng trường hoặc toàn bộ.
+Yêu cầu bổ sung phải chọn lý do và ghi chú; lưu lịch sử người xử lý.
+Hiển thị cảnh báo bất thường: biến động quá lớn, thiếu minh chứng, tọa độ lệch.
+6.10. Sửa chữa - khôi phục
+Danh sách nhu cầu sửa chữa, mức ưu tiên, nguồn lực, tiến độ và tổng kinh phí dự kiến.
+Trang chi tiết gồm hiện trạng, phạm vi hư hỏng, dự toán vật chất, nhân lực, thời gian.
+Timeline phê duyệt và thực hiện; ảnh nghiệm thu; chênh lệch dự kiến/thực tế.
+Trong tình huống giả định, phân biệt rõ dữ liệu mô phỏng với dữ liệu thực.
+6.11. Lập tình huống và phương án bảo đảm
+Chọn phạm vi, quân số, thời gian, mức hư hỏng, điều kiện điện/nước, giới hạn nguồn lực.
+Kết quả: khả năng đáp ứng, thiếu hụt, phương án phân bổ, thứ tự ưu tiên.
+Cho phép so sánh 2-3 phương án cạnh nhau; có ghi giả định và mức tin cậy.
+Nút 'Chốt phương án' tạo phiên bản bất biến, có người phê duyệt.
+6.12. Báo cáo và phân tích
+Thư viện báo cáo theo nhóm: thực lực, kiểm kê, chất lượng công trình, vật chất, sửa chữa, khả năng bảo đảm.
+Report builder với bộ lọc, cột, nhóm và biểu đồ có kiểm soát.
+Mỗi báo cáo ghi nguồn dữ liệu, thời điểm chốt và phạm vi quyền.
+Xuất PDF/Excel/Word theo mẫu quy định; bản xem trước trước khi xuất.
+6.13. Trung tâm cảnh báo
+Phân loại: nghiêm trọng, cần xử lý, theo dõi; nhóm theo địa bàn và loại vấn đề.
+Mỗi cảnh báo có nguyên nhân, bằng chứng, thời hạn, người phụ trách, hành động đề xuất.
+Cho phép xác nhận đã xem, giao việc, tạm hoãn có lý do, đóng cảnh báo.
+Không hiển thị quá nhiều cảnh báo KPI; dùng quy tắc giảm trùng và gom nhóm.
+6.14. Quản trị danh mục và phân quyền
+Quản lý đơn vị, xã/phường, loại công trình, vật chất, đơn vị tính, trạng thái.
+Phân quyền RBAC kết hợp phạm vi dữ liệu; ma trận quyền xem/thêm/sửa/duyệt/xuất.
+Nhật ký truy cập và thay đổi; tìm kiếm theo người dùng, thời gian, đối tượng.
+Thao tác rủi ro cao cần xác nhận hai bước và ghi lý do.
+7. LUỒNG NGHIỆP VỤ FRONTEND CHỦ ĐẠO
+Luồng
+Chuỗi thao tác
+Luồng A - Cấp xã cập nhật kiểm kê
+Đăng nhập → Chọn đợt kiểm kê → Chọn phạm vi → Nhập/nhập tệp → Kiểm tra lỗi → Đính kèm minh chứng → Gửi duyệt → Theo dõi phản hồi.
+Luồng B - Tỉnh kiểm duyệt
+Mở hàng chờ duyệt → Xem chênh lệch → Kiểm tra minh chứng → Chấp thuận hoặc yêu cầu bổ sung → Chốt phiên bản dữ liệu.
+Luồng C - Chỉ huy nắm thực lực
+Dashboard → Chọn phạm vi/tình huống → Xem KPI và bản đồ → Mở cảnh báo → Drill-down hồ sơ → Xuất báo cáo nhanh.
+Luồng D - Lập phương án bảo đảm
+Tạo tình huống → Nhập giả định → Chạy tính toán → Xem thiếu hụt → Điều chỉnh nguồn lực → So sánh phương án → Chốt phương án.
+Luồng E - Cập nhật thiệt hại/khôi phục
+Chọn công trình → Ghi nhận hư hỏng → Ảnh/minh chứng → Ước tính nhu cầu → Lập kế hoạch → Phê duyệt → Theo dõi thực hiện → Nghiệm thu.
+8. QUY TẮC BIỂU MẪU VÀ BẢNG DỮ LIỆU
+Mỗi trường phải có nhãn rõ; placeholder không thay thế nhãn.
+Đơn vị tính luôn hiển thị sát trường số; định dạng hàng nghìn theo ngôn ngữ Việt Nam.
+Trường bắt buộc đánh dấu bằng chữ và thông báo lỗi cụ thể, không chỉ dùng dấu sao.
+Lỗi hiển thị tại trường và bản tóm tắt ở đầu form khi gửi.
+Biểu mẫu dài chia section/wizard; có mục lục neo bên trái trên desktop.
+Thao tác lưu nháp và gửi duyệt tách biệt; gửi duyệt phải xác nhận.
+Bảng dữ liệu hỗ trợ keyboard, sticky header, column chooser, density, export có quyền.
+Các thao tác nguy hiểm không đặt cạnh hành động chính; yêu cầu lý do khi hủy/xóa/ngừng khai thác.
+9. RESPONSIVE, ACCESSIBILITY VÀ HIỆU NĂNG CẢM NHẬN
+Mục tiêu accessibility là WCAG 2.2 mức AA cho các màn hình chính. Thiết kế phải đáp ứng bốn nguyên tắc: có thể nhận biết, có thể thao tác, dễ hiểu và bền vững. Claude Design cần tạo đủ trạng thái focus, keyboard navigation, nhãn thay thế, độ tương phản và kích thước mục tiêu tương tác.
+Desktop ≥ 1280 px: đầy đủ sidebar, bảng và bản đồ split-view.
+Tablet 768-1279 px: sidebar dạng drawer; bảng cho phép cuộn ngang có chỉ báo.
+Mobile < 768 px: chỉ hỗ trợ tác vụ nhanh, tra cứu, chụp ảnh, cập nhật trạng thái; không ép toàn bộ dashboard xuống màn hình nhỏ.
+Mục tiêu tương tác tối thiểu 24x24 px, ưu tiên 40x40 px cho thao tác thường dùng.
+Không dùng chuyển động dài; tôn trọng prefers-reduced-motion.
+Skeleton cho tải dữ liệu; không dùng spinner toàn màn hình kéo dài.
+Virtualization cho bảng lớn; lazy load ảnh/bản đồ; hiển thị tiến trình xuất báo cáo.
+10. TRẠNG THÁI HỆ THỐNG PHẢI THIẾT KẾ
+Loading/skeleton
+Empty state có hướng dẫn
+Không có quyền
+Không tìm thấy dữ liệu
+Lỗi máy chủ
+Mất kết nối
+Dữ liệu chờ đồng bộ
+Xung đột phiên bản
+Dữ liệu đã khóa/chốt
+Phiên đăng nhập hết hạn
+Tác vụ thành công
+Tác vụ một phần thành công
+11. YÊU CẦU BẢO MẬT THỂ HIỆN TRÊN FRONTEND
+Không hiển thị trường, lớp bản đồ hoặc số liệu ngoài quyền, kể cả ở tooltip, export hoặc URL.
+Không lưu dữ liệu nhạy cảm trong localStorage; token theo cơ chế an toàn do kiến trúc hệ thống quy định.
+Tự động khóa giao diện khi không hoạt động; cảnh báo trước khi hết phiên.
+Che một phần dữ liệu nhạy cảm theo vai trò; audit mọi thao tác xem/xuất dữ liệu đặc biệt.
+Ảnh và tài liệu có watermark động theo người dùng khi cần.
+Không đưa dữ liệu thật, tọa độ thật hoặc sơ đồ nhạy cảm vào prototype cloud; dùng dữ liệu giả lập.
+12. DỮ LIỆU MẪU DÙNG CHO THIẾT KẾ
+Claude Design chỉ sử dụng dữ liệu giả lập. Bộ dữ liệu mẫu nên gồm 01 tỉnh giả định, 12 xã/phường, 30 doanh trại, 180 công trình, 1.500 dòng vật chất, 25 cảnh báo và 03 tình huống mô phỏng. Tên địa danh dùng ký hiệu Xã A01, Phường P02; tọa độ dịch chuyển hoặc không có giá trị thực.
+13. DANH SÁCH FRAME/PROTOTYPE CẦN CLAUDE DESIGN BÀN GIAO
+01 trang định hướng thị giác và design principles.
+01 trang design tokens: màu, typography, spacing, elevation, radius, icon.
+01 thư viện component và các biến thể/trạng thái.
+Dashboard chỉ huy desktop + tablet.
+Bản đồ doanh trại split-view.
+Danh sách doanh trại với bộ lọc nâng cao.
+Hồ sơ chi tiết doanh trại.
+Phiếu kiểm kê dạng wizard.
+Màn hình kiểm duyệt so sánh thay đổi.
+Màn hình lập tình huống và so sánh phương án.
+Trung tâm cảnh báo.
+Màn hình quản trị phân quyền.
+Prototype tương tác cho 05 luồng nghiệp vụ chủ đạo.
+Responsive specs, redline, empty/error/loading states.
+Dev handoff: token, component mapping, behavior notes.
+14. TIÊU CHÍ NGHIỆM THU THIẾT KẾ FRONTEND
+Nhóm tiêu chí
+Điều kiện
+Phù hợp nghiệp vụ
+Các tác vụ chính hoàn thành đúng trình tự, không thiếu bước kiểm duyệt/chốt dữ liệu.
+Tính nhất quán
+Dùng token và component chung; trạng thái, màu, thuật ngữ thống nhất.
+Khả năng đọc dữ liệu
+KPI, bảng, bản đồ, cảnh báo rõ; không gây hiểu nhầm giữa dữ liệu thực và mô phỏng.
+Khả năng thao tác
+Tác vụ thường dùng ít bước; hỗ trợ bàn phím; lỗi có hướng dẫn khắc phục.
+An toàn
+Không lộ dữ liệu ngoài quyền; thao tác rủi ro có xác nhận và nhật ký.
+Responsive
+Các breakpoint chính không vỡ layout; bảng/bản đồ có phương án thích ứng.
+Accessibility
+Đạt mục tiêu WCAG 2.2 AA cho màn hình chính.
+Bàn giao phát triển
+Có đầy đủ token, component, kích thước, trạng thái và logic tương tác.
+15. PROMPT TỔNG DÙNG TRỰC TIẾP CHO CLAUDE DESIGN
+Bạn là Lead Product Designer và Design Systems Architect. Hãy thiết kế một ứng dụng web nội bộ desktop-first cho “Hệ thống cơ sở dữ liệu lớn về vật chất doanh trại cấp tỉnh trong chiến tranh bảo vệ Tổ quốc”.Bối cảnh tổ chức:- Cấp tỉnh quản lý trực tiếp Ban CHQS cấp xã và các đơn vị trực thuộc; không có cấp huyện.- Người dùng gồm: chỉ huy tỉnh, cơ quan hậu cần - kỹ thuật/ngành doanh trại, Ban CHQS cấp xã, kiểm duyệt viên, quản trị hệ thống.- Hệ thống chạy trên mạng nội bộ, có tình huống mạng yếu hoặc mất kết nối.- Chỉ sử dụng dữ liệu giả lập; tuyệt đối không tạo địa danh, tọa độ hoặc số liệu quân sự thật.Mục tiêu sản phẩm:1. Quản lý tập trung doanh trại, công trình, vật chất, vật tư, kiểm kê, sửa chữa và hồ sơ.2. Hỗ trợ dashboard chỉ huy, GIS, cảnh báo, đánh giá khả năng tiếp nhận lực lượng.3. Hỗ trợ lập tình huống, tính nhu cầu và so sánh phương án bảo đảm.4. Mọi số liệu quan trọng phải truy nguyên nguồn, người xác nhận và thời điểm cập nhật.Phong cách:- “Command Data System”: hiện đại, nghiêm túc, chắc chắn, rõ thứ bậc.- Desktop-first, mật độ thông tin trung bình-cao, ưu tiên bảng và bản đồ.- Không dùng giao diện AI đại trà: tránh nền kem, serif lớn, gradient trang trí, thẻ bo tròn quá mức.- Màu chủ đạo navy #102A43, teal #178F8B, nền #F8FAFC, trắng; amber cho cảnh báo và red cho nguy hiểm.- Typography Inter hoặc IBM Plex Sans; mã/số liệu có thể dùng IBM Plex Mono.- Radius 8-12px, spacing theo thang 4/8/12/16/24/32/48.Hãy tạo:A. Visual direction và design principles.B. Design tokens và component library.C. App shell gồm sidebar, topbar, breadcrumb, context switcher, tìm kiếm toàn cục, thông báo, trạng thái kết nối.D. Các màn hình:1) Đăng nhập;2) Dashboard chỉ huy cấp tỉnh;3) Bản đồ doanh trại split-view;4) Danh sách doanh trại;5) Hồ sơ chi tiết doanh trại;6) Hồ sơ công trình;7) Vật chất và tồn kho;8) Phiếu kiểm kê wizard 4 bước;9) Kiểm duyệt dữ liệu dạng so sánh trước/sau;10) Sửa chữa - khôi phục;11) Lập tình huống và so sánh phương án;12) Báo cáo - phân tích;13) Trung tâm cảnh báo;14) Quản trị danh mục và phân quyền.Yêu cầu UX:- Role-aware dashboard.- Bản đồ và bảng dùng chung bộ lọc.- Autosave, lưu nháp, gửi duyệt, lịch sử phiên bản.- Có loading, empty, error, no permission, offline, pending sync, conflict, locked states.- Mọi trạng thái dùng màu + icon + chữ, không dùng màu đơn độc.- WCAG 2.2 AA, keyboard navigation, focus rõ, reduced motion.- Tablet tối ưu nhập liệu; mobile chỉ hỗ trợ tra cứu/tác vụ nhanh.- Không hiển thị dữ liệu ngoài quyền; tọa độ nhạy cảm có chế độ che.- Tách rõ dữ liệu thực và dữ liệu mô phỏng.Prototype ưu tiên:1. Chỉ huy xem dashboard → mở cảnh báo → drill-down hồ sơ.2. Cấp xã tạo phiếu kiểm kê → lưu nháp → gửi duyệt.3. Tỉnh so sánh thay đổi → yêu cầu bổ sung hoặc phê duyệt.4. Tạo tình huống → chạy tính toán → so sánh phương án → chốt.5. Cập nhật hư hỏng → lập kế hoạch khôi phục → theo dõi tiến độ.Đầu ra mong muốn:- High-fidelity desktop frames 1440px và tablet 1024px.- Component variants và interaction notes.- Responsive behavior, accessibility annotations, redline và dev handoff.- Dữ liệu mẫu hoàn toàn giả lập theo ký hiệu A01, P02, DT-001.
+16. PROMPT THEO TỪNG GIAI ĐOẠN LÀM VIỆC
+Giai đoạn
+Prompt ngắn
+Giai đoạn 1 - Khám phá
+Đọc đặc tả, lập sitemap, xác định 5 nhiệm vụ quan trọng nhất theo từng vai trò, chỉ ra xung đột hoặc điểm thiếu trước khi vẽ.
+Giai đoạn 2 - Hướng thị giác
+Đề xuất 3 hướng thị giác khác nhau nhưng đều nghiêm túc, dữ liệu lớn và không mang phong cách AI đại trà; so sánh ưu/nhược.
+Giai đoạn 3 - Design system
+Xây token, component và trạng thái trước khi dựng toàn bộ màn hình; bảo đảm data table, map panel, filter bar và evidence drawer tái sử dụng.
+Giai đoạn 4 - Màn hình trọng yếu
+Dựng dashboard, bản đồ, danh sách, hồ sơ chi tiết, kiểm kê và kiểm duyệt ở high fidelity.
+Giai đoạn 5 - Prototype
+Liên kết 5 luồng nghiệp vụ, thêm trạng thái loading/error/offline/conflict và microcopy tiếng Việt.
+Giai đoạn 6 - QA
+Tự audit theo consistency, accessibility, responsive, security visibility, data traceability; liệt kê lỗi và sửa.
+Giai đoạn 7 - Dev handoff
+Xuất token, component inventory, kích thước, trạng thái, responsive behavior và acceptance criteria cho frontend.
+17. ĐỀ XUẤT STACK FRONTEND ĐỂ BÀN GIAO THIẾT KẾ
+Next.js + TypeScript.
+Tailwind CSS kết hợp CSS variables cho design tokens.
+Radix UI hoặc React Aria làm nền accessibility; không sử dụng nguyên trạng giao diện mặc định.
+TanStack Table cho bảng dữ liệu; TanStack Query cho trạng thái dữ liệu.
+React Hook Form + Zod cho biểu mẫu và kiểm tra dữ liệu.
+MapLibre GL hoặc OpenLayers/Leaflet tùy yêu cầu bản đồ nội bộ.
+ECharts hoặc Apache ECharts cho biểu đồ; giới hạn loại biểu đồ và thống nhất tooltip.
+Storybook để quản lý component, trạng thái và QA.
+Playwright cho kiểm thử luồng; axe-core cho kiểm thử accessibility.
+18. TÀI LIỆU THAM CHIẾU
+Anthropic, Claude Design/Design plugin: công cụ hỗ trợ thiết kế, critique, design system, accessibility audit và dev handoff (truy cập tháng 7/2026).
+W3C, Web Content Accessibility Guidelines (WCAG) 2.2 và tài liệu hướng dẫn mức tuân thủ AA.
+Nguyên tắc thiết kế ứng dụng doanh nghiệp hiện đại: clarity, scalability, security, accessibility và decision-oriented dashboards.

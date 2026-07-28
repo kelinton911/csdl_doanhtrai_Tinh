@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bản đồ số cấp tỉnh</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ink: #102a43; --acc: #10609e; --dgr: #c62828; --warn: #8a5a04;
+    --surface: #ffffff; --bg: #f4f7fa; --n300: #d9e2ec; --n400: #bcccdc; --n700: #627d98;
+  }
+  html[data-theme="dark"] {
+    --ink: #e6edf4; --acc: #4c9bd8; --dgr: #e5534b; --warn: #f0c266;
+    --surface: #112637; --bg: #0b1a2a; --n300: #1f4160; --n400: #2e5878; --n700: #a3bcd3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: Archivo, system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  #map { position: absolute; inset: 0; background: var(--bg); }
+  html[data-theme="dark"] .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.95); }
+  .num { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+  .panel {
+    position: absolute; z-index: 500; background: var(--surface); border: 2px solid var(--ink);
+    font-size: 12.5px; line-height: 1.5;
+  }
+  #layers { top: 12px; left: 12px; width: 214px; }
+  #tilesel {
+    width: 100%; font-family: Archivo, sans-serif; font-size: 12px; padding: 6px 7px;
+    border: 1px solid var(--n400); border-radius: 0; background: var(--surface); color: var(--ink);
+  }
+  #legend { bottom: 22px; left: 12px; }
+  #notice { top: 12px; right: 12px; width: 230px; border-color: var(--acc); }
+  .phead { font-size: 10.5px; letter-spacing: 0.14em; font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--n300); }
+  .lrow { display: flex; gap: 8px; align-items: center; padding: 6px 10px; cursor: pointer; user-select: none; }
+  .lrow:hover { background: var(--bg); }
+  .lrow input { accent-color: var(--acc); margin: 0; width: 14px; height: 14px; }
+  .lg { display: flex; gap: 14px; flex-wrap: wrap; padding: 8px 10px; align-items: center; font-size: 11.5px; }
+  .lg span { display: flex; gap: 6px; align-items: center; }
+  .sw { width: 12px; height: 12px; border: 1px solid var(--ink); display: inline-block; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { border-radius: 0; background: var(--surface); color: var(--ink); box-shadow: 0 2px 0 var(--ink); }
+  .leaflet-popup-content { margin: 12px 14px; font-size: 13px; line-height: 1.55; }
+  .pk { font-size: 10.5px; letter-spacing: 0.1em; font-weight: 700; color: var(--n700); }
+  .pt { font-family: Archivo; font-size: 15px; font-weight: 800; margin: 2px 0 6px; }
+  .leaflet-container a.leaflet-popup-close-button { color: var(--n700); }
+  .leaflet-bar a { border-radius: 0 !important; background: var(--surface); color: var(--ink); border-bottom-color: var(--n300); }
+  .leaflet-control-attribution { font-size: 10px; background: var(--surface) !important; color: var(--n700); }
+  .leaflet-control-attribution a { color: var(--acc); }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="panel" id="layers">
+  <div class="phead">NỀN BẢN ĐỒ</div>
+  <div style="padding: 7px 10px;"><select id="tilesel"></select></div>
+  <div class="phead" style="border-top: 1px solid var(--n300);">LỚP DỮ LIỆU</div>
+  <label class="lrow"><input type="checkbox" data-l="barracks" checked>Doanh trại</label>
+  <label class="lrow"><input type="checkbox" data-l="depot" checked>Kho vật tư</label>
+  <label class="lrow"><input type="checkbox" data-l="tech" checked>Cơ sở kỹ thuật</label>
+  <label class="lrow"><input type="checkbox" data-l="med" checked>Quân y</label>
+  <label class="lrow"><input type="checkbox" data-l="risk">Vùng nguy cơ</label>
+  <label class="lrow"><input type="checkbox" data-l="route">Tuyến cơ động</label>
+</div>
+
+<div class="panel" id="legend">
+  <div class="lg">
+    <span><i class="sw" style="background: var(--acc)"></i>Doanh trại</span>
+    <span><i class="sw" style="background: var(--dgr)"></i>Dưới ngưỡng bảo đảm</span>
+    <span><i class="sw" style="background: var(--warn)"></i>Kho / kỹ thuật</span>
+    <span><i class="sw" style="background: var(--ink)"></i>Quân y</span>
+  </div>
+</div>
+
+<div class="panel" id="tilewarn" style="display: none; top: 12px; left: 234px; width: 300px; border-color: var(--warn);">
+  <div class="phead" style="color: var(--warn)">NỀN BẢN ĐỒ KHÔNG KHẢ DỤNG</div>
+  <div style="padding: 8px 10px;"><span></span></div>
+</div>
+
+<div class="panel" id="notice">
+  <div class="phead" style="color: var(--acc)">DỮ LIỆU GIẢ LẬP</div>
+  <div style="padding: 8px 10px;">Nền bản đồ là OpenStreetMap thật. Toàn bộ điểm quân sự là <strong>giả lập</strong>, đặt ngẫu nhiên quanh tâm tỉnh — không phải tọa độ thực.</div>
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+   CẤU HÌNH NGUỒN NỀN BẢN ĐỒ
+   Khi triển khai trên mạng nội bộ: đổi `active` sang 'noibo' và điền
+   URL tile server của đơn vị. Không cần sửa chỗ nào khác.
+   ------------------------------------------------------------------ */
+var TILE_SOURCES = {
+  osm: {
+    label: 'OpenStreetMap (cần Internet)',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 18
+  },
+  noibo: {
+    label: 'Tile server nội bộ đơn vị',
+    url: 'http://10.0.0.10:8080/tiles/{z}/{x}/{y}.png',
+    attribution: 'Bản đồ số nội bộ · Bộ CHQS tỉnh',
+    maxZoom: 17
+  },
+  offline: {
+    label: 'Ngoại tuyến — lưới tọa độ',
+    url: null,
+    attribution: 'Chế độ ngoại tuyến · không có nền bản đồ',
+    maxZoom: 18
+  }
+};
+var TILE_CONFIG = { active: 'osm', fallback: 'offline', probeTimeoutMs: 6000 };
+
+(function () {
+  var q = new URLSearchParams(location.search);
+  var name = q.get('name') || 'Tỉnh mẫu';
+  var lat = parseFloat(q.get('lat')) || 21.03;
+  var lon = parseFloat(q.get('lon')) || 105.85;
+  var z = parseInt(q.get('z'), 10) || 9;
+  var n = parseInt(q.get('n'), 10) || 30;
+  var seed = parseInt(q.get('seed'), 10) || 7;
+  if (q.get('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+  var map = L.map('map', { zoomControl: false, attributionControl: true }).setView([lat, lon], z);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  var srcKey = q.get('tiles') || TILE_CONFIG.active;
+  if (!TILE_SOURCES[srcKey]) srcKey = 'osm';
+
+  var GridLayer = L.GridLayer.extend({
+    createTile: function (coords) {
+      var t = document.createElement('canvas');
+      var s = this.getTileSize();
+      t.width = s.x; t.height = s.y;
+      var g = t.getContext('2d');
+      g.strokeStyle = c('--n400'); g.lineWidth = 1;
+      g.strokeRect(0.5, 0.5, s.x - 1, s.y - 1);
+      g.fillStyle = c('--n700'); g.font = '11px "IBM Plex Mono", monospace';
+      g.fillText(coords.z + '/' + coords.x + '/' + coords.y, 8, 18);
+      return t;
+    }
+  });
+
+  var tileLayer = null;
+  function mountTiles(key) {
+    if (tileLayer) map.removeLayer(tileLayer);
+    srcKey = key;
+    var src = TILE_SOURCES[key];
+    tileLayer = src.url
+      ? L.tileLayer(src.url, { maxZoom: src.maxZoom, attribution: src.attribution })
+      : new GridLayer({ maxZoom: src.maxZoom, attribution: src.attribution });
+    tileLayer.addTo(map);
+    if (src.url) {
+      var failed = 0;
+      tileLayer.on('tileerror', function () {
+        if (++failed === 4 && srcKey === key) {
+          mountTiles(TILE_CONFIG.fallback);
+          showBanner(src.label);
+        }
+      });
+    }
+    var sel = document.getElementById('tilesel');
+    if (sel) sel.value = key;
+  }
+
+  function showBanner(failedLabel) {
+    var b = document.getElementById('tilewarn');
+    if (!b) return;
+    b.style.display = 'block';
+    b.querySelector('span').textContent = 'Không tải được nền “' + failedLabel +
+      '”. Đã chuyển sang chế độ ngoại tuyến — mọi lớp dữ liệu vẫn hoạt động.';
+  }
+
+  mountTiles(srcKey);
+  L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
+
+  var s = seed;
+  function rnd() { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }
+
+  function c(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+
+
+  function sq(color, size) {
+    return L.divIcon({
+      className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
+      html: '<div style="width:' + size + 'px;height:' + size + 'px;background:' + color +
+            ';border:1.5px solid ' + c('--surface') + ';box-shadow:0 0 0 1px ' + c('--ink') + '"></div>'
+    });
+  }
+  function popup(kind, code, title, rows) {
+    var h = '<div class="pk">' + kind + ' · ' + code + '</div><div class="pt">' + title + '</div>';
+    rows.forEach(function (r) {
+      h += '<div style="display:flex;gap:12px;justify-content:space-between"><span style="color:var(--n700)">' +
+           r[0] + '</span><span class="num" style="font-weight:700">' + r[1] + '</span></div>';
+    });
+    h += '<div style="margin-top:8px;font-size:11px;color:var(--n700)">Tọa độ giả lập — không dùng để định vị thực địa.</div>';
+    return h;
+  }
+
+  var groups = {
+    barracks: L.layerGroup(), depot: L.layerGroup(), tech: L.layerGroup(),
+    med: L.layerGroup(), risk: L.layerGroup(), route: L.layerGroup()
+  };
+
+  var spread = Math.max(0.35, 2.2 - z * 0.16);
+  function jitter(k) { return (rnd() - 0.5) * spread * k; }
+
+  for (var i = 0; i < n; i++) {
+    var ready = 42 + Math.floor(rnd() * 58);
+    var la = lat + jitter(1.5), lo = lon + jitter(1.9);
+    var color = ready < 60 ? c('--dgr') : c('--acc');
+    L.marker([la, lo], { icon: sq(color, ready < 60 ? 13 : 11) })
+      .bindPopup(popup('DOANH TRẠI', 'DT-' + (101 + i), 'Doanh trại ' + name + '-' + (i + 1), [
+        ['Khả năng bảo đảm', ready + '%'],
+        ['Khả năng tiếp nhận', (120 + Math.floor(rnd() * 26) * 50).toLocaleString('vi-VN') + ' người'],
+        ['Số công trình', 3 + Math.floor(rnd() * 10)]
+      ]), { maxWidth: 260 })
+      .addTo(groups.barracks);
+  }
+
+  var depotN = Math.max(3, Math.round(n / 5));
+  for (var d = 0; d < depotN; d++) {
+    L.marker([lat + jitter(1.3), lon + jitter(1.6)], { icon: sq(c('--warn'), 11) })
+      .bindPopup(popup('KHO VẬT TƯ', 'K-' + (1 + d), 'Kho vật chất doanh trại K' + (1 + d), [
+        ['Sức chứa', (600 + Math.floor(rnd() * 24) * 100).toLocaleString('vi-VN') + ' tấn'],
+        ['Tỷ lệ khai thác', (48 + Math.floor(rnd() * 50)) + '%']
+      ]), { maxWidth: 260 })
+      .addTo(groups.depot);
+  }
+
+  var techN = Math.max(2, Math.round(n / 8));
+  for (var t = 0; t < techN; t++) {
+    L.marker([lat + jitter(1.1), lon + jitter(1.4)], { icon: sq(c('--warn'), 11) })
+      .bindPopup(popup('CƠ SỞ KỸ THUẬT', 'CSKT-' + (1 + t), 'Trạm sửa chữa cấp ' + (t % 2 ? 'II' : 'III'), [
+        ['Năng lực sửa chữa', (6 + Math.floor(rnd() * 18)) + ' đầu xe/tháng'],
+        ['Thợ kỹ thuật', (8 + Math.floor(rnd() * 22)) + ' người']
+      ]), { maxWidth: 260 })
+      .addTo(groups.tech);
+  }
+
+  var medN = Math.max(2, Math.round(n / 10));
+  for (var m = 0; m < medN; m++) {
+    L.marker([lat + jitter(1.0), lon + jitter(1.2)], { icon: sq(c('--ink'), 11) })
+      .bindPopup(popup('QUÂN Y', 'QY-' + (1 + m), 'Bệnh xá / tổ quân y ' + (1 + m), [
+        ['Giường bệnh', 10 + Math.floor(rnd() * 40)],
+        ['Cán bộ y tế', 4 + Math.floor(rnd() * 16)]
+      ]), { maxWidth: 260 })
+      .addTo(groups.med);
+  }
+
+  for (var r = 0; r < 3; r++) {
+    L.circle([lat + jitter(1.0), lon + jitter(1.2)], {
+      radius: 6000 + rnd() * 14000, color: c('--dgr'), weight: 1.5, fillColor: c('--dgr'), fillOpacity: 0.12
+    }).bindPopup(popup('VÙNG NGUY CƠ', 'NC-' + (1 + r), ['Ngập lụt theo mùa', 'Sạt lở đất', 'Khó cơ động mùa mưa'][r], [
+      ['Doanh trại ảnh hưởng', 1 + Math.floor(rnd() * 4)],
+      ['Mức độ', ['Cao', 'Trung bình', 'Trung bình'][r]]
+    ]), { maxWidth: 260 }).addTo(groups.risk);
+  }
+
+  for (var w = 0; w < 3; w++) {
+    var pts = [];
+    for (var p = 0; p < 5; p++) pts.push([lat + jitter(1.6), lon + jitter(1.9)]);
+    L.polyline(pts, { color: c('--acc'), weight: 2.5, dashArray: '8 5', opacity: 0.85 })
+      .bindPopup(popup('TUYẾN CƠ ĐỘNG', 'TCĐ-' + (1 + w), 'Tuyến cơ động số ' + (1 + w), [
+        ['Chiều dài', (18 + Math.floor(rnd() * 60)) + ' km'],
+        ['Thời gian hành quân', (1 + Math.floor(rnd() * 5)) + ' giờ']
+      ]), { maxWidth: 260 }).addTo(groups.route);
+  }
+
+  ['barracks', 'depot', 'tech', 'med'].forEach(function (k) { groups[k].addTo(map); });
+
+  document.querySelectorAll('#layers input').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      var g = groups[cb.dataset.l];
+      if (cb.checked) g.addTo(map); else map.removeLayer(g);
+    });
+  });
+
+  var sel = document.getElementById('tilesel');
+  Object.keys(TILE_SOURCES).forEach(function (k) {
+    var o = document.createElement('option');
+    o.value = k; o.textContent = TILE_SOURCES[k].label;
+    sel.appendChild(o);
+  });
+  sel.value = srcKey;
+  sel.addEventListener('change', function () {
+    document.getElementById('tilewarn').style.display = 'none';
+    mountTiles(sel.value);
+  });
+
+  window.addEventListener('message', function (e) {
+    var d = e.data || {};
+    if (d.type === 'theme') {
+      document.documentElement.setAttribute('data-theme', d.theme === 'dark' ? 'dark' : 'light');
+    }
+    if (d.type === 'province' && typeof d.lat === 'number') {
+      map.setView([d.lat, d.lon], d.z || 9);
+    }
+  });
+})();
+</script>
+</body>
+</html>

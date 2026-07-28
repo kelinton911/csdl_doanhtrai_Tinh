@@ -1,0 +1,13 @@
+// Danh mục vai trò (RBAC) theo Tài liệu mô tả Backend §4.
+export enum Role {
+  SYS_ADMIN = 'SYS_ADMIN',
+  PROVINCIAL_COMMAND = 'PROVINCIAL_COMMAND',
+  BARRACKS_OFFICER = 'BARRACKS_OFFICER',
+  COMMUNE_USER = 'COMMUNE_USER',
+  REVIEWER = 'REVIEWER',
+  REPORT_VIEWER = 'REPORT_VIEWER',
+  AUDITOR = 'AUDITOR',
+  INTEGRATION_CLIENT = 'INTEGRATION_CLIENT',
+}
+
+export const ALL_ROLES = Object.values(Role);

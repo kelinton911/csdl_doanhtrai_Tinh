@@ -1,0 +1,74 @@
+name: csdl-doanhtrai
+
+# Hạ tầng phát triển cục bộ cho hệ thống CSDL Vật chất Doanh trại cấp tỉnh.
+# ADR-02: PostgreSQL + PostGIS. ADR-03: Object Storage nội bộ (MinIO).
+# ADR-05: Outbox + hàng đợi (Redis). Ưu tiên mạng nội bộ, không phụ thuộc Internet.
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: csdl-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-csdl}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-csdl_dev_pw}
+      POSTGRES_DB: ${DB_NAME:-csdl_doanhtrai}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-csdl} -d ${DB_NAME:-csdl_doanhtrai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: csdl-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Object storage nội bộ (ADR-03) — lưu ảnh, hồ sơ, bản vẽ tách khỏi CSDL quan hệ.
+  minio:
+    image: minio/minio:latest
+    container_name: csdl-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-csdl}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-csdl_dev_pw}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # Quản trị CSDL nhẹ cho DEV (không dùng ở PROD).
+  adminer:
+    image: adminer:latest
+    container_name: csdl-adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8081}:8080"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+  redis_data:
+  minio_data:

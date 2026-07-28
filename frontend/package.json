@@ -1,0 +1,11 @@
+{
+  "name": "csdl-doanhtrai-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Giao diện Claude Design (no-build) cho hệ thống CSDL Vật chất Doanh trại cấp tỉnh",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  }
+}
