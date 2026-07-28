@@ -27,9 +27,9 @@ export class BarracksController {
   constructor(private readonly service: BarracksService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Danh sách doanh trại (phân trang)' })
-  list(@Query() q: PaginationQuery) {
-    return this.service.list(q);
+  @ApiOperation({ summary: 'Danh sách doanh trại (phân trang, kèm tên xã/đơn vị, số công trình)' })
+  list(@Query() q: PaginationQuery, @Query('search') search?: string) {
+    return this.service.list(q, search);
   }
 
   @Get(':id')

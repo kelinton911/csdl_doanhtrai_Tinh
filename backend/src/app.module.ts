@@ -8,8 +8,11 @@ import { IdempotencyModule } from './modules/idempotency/idempotency.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { IdentityModule } from './modules/identity/identity.module';
 import { OrganizationModule } from './modules/organization/organization.module';
+import { MasterDataModule } from './modules/master-data/master-data.module';
 import { BarracksModule } from './modules/barracks/barracks.module';
 import { FacilitiesModule } from './modules/facilities/facilities.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { GisModule } from './modules/gis/gis.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/identity/guards/roles.guard';
@@ -31,12 +34,15 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     StorageModule, // Object storage MinIO (nền cho M08)
     IdentityModule, // M01 — Identity & Access
     OrganizationModule, // M02 — Organization & Area
+    MasterDataModule, // M03 — Master Data (danh mục + vật chất)
     BarracksModule, // M04 — Barracks (workflow UC-05/06)
     FacilitiesModule, // M05 — Facilities (công trình thuộc doanh trại, UC-07)
+    GisModule, // M11 — GIS (UC-17)
+    DashboardModule, // M12 — Dashboard tổng hợp
     HealthModule,
-    // Roadmap còn lại: MasterData(M03), Inventory(M06), Inspection(M07),
-    // Documents(M08), Maintenance(M09), Scenario(M10), GIS(M11), Reporting(M12),
-    // Alert(M13), Integration(M14). Xem docs/ROADMAP.md.
+    // Roadmap còn lại: Inventory(M06), Inspection(M07), Documents(M08),
+    // Maintenance(M09), Scenario(M10), Reporting/Export(M12), Alert(M13),
+    // Integration(M14). Xem docs/ROADMAP.md.
   ],
   providers: [
     // Xác thực mặc định toàn hệ thống, endpoint công khai đánh dấu @Public().

@@ -29,19 +29,71 @@ export class BarracksService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async list(q: PaginationQuery) {
-    const [data, total] = await this.repo.findAndCount({
-      order: { code: 'ASC' },
-      skip: q.skip,
-      take: q.size,
-    });
+  // Danh sách kèm tên xã/đơn vị, số công trình, và toạ độ GeoJSON (màn danh sách + bản đồ).
+  async list(q: PaginationQuery, search?: string) {
+    const qb = this.repo
+      .createQueryBuilder('b')
+      .leftJoin('administrative_areas', 'a', 'a.id = b.area_id')
+      .leftJoin('organizations', 'o', 'o.id = b.organization_id')
+      .select('b.id', 'id')
+      .addSelect('b.code', 'code')
+      .addSelect('b.name', 'name')
+      .addSelect('b.workflow_status', 'workflowStatus')
+      .addSelect('b.declared_capacity', 'declaredCapacity')
+      .addSelect('b.land_area', 'landArea')
+      .addSelect('b.address', 'address')
+      .addSelect('b.updated_at', 'updatedAt')
+      .addSelect('a.name', 'areaName')
+      .addSelect('o.name', 'orgName')
+      .addSelect('ST_AsGeoJSON(b.location)', 'locationGeojson')
+      .addSelect(
+        (sub) =>
+          sub
+            .select('COUNT(*)')
+            .from('facilities', 'f')
+            .where('f.barracks_id = b.id'),
+        'facilityCount',
+      )
+      .orderBy('b.code', 'ASC')
+      .offset(q.skip)
+      .limit(q.size);
+    if (search)
+      qb.where('(b.code ILIKE :s OR b.name ILIKE :s)', { s: `%${search}%` });
+
+    const rows = await qb.getRawMany();
+    const total = search
+      ? await this.repo
+          .createQueryBuilder('b')
+          .where('(b.code ILIKE :s OR b.name ILIKE :s)', { s: `%${search}%` })
+          .getCount()
+      : await this.repo.count();
+
+    const data = rows.map((r) => ({
+      id: r.id,
+      code: r.code,
+      name: r.name,
+      workflowStatus: r.workflowStatus,
+      declaredCapacity: Number(r.declaredCapacity),
+      landArea: Number(r.landArea),
+      address: r.address,
+      updatedAt: r.updatedAt,
+      areaName: r.areaName,
+      orgName: r.orgName,
+      facilityCount: Number(r.facilityCount),
+      location: r.locationGeojson ? JSON.parse(r.locationGeojson) : null,
+    }));
     return paginated(data, total, q);
   }
 
-  async get(id: string): Promise<Barracks> {
+  async get(id: string): Promise<Barracks & { location: unknown }> {
     const found = await this.repo.findOne({ where: { id } });
     if (!found) throw new NotFoundException('DATA-001: Không tìm thấy doanh trại');
-    return found;
+    // Chuẩn hoá toạ độ về GeoJSON để frontend dùng trực tiếp trên bản đồ.
+    const geo = await this.repo.query(
+      'SELECT ST_AsGeoJSON(location) AS g FROM barracks WHERE id = $1',
+      [id],
+    );
+    return { ...found, location: geo?.[0]?.g ? JSON.parse(geo[0].g) : null };
   }
 
   async create(dto: CreateBarracksDto, user: AuthUser): Promise<Barracks> {
@@ -54,6 +106,9 @@ export class BarracksService {
       areaId: dto.areaId ?? null,
       organizationId: dto.organizationId ?? user.organizationId ?? null,
       declaredCapacity: dto.declaredCapacity ?? 0,
+      address: dto.address ?? null,
+      landArea: (dto.landArea ?? 0).toString(),
+      function: dto.function ?? null,
       location: dto.location ?? null,
       workflowStatus: WorkflowStatus.DRAFT,
       createdBy: user.sub,
@@ -78,6 +133,9 @@ export class BarracksService {
     if (dto.areaId !== undefined) b.areaId = dto.areaId;
     if (dto.organizationId !== undefined) b.organizationId = dto.organizationId;
     if (dto.declaredCapacity !== undefined) b.declaredCapacity = dto.declaredCapacity;
+    if (dto.address !== undefined) b.address = dto.address;
+    if (dto.landArea !== undefined) b.landArea = dto.landArea.toString();
+    if (dto.function !== undefined) b.function = dto.function;
     if (dto.location !== undefined) b.location = dto.location;
     b.updatedBy = user.sub;
     return this.repo.save(b);

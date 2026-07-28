@@ -32,6 +32,15 @@ export class Barracks {
   @Column({ name: 'declared_capacity', type: 'int', default: 0 })
   declaredCapacity!: number;
 
+  @Column({ type: 'varchar', nullable: true })
+  address!: string | null;
+
+  @Column({ name: 'land_area', type: 'numeric', precision: 14, scale: 2, default: 0 })
+  landArea!: string;
+
+  @Column({ name: 'function', type: 'varchar', nullable: true })
+  function!: string | null;
+
   // Điểm đại diện doanh trại (PostGIS Point, SRID 4326). Nullable ở giai đoạn giả lập.
   @Column({
     type: 'geometry',

@@ -1,23 +1,47 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Doughnut, Bar } from 'react-chartjs-2';
 import { api } from '../lib/api';
 import { useAuth, ROLE_LABEL } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
 import { KpiCard } from '../components/KpiCard';
 import { Skeleton, ErrorState } from '../components/States';
+import { Icon } from '../components/Icon';
 import { num } from '../lib/format';
+import {
+  CONDITION_COLOR,
+  CONDITION_LABEL,
+  STATUS_COLOR,
+  STATUS_LABEL,
+} from '../lib/charts';
 
-interface Paged<T> {
-  data: T[];
-  meta: { total: number };
+interface Summary {
+  generatedAt: string;
+  barracks: { total: number; approved: number; pending: number; draft: number; capacity: number; landArea: number };
+  facilities: { total: number; inUse: number; decommissioned: number };
+  materials: { total: number; published: number };
+  dataConfirmedRatio: number;
+  criticalAlerts: number;
+  charts: {
+    facilitiesByCondition: Array<{ condition: string; count: number }>;
+    barracksByStatus: Array<{ status: string; count: number }>;
+  };
+  topIssues: Array<{ severity: string; title: string; count: number }>;
 }
 
-// Dashboard chỉ huy (Frontend §6.2). Pha A: KPI thật từ API; Pha B bổ sung biểu đồ, bản đồ,
-// và endpoint tổng hợp /dashboard/summary.
+const MODES = ['Bình thường', 'SSCĐ', 'Tình huống giả định'];
+const SEV: Record<string, { fg: string; bg: string; bd: string }> = {
+  danger: { fg: 'var(--danger-fg)', bg: 'var(--danger-bg)', bd: 'var(--danger-bd)' },
+  warn: { fg: 'var(--warn-fg)', bg: 'var(--warn-bg)', bd: 'var(--warn-bd)' },
+  info: { fg: 'var(--info-fg)', bg: 'var(--info-bg)', bd: 'var(--info-bd)' },
+};
+
 export function DashboardPage() {
   const { profile } = useAuth();
-  const barracks = useQuery({
-    queryKey: ['barracks-count'],
-    queryFn: async () => (await api.get<Paged<unknown>>('/barracks', { params: { size: 1 } })).data,
+  const [mode, setMode] = useState(MODES[0]);
+  const q = useQuery({
+    queryKey: ['dashboard-summary'],
+    queryFn: async () => (await api.get<Summary>('/dashboard/summary')).data,
   });
 
   return (
@@ -25,34 +49,109 @@ export function DashboardPage() {
       <PageHeader
         eyebrow="Tổng quan chỉ huy"
         title={`Xin chào, ${profile?.fullName ?? ''}`}
-        description={`Vai trò: ${(profile?.roles ?? []).map((r) => ROLE_LABEL[r] ?? r).join(', ')}. Toàn bộ số liệu trong bản dựng này là dữ liệu giả lập phục vụ thiết kế.`}
+        description={`Vai trò: ${(profile?.roles ?? []).map((r) => ROLE_LABEL[r] ?? r).join(', ')}. Toàn bộ số liệu là dữ liệu giả lập phục vụ thiết kế.`}
+        actions={
+          <div style={{ display: 'flex', gap: 4, background: 'var(--color-neutral-200)', padding: 4, borderRadius: 8 }}>
+            {MODES.map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className="btn btn-sm"
+                style={{
+                  border: 'none',
+                  background: mode === m ? 'var(--surface-1)' : 'transparent',
+                  fontWeight: mode === m ? 700 : 500,
+                  boxShadow: mode === m ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                }}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        }
       />
 
-      {barracks.isLoading && <Skeleton rows={3} />}
-      {barracks.isError && <ErrorState error={barracks.error} />}
-      {barracks.data && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-          <KpiCard
-            label="Tổng số doanh trại"
-            value={num(barracks.data.meta.total)}
-            unit="hồ sơ"
-            icon="building"
-            dom="asset"
-            hint="Cập nhật thời gian thực"
-          />
-          <KpiCard label="Công trình đang khai thác" value="—" unit="công trình" icon="grid" dom="cmd" hint="Bổ sung ở Pha B" />
-          <KpiCard label="Tỷ lệ dữ liệu đã xác nhận" value="—" unit="%" icon="check" dom="cap" hint="Bổ sung ở Pha B" />
-          <KpiCard label="Cảnh báo trọng yếu" value="—" icon="alert" dom="repair" hint="Bổ sung ở Pha H" />
-        </div>
-      )}
+      {q.isLoading && <Skeleton rows={4} />}
+      {q.isError && <ErrorState error={q.error} />}
+      {q.data && (
+        <>
+          {mode !== 'Bình thường' && (
+            <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, border: '1px dashed var(--warn-bd)', background: 'var(--warn-bg)', color: 'var(--warn-fg)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <Icon name="target" size={16} /> Đang xem ở chế độ <b>{mode}</b> — số liệu mô phỏng, tách biệt với dữ liệu thực.
+            </div>
+          )}
 
-      <div className="panel" style={{ padding: 20, marginTop: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
-        <span style={{ color: 'var(--info-fg)' }}>ℹ️</span>
-        <div style={{ fontSize: 13.5 }}>
-          Nền tảng (Pha A) đã hoạt động: đăng nhập, phân quyền theo vai trò, nhật ký truy nguyên,
-          lưu trữ tệp và khung ứng dụng. Các module nghiệp vụ được bổ sung theo từng pha.
-        </div>
-      </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 16 }}>
+            <KpiCard label="Tổng số doanh trại" value={num(q.data.barracks.total)} unit="hồ sơ" icon="building" dom="asset" hint={`${q.data.barracks.approved} đã duyệt`} />
+            <KpiCard label="Công trình đang khai thác" value={num(q.data.facilities.inUse)} unit={`/ ${num(q.data.facilities.total)}`} icon="grid" dom="cmd" trend={{ dir: 'flat', text: `${q.data.facilities.decommissioned} ngừng KT` }} />
+            <KpiCard label="Tỷ lệ dữ liệu đã xác nhận" value={num(q.data.dataConfirmedRatio)} unit="%" icon="check" dom="cap" trend={{ dir: q.data.dataConfirmedRatio >= 60 ? 'up' : 'down', text: q.data.dataConfirmedRatio >= 60 ? 'Đạt mục tiêu' : 'Dưới mục tiêu' }} />
+            <KpiCard label="Khả năng tiếp nhận" value={num(q.data.barracks.capacity)} unit="người" icon="user" dom="plan" />
+            <KpiCard label="Cảnh báo trọng yếu" value={num(q.data.criticalAlerts)} icon="alert" dom="repair" hint="Trung tâm cảnh báo (Pha H)" />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 20 }}>
+            <div className="card" style={{ padding: 18 }}>
+              <div className="eyebrow" style={{ marginBottom: 12 }}>Cơ cấu chất lượng công trình</div>
+              <div style={{ maxHeight: 260 }}>
+                <Doughnut
+                  data={{
+                    labels: q.data.charts.facilitiesByCondition.map((c) => CONDITION_LABEL[c.condition] ?? c.condition),
+                    datasets: [{
+                      data: q.data.charts.facilitiesByCondition.map((c) => c.count),
+                      backgroundColor: q.data.charts.facilitiesByCondition.map((c) => CONDITION_COLOR[c.condition] ?? '#9fb3c8'),
+                      borderWidth: 0,
+                    }],
+                  }}
+                  options={{ maintainAspectRatio: false, cutout: '60%' }}
+                  height={240}
+                />
+              </div>
+            </div>
+            <div className="card" style={{ padding: 18 }}>
+              <div className="eyebrow" style={{ marginBottom: 12 }}>Hồ sơ doanh trại theo trạng thái</div>
+              <div style={{ maxHeight: 260 }}>
+                <Bar
+                  data={{
+                    labels: q.data.charts.barracksByStatus.map((s) => STATUS_LABEL[s.status] ?? s.status),
+                    datasets: [{
+                      label: 'Số hồ sơ',
+                      data: q.data.charts.barracksByStatus.map((s) => s.count),
+                      backgroundColor: q.data.charts.barracksByStatus.map((s) => STATUS_COLOR[s.status] ?? '#829ab1'),
+                      borderRadius: 6,
+                    }],
+                  }}
+                  options={{ maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }}
+                  height={240}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: 18, marginTop: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div className="eyebrow">Vấn đề cần xử lý</div>
+              <span className="muted" style={{ fontSize: 12 }}>Chốt số liệu: {new Date(q.data.generatedAt).toLocaleString('vi-VN')}</span>
+            </div>
+            {q.data.topIssues.length === 0 ? (
+              <div className="muted">Không có vấn đề nổi cộm.</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {q.data.topIssues.map((iss, i) => {
+                  const s = SEV[iss.severity] ?? SEV.info;
+                  return (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', border: `1px solid ${s.bd}`, background: s.bg, borderRadius: 8 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 10, color: s.fg, fontWeight: 600 }}>
+                        <Icon name="alert" size={16} /> {iss.title}
+                      </span>
+                      <span className="num" style={{ fontWeight: 700, color: s.fg }}>{num(iss.count)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 }

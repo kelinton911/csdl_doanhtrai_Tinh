@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import {
   IsInt,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -35,6 +36,21 @@ export class CreateBarracksDto {
   @IsInt()
   @Min(0)
   declaredCapacity?: number;
+
+  @ApiPropertyOptional({ example: 'Thôn 3, Xã A01' })
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiPropertyOptional({ example: 12000.5, description: 'Diện tích đất (m2)' })
+  @IsOptional()
+  @IsNumber()
+  landArea?: number;
+
+  @ApiPropertyOptional({ example: 'Đơn vị bộ binh' })
+  @IsOptional()
+  @IsString()
+  function?: string;
 
   @ApiPropertyOptional({
     description: 'GeoJSON Point (giả lập). Ví dụ: {"type":"Point","coordinates":[0,0]}',
