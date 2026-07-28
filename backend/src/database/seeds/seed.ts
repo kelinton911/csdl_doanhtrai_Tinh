@@ -15,7 +15,8 @@ import { Facility } from '../../modules/facilities/entities/facility.entity';
 import { StorageLocation } from '../../modules/inventory/entities/storage-location.entity';
 import { StockBalance } from '../../modules/inventory/entities/stock-balance.entity';
 import { InspectionCampaign } from '../../modules/inspection/entities/inspection-campaign.entity';
-import { InspectionStatus } from '../../common/workflow';
+import { Alert } from '../../modules/alerts/alert.entity';
+import { InspectionStatus, AlertStatus } from '../../common/workflow';
 import { WorkflowStatus } from '../../common/workflow';
 import { FacilityStatus } from '../../modules/facilities/facility-status';
 

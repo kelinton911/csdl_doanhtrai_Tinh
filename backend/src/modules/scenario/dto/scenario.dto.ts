@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsInt,
@@ -8,6 +9,7 @@ import {
   IsUUID,
   Min,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 
 export class ScenarioParamsDto {
@@ -44,6 +46,8 @@ export class CreateScenarioDto {
   name!: string;
 
   @ApiProperty({ type: ScenarioParamsDto })
+  @ValidateNested()
+  @Type(() => ScenarioParamsDto)
   parameters!: ScenarioParamsDto;
 }
 

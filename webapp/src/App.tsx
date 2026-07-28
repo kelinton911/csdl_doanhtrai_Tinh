@@ -11,6 +11,7 @@ import { InventoryPage } from './pages/InventoryPage';
 import { InspectionPage } from './pages/InspectionPage';
 import { InspectionWizardPage } from './pages/InspectionWizardPage';
 import { MaintenancePage } from './pages/MaintenancePage';
+import { ScenarioPage } from './pages/ScenarioPage';
 import { Placeholder } from './pages/Placeholder';
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -43,7 +44,7 @@ export default function App() {
       <Route path="/inspection" element={<Protected><InspectionPage /></Protected>} />
       <Route path="/inspection/sheet/:id" element={<Protected><InspectionWizardPage /></Protected>} />
       <Route path="/maintenance" element={<Protected><MaintenancePage /></Protected>} />
-      <Route path="/scenarios" element={<Protected><Placeholder title="Kế hoạch và tình huống" phase="Pha G" /></Protected>} />
+      <Route path="/scenarios" element={<Protected><ScenarioPage /></Protected>} />
       <Route path="/reports" element={<Protected><Placeholder title="Báo cáo - phân tích" phase="Pha H" /></Protected>} />
       <Route path="/admin" element={<Protected><Placeholder title="Quản trị hệ thống" phase="Pha H" /></Protected>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

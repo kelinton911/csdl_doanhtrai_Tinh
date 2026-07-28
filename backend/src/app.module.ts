@@ -13,6 +13,9 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { InspectionModule } from './modules/inspection/inspection.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { MaintenanceModule } from './modules/maintenance/maintenance.module';
+import { ScenarioModule } from './modules/scenario/scenario.module';
+import { AlertsModule } from './modules/alerts/alerts.module';
+import { ReportingModule } from './modules/reporting/reporting.module';
 import { BarracksModule } from './modules/barracks/barracks.module';
 import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -43,6 +46,9 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     InspectionModule, // M07 — Inspection & Review (UC-09/10/11)
     DocumentsModule, // M08 — Documents & Media (UC-12, MinIO)
     MaintenanceModule, // M09 — Maintenance & Recovery (UC-13/14)
+    ScenarioModule, // M10 — Scenario & Planning (UC-15/16)
+    AlertsModule, // M13 — Alert & Notification (UC-18)
+    ReportingModule, // M12 — Reporting & Search + Export (UC-19/20)
     BarracksModule, // M04 — Barracks (workflow UC-05/06)
     FacilitiesModule, // M05 — Facilities (công trình thuộc doanh trại, UC-07)
     GisModule, // M11 — GIS (UC-17)
