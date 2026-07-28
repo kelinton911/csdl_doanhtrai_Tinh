@@ -16,6 +16,7 @@ import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 import { ScenarioModule } from './modules/scenario/scenario.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
+import { IntegrationModule } from './modules/integration/integration.module';
 import { BarracksModule } from './modules/barracks/barracks.module';
 import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -49,6 +50,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     ScenarioModule, // M10 — Scenario & Planning (UC-15/16)
     AlertsModule, // M13 — Alert & Notification (UC-18)
     ReportingModule, // M12 — Reporting & Search + Export (UC-19/20)
+    IntegrationModule, // M14 — Integration & Sync (UC-21/22)
     BarracksModule, // M04 — Barracks (workflow UC-05/06)
     FacilitiesModule, // M05 — Facilities (công trình thuộc doanh trại, UC-07)
     GisModule, // M11 — GIS (UC-17)

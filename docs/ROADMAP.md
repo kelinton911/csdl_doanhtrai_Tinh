@@ -22,34 +22,42 @@ Tổng hợp từ ba tài liệu trong `docs/`:
 
 | Module | Phạm vi | Use case | API gốc | Hiện trạng |
 | --- | --- | --- | --- | --- |
-| M01 Identity & Access | Tài khoản, vai trò, phiên | UC-01, UC-02 | `/auth/*`, `/me`, `/users` | ✅ auth + /me; quản lý user là lộ trình |
-| M02 Organization & Area | Đơn vị, xã/phường | UC-04 | `/organizations`, `/administrative-areas` | ✅ list/create area (RBAC); geometry PostGIS |
-| M03 Master Data | Danh mục chuẩn | UC-03, UC-07 | `/master-data/*`, `/materials` | ⬜ |
+| M01 Identity & Access | Tài khoản, vai trò, phiên | UC-01, UC-02 | `/auth/*`, `/me`, `/users` | ✅ auth + /me + refresh/logout; CRUD users, gán roles/scopes (RBAC) |
+| M02 Organization & Area | Đơn vị, xã/phường | UC-04 | `/organizations`, `/administrative-areas` | ✅ CRUD đơn vị + xã/phường (RBAC); geometry PostGIS |
+| M03 Master Data | Danh mục chuẩn | UC-03, UC-07 | `/master-data/*`, `/materials` | ✅ catalogs (7 loại) + materials, phiên bản hóa, publish, chống trùng mã |
 | M04 Barracks | Hồ sơ doanh trại | UC-05, UC-06 | `/barracks` | ✅ CRUD + workflow (submit/approve/request-changes), revision, unique-code, no-edit-approved, phân tách nhiệm vụ |
 | M05 Facilities | Công trình, hạ tầng | UC-07 | `/barracks/:id/facilities`, `/facilities/:id` | ✅ CRUD thuộc doanh trại, mã duy nhất trong doanh trại, decommission thay xóa cứng, geometry Point |
-| M06 Materials & Inventory | Tồn kho, biến động | UC-08 | `/inventory/*` | ⬜ |
-| M07 Inspection | Kiểm kê, kiểm duyệt | UC-09, UC-10, UC-11 | `/inspection-*`, `/review-*` | ⬜ |
-| M08 Documents & Media | Tài liệu, ảnh | UC-12 | `/files/*`, `/documents` | ⬜ (dùng MinIO) |
-| M09 Maintenance & Recovery | Hư hỏng, sửa chữa | UC-13, UC-14, UC-15 | `/damage-events`, `/maintenance-*` | ⬜ |
-| M10 Scenario & Planning | Tình huống, phương án | UC-15, UC-16 | `/scenarios`, `/plans` | ⬜ |
-| M11 GIS | Bản đồ, không gian | UC-17 | `/gis/*` | ⬜ (PostGIS sẵn) |
-| M12 Reporting & Analytics | Báo cáo, dashboard | UC-20 | `/reports/*`, `/exports` | ⬜ |
-| M13 Alert & Notification | Cảnh báo | UC-18 | `/alerts/*` | ⬜ |
-| M14 Integration & Sync | Nhập liệu, đồng bộ | UC-21, UC-22 | `/imports`, `/sync/*` | ⬜ |
-| M15 System Administration | Cấu hình, sao lưu, audit | UC-23, UC-24 | `/audit-logs`, `/admin/*` | ⬜ |
+| M06 Materials & Inventory | Tồn kho, biến động | UC-08 | `/inventory/*` | ✅ transactions/balances/adjustments, sổ kho bất biến, chặn tồn âm (INV-001), idempotency |
+| M07 Inspection | Kiểm kê, kiểm duyệt | UC-09, UC-10, UC-11 | `/inspection-*`, `/review-*` | ✅ campaign/sheet/line/variance/review-task, autosave, chặn gửi rỗng, tách nhiệm vụ |
+| M08 Documents & Media | Tài liệu, ảnh | UC-12 | `/files/*`, `/documents` | ✅ upload multipart→MinIO, checksum, presigned download, lọc loại tệp/kích thước |
+| M09 Maintenance & Recovery | Hư hỏng, sửa chữa | UC-13, UC-14 | `/damage-events`, `/maintenance-*` | ✅ damage verify; request DRAFT→PROPOSED→APPROVED→IN_PROGRESS→ACCEPTED→CLOSED, tách nhiệm vụ, cờ scenario |
+| M10 Scenario & Planning | Tình huống, phương án | UC-15, UC-16 | `/scenarios`, `/plans` | ✅ engine assurance-v1 (chỗ ở + cân đối vật chất + confidence), run có version, plan compare/approve bất biến |
+| M11 GIS | Bản đồ, không gian | UC-17 | `/gis/*` | ✅ `/gis/features` (bbox), `/gis/search-within` (bán kính) trả GeoJSON từ PostGIS |
+| M12 Reporting & Analytics | Báo cáo, dashboard, tìm kiếm | UC-19, UC-20 | `/dashboard/summary`, `/search`, `/reports/*` | ✅ dashboard tổng hợp, tìm kiếm toàn cục, xuất PDF (DejaVuSans)/Excel từ snapshot lưu MinIO |
+| M13 Alert & Notification | Cảnh báo | UC-18 | `/alerts/*` | ✅ rule engine sinh cảnh báo, gom trùng, assign, close (bắt buộc kết quả), SLA |
+| M14 Integration & Sync | Nhập liệu, đồng bộ | UC-21, UC-22 | `/imports`, `/sync/*` | ✅ import CSV (staging→validate→commit, transaction) + đồng bộ offline (idempotent, phát hiện xung đột phiên bản) |
+| M15 System Administration | Nhật ký, sao lưu, audit | UC-23, UC-24 | `/audit-logs`, `/admin/*` | ✅ audit append-only (interceptor + `/audit-logs`); backup/restore qua runbook + script (`infra/backup.sh`, `infra/restore.sh`, `docs/RUNBOOK-backup-restore.md`) |
 
 ## 3. Pha triển khai (theo hồ sơ backend §13)
 
-- **Pha 0 — Nền tảng** ✅ *(đã dựng)*: repo, CI/CD-ready, auth, error model (problem+json),
-  migration, observability (correlation id, health), CSDL PostGIS, Swagger.
-- **Pha 1 — Dữ liệu lõi**: Organization/Area (M02 ✅), Barracks (M04 ✅), Facilities (M05 ✅);
-  còn Master Data (M03), Documents (M08 + MinIO).
-- **Pha 2 — Kiểm kê & kiểm duyệt**: Inspection (M07), Workflow/Approval, chênh lệch, thông báo.
-- **Pha 3 — Vật chất & sửa chữa**: Inventory (M06), Maintenance (M09).
-- **Pha 4 — GIS & báo cáo**: GIS (M11), Reporting (M12), snapshot/export.
-- **Pha 5 — Tình huống & phương án**: engine tính toán, Scenario (M10), so sánh/chốt phương án.
-- **Pha 6 — Tích hợp & tối ưu**: Integration/Sync (M14), Alert (M13), Audit (M15),
-  outbox, HA, performance, security hardening.
+- **Pha 0 — Nền tảng** ✅: repo, auth, error model (problem+json), migration, observability
+  (correlation id, health), CSDL PostGIS, Swagger; audit append-only + idempotency + MinIO storage.
+- **Pha 1 — Dữ liệu lõi** ✅: Organization/Area (M02), Barracks (M04), Facilities (M05),
+  Master Data (M03), Documents (M08 + MinIO), Dashboard.
+- **Pha 2 — Kiểm kê & kiểm duyệt** ✅: Inspection (M07) + workflow/approval + chênh lệch.
+- **Pha 3 — Vật chất & sửa chữa** ✅: Inventory (M06), Maintenance (M09).
+- **Pha 4 — GIS & báo cáo** ✅: GIS (M11), Reporting (M12) + tìm kiếm + xuất PDF/Excel.
+- **Pha 5 — Tình huống & phương án** ✅: engine tính toán (M10), so sánh/chốt phương án.
+- **Pha 6 — Tích hợp & tối ưu** ✅: Alert (M13), Audit (M15), Integration/Sync (M14),
+  backup/restore (runbook + script), data-scope theo dataScopes, watermark báo cáo theo người dùng;
+  còn outbox, HA, performance/security hardening nâng cao (lộ trình).
+
+> **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
+> `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),
+> `cd webapp && BACKEND_ORIGIN=http://localhost:<cổng> npm run e2e`.
+
+> **Frontend chức năng**: SPA thật ở `webapp/` (Vite + React + TS) nối API end-to-end, tái dùng
+> design tokens "Command Data System". 15 màn hình. Mockup `frontend/app/` giữ làm tham chiếu thiết kế.
 
 ## 4. Khuôn dựng một module mới (giữ nhất quán)
 

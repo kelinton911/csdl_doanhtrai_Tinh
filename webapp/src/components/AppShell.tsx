@@ -1,17 +1,42 @@
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Icon } from './Icon';
+import { api } from '../lib/api';
 import { visibleNav } from '../lib/nav';
 import { ROLE_LABEL, useAuth } from '../lib/auth';
 import { useTheme } from '../lib/theme';
+
+interface SearchResult {
+  barracks: Array<{ id: string; code: string; name: string }>;
+  facilities: Array<{ id: string; code: string; name: string; barracks_id: string }>;
+  materials: Array<{ id: string; code: string; name: string }>;
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { profile, logout } = useAuth();
   const { theme, toggle } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const [search, setSearch] = useState('');
   const nav = visibleNav(profile?.roles ?? []);
   const primaryRole = profile?.roles?.[0] ?? '';
+
+  const alertCount = useQuery({
+    queryKey: ['alert-summary'],
+    queryFn: async () => (await api.get('/alerts/summary')).data as { open: number },
+    refetchInterval: 60_000,
+  });
+  const searchResults = useQuery({
+    queryKey: ['global-search', search],
+    queryFn: async () => (await api.get<SearchResult>('/search', { params: { q: search } })).data,
+    enabled: search.trim().length >= 2,
+  });
+  const totalResults =
+    (searchResults.data?.barracks.length ?? 0) +
+    (searchResults.data?.facilities.length ?? 0) +
+    (searchResults.data?.materials.length ?? 0);
 
   const current = nav.find((n) => location.pathname.startsWith(n.to));
 
@@ -138,9 +163,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </span>
             <input
               className="input"
-              placeholder="Tìm doanh trại, công trình, vật chất, hồ sơ…"
+              placeholder="Tìm doanh trại, công trình, vật chất…"
               style={{ paddingLeft: 32 }}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
+            {search.trim().length >= 2 && (
+              <div
+                className="scrl"
+                style={{ position: 'absolute', top: 42, left: 0, right: 0, background: 'var(--surface-1)', border: '1px solid var(--color-neutral-300)', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', maxHeight: 360, overflow: 'auto', zIndex: 20 }}
+              >
+                {totalResults === 0 ? (
+                  <div className="muted" style={{ padding: 14, fontSize: 13 }}>Không tìm thấy kết quả.</div>
+                ) : (
+                  <>
+                    <SearchGroup title="Doanh trại" items={searchResults.data?.barracks} onPick={(id) => { setSearch(''); navigate(`/barracks/${id}`); }} />
+                    <SearchGroup title="Công trình" items={(searchResults.data?.facilities ?? []).map((f) => ({ id: f.barracks_id, code: f.code, name: f.name }))} onPick={(id) => { setSearch(''); navigate(`/barracks/${id}`); }} />
+                    <SearchGroup title="Vật chất" items={searchResults.data?.materials} onPick={() => { setSearch(''); navigate('/inventory'); }} />
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div style={{ flex: 1 }} />
@@ -171,8 +214,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             Trực tuyến
           </span>
 
-          <button className="btn btn-ghost btn-sm" title="Cảnh báo">
+          <button className="btn btn-ghost btn-sm" title="Cảnh báo" onClick={() => navigate('/alerts')} style={{ position: 'relative' }}>
             <Icon name="bell" size={18} />
+            {(alertCount.data?.open ?? 0) > 0 && (
+              <span style={{ position: 'absolute', top: 0, right: 0, minWidth: 16, height: 16, padding: '0 4px', borderRadius: 8, background: 'var(--danger)', color: '#fff', fontSize: 10, fontWeight: 700, display: 'grid', placeItems: 'center' }}>
+                {alertCount.data!.open > 99 ? '99+' : alertCount.data!.open}
+              </span>
+            )}
           </button>
           <button className="btn btn-ghost btn-sm" onClick={toggle} title="Đổi giao diện sáng/tối">
             <Icon name={theme === 'light' ? 'moon' : 'sun'} size={18} />
@@ -208,6 +256,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+    </div>
+  );
+}
+
+function SearchGroup({
+  title,
+  items,
+  onPick,
+}: {
+  title: string;
+  items?: Array<{ id: string; code: string; name: string }>;
+  onPick: (id: string) => void;
+}) {
+  if (!items || items.length === 0) return null;
+  return (
+    <div>
+      <div className="eyebrow" style={{ padding: '8px 12px 4px' }}>{title}</div>
+      {items.map((it) => (
+        <button
+          key={`${title}-${it.id}-${it.code}`}
+          onClick={() => onPick(it.id)}
+          style={{ all: 'unset', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', gap: 10, padding: '8px 12px', width: '100%', boxSizing: 'border-box' }}
+          className="rowh"
+        >
+          <span style={{ fontWeight: 600, fontSize: 13 }}>{it.name}</span>
+          <span className="num muted" style={{ fontSize: 11 }}>{it.code}</span>
+        </button>
+      ))}
     </div>
   );
 }

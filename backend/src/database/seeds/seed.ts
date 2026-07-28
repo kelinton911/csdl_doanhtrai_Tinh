@@ -90,6 +90,17 @@ async function run() {
   }
   console.log(`  + Xã/phường: ${areas.length}`);
 
+  // Gắn phạm vi dữ liệu cho tài khoản cấp xã xa01: thuộc đơn vị DV-XA-A01, scope địa bàn XA-A01.
+  const xa01 = await userRepo.findOne({ where: { username: 'xa01' } });
+  const areaA01 = areas.find((a) => a.code === 'XA-A01');
+  const orgA01 = await orgRepo.findOne({ where: { code: 'DV-XA-A01' } });
+  if (xa01 && areaA01 && orgA01) {
+    xa01.organizationId = orgA01.id;
+    xa01.dataScopes = [{ type: 'AREA', refId: areaA01.id }];
+    await userRepo.save(xa01);
+    console.log('  + Phạm vi dữ liệu xa01 → xã A01');
+  }
+
   // 4) Danh mục dùng chung (phát hành sẵn)
   if ((await catalogRepo.count()) === 0) {
     const cats: Array<Partial<Catalog>> = [];

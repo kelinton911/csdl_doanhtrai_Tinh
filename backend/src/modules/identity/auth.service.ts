@@ -53,6 +53,7 @@ export class AuthService {
       username: user.username,
       roles: user.roles,
       organizationId: user.organizationId,
+      dataScopes: user.dataScopes ?? [],
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(payload, {

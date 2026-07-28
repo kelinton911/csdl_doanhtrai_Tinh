@@ -23,3 +23,23 @@ export function scopeOrganizationId(user: AuthUser | undefined): string | null {
   if (isProvinceWide(user)) return null;
   return user?.organizationId ?? null;
 }
+
+// Danh sách area refId trong phạm vi dữ liệu của người dùng (từ dataScopes type=AREA).
+export function scopeAreaIds(user: AuthUser | undefined): string[] {
+  if (!user?.dataScopes) return [];
+  return user.dataScopes.filter((s) => s.type === 'AREA').map((s) => s.refId);
+}
+
+// Bộ lọc phạm vi cho list doanh trại/công trình theo địa bàn + đơn vị.
+// null = xem toàn tỉnh; ngược lại giới hạn theo area scopes hoặc organizationId.
+export interface BarracksScope {
+  areaIds: string[];
+  organizationId: string | null;
+}
+export function barracksScope(user: AuthUser | undefined): BarracksScope | null {
+  if (isProvinceWide(user)) return null;
+  return {
+    areaIds: scopeAreaIds(user),
+    organizationId: user?.organizationId ?? null,
+  };
+}

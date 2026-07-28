@@ -104,9 +104,11 @@ export class ReportingService {
     const snapshotAt = new Date();
     const rows: Record<string, unknown>[] = await this.ds.query(def.query);
 
+    // Watermark động theo người dùng (Frontend §11 / Backend §9 — data masking).
+    const watermark = `${user.username} · ${snapshotAt.toLocaleString('vi-VN')}`;
     const buffer = format === 'excel'
-      ? await this.buildExcel(def, rows, snapshotAt)
-      : await this.buildPdf(def, rows, snapshotAt);
+      ? await this.buildExcel(def, rows, snapshotAt, watermark)
+      : await this.buildPdf(def, rows, snapshotAt, watermark);
 
     const contentType = format === 'excel'
       ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -134,14 +136,15 @@ export class ReportingService {
     return { url, template: j.template, format: j.format };
   }
 
-  private async buildExcel(def: TemplateDef, rows: Record<string, unknown>[], at: Date): Promise<Buffer> {
+  private async buildExcel(def: TemplateDef, rows: Record<string, unknown>[], at: Date, watermark: string): Promise<Buffer> {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('BaoCao');
     ws.addRow([def.title]);
     ws.addRow([`Thời điểm chốt: ${at.toLocaleString('vi-VN')} · Nguồn: CSDL Vật chất Doanh trại (giả lập)`]);
+    ws.addRow([`Người tải: ${watermark}`]);
     ws.addRow([]);
     ws.addRow(def.columns.map((c) => c.header));
-    const headerRow = ws.getRow(4);
+    const headerRow = ws.getRow(5);
     headerRow.font = { bold: true };
     for (const r of rows) ws.addRow(def.columns.map((c) => r[c.key] ?? ''));
     ws.columns.forEach((col) => { col.width = 22; });
@@ -149,7 +152,7 @@ export class ReportingService {
     return Buffer.from(out as ArrayBuffer);
   }
 
-  private buildPdf(def: TemplateDef, rows: Record<string, unknown>[], at: Date): Promise<Buffer> {
+  private buildPdf(def: TemplateDef, rows: Record<string, unknown>[], at: Date, watermark: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({ size: 'A4', margin: 40 });
       const useFont = existsSync(FONT_PATH);
@@ -162,6 +165,22 @@ export class ReportingService {
       doc.on('data', (c: Buffer) => chunks.push(c));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
+
+      // Watermark động theo người dùng: chữ chéo mờ, lặp trên mỗi trang (vẽ trước nội dung → nằm dưới).
+      const stamp = () => {
+        const sx = doc.x;
+        const sy = doc.y;
+        doc.save();
+        doc.rotate(-30, { origin: [300, 420] });
+        doc.font(useFont ? 'vn' : 'Helvetica').fontSize(28).fillColor('#000000').opacity(0.06)
+          .text(`CSDL DOANH TRẠI · ${watermark}`, 40, 400, { width: 700, align: 'center' });
+        doc.restore();
+        doc.opacity(1).fillColor('#000000');
+        doc.x = sx;
+        doc.y = sy;
+      };
+      stamp();
+      doc.on('pageAdded', stamp);
 
       doc.font(useFont && existsSync(FONT_BOLD) ? 'vn-bold' : 'Helvetica-Bold').fontSize(16).text(def.title);
       doc.moveDown(0.3);

@@ -16,6 +16,7 @@ import {
 import { EDITABLE_STATUSES, WorkflowStatus } from '../../common/workflow';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { barracksScope } from '../../common/data-scope';
 
 // M04 — Barracks. UC-05 (tạo/cập nhật), UC-06 (duyệt). Quy tắc trọng yếu:
 // mã duy nhất toàn tỉnh; không sửa trực tiếp bản APPROVED; không xóa cứng;
@@ -30,7 +31,9 @@ export class BarracksService {
   ) {}
 
   // Danh sách kèm tên xã/đơn vị, số công trình, và toạ độ GeoJSON (màn danh sách + bản đồ).
-  async list(q: PaginationQuery, search?: string) {
+  // Lọc theo phạm vi dữ liệu người dùng (data-scope) ở TẦNG SERVER.
+  async list(q: PaginationQuery, search?: string, user?: AuthUser) {
+    const scope = barracksScope(user);
     const qb = this.repo
       .createQueryBuilder('b')
       .leftJoin('administrative_areas', 'a', 'a.id = b.area_id')
@@ -57,16 +60,23 @@ export class BarracksService {
       .orderBy('b.code', 'ASC')
       .offset(q.skip)
       .limit(q.size);
-    if (search)
-      qb.where('(b.code ILIKE :s OR b.name ILIKE :s)', { s: `%${search}%` });
+
+    // Điều kiện dùng chung cho cả truy vấn dữ liệu và đếm tổng.
+    const countQb = this.repo.createQueryBuilder('b');
+    if (search) {
+      qb.andWhere('(b.code ILIKE :s OR b.name ILIKE :s)', { s: `%${search}%` });
+      countQb.andWhere('(b.code ILIKE :s OR b.name ILIKE :s)', { s: `%${search}%` });
+    }
+    if (scope) {
+      // Giới hạn theo địa bàn (area scopes) hoặc đơn vị quản lý của người dùng.
+      const cond = '(b.area_id = ANY(:areaIds::uuid[]) OR b.organization_id = :orgId)';
+      const params = { areaIds: scope.areaIds, orgId: scope.organizationId };
+      qb.andWhere(cond, params);
+      countQb.andWhere(cond, params);
+    }
 
     const rows = await qb.getRawMany();
-    const total = search
-      ? await this.repo
-          .createQueryBuilder('b')
-          .where('(b.code ILIKE :s OR b.name ILIKE :s)', { s: `%${search}%` })
-          .getCount()
-      : await this.repo.count();
+    const total = await countQb.getCount();
 
     const data = rows.map((r) => ({
       id: r.id,

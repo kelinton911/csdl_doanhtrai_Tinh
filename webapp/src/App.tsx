@@ -12,7 +12,9 @@ import { InspectionPage } from './pages/InspectionPage';
 import { InspectionWizardPage } from './pages/InspectionWizardPage';
 import { MaintenancePage } from './pages/MaintenancePage';
 import { ScenarioPage } from './pages/ScenarioPage';
-import { Placeholder } from './pages/Placeholder';
+import { AlertsPage } from './pages/AlertsPage';
+import { ReportsPage } from './pages/ReportsPage';
+import { AdminPage } from './pages/AdminPage';
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { profile, ready } = useAuth();
@@ -45,8 +47,9 @@ export default function App() {
       <Route path="/inspection/sheet/:id" element={<Protected><InspectionWizardPage /></Protected>} />
       <Route path="/maintenance" element={<Protected><MaintenancePage /></Protected>} />
       <Route path="/scenarios" element={<Protected><ScenarioPage /></Protected>} />
-      <Route path="/reports" element={<Protected><Placeholder title="Báo cáo - phân tích" phase="Pha H" /></Protected>} />
-      <Route path="/admin" element={<Protected><Placeholder title="Quản trị hệ thống" phase="Pha H" /></Protected>} />
+      <Route path="/reports" element={<Protected><ReportsPage /></Protected>} />
+      <Route path="/alerts" element={<Protected><AlertsPage /></Protected>} />
+      <Route path="/admin" element={<Protected><AdminPage /></Protected>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
