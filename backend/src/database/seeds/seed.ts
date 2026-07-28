@@ -12,6 +12,8 @@ import { Catalog } from '../../modules/master-data/entities/catalog.entity';
 import { Material } from '../../modules/master-data/entities/material.entity';
 import { Barracks } from '../../modules/barracks/entities/barracks.entity';
 import { Facility } from '../../modules/facilities/entities/facility.entity';
+import { StorageLocation } from '../../modules/inventory/entities/storage-location.entity';
+import { StockBalance } from '../../modules/inventory/entities/stock-balance.entity';
 import { WorkflowStatus } from '../../common/workflow';
 import { FacilityStatus } from '../../modules/facilities/facility-status';
 
@@ -100,6 +102,8 @@ async function run() {
     [['TOT', 'Tốt'], ['KHA', 'Khá'], ['TRUNG_BINH', 'Trung bình'], ['KEM', 'Kém']].forEach(([c, n], i) => add('quality-grade', c, n, { sortOrder: i }));
     // Nguyên nhân hư hỏng
     [['THIEN-TAI', 'Thiên tai'], ['XUONG-CAP', 'Xuống cấp tự nhiên'], ['SU-CO', 'Sự cố kỹ thuật'], ['TAC-DONG', 'Tác động bên ngoài']].forEach(([c, n], i) => add('damage-cause', c, n, { sortOrder: i }));
+    // Loại kho
+    [['KHO-TONG', 'Kho tổng hợp'], ['KHO-LUONG', 'Kho lương thực'], ['KHO-NHIEN', 'Kho nhiên liệu'], ['KHO-KT', 'Kho kỹ thuật']].forEach(([c, n], i) => add('storage-location-type', c, n, { sortOrder: i }));
     await catalogRepo.save(cats.map((c) => catalogRepo.create(c)));
     console.log(`  + Danh mục: ${cats.length} mục`);
   }
@@ -185,6 +189,48 @@ async function run() {
       facTotal += facs.length;
     }
     console.log(`  + Doanh trại: 30 · Công trình: ${facTotal}`);
+  }
+
+  // 7) Kho + số dư tồn (M06) — đủ dòng để màn tồn kho có nội dung, có chênh lệch kiểm kê
+  const locationRepo = dataSource.getRepository(StorageLocation);
+  const balanceRepo = dataSource.getRepository(StockBalance);
+  if ((await locationRepo.count()) === 0) {
+    const mats = await materialRepo.find();
+    const locTypes = ['KHO-TONG', 'KHO-LUONG', 'KHO-NHIEN', 'KHO-KT'];
+    const locs: StorageLocation[] = [];
+    for (let i = 0; i < 12; i++) {
+      locs.push(
+        await locationRepo.save(
+          locationRepo.create({
+            code: `KHO-${String(i + 1).padStart(3, '0')}`,
+            name: `Kho ${pick(['Hậu cần', 'Kỹ thuật', 'Dự trữ', 'Trung tâm'])} ${i + 1} (giả lập)`,
+            type: pick(locTypes),
+            status: 'ACTIVE',
+            createdBy: authorId,
+          }),
+        ),
+      );
+    }
+    let balCount = 0;
+    for (const loc of locs) {
+      // mỗi kho giữ 12–18 mã vật chất
+      const shuffled = [...mats].sort(() => rnd() - 0.5).slice(0, Math.round(between(12, 18)));
+      for (const mat of shuffled) {
+        const onHand = between(50, 5000);
+        // ~30% có kiểm kê gần nhất tạo chênh lệch
+        const counted = rnd() < 0.3 ? onHand + between(-80, 80) : null;
+        await balanceRepo.save(
+          balanceRepo.create({
+            materialId: mat.id,
+            storageLocationId: loc.id,
+            onHand: onHand.toFixed(3),
+            lastCounted: counted !== null ? counted.toFixed(3) : null,
+          }),
+        );
+        balCount++;
+      }
+    }
+    console.log(`  + Kho: ${locs.length} · Dòng tồn kho: ${balCount}`);
   }
 
   await dataSource.destroy();

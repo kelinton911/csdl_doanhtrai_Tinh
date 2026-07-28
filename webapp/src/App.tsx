@@ -3,6 +3,11 @@ import { useAuth } from './lib/auth';
 import { AppShell } from './components/AppShell';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { MapPage } from './pages/MapPage';
+import { BarracksListPage } from './pages/BarracksListPage';
+import { BarracksFormPage } from './pages/BarracksFormPage';
+import { BarracksDetailPage } from './pages/BarracksDetailPage';
+import { InventoryPage } from './pages/InventoryPage';
 import { Placeholder } from './pages/Placeholder';
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -27,9 +32,11 @@ export default function App() {
         element={ready && profile ? <Navigate to="/dashboard" replace /> : <LoginPage />}
       />
       <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
-      <Route path="/map" element={<Protected><Placeholder title="Bản đồ doanh trại" phase="Pha B" /></Protected>} />
-      <Route path="/barracks" element={<Protected><Placeholder title="Doanh trại và công trình" phase="Pha B" /></Protected>} />
-      <Route path="/inventory" element={<Protected><Placeholder title="Vật chất và vật tư" phase="Pha C" /></Protected>} />
+      <Route path="/map" element={<Protected><MapPage /></Protected>} />
+      <Route path="/barracks" element={<Protected><BarracksListPage /></Protected>} />
+      <Route path="/barracks/new" element={<Protected><BarracksFormPage /></Protected>} />
+      <Route path="/barracks/:id" element={<Protected><BarracksDetailPage /></Protected>} />
+      <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/inspection" element={<Protected><Placeholder title="Kiểm kê - biến động" phase="Pha D" /></Protected>} />
       <Route path="/maintenance" element={<Protected><Placeholder title="Sửa chữa - khôi phục" phase="Pha F" /></Protected>} />
       <Route path="/scenarios" element={<Protected><Placeholder title="Kế hoạch và tình huống" phase="Pha G" /></Protected>} />

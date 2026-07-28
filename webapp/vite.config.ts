@@ -7,6 +7,9 @@ const backendOrigin = process.env.BACKEND_ORIGIN ?? 'http://localhost:3004';
 // Proxy /api → backend để tránh cấu hình CORS và gom cấu hình cổng về một nơi.
 export default defineConfig({
   plugins: [react()],
+  // Tránh nạp React trùng lặp (react-chartjs-2 báo lỗi useRef null nếu không dedupe).
+  resolve: { dedupe: ['react', 'react-dom'] },
+  optimizeDeps: { include: ['react', 'react-dom', 'chart.js', 'react-chartjs-2'] },
   server: {
     port: 5173,
     proxy: {

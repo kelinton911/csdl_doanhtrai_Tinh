@@ -9,6 +9,7 @@ import { StorageModule } from './modules/storage/storage.module';
 import { IdentityModule } from './modules/identity/identity.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { MasterDataModule } from './modules/master-data/master-data.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 import { BarracksModule } from './modules/barracks/barracks.module';
 import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -35,6 +36,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     IdentityModule, // M01 — Identity & Access
     OrganizationModule, // M02 — Organization & Area
     MasterDataModule, // M03 — Master Data (danh mục + vật chất)
+    InventoryModule, // M06 — Inventory (tồn kho UC-08)
     BarracksModule, // M04 — Barracks (workflow UC-05/06)
     FacilitiesModule, // M05 — Facilities (công trình thuộc doanh trại, UC-07)
     GisModule, // M11 — GIS (UC-17)
