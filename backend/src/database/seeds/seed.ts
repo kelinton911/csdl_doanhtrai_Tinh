@@ -254,6 +254,28 @@ async function run() {
     console.log('  + Đợt kiểm kê: KK-2026-Q1 (OPEN)');
   }
 
+  // 9) Cảnh báo (M13) — sinh từ dữ liệu để trung tâm cảnh báo có nội dung (~25 mục)
+  const alertRepo = dataSource.getRepository(Alert);
+  if ((await alertRepo.count()) === 0) {
+    const alerts: Array<Partial<Alert>> = [];
+    const poor = await dataSource.query(
+      `SELECT f.id, f.name, b.name AS barracks FROM facilities f JOIN barracks b ON b.id=f.barracks_id
+       WHERE f.condition='KEM' AND f.status='IN_USE' LIMIT 12`,
+    );
+    for (const r of poor) alerts.push({ alertType: 'FACILITY_POOR', severity: 'HIGH', title: `Công trình chất lượng kém: ${r.name}`, description: `Thuộc ${r.barracks}`, entityType: 'facility', entityId: r.id, status: AlertStatus.OPEN });
+    const pending = await dataSource.query(`SELECT id, name FROM barracks WHERE workflow_status='PENDING_REVIEW' LIMIT 8`);
+    for (const r of pending) alerts.push({ alertType: 'BARRACKS_PENDING', severity: 'MEDIUM', title: `Hồ sơ chờ duyệt: ${r.name}`, entityType: 'barracks', entityId: r.id, status: AlertStatus.OPEN });
+    const variance = await dataSource.query(
+      `SELECT sb.id, m.name FROM stock_balances sb JOIN materials m ON m.id=sb.material_id
+       WHERE sb.last_counted IS NOT NULL AND ABS(sb.last_counted - sb.on_hand) > 40 LIMIT 10`,
+    );
+    for (const r of variance) alerts.push({ alertType: 'INVENTORY_VARIANCE', severity: 'MEDIUM', title: `Chênh lệch kiểm kê lớn: ${r.name}`, entityType: 'stock_balance', entityId: r.id, status: AlertStatus.OPEN });
+    if (alerts.length) {
+      await alertRepo.save(alerts.map((a) => alertRepo.create(a)));
+      console.log(`  + Cảnh báo: ${alerts.length} mục`);
+    }
+  }
+
   await dataSource.destroy();
   console.log('\n  Seed hoàn tất. Đăng nhập demo: admin / admin@123 (chỉ DEV).');
 }

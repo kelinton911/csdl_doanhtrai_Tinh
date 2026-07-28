@@ -170,18 +170,20 @@ export class ReportingService {
       doc.moveDown(0.8).fillColor('#000');
 
       const startX = 40;
-      const colW = (515) / def.columns.length;
+      const colW = 515 / def.columns.length;
+      const rowH = 15; // chiều cao dòng cố định — mỗi ô một dòng, cắt bớt nếu dài.
       const drawRow = (values: string[], bold = false) => {
+        if (doc.y + rowH > 800) doc.addPage();
         const y = doc.y;
         doc.font(useFont ? (bold && existsSync(FONT_BOLD) ? 'vn-bold' : 'vn') : bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(9);
-        values.forEach((v, i) => doc.text(v, startX + i * colW, y, { width: colW - 4, ellipsis: true }));
-        doc.moveDown(0.4);
+        values.forEach((v, i) =>
+          doc.text(v, startX + i * colW, y, { width: colW - 6, height: rowH - 3, lineBreak: false, ellipsis: true }),
+        );
+        doc.y = y + rowH;
       };
       drawRow(def.columns.map((c) => c.header), true);
-      doc.moveTo(startX, doc.y).lineTo(startX + 515, doc.y).strokeColor('#d9e2ec').stroke();
-      doc.moveDown(0.2);
+      doc.moveTo(startX, doc.y - 2).lineTo(startX + 515, doc.y - 2).strokeColor('#d9e2ec').stroke();
       for (const r of rows) {
-        if (doc.y > 780) doc.addPage();
         drawRow(def.columns.map((c) => String(r[c.key] ?? '')));
       }
       doc.moveDown(1).fontSize(8).fillColor('#829ab1').text(`Tổng số dòng: ${rows.length}`);

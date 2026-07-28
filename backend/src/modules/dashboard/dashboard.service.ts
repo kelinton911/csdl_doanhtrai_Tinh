@@ -40,6 +40,17 @@ export class DashboardService {
       FROM materials
     `);
 
+    // Cảnh báo trọng yếu đang mở (bảng có thể chưa tồn tại ở lần chạy đầu — bọc an toàn).
+    let criticalAlerts = 0;
+    try {
+      const [al] = await this.ds.query(
+        `SELECT COUNT(*)::int AS c FROM alerts WHERE status <> 'CLOSED' AND severity IN ('HIGH','CRITICAL')`,
+      );
+      criticalAlerts = al?.c ?? 0;
+    } catch {
+      criticalAlerts = 0;
+    }
+
     const total = barracks.total || 0;
     const dataConfirmedRatio = total ? Math.round((barracks.approved / total) * 100) : 0;
 
@@ -77,7 +88,7 @@ export class DashboardService {
       },
       materials: { total: materials.total, published: materials.published },
       dataConfirmedRatio,
-      criticalAlerts: 0,
+      criticalAlerts,
       charts: {
         facilitiesByCondition: byCondition,
         barracksByStatus: byStatus,
