@@ -8,6 +8,7 @@ import { useAuth } from '../lib/auth';
 import { useCatalog } from '../lib/catalogs';
 import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
+import { EvidenceDrawer } from '../components/EvidenceDrawer';
 import { DataTable, type Column } from '../components/DataTable';
 import { Skeleton, ErrorState, EmptyState } from '../components/States';
 import { Icon } from '../components/Icon';
@@ -53,6 +54,7 @@ export function BarracksDetailPage() {
   const { hasRole } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>('Tổng quan');
   const [actionError, setActionError] = useState<string | null>(null);
+  const [evidence, setEvidence] = useState(false);
   const facType = useCatalog('facility-type');
   const grade = useCatalog('quality-grade');
 
@@ -114,6 +116,9 @@ export function BarracksDetailPage() {
         actions={
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <StatusBadge status={status} />
+            <button className="btn" onClick={() => setEvidence(true)}>
+              <Icon name="file" size={16} /> Tài liệu
+            </button>
             {canSubmit && (
               <button className="btn btn-primary" disabled={act.isPending} onClick={() => act.mutate('submit')}>
                 <Icon name="upload" size={16} /> Gửi duyệt
