@@ -1,6 +1,6 @@
 # ADR-2026-07-29 — Hoàn thiện Frontend lên chuẩn production
 
-- **Trạng thái:** Đã áp dụng (FE) · Chờ bổ sung BE (mục "Hệ quả / khoảng thiếu BE")
+- **Trạng thái:** Đã áp dụng (FE) · **BE-1…BE-8 ĐÃ BỔ SUNG cùng ngày** (migration `FeatureUnlock1753000012000`, FE đã nối — xem bảng cập nhật bên dưới và `CHECKLIST-FE-BE-SYNC.md`)
 - **Bối cảnh:** SPA `webapp/` đã nối phần lõi tới 95 endpoint BE. Đối chiếu FE ↔ BE ↔ hồ sơ thiết kế Frontend cho thấy khoảng thiếu về độ phủ UX so với chuẩn "production theo thiết kế". Đợt này bổ sung 4 nhóm: nối nốt chức năng, chiều sâu từng màn, khung UX xuyên suốt, chuẩn hóa & an toàn.
 
 ## Quyết định
@@ -15,20 +15,20 @@ Triển khai theo 6 pha (chi tiết trong `docs/CHECKLIST-FE-BE-SYNC.md`, mục 
 
 **Nguyên tắc bất biến giữ nguyên:** không tự bịa API; tái dùng component sẵn có (`Modal`, `EvidenceDrawer`, `DataTable`, `Pagination`, `States`, `StatusBadge`); không đổi nghiệp vụ bất biến (no-edit-approved, tách nhiệm vụ, tồn âm, append-only).
 
-## Hệ quả — khoảng thiếu BE cần bổ sung (không làm giả ở FE)
+## Hệ quả — khoảng thiếu BE (ĐÃ BỔ SUNG 2026-07-29, không làm giả ở FE)
 
-Các chức năng thiết kế yêu cầu nhưng **BE chưa có endpoint/trường**; FE đã hoãn (defer) hoặc để chế độ hiển thị, chờ BE:
+Cả 8 mục đã hiện thực ở BE (migration `FeatureUnlock1753000012000`: cột `users.mfa_secret`, `users.locked_until`, `maintenance_requests.assignee_name`, bảng `material_versions`) và nối FE, kiểm chứng bằng smoke test qua API sống:
 
-| Mã | Khoảng thiếu | Vị trí BE | Đề xuất |
-| --- | --- | --- | --- |
-| BE-1 | Đóng đợt kiểm kê | `inspection.controller.ts` chỉ có `open` | Thêm `POST /inspection-campaigns/:id/close` |
-| BE-2 | Tham số `mode` dashboard | `dashboard.controller.ts` `summary` không nhận query | Nhận `mode=NORMAL|SSCD|SCENARIO`, trả số liệu theo bối cảnh |
-| BE-3 | OTP đăng nhập | `auth` không có OTP/MFA | Thêm bước OTP 6 số (thiết kế §1.1) |
-| BE-4 | Word + bộ lọc báo cáo | `reporting.service.ts` chỉ `pdf\|excel` | Thêm `docx` + tham số khoảng thời gian/phạm vi |
-| BE-5 | Lịch sử phiên bản & diff | materials không có `versions`; revisions doanh trại không kèm payload | Trả snapshot trường để FE diff |
-| BE-6 | Reset mật khẩu | `UpdateUserDto` không có `password` | Thêm `POST /users/:id/reset-password` |
-| BE-7 | Data-scope `FACILITY` | scope nhận freeform type (đã dùng AREA/ORGANIZATION) | Cần API liệt kê công trình toàn hệ thống để chọn |
-| BE-8 | Phân công kỹ thuật viên sửa chữa | `CreateMaintenanceRequestDto` thiếu trường | Thêm `assigneeId` + endpoint gán |
+| Mã | Giải pháp đã áp dụng | Kiểm chứng |
+| --- | --- | --- |
+| BE-1 | `POST /inspection-campaigns/:id/close`; FE nút "Đóng đợt" | open→close trả `CLOSED` |
+| BE-2 | `GET /dashboard/summary?mode=NORMAL·SSCD·SCENARIO` (SSCĐ: issue sẵn sàng chiến đấu; SCENARIO: gộp thiệt hại mô phỏng); FE gửi mode thật | mode=SCENARIO trả issue mô phỏng |
+| BE-3 | TOTP RFC 6238 tự hiện thực (`identity/totp.ts`, Node crypto, không thêm dep); `otp` trong login; `POST /auth/mfa/enroll·disable`; khóa 15' sau 5 lần sai (423); FE ô OTP + modal shield | enroll → 401 AUTH-005 → 200 với mã TOTP tính độc lập |
+| BE-4 | `format=word` xuất RTF Unicode (Word mở trực tiếp, không thêm dep); FE nút WORD | job COMPLETED, tệp `{\rtf1...` |
+| BE-5 | Bảng `material_versions` snapshot CREATE/UPDATE/PUBLISH + `GET /materials/:id/versions`; FE modal diff trường | 2 bản ghi (CREATE, PUBLISH) |
+| BE-6 | `POST /users/:id/reset-password` (reset + mở khóa); FE mục Bảo mật | ok=true |
+| BE-7 | `GET /facilities` toàn hệ thống kèm `barracksName`; FE bộ chọn scope FACILITY | 191 công trình |
+| BE-8 | `assigneeName` trong Create/Start DTO + cột DB; FE ô KTV ở tạo/chi tiết | lưu đúng với vai trò BARRACKS_OFFICER |
 
 ## Kiểm chứng
 

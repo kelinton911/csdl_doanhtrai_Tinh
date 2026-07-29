@@ -44,15 +44,17 @@ Nâng FE lên chuẩn production theo hồ sơ thiết kế trên 4 nhóm. Trạ
 - [x] P5 — A11y WCAG: skip-link, Modal role=dialog + Esc + aria-labelledby, aria-label nút icon, focus ring; Login gỡ credentials demo ở PROD (`import.meta.env.DEV`) + chỉ báo khóa 423/429; toast 409 xung đột.
 - [x] P6 — Cập nhật checklist + ADR (ghi các khoảng thiếu BE), `tsc --noEmit` PASS, `vite build` PASS (217 modules).
 
-### Khoảng thiếu backend đã phát hiện (chờ bổ sung BE — xem ADR)
-- [ ] BE-1 — Đóng đợt kiểm kê: chỉ có `/inspection-campaigns/:id/open`, chưa có `.../close`.
-- [ ] BE-2 — `GET /dashboard/summary` chưa nhận tham số `mode` (SSCĐ/tình huống) → toggle mode hiện chỉ là bối cảnh hiển thị.
-- [ ] BE-3 — OTP trong `POST /auth/login` (thiết kế §1.1 yêu cầu OTP 6 số).
-- [ ] BE-4 — `POST /reports/jobs` chỉ nhận `pdf|excel` (VAL-001) → chưa có Word; chưa có tham số lọc/khoảng thời gian.
-- [ ] BE-5 — Chưa có endpoint lịch sử phiên bản materials; revisions doanh trại không kèm payload trường → chưa diff nội dung được.
-- [ ] BE-6 — `UpdateUserDto` không có trường password → chưa reset mật khẩu từ FE.
-- [ ] BE-7 — Data-scope `FACILITY` cần bộ chọn công trình toàn hệ thống (đã hỗ trợ `AREA` + `ORGANIZATION`).
-- [ ] BE-8 — `CreateMaintenanceRequestDto` không có trường phân công kỹ thuật viên.
+### Khoảng thiếu backend — ĐÃ BỔ SUNG (2026-07-29, migration `FeatureUnlock1753000012000`, nối FE xong)
+- [x] BE-1 — `POST /inspection-campaigns/:id/close` (đóng đợt từ OPEN/IN_PROGRESS/SUBMITTED/RECONCILED); FE nút "Đóng đợt" ở InspectionPage. Smoke: open→close → `CLOSED`.
+- [x] BE-2 — `GET /dashboard/summary?mode=NORMAL|SSCD|SCENARIO`: SSCĐ thêm issue "chưa sẵn sàng chiến đấu", SCENARIO gộp thiệt hại mô phỏng (scenario=true); FE gửi mode thật + banner giải thích. Smoke: mode=SCENARIO trả issue mô phỏng.
+- [x] BE-3 — OTP TOTP (RFC 6238, tự hiện thực bằng Node crypto — `identity/totp.ts`, không thêm dependency): `otp` trong LoginDto, `POST /auth/mfa/enroll|disable`; khóa tạm 15 phút sau 5 lần sai (423). FE: ô OTP hiện khi AUTH-005/006, modal bật/tắt OTP ở AppShell (icon shield). Smoke: enroll → login không OTP 401 AUTH-005 → login với mã TOTP tính độc lập bằng Python → 200.
+- [x] BE-4 — `format=word` cho `/reports/jobs` (RTF `application/rtf`, Unicode tiếng Việt, Word mở trực tiếp — không thêm dependency); FE thêm nút WORD. Smoke: tạo job word COMPLETED, tệp `{\rtf1\ansi...` 8.3KB.
+- [x] BE-5 — Bảng `material_versions` (snapshot bất biến khi CREATE/UPDATE/PUBLISH) + `GET /materials/:id/versions`; FE modal lịch sử phiên bản + diff trường (gạch đỏ → xanh). Smoke: create→publish cho 2 bản ghi (1,CREATE),(2,PUBLISH).
+- [x] BE-6 — `POST /users/:id/reset-password` (đặt lại + xóa failedAttempts + mở khóa); FE mục "Bảo mật" trong modal quản lý tài khoản. Smoke: ok=true.
+- [x] BE-7 — `GET /facilities` toàn hệ thống (kèm `barracksName`, lọc `barracksId`/`search`); FE bộ chọn scope `FACILITY` trong Admin (cùng AREA/ORGANIZATION). Smoke: 191 công trình, đủ trường.
+- [x] BE-8 — Cột `assignee_name` + `assigneeName` trong Create/Start DTO (phân công khi lập hoặc khi bắt đầu thực hiện); FE ô nhập KTV ở modal tạo + modal chi tiết (trạng thái APPROVED). Smoke: tạo với vai trò BARRACKS_OFFICER → assigneeName lưu đúng (admin bị 403 là đúng RBAC).
+
+> Ghi chú hạ tầng (không thuộc 8 mục): URL presigned MinIO trả host nội bộ `minio:9000` — tải tệp từ ngoài docker network cần map lại host (ảnh hưởng mọi định dạng, đã có từ trước).
 
 ## Kiểm thử end-to-end
 - [x] T1 — Chạy BE (đọc cổng thật) + FE (5173), đăng nhập `admin/admin@123`
