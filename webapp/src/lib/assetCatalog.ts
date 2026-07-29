@@ -186,6 +186,98 @@ export async function setAssetCode(
   return (await api.patch(`/asset-catalog/${path}/${id}/asset-code`, body)).data;
 }
 
+// ---- Đề xuất bổ sung (đáp ứng CV 2837/DT-QLDT, hạn 30/8/2026) ----
+
+export interface Proposal {
+  id: string;
+  batchId: string | null;
+  parentCode: string;
+  proposedCode: string | null;
+  name: string;
+  unitRaw: string | null;
+  justification: string | null;
+  requiresParentPromotion: boolean;
+  status: string; // DRAFT | SUBMITTED | EXPORTED
+}
+
+export interface ProposalBatch {
+  id: string;
+  code: string;
+  title: string;
+  deadline: string | null;
+  status: string;
+  rowCount: number;
+  exportedAt: string | null;
+}
+
+export function useProposals(page = 1, size = 20) {
+  return useQuery({
+    queryKey: ['asset-catalog', 'proposals', page, size],
+    queryFn: async () =>
+      (await api.get('/asset-catalog/proposals', { params: { page, size } }))
+        .data as Paged<Proposal>,
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useProposalBatches() {
+  return useQuery({
+    queryKey: ['asset-catalog', 'batches'],
+    queryFn: async () =>
+      (await api.get('/asset-catalog/proposals/batches')).data as ProposalBatch[],
+  });
+}
+
+export async function createProposal(body: {
+  parentCode: string;
+  name: string;
+  unitRaw?: string | null;
+  justification?: string | null;
+}) {
+  return (await api.post('/asset-catalog/proposals', body)).data as Proposal;
+}
+
+/** Xem trước mã kế tiếp — KHÔNG lưu; ném 400 kèm hướng dẫn nếu nhánh hết mã. */
+export async function previewProposalCode(id: string) {
+  return (await api.get(`/asset-catalog/proposals/${id}/preview-code`)).data as {
+    code: string;
+    segmentIndex: number;
+    inferredFrom: 'siblings' | 'parent-level';
+    parentPathNames: string;
+    requiresParentPromotion: boolean;
+    siblingCount: number;
+  };
+}
+
+export async function allocateProposalCode(id: string) {
+  return (await api.post(`/asset-catalog/proposals/${id}/allocate-code`)).data as Proposal;
+}
+
+export async function submitProposal(id: string) {
+  return (await api.post(`/asset-catalog/proposals/${id}/submit`)).data as Proposal;
+}
+
+export async function deleteProposal(id: string) {
+  return (await api.delete(`/asset-catalog/proposals/${id}`)).data;
+}
+
+export async function createBatch(body: { code: string; title: string; deadline?: string }) {
+  return (await api.post('/asset-catalog/proposals/batches', body)).data as ProposalBatch;
+}
+
+export async function exportBatch(id: string) {
+  return (await api.post(`/asset-catalog/proposals/batches/${id}/export`)).data as {
+    rowCount: number;
+  };
+}
+
+export async function batchDownloadUrl(id: string) {
+  return (await api.get(`/asset-catalog/proposals/batches/${id}/download`)).data as {
+    url: string;
+    code: string;
+  };
+}
+
 /** Bỏ tiền tố đánh mục ("1/", "2.4/", "a/", "-") để hiển thị gọn. Dữ liệu gốc giữ nguyên. */
 export function displayName(name: string): string {
   return name.replace(/^\s*-?\s*([IVX]+|\d+(\.\d+)?|[a-z])\s*\/\s*/i, '').trim() || name;

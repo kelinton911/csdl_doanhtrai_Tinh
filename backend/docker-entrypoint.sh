@@ -25,8 +25,17 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   npm run migration:run
 fi
 
-# Seed dữ liệu giả lập (mặc định tắt; bật cho môi trường test/DEV mới).
+# Seed dữ liệu (mặc định tắt; bật cho môi trường test/DEV mới).
+# THỨ TỰ BẮT BUỘC — danh mục tài sản là dữ liệu NỀN, phải có trước:
+#   1) seed:asset-catalog    → 1272 mã của Phụ lục CV 2837/DT-QLDT vào asset_catalog_items
+#   2) seed:official-catalog → dựng materials + nhóm vật chất + loại công trình từ (1)
+#   3) seed                  → doanh trại/công trình/tồn kho giả lập, LẤY mã từ (1) và (2)
+# Bỏ bước (1) thì bước (3) sẽ dừng với lỗi "Chưa có danh mục loại công trình chính thức".
 if [ "${SEED_ON_START:-false}" = "true" ]; then
+  echo "[entrypoint] Nạp danh mục tài sản ngành Doanh trại (Phụ lục CV 2837/DT-QLDT)..."
+  npm run seed:asset-catalog
+  echo "[entrypoint] Dựng danh mục chính thức (vật chất/nhóm/loại công trình)..."
+  npm run seed:official-catalog
   echo "[entrypoint] Seed dữ liệu giả lập..."
   npm run seed
 fi

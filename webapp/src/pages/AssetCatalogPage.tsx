@@ -6,6 +6,7 @@ import { Pagination } from '../components/Pagination';
 import { Icon } from '../components/Icon';
 import { ErrorState } from '../components/States';
 import { AssetCodePicker } from '../components/AssetCodePicker';
+import { ProposalPanel } from '../components/ProposalPanel';
 import { toast } from '../lib/toast';
 import { downloadCsv, type CsvColumn } from '../lib/csv';
 import {
@@ -22,7 +23,7 @@ import {
 // TỔNG DANH MỤC TÀI SẢN NGÀNH DOANH TRẠI — Phụ lục kèm CV 2837/DT-QLDT ngày 16/7/2026
 // của Cục Doanh trại/TCHC-KT. Dữ liệu do BQP sở hữu: chỉ tra cứu, không sửa tại đây.
 
-type Tab = 'tree' | 'search' | 'gaps';
+type Tab = 'tree' | 'search' | 'gaps' | 'proposals';
 
 function Badges({ n }: { n: AssetNode }) {
   return (
@@ -210,6 +211,7 @@ export function AssetCatalogPage() {
         <button className={`btn btn-sm ${tab === 'tree' ? 'btn-primary' : ''}`} onClick={() => setTab('tree')}>Cây danh mục</button>
         <button className={`btn btn-sm ${tab === 'search' ? 'btn-primary' : ''}`} onClick={() => setTab('search')}>Tìm kiếm</button>
         <button className={`btn btn-sm ${tab === 'gaps' ? 'btn-primary' : ''}`} onClick={() => setTab('gaps')}>Rà soát thiếu mã</button>
+        <button className={`btn btn-sm ${tab === 'proposals' ? 'btn-primary' : ''}`} onClick={() => setTab('proposals')}>Đề xuất bổ sung</button>
       </div>
 
       {tab === 'tree' && (
@@ -275,6 +277,8 @@ export function AssetCatalogPage() {
           )}
         </>
       )}
+
+      {tab === 'proposals' && <ProposalPanel />}
 
       <AssetCodePicker
         open={!!picking}
