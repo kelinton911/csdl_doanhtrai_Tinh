@@ -25,7 +25,7 @@ export default defineConfig({
     trace: 'off',
   },
   webServer: {
-    command: `BACKEND_ORIGIN=${BACKEND} npx vite --port ${PORT} --strictPort --host`,
+    command: `npx vite --port ${PORT} --strictPort --host`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: true,
     timeout: 60_000,

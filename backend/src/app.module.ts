@@ -9,6 +9,7 @@ import { StorageModule } from './modules/storage/storage.module';
 import { IdentityModule } from './modules/identity/identity.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { MasterDataModule } from './modules/master-data/master-data.module';
+import { AssetCatalogModule } from './modules/asset-catalog/asset-catalog.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { InspectionModule } from './modules/inspection/inspection.module';
 import { DocumentsModule } from './modules/documents/documents.module';
@@ -43,6 +44,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     IdentityModule, // M01 — Identity & Access
     OrganizationModule, // M02 — Organization & Area
     MasterDataModule, // M03 — Master Data (danh mục + vật chất)
+    AssetCatalogModule, // Danh mục tài sản ngành Doanh trại (Phụ lục CV 2837/DT-QLDT)
     InventoryModule, // M06 — Inventory (tồn kho UC-08)
     InspectionModule, // M07 — Inspection & Review (UC-09/10/11)
     DocumentsModule, // M08 — Documents & Media (UC-12, MinIO)

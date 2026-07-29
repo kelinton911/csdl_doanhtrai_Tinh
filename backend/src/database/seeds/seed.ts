@@ -166,10 +166,11 @@ async function run() {
       cats.push({ type, code, name, status: 'PUBLISHED', effectiveFrom: new Date(), createdBy: authorId, updatedBy: authorId, ...extra });
     // Đơn vị tính
     [['KG', 'Ki-lô-gam'], ['TAN', 'Tấn'], ['CAI', 'Cái'], ['BO', 'Bộ'], ['LIT', 'Lít'], ['M', 'Mét'], ['M2', 'Mét vuông'], ['M3', 'Mét khối'], ['THUNG', 'Thùng'], ['VIEN', 'Viên']].forEach(([c, n], i) => add('unit-of-measure', c, n, { sortOrder: i }));
-    // Nhóm vật chất
-    [['LUONG-THUC', 'Lương thực - thực phẩm'], ['NHIEN-LIEU', 'Nhiên liệu - chất đốt'], ['QUAN-TRANG', 'Quân trang'], ['VAT-LIEU-XD', 'Vật liệu xây dựng'], ['Y-TE', 'Vật tư y tế'], ['DUNG-CU', 'Dụng cụ - trang bị'], ['DIEN-NUOC', 'Vật tư điện nước']].forEach(([c, n], i) => add('material-category', c, n, { sortOrder: i }));
-    // Loại công trình
-    [['NHA-O', 'Nhà ở'], ['NHA-AN', 'Nhà ăn - bếp'], ['KHO', 'Kho vật chất'], ['NHA-LV', 'Nhà làm việc'], ['SAN', 'Sân - đường nội bộ'], ['HANG-RAO', 'Hàng rào - cổng'], ['CONG-TRINH-NGAM', 'Công trình ngầm'], ['HA-TANG-KT', 'Hạ tầng kỹ thuật']].forEach(([c, n], i) => add('facility-type', c, n, { sortOrder: i }));
+    // Nhóm vật chất & loại công trình: KHÔNG seed ở đây nữa.
+    // Hai danh mục này nay dựng từ TỔNG DANH MỤC TÀI SẢN NGÀNH DOANH TRẠI
+    // (Phụ lục CV 2837/DT-QLDT) qua `npm run seed:asset-catalog` rồi
+    // `npm run seed:official-catalog`. Seed mã tự đặt ở đây sẽ chèn dữ liệu bịa
+    // vào danh mục chính thức của BQP.
     // Cấp chất lượng
     [['TOT', 'Tốt'], ['KHA', 'Khá'], ['TRUNG_BINH', 'Trung bình'], ['KEM', 'Kém']].forEach(([c, n], i) => add('quality-grade', c, n, { sortOrder: i }));
     // Nguyên nhân hư hỏng
@@ -180,26 +181,17 @@ async function run() {
     console.log(`  + Danh mục: ${cats.length} mục`);
   }
 
-  // 5) Vật chất (danh mục vật chất — phát hành sẵn)
+  // 5) Vật chất — KHÔNG seed dữ liệu tự đặt ở đây nữa.
+  // Danh mục vật chất chính thức là 788 nút lá miền MATERIAL của TỔNG DANH MỤC TÀI SẢN
+  // NGÀNH DOANH TRẠI, dựng bằng:
+  //     npm run seed:asset-catalog      (nạp 1272 mã từ phụ lục đã chốt hash)
+  //     npm run seed:official-catalog   (dựng materials + nhóm + loại công trình)
+  // Bộ mã cũ (VC-GAO, VC-XANG, VC-QUAN-AO...) là hàng Quân nhu/Xăng dầu — KHÔNG thuộc
+  // ngành Doanh trại nên vốn không có mã trong phụ lục này.
   if ((await materialRepo.count()) === 0) {
-    const matDefs: Array<[string, string, string, string]> = [
-      ['VC-GAO', 'Gạo tẻ', 'LUONG-THUC', 'KG'], ['VC-MUOI', 'Muối i-ốt', 'LUONG-THUC', 'KG'],
-      ['VC-DUONG', 'Đường kính', 'LUONG-THUC', 'KG'], ['VC-DAU-AN', 'Dầu ăn', 'LUONG-THUC', 'LIT'],
-      ['VC-DO-HOP', 'Đồ hộp', 'LUONG-THUC', 'CAI'], ['VC-XANG', 'Xăng A95', 'NHIEN-LIEU', 'LIT'],
-      ['VC-DAU-DO', 'Dầu diesel', 'NHIEN-LIEU', 'LIT'], ['VC-DAU-NHON', 'Dầu nhờn', 'NHIEN-LIEU', 'LIT'],
-      ['VC-QUAN-AO', 'Quân phục dã chiến', 'QUAN-TRANG', 'BO'], ['VC-GIAY', 'Giày vải', 'QUAN-TRANG', 'CAI'],
-      ['VC-MU', 'Mũ cứng', 'QUAN-TRANG', 'CAI'], ['VC-CHAN', 'Chăn bông', 'QUAN-TRANG', 'CAI'],
-      ['VC-XI-MANG', 'Xi măng PC40', 'VAT-LIEU-XD', 'TAN'], ['VC-THEP', 'Thép xây dựng', 'VAT-LIEU-XD', 'TAN'],
-      ['VC-GACH', 'Gạch nung', 'VAT-LIEU-XD', 'VIEN'], ['VC-CAT', 'Cát vàng', 'VAT-LIEU-XD', 'M3'],
-      ['VC-BONG', 'Bông băng y tế', 'Y-TE', 'THUNG'], ['VC-THUOC', 'Thuốc thiết yếu', 'Y-TE', 'THUNG'],
-      ['VC-MAY-PHAT', 'Máy phát điện', 'DUNG-CU', 'CAI'], ['VC-DAY-DIEN', 'Dây điện', 'DIEN-NUOC', 'M'],
-    ];
-    await materialRepo.save(
-      matDefs.map(([code, name, cat, unit]) =>
-        materialRepo.create({ code, name, categoryCode: cat, unitCode: unit, qualityGrade: 'TOT', status: 'PUBLISHED', createdBy: authorId, updatedBy: authorId }),
-      ),
+    console.log(
+      '  ! Chưa có vật chất. Chạy: npm run seed:asset-catalog && npm run seed:official-catalog',
     );
-    console.log(`  + Vật chất: ${matDefs.length} mã`);
   }
 
   // 6) 30 doanh trại + ~180 công trình
@@ -210,7 +202,19 @@ async function run() {
       ...Array(5).fill(WorkflowStatus.DRAFT),
       ...Array(3).fill(WorkflowStatus.CHANGES_REQUESTED),
     ];
-    const facTypes = ['NHA-O', 'NHA-AN', 'KHO', 'NHA-LV', 'SAN', 'HANG-RAO', 'HA-TANG-KT'];
+    // Loại công trình lấy từ DANH MỤC CHÍNH THỨC (chương I–IV, XVII của phụ lục),
+    // không dùng mảng mã tự đặt. Chỉ lấy nút lá — nút nhóm không phải loại công trình cụ thể.
+    const facTypeRows: Array<{ code: string }> = await dataSource.query(`
+      SELECT code FROM asset_catalog_items
+       WHERE domain = 'FACILITY' AND is_leaf AND unit_raw IS NOT NULL AND status = 'ACTIVE'
+       ORDER BY code
+    `);
+    const facTypes = facTypeRows.map((r) => r.code);
+    if (!facTypes.length) {
+      throw new Error(
+        'Chưa có danh mục loại công trình chính thức. Chạy `npm run seed:asset-catalog` trước.',
+      );
+    }
     const grades = ['TOT', 'TOT', 'KHA', 'KHA', 'TRUNG_BINH', 'KEM'];
     let facTotal = 0;
     for (let i = 0; i < 30; i++) {
@@ -241,12 +245,15 @@ async function run() {
       const nFac = Math.round(between(4, 8));
       const facs: Facility[] = [];
       for (let j = 0; j < nFac; j++) {
+        const facType = pick(facTypes);
         facs.push(
           facilityRepo.create({
             barracksId: b.id,
             code: `CT-${String(j + 1).padStart(2, '0')}`,
             name: `${pick(['Nhà', 'Kho', 'Khu', 'Dãy'])} ${String.fromCharCode(65 + j)}`,
-            type: pick(facTypes),
+            type: facType,
+            assetCode: facType,
+            assetCodeStatus: 'MAPPED',
             area: between(60, 1200).toFixed(2),
             declaredCapacity: Math.round(between(0, 120)),
             buildYear: Math.round(between(1985, 2022)),

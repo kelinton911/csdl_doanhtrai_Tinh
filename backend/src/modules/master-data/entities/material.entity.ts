@@ -46,6 +46,19 @@ export class Material {
   @Column({ type: 'jsonb', default: () => "'{}'" })
   attributes!: Record<string, unknown>;
 
+  // Mã trong TỔNG DANH MỤC TÀI SẢN NGÀNH DOANH TRẠI (Phụ lục CV 2837/DT-QLDT).
+  // Tham chiếu MỀM tới asset_catalog_items.code — cùng quy ước với categoryCode/unitCode,
+  // để nạp lại phụ lục bản mới không vướng ràng buộc.
+  @Index()
+  @Column({ name: 'asset_code', type: 'varchar', nullable: true })
+  assetCode!: string | null;
+
+  // UNMAPPED | MAPPED | OUT_OF_SCOPE | PROPOSED
+  // OUT_OF_SCOPE dành cho vật chất thuộc ngành khác (Quân nhu, Xăng dầu...) — không có
+  // mã trong phụ lục ngành Doanh trại; đánh dấu để không bị nhắc mãi ở màn rà soát.
+  @Column({ name: 'asset_code_status', default: 'UNMAPPED' })
+  assetCodeStatus!: string;
+
   // DRAFT | PUBLISHED | INACTIVE
   @Column({ default: 'DRAFT' })
   status!: string;

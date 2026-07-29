@@ -9,6 +9,7 @@ import { BarracksFormPage } from './pages/BarracksFormPage';
 import { BarracksDetailPage } from './pages/BarracksDetailPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { MaterialsPage } from './pages/MaterialsPage';
+import { AssetCatalogPage } from './pages/AssetCatalogPage';
 import { ImportPage } from './pages/ImportPage';
 import { InspectionPage } from './pages/InspectionPage';
 import { InspectionWizardPage } from './pages/InspectionWizardPage';
@@ -48,6 +49,7 @@ export default function App() {
       <Route path="/barracks/:id" element={<Protected><BarracksDetailPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/materials" element={<Protected><MaterialsPage /></Protected>} />
+      <Route path="/asset-catalog" element={<Protected><AssetCatalogPage /></Protected>} />
       <Route path="/import" element={<Protected><ImportPage /></Protected>} />
       <Route path="/inspection" element={<Protected><InspectionPage /></Protected>} />
       <Route path="/inspection/sheet/:id" element={<Protected><InspectionWizardPage /></Protected>} />

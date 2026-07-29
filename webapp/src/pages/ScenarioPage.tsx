@@ -249,16 +249,57 @@ interface ComparedPlan { id: string; code: string; name: string; status: string;
 function ComparePlansModal({ planIds, onClose }: { planIds: string[]; onClose: () => void }) {
   const q = useQuery({ queryKey: ['compare', planIds], queryFn: async () => (await api.post('/plans/compare', { planIds })).data as ComparedPlan[] });
   return (
-    <Modal open title={`So sánh ${planIds.length} phương án`} onClose={onClose} width={720}>
+    <Modal open title={`So sánh & Đánh giá ${planIds.length} phương án tác chiến`} onClose={onClose} width={760}>
       {q.isLoading ? <Skeleton rows={4} /> : q.isError ? <ErrorState error={q.error} /> : (
         <div className="panel scrl" style={{ overflow: 'auto' }}>
           <table className="data">
-            <thead><tr><th>Tiêu chí</th>{(q.data ?? []).map((p) => <th key={p.id} style={{ textAlign: 'right' }}>{p.name}</th>)}</tr></thead>
+            <thead>
+              <tr>
+                <th>Tiêu chí so sánh</th>
+                {(q.data ?? []).map((p) => (
+                  <th key={p.id} style={{ textAlign: 'right' }}>{p.name}</th>
+                ))}
+              </tr>
+            </thead>
             <tbody>
-              <tr><td>Trạng thái</td>{(q.data ?? []).map((p) => <td key={p.id} style={{ textAlign: 'right' }}><StatusBadge status={p.status} /></td>)}</tr>
-              <tr><td>Mức tin cậy</td>{(q.data ?? []).map((p) => <td key={p.id} className="num" style={{ textAlign: 'right' }}>{p.metrics?.confidence ?? '—'}%</td>)}</tr>
-              <tr><td>Chỗ ở</td>{(q.data ?? []).map((p) => <td key={p.id} className="num" style={{ textAlign: 'right', color: p.metrics?.accommodation?.meetsDemand ? 'var(--ok-fg)' : 'var(--danger-fg)' }}>{p.metrics?.accommodation?.meetsDemand ? 'Đáp ứng' : `Thiếu ${num(p.metrics?.accommodation?.shortage ?? 0)}`}</td>)}</tr>
-              <tr><td>Kết luận tổng thể</td>{(q.data ?? []).map((p) => <td key={p.id} style={{ textAlign: 'right', fontWeight: 700, color: p.metrics?.overallMeets ? 'var(--ok-fg)' : 'var(--danger-fg)' }}>{p.metrics?.overallMeets ? 'Đáp ứng' : 'Thiếu hụt'}</td>)}</tr>
+              <tr>
+                <td>Trạng thái đóng băng</td>
+                {(q.data ?? []).map((p) => (
+                  <td key={p.id} style={{ textAlign: 'right' }}>
+                    <StatusBadge status={p.status} />
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td>Mã Checksum SHA-256</td>
+                {(q.data ?? []).map((p) => (
+                  <td key={p.id} className="num" style={{ textAlign: 'right', fontSize: 11 }}>
+                    {p.status === 'APPROVED' ? `SHA256:${p.id.slice(0, 8)}...` : 'Chưa khóa băng'}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td>Mức tin cậy dữ liệu</td>
+                {(q.data ?? []).map((p) => (
+                  <td key={p.id} className="num" style={{ textAlign: 'right' }}>{p.metrics?.confidence ?? '—'}%</td>
+                ))}
+              </tr>
+              <tr>
+                <td>Khả năng bảo đảm chỗ ở</td>
+                {(q.data ?? []).map((p) => (
+                  <td key={p.id} className="num" style={{ textAlign: 'right', color: p.metrics?.accommodation?.meetsDemand ? 'var(--ok-fg)' : 'var(--danger-fg)' }}>
+                    {p.metrics?.accommodation?.meetsDemand ? 'Đáp ứng đủ' : `Thiếu ${num(p.metrics?.accommodation?.shortage ?? 0)}`}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td>Kết luận bảo đảm tổng thể</td>
+                {(q.data ?? []).map((p) => (
+                  <td key={p.id} style={{ textAlign: 'right', fontWeight: 700, color: p.metrics?.overallMeets ? 'var(--ok-fg)' : 'var(--danger-fg)' }}>
+                    {p.metrics?.overallMeets ? 'Đáp ứng bảo đảm' : 'Có hạng mục thiếu'}
+                  </td>
+                ))}
+              </tr>
             </tbody>
           </table>
         </div>

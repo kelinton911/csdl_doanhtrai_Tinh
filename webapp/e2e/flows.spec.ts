@@ -23,7 +23,7 @@ test.describe.serial('5 luồng nghiệp vụ', () => {
     await nums.nth(0).fill('1000');
     await nums.nth(1).fill('950');
     await page.getByRole('button', { name: /Tiếp/ }).click(); // → Rà soát
-    await expect(page.getByText('Rà soát chênh lệch')).toBeVisible();
+    await expect(page.getByText('Rà soát chênh lệch', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: /Tiếp/ }).click(); // → Xác nhận
     await page.getByRole('button', { name: /Gửi duyệt/ }).click();
     await page.waitForURL('**/inspection', { timeout: 20_000 });

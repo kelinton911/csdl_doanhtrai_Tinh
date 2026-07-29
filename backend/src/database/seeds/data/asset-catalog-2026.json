@@ -1,0 +1,7646 @@
+{
+  "meta": {
+    "sourceDoc": "Phu luc kem theo Vb.pdf",
+    "revision": "2837/DT-QLDT-2026",
+    "vanBan": "Cong van so 2837/DT-QLDT",
+    "ngayVanBan": "2026-07-16",
+    "coQuanBanHanh": "Cuc Doanh trai/TCHC-KT",
+    "pymupdfVersion": "PyMuPDF 1.27.2.3: Python bindings for the MuPDF 1.27.2 library.",
+    "itemCount": 1272,
+    "note": "Chi gom 4 cot co that trong van ban goc. Moi truong dan xuat duoc tinh trong seed-asset-catalog.ts."
+  },
+  "items": [
+    {
+      "stt": null,
+      "code": "R00.00.00.00.00.000",
+      "name": "Doanh trại",
+      "unitRaw": null
+    },
+    {
+      "stt": 1,
+      "code": "R00.00.01.00.00.000",
+      "name": "I/ Đất Quốc phòng",
+      "unitRaw": null
+    },
+    {
+      "stt": 2,
+      "code": "R00.00.01.01.00.000",
+      "name": "1/ Đất làm nơi đóng quân, trụ sở làm việc",
+      "unitRaw": null
+    },
+    {
+      "stt": 3,
+      "code": "R00.00.01.01.01.000",
+      "name": "Đất làm nơi đóng quân, trụ sở làm việc",
+      "unitRaw": null
+    },
+    {
+      "stt": 4,
+      "code": "R00.00.01.01.02.000",
+      "name": "Đất làm nơi đóng quân, trụ sở làm việc sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 5,
+      "code": "R00.00.01.01.02.001",
+      "name": "Đất làm nơi đóng quân, trụ sở làm việc sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 6,
+      "code": "R00.00.01.01.02.002",
+      "name": "Đất làm nơi đóng quân, trụ sở làm việc sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 7,
+      "code": "R00.00.01.01.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 8,
+      "code": "R00.00.01.01.03.000",
+      "name": "Đất làm nơi đóng quân, trụ sở làm việc kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 9,
+      "code": "R00.00.01.01.03.001",
+      "name": "Đất làm nơi đóng quân, trụ sở làm việc kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 10,
+      "code": "R00.00.01.01.03.002",
+      "name": "Đất làm nơi đóng quân, trụ sở làm việc kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 11,
+      "code": "R00.00.01.01.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 12,
+      "code": "R00.00.01.01.04.000",
+      "name": "Đất làm nơi đóng quân, trụ sở làm việc bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 13,
+      "code": "R00.00.01.02.00.000",
+      "name": "2/ Đất xây dựng căn cứ quân sự",
+      "unitRaw": null
+    },
+    {
+      "stt": 14,
+      "code": "R00.00.01.02.01.000",
+      "name": "Đất xây dựng căn cứ quân sự",
+      "unitRaw": null
+    },
+    {
+      "stt": 15,
+      "code": "R00.00.01.02.02.000",
+      "name": "Đất xây dựng căn cứ quân sự sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 16,
+      "code": "R00.00.01.02.02.001",
+      "name": "Đất xây dựng căn cứ quân sự sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 17,
+      "code": "R00.00.01.02.02.002",
+      "name": "Đất xây dựng căn cứ quân sự sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 18,
+      "code": "R00.00.01.02.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 19,
+      "code": "R00.00.01.02.03.000",
+      "name": "Đất xây dựng căn cứ quân sự kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 20,
+      "code": "R00.00.01.02.03.001",
+      "name": "Đất xây dựng căn cứ quân sự kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 21,
+      "code": "R00.00.01.02.03.002",
+      "name": "Đất xây dựng căn cứ quân sự kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 22,
+      "code": "R00.00.01.02.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 23,
+      "code": "R00.00.01.02.04.000",
+      "name": "Đất xây dựng căn cứ quân sự bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 24,
+      "code": "R00.00.01.03.00.000",
+      "name": "3/ Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệt",
+      "unitRaw": null
+    },
+    {
+      "stt": 25,
+      "code": "R00.00.01.03.01.000",
+      "name": "Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệ",
+      "unitRaw": null
+    },
+    {
+      "stt": 26,
+      "code": "R00.00.01.03.02.000",
+      "name": "Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệt sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 27,
+      "code": "R00.00.01.03.02.001",
+      "name": "Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệt sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 28,
+      "code": "R00.00.01.03.02.002",
+      "name": "Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệt sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 29,
+      "code": "R00.00.01.03.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 30,
+      "code": "R00.00.01.03.03.000",
+      "name": "Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệt kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 31,
+      "code": "R00.00.01.03.03.001",
+      "name": "Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệt kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 32,
+      "code": "R00.00.01.03.03.002",
+      "name": "Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệt kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 33,
+      "code": "R00.00.01.03.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 34,
+      "code": "R00.00.01.03.04.000",
+      "name": "Đất xây dựng công trình phòng thủ quốc gia, trận địa và công trình đặc biệt bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 35,
+      "code": "R00.00.01.04.00.000",
+      "name": "4/ Đất xây dựng ga, cảng quân sự",
+      "unitRaw": null
+    },
+    {
+      "stt": 36,
+      "code": "R00.00.01.04.01.000",
+      "name": "Đất xây dựng ga, cảng quân sự",
+      "unitRaw": null
+    },
+    {
+      "stt": 37,
+      "code": "R00.00.01.04.02.000",
+      "name": "Đất xây dựng ga, cảng quân sự sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 38,
+      "code": "R00.00.01.04.02.001",
+      "name": "Đất xây dựng ga, cảng quân sự sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 39,
+      "code": "R00.00.01.04.02.002",
+      "name": "Đất xây dựng ga, cảng quân sự sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 40,
+      "code": "R00.00.01.04.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 41,
+      "code": "R00.00.01.04.03.000",
+      "name": "Đất xây dựng ga, cảng quân sự kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 42,
+      "code": "R00.00.01.04.03.001",
+      "name": "Đất xây dựng ga, cảng quân sự kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 43,
+      "code": "R00.00.01.04.03.002",
+      "name": "Đất xây dựng ga, cảng quân sự kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 44,
+      "code": "R00.00.01.04.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 45,
+      "code": "R00.00.01.04.04.000",
+      "name": "Đất xây dựng ga, cảng quân sự bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 46,
+      "code": "R00.00.01.05.00.000",
+      "name": "5/ Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng",
+      "unitRaw": null
+    },
+    {
+      "stt": 47,
+      "code": "R00.00.01.05.01.000",
+      "name": "Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng",
+      "unitRaw": null
+    },
+    {
+      "stt": 48,
+      "code": "R00.00.01.05.02.000",
+      "name": "Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 49,
+      "code": "R00.00.01.05.02.001",
+      "name": "Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 50,
+      "code": "R00.00.01.05.02.002",
+      "name": "Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 51,
+      "code": "R00.00.01.05.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 52,
+      "code": "R00.00.01.05.03.000",
+      "name": "Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 53,
+      "code": "R00.00.01.05.03.001",
+      "name": "Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 54,
+      "code": "R00.00.01.05.03.002",
+      "name": "Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 55,
+      "code": "R00.00.01.05.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 56,
+      "code": "R00.00.01.05.04.000",
+      "name": "Đất xây dựng công trình công nghiệp, khoa học và công nghệ, văn hóa, thể thao phục vụ trực tiếp cho quốc phòng bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 57,
+      "code": "R00.00.01.06.00.000",
+      "name": "6/ Đất xây dựng kho tàng",
+      "unitRaw": null
+    },
+    {
+      "stt": 58,
+      "code": "R00.00.01.06.01.000",
+      "name": "Đất xây dựng kho tàng",
+      "unitRaw": null
+    },
+    {
+      "stt": 59,
+      "code": "R00.00.01.06.02.000",
+      "name": "Đất xây dựng kho tàng sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 60,
+      "code": "R00.00.01.06.02.001",
+      "name": "Đất xây dựng kho tàng sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 61,
+      "code": "R00.00.01.06.02.002",
+      "name": "Đất xây dựng kho tàng sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 62,
+      "code": "R00.00.01.06.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 63,
+      "code": "R00.00.01.06.03.000",
+      "name": "Đất xây dựng kho tàng kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 64,
+      "code": "R00.00.01.06.03.001",
+      "name": "Đất xây dựng kho tàng kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 65,
+      "code": "R00.00.01.06.03.002",
+      "name": "Đất xây dựng kho tàng kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 66,
+      "code": "R00.00.01.06.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 67,
+      "code": "R00.00.01.06.04.000",
+      "name": "Đất xây dựng kho tàng bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 68,
+      "code": "R00.00.01.07.00.000",
+      "name": "7/ Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí",
+      "unitRaw": null
+    },
+    {
+      "stt": 69,
+      "code": "R00.00.01.07.01.000",
+      "name": "Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí",
+      "unitRaw": null
+    },
+    {
+      "stt": 70,
+      "code": "R00.00.01.07.02.000",
+      "name": "Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 71,
+      "code": "R00.00.01.07.02.001",
+      "name": "Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 72,
+      "code": "R00.00.01.07.02.002",
+      "name": "Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 73,
+      "code": "R00.00.01.07.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 74,
+      "code": "R00.00.01.07.03.000",
+      "name": "Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 75,
+      "code": "R00.00.01.07.03.001",
+      "name": "Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 76,
+      "code": "R00.00.01.07.03.002",
+      "name": "Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 77,
+      "code": "R00.00.01.07.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 78,
+      "code": "R00.00.01.07.04.000",
+      "name": "Đất làm trường bắn, thao trường, bãi thử vũ khí, bãi hủy vũ khí bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 79,
+      "code": "R00.00.01.08.00.000",
+      "name": "8/ Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng",
+      "unitRaw": null
+    },
+    {
+      "stt": 80,
+      "code": "R00.00.01.08.01.000",
+      "name": "Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng",
+      "unitRaw": null
+    },
+    {
+      "stt": 81,
+      "code": "R00.00.01.08.02.000",
+      "name": "Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 82,
+      "code": "R00.00.01.08.02.001",
+      "name": "Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 83,
+      "code": "R00.00.01.08.02.002",
+      "name": "Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 84,
+      "code": "R00.00.01.08.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 85,
+      "code": "R00.00.01.08.03.000",
+      "name": "Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng của lực lượng vũ trang nhân dân kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 86,
+      "code": "R00.00.01.08.03.001",
+      "name": "Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 87,
+      "code": "R00.00.01.08.03.002",
+      "name": "Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 88,
+      "code": "R00.00.01.08.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 89,
+      "code": "R00.00.01.08.04.000",
+      "name": "Đất xây dựng cơ sở đào tạo, trung tâm huấn luyện, bệnh viện, nhà an dưỡng bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 90,
+      "code": "R00.00.01.09.00.000",
+      "name": "9/ Đất xây dựng nhà công vụ",
+      "unitRaw": null
+    },
+    {
+      "stt": 91,
+      "code": "R00.00.01.09.01.000",
+      "name": "Đất xây dựng nhà công vụ",
+      "unitRaw": null
+    },
+    {
+      "stt": 92,
+      "code": "R00.00.01.09.02.000",
+      "name": "Đất xây dựng nhà công vụ sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 93,
+      "code": "R00.00.01.09.02.001",
+      "name": "Đất xây dựng nhà công vụ sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 94,
+      "code": "R00.00.01.09.02.002",
+      "name": "Đất xây dựng nhà công vụ sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 95,
+      "code": "R00.00.01.09.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 96,
+      "code": "R00.00.01.09.03.000",
+      "name": "Đất xây dựng nhà công vụ kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 97,
+      "code": "R00.00.01.09.03.001",
+      "name": "Đất xây dựng nhà công vụ kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 98,
+      "code": "R00.00.01.09.03.002",
+      "name": "Đất xây dựng nhà công vụ kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 99,
+      "code": "R00.00.01.09.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 100,
+      "code": "R00.00.01.09.04.000",
+      "name": "Đất xây dựng nhà công vụ bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 101,
+      "code": "R00.00.01.10.00.000",
+      "name": "10/ Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng quản lý",
+      "unitRaw": null
+    },
+    {
+      "stt": 102,
+      "code": "R00.00.01.10.01.000",
+      "name": "Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng quản lý",
+      "unitRaw": null
+    },
+    {
+      "stt": 103,
+      "code": "R00.00.01.10.02.000",
+      "name": "Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng sử dụng làm Khu gia đình",
+      "unitRaw": null
+    },
+    {
+      "stt": 104,
+      "code": "R00.00.01.10.02.001",
+      "name": "Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng sử dụng làm Khu gia đình theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 105,
+      "code": "R00.00.01.10.02.002",
+      "name": "Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng sử dụng làm Khu gia đình, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 106,
+      "code": "R00.00.01.10.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 107,
+      "code": "R00.00.01.10.03.000",
+      "name": "Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng kết hợp sử dụng vào mục đích kinh tế",
+      "unitRaw": null
+    },
+    {
+      "stt": 108,
+      "code": "R00.00.01.10.03.001",
+      "name": "Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng quản lý kết hợp sử dụng vào mục đích kinh tế theo chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 109,
+      "code": "R00.00.01.10.03.002",
+      "name": "Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng quản lý kết hợp sử dụng vào mục đích kinh tế, chưa có chủ trương của Bộ Quốc phòng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 110,
+      "code": "R00.00.01.10.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 111,
+      "code": "R00.00.01.10.04.000",
+      "name": "Đất xây dựng cơ sở giam giữ, cơ sở giáo dục do Bộ Quốc phòng quản lý bị tranh chấp, lấn chiếm, cấp chồng",
+      "unitRaw": null
+    },
+    {
+      "stt": 112,
+      "code": "R00.00.01.99.00.000",
+      "name": "11/ Đất khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 113,
+      "code": "R00.00.02.00.00.000",
+      "name": "II/ Công trình Nhà",
+      "unitRaw": null
+    },
+    {
+      "stt": 114,
+      "code": "R00.00.02.01.00.000",
+      "name": "1/ Nhóm nhà xây gạch",
+      "unitRaw": null
+    },
+    {
+      "stt": 115,
+      "code": "R00.00.02.01.00.001",
+      "name": "Nhà 1 tầng cấp IV",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 116,
+      "code": "R00.00.02.02.00.000",
+      "name": "2/ Nhà khung BTCT, tường gạch",
+      "unitRaw": null
+    },
+    {
+      "stt": 117,
+      "code": "R00.00.02.02.00.001",
+      "name": "Nhà trên 5 tầng cấp I",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 118,
+      "code": "R00.00.02.02.00.002",
+      "name": "Nhà 3 đến 5 tầng cấp II",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 119,
+      "code": "R00.00.02.02.00.003",
+      "name": "Nhà 1 đến 2 tầng cấp III",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 120,
+      "code": "R00.00.02.03.00.000",
+      "name": "4/ Nhà cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 121,
+      "code": "R00.00.02.03.01.000",
+      "name": "a/ Nhà Sinh hoạt, làm việc, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 122,
+      "code": "R00.00.02.03.01.001",
+      "name": "Nhà Sinh hoạt, làm việc trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 123,
+      "code": "R00.00.02.03.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 124,
+      "code": "R00.00.02.03.02.000",
+      "name": "b/ Nhà Kho, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 125,
+      "code": "R00.00.02.03.02.001",
+      "name": "Nhà Kho trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 126,
+      "code": "R00.00.02.03.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 127,
+      "code": "R00.00.02.03.03.000",
+      "name": "c/ Nhà Xưởng, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 128,
+      "code": "R00.00.02.03.03.001",
+      "name": "Nhà Xưởng trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 129,
+      "code": "R00.00.02.03.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 130,
+      "code": "R00.00.02.03.04.000",
+      "name": "d/ Nhà để xe, pháo, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 131,
+      "code": "R00.00.02.03.04.001",
+      "name": "Nhà để xe, pháo trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 132,
+      "code": "R00.00.02.03.04.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 133,
+      "code": "R00.00.02.03.05.000",
+      "name": "e/ Nhà Giảng đường, lớp học, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 134,
+      "code": "R00.00.02.03.05.001",
+      "name": "Nhà Giảng đường, lớp học trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 135,
+      "code": "R00.00.02.03.05.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 136,
+      "code": "R00.00.02.03.06.000",
+      "name": "f/ Nhà Bệnh viện, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 137,
+      "code": "R00.00.02.03.06.001",
+      "name": "Nhà Bệnh viện trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 138,
+      "code": "R00.00.02.03.06.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 139,
+      "code": "R00.00.02.03.07.000",
+      "name": "g/ Nhà An dưỡng, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 140,
+      "code": "R00.00.02.03.07.001",
+      "name": "Nhà An dưỡng trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 141,
+      "code": "R00.00.02.03.07.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 142,
+      "code": "R00.00.02.03.08.000",
+      "name": "h/ Nhà khách, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 143,
+      "code": "R00.00.02.03.08.001",
+      "name": "Nhà Khách trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 144,
+      "code": "R00.00.02.03.08.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 145,
+      "code": "R00.00.02.03.09.000",
+      "name": "i/ Nhà Kinh doanh, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 146,
+      "code": "R00.00.02.03.09.001",
+      "name": "Nhà Kinh doanh trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 147,
+      "code": "R00.00.02.03.09.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 148,
+      "code": "R00.00.02.03.10.000",
+      "name": "k/ Nhà Công vụ, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 149,
+      "code": "R00.00.02.03.10.001",
+      "name": "Nhà Công vụ trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 150,
+      "code": "R00.00.02.03.10.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 151,
+      "code": "R00.00.02.03.11.000",
+      "name": "l/ Nhà ở Gia đình, cấp I",
+      "unitRaw": null
+    },
+    {
+      "stt": 152,
+      "code": "R00.00.02.03.11.001",
+      "name": "Nhà ở gia đình trên 5 tầng, cấp I",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 153,
+      "code": "R00.00.02.03.11.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 154,
+      "code": "R00.00.02.04.00.000",
+      "name": "5/ Nhà cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 155,
+      "code": "R00.00.02.04.01.000",
+      "name": "a/ Nhà Sinh hoạt, làm việc, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 156,
+      "code": "R00.00.02.04.01.001",
+      "name": "Nhà Sinh hoạt, làm việc 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 157,
+      "code": "R00.00.02.04.01.002",
+      "name": "Nhà Sinh hoạt, làm việc 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 158,
+      "code": "R00.00.02.04.01.003",
+      "name": "Nhà Sinh hoạt, làm việc 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 159,
+      "code": "R00.00.02.04.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 160,
+      "code": "R00.00.02.04.02.000",
+      "name": "b/ Nhà Kho, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 161,
+      "code": "R00.00.02.04.02.001",
+      "name": "Nhà Kho 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 162,
+      "code": "R00.00.02.04.02.002",
+      "name": "Nhà Kho 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 163,
+      "code": "R00.00.02.04.02.003",
+      "name": "Nhà Kho 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 164,
+      "code": "R00.00.02.04.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 165,
+      "code": "R00.00.02.04.03.000",
+      "name": "c/ Nhà Xưởng, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 166,
+      "code": "R00.00.02.04.03.001",
+      "name": "Nhà Xưởng 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 167,
+      "code": "R00.00.02.04.03.002",
+      "name": "Nhà Xưởng 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 168,
+      "code": "R00.00.02.04.03.003",
+      "name": "Nhà Xưởng 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 169,
+      "code": "R00.00.02.04.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 170,
+      "code": "R00.00.02.04.04.000",
+      "name": "d/ Nhà để xe, pháo, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 171,
+      "code": "R00.00.02.04.04.001",
+      "name": "Nhà để xe, pháo 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 172,
+      "code": "R00.00.02.04.04.002",
+      "name": "Nhà để xe, pháo 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 173,
+      "code": "R00.00.02.04.04.003",
+      "name": "Nhà để xe, pháo 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 174,
+      "code": "R00.00.02.04.04.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 175,
+      "code": "R00.00.02.04.05.000",
+      "name": "e/ Nhà Giảng đường, lớp học, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 176,
+      "code": "R00.00.02.04.05.001",
+      "name": "Nhà Giảng đường, lớp học 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 177,
+      "code": "R00.00.02.04.05.002",
+      "name": "Nhà Giảng đường, lớp học 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 178,
+      "code": "R00.00.02.04.05.003",
+      "name": "Nhà Giảng đường, lớp học 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 179,
+      "code": "R00.00.02.04.05.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 180,
+      "code": "R00.00.02.04.06.000",
+      "name": "f/ Nhà Bệnh viện, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 181,
+      "code": "R00.00.02.04.06.001",
+      "name": "Nhà Bệnh viện 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 182,
+      "code": "R00.00.02.04.06.002",
+      "name": "Nhà Bệnh viện 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 183,
+      "code": "R00.00.02.04.06.003",
+      "name": "Nhà Bệnh viện 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 184,
+      "code": "R00.00.02.04.06.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 185,
+      "code": "R00.00.02.04.07.000",
+      "name": "g/ Nhà An dưỡng, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 186,
+      "code": "R00.00.02.04.07.001",
+      "name": "Nhà An dưỡng 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 187,
+      "code": "R00.00.02.04.07.002",
+      "name": "Nhà An dưỡng 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 188,
+      "code": "R00.00.02.04.07.003",
+      "name": "Nhà An dưỡng 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 189,
+      "code": "R00.00.02.04.07.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 190,
+      "code": "R00.00.02.04.08.000",
+      "name": "h/ Nhà khách, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 191,
+      "code": "R00.00.02.04.08.001",
+      "name": "Nhà Khách 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 192,
+      "code": "R00.00.02.04.08.002",
+      "name": "Nhà Khách 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 193,
+      "code": "R00.00.02.04.08.003",
+      "name": "Nhà Khách 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 194,
+      "code": "R00.00.02.04.08.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 195,
+      "code": "R00.00.02.04.09.000",
+      "name": "i/ Nhà Kinh doanh, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 196,
+      "code": "R00.00.02.04.09.001",
+      "name": "Nhà Kinh doanh 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 197,
+      "code": "R00.00.02.04.09.002",
+      "name": "Nhà Kinh doanh 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 198,
+      "code": "R00.00.02.04.09.003",
+      "name": "Nhà Kinh doanh 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 199,
+      "code": "R00.00.02.04.09.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 200,
+      "code": "R00.00.02.04.10.000",
+      "name": "k/ Nhà Công vụ, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 201,
+      "code": "R00.00.02.04.10.001",
+      "name": "Nhà Công vụ 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 202,
+      "code": "R00.00.02.04.10.002",
+      "name": "Nhà Công vụ 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 203,
+      "code": "R00.00.02.04.10.003",
+      "name": "Nhà Công vụ 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 204,
+      "code": "R00.00.02.04.10.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 205,
+      "code": "R00.00.02.04.11.000",
+      "name": "l/ Nhà ở gia đình, cấp II",
+      "unitRaw": null
+    },
+    {
+      "stt": 206,
+      "code": "R00.00.02.04.11.001",
+      "name": "Nhà ở gia đình 3 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 207,
+      "code": "R00.00.02.04.11.002",
+      "name": "Nhà ở gia đình 4 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 208,
+      "code": "R00.00.02.04.11.003",
+      "name": "Nhà ở gia đình 5 tầng cấp II",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 209,
+      "code": "R00.00.02.04.11.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 210,
+      "code": "R00.00.02.05.00.000",
+      "name": "6/ Nhà cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 211,
+      "code": "R00.00.02.05.01.000",
+      "name": "a/ Nhà Sinh hoạt, làm việc, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 212,
+      "code": "R00.00.02.05.01.001",
+      "name": "Nhà Sinh hoạt, làm việc 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 213,
+      "code": "R00.00.02.05.01.002",
+      "name": "Nhà Sinh hoạt, làm việc 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 214,
+      "code": "R00.00.02.05.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 215,
+      "code": "R00.00.02.05.02.000",
+      "name": "b/ Nhà Kho, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 216,
+      "code": "R00.00.02.05.02.001",
+      "name": "Nhà Kho 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 217,
+      "code": "R00.00.02.05.02.002",
+      "name": "Nhà Kho 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 218,
+      "code": "R00.00.02.05.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 219,
+      "code": "R00.00.02.05.03.000",
+      "name": "c/ Nhà Xưởng, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 220,
+      "code": "R00.00.02.05.03.001",
+      "name": "Nhà Xưởng 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 221,
+      "code": "R00.00.02.05.03.002",
+      "name": "Nhà Xưởng 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 222,
+      "code": "R00.00.02.05.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 223,
+      "code": "R00.00.02.05.04.000",
+      "name": "d/ Nhà để xe, pháo, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 224,
+      "code": "R00.00.02.05.04.001",
+      "name": "Nhà để xe, pháo 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 225,
+      "code": "R00.00.02.05.04.002",
+      "name": "Nhà để xe, pháo 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 226,
+      "code": "R00.00.02.05.04.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 227,
+      "code": "R00.00.02.05.05.000",
+      "name": "e/ Nhà Giảng đường, lớp học, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 228,
+      "code": "R00.00.02.05.05.001",
+      "name": "Nhà Giảng đường, lớp học 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 229,
+      "code": "R00.00.02.05.05.002",
+      "name": "Nhà Giảng đường, lớp học 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 230,
+      "code": "R00.00.02.05.05.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 231,
+      "code": "R00.00.02.05.06.000",
+      "name": "f/ Nhà Bệnh viện, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 232,
+      "code": "R00.00.02.05.06.001",
+      "name": "Nhà Bệnh viện 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 233,
+      "code": "R00.00.02.05.06.002",
+      "name": "Nhà Bệnh viện 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 234,
+      "code": "R00.00.02.05.06.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 235,
+      "code": "R00.00.02.05.07.000",
+      "name": "g/ Nhà An dưỡng, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 236,
+      "code": "R00.00.02.05.07.001",
+      "name": "Nhà An dưỡng 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 237,
+      "code": "R00.00.02.05.07.002",
+      "name": "Nhà An dưỡng 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 238,
+      "code": "R00.00.02.05.07.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 239,
+      "code": "R00.00.02.05.08.000",
+      "name": "h/ Nhà khách, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 240,
+      "code": "R00.00.02.05.08.001",
+      "name": "Nhà Khách 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 241,
+      "code": "R00.00.02.05.08.002",
+      "name": "Nhà Khách 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 242,
+      "code": "R00.00.02.05.08.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 243,
+      "code": "R00.00.02.05.09.000",
+      "name": "i/ Nhà Kinh doanh, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 244,
+      "code": "R00.00.02.05.09.001",
+      "name": "Nhà Kinh doanh 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 245,
+      "code": "R00.00.02.05.09.002",
+      "name": "Nhà Kinh doanh 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 246,
+      "code": "R00.00.02.05.09.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 247,
+      "code": "R00.00.02.05.10.000",
+      "name": "k/ Nhà Công vụ, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 248,
+      "code": "R00.00.02.05.10.001",
+      "name": "Nhà Công vụ 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 249,
+      "code": "R00.00.02.05.10.002",
+      "name": "Nhà Công vụ 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 250,
+      "code": "R00.00.02.05.10.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 251,
+      "code": "R00.00.02.05.11.000",
+      "name": "l/ Nhà ở gia đình, cấp III",
+      "unitRaw": null
+    },
+    {
+      "stt": 252,
+      "code": "R00.00.02.05.11.001",
+      "name": "Nhà ở gia đình 1 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 253,
+      "code": "R00.00.02.05.11.002",
+      "name": "Nhà ở gia đình 2 tầng cấp III",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 254,
+      "code": "R00.00.02.05.11.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 255,
+      "code": "R00.00.02.06.00.000",
+      "name": "7/ Nhà cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 256,
+      "code": "R00.00.02.06.01.000",
+      "name": "a/ Nhà Sinh hoạt, làm việc, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 257,
+      "code": "R00.00.02.06.01.001",
+      "name": "Nhà Sinh hoạt, làm việc 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 258,
+      "code": "R00.00.02.06.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 259,
+      "code": "R00.00.02.06.02.000",
+      "name": "b/ Nhà Kho, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 260,
+      "code": "R00.00.02.06.02.001",
+      "name": "Nhà Kho 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 261,
+      "code": "R00.00.02.06.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 262,
+      "code": "R00.00.02.06.03.000",
+      "name": "c/ Nhà Xưởng, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 263,
+      "code": "R00.00.02.06.03.001",
+      "name": "Nhà Xưởng 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 264,
+      "code": "R00.00.02.06.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 265,
+      "code": "R00.00.02.06.04.000",
+      "name": "d/ Nhà để xe, pháo, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 266,
+      "code": "R00.00.02.06.04.001",
+      "name": "Nhà để xe, pháo 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 267,
+      "code": "R00.00.02.06.04.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 268,
+      "code": "R00.00.02.06.05.000",
+      "name": "e/ Nhà Giảng đường, lớp học, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 269,
+      "code": "R00.00.02.06.05.001",
+      "name": "Nhà Giảng đường, lớp học 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 270,
+      "code": "R00.00.02.06.05.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 271,
+      "code": "R00.00.02.06.06.000",
+      "name": "f/ Nhà Bệnh viện, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 272,
+      "code": "R00.00.02.06.06.001",
+      "name": "Nhà Bệnh viện 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 273,
+      "code": "R00.00.02.06.06.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 274,
+      "code": "R00.00.02.06.07.000",
+      "name": "g/ Nhà An dưỡng, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 275,
+      "code": "R00.00.02.06.07.001",
+      "name": "Nhà An dưỡng 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 276,
+      "code": "R00.00.02.06.07.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 277,
+      "code": "R00.00.02.06.08.000",
+      "name": "h/ Nhà khách, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 278,
+      "code": "R00.00.02.06.08.001",
+      "name": "Nhà Khách 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 279,
+      "code": "R00.00.02.06.08.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 280,
+      "code": "R00.00.02.06.09.000",
+      "name": "i/ Nhà Kinh doanh, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 281,
+      "code": "R00.00.02.06.09.001",
+      "name": "Nhà Kinh doanh 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 282,
+      "code": "R00.00.02.06.09.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 283,
+      "code": "R00.00.02.06.10.000",
+      "name": "k/ Nhà Công vụ, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 284,
+      "code": "R00.00.02.06.10.001",
+      "name": "Nhà Công vụ 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 285,
+      "code": "R00.00.02.06.10.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 286,
+      "code": "R00.00.02.06.11.000",
+      "name": "l/ Nhà ở gia đình, cấp IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 287,
+      "code": "R00.00.02.06.11.001",
+      "name": "Nhà ở gia đình 1 tầng cấp IV",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 288,
+      "code": "R00.00.02.06.11.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 289,
+      "code": "R00.00.02.99.00.000",
+      "name": "3/ Nhà khác",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 290,
+      "code": "R00.00.02.99.00.001",
+      "name": "Nhà thi đấu đa năng",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 291,
+      "code": "R00.00.02.99.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 292,
+      "code": "R00.00.03.00.00.000",
+      "name": "III/ Nhà kho, xưởng, xe pháo",
+      "unitRaw": null
+    },
+    {
+      "stt": 293,
+      "code": "R00.00.03.00.00.001",
+      "name": "Nhà 1 tầng mái tôn, Fibrô",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 294,
+      "code": "R00.00.03.00.00.002",
+      "name": "Cột bê tông, kèo thép, tường gạch",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 295,
+      "code": "R00.00.03.00.00.003",
+      "name": "Cột, kèo bằng bê tông, tường gạch",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 296,
+      "code": "R00.00.03.00.00.004",
+      "name": "Cột, kèo bằng thép, tường gạch",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 297,
+      "code": "R00.00.03.00.00.005",
+      "name": "Cột bê tông, kèo thép có cần trục, tường gạch",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 298,
+      "code": "R00.00.03.00.00.006",
+      "name": "Cột, kèo bằng thép, tường bao bằng tôn cao có cần trục",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 299,
+      "code": "R00.00.03.00.00.007",
+      "name": "Nhà phơi lắp ghép khung thép, mái lợp tôn lấy sáng",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 300,
+      "code": "R00.00.03.00.00.008",
+      "name": "Nhà lắp ghép cơ động khung thép định hình, mái tôn chống nóng",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 301,
+      "code": "R00.00.03.00.00.999",
+      "name": "Các loại nhà kho, xưởng, xe pháo khác",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 302,
+      "code": "R00.00.04.00.00.000",
+      "name": "IV/ Vật kiến trúc",
+      "unitRaw": null
+    },
+    {
+      "stt": 303,
+      "code": "R00.00.04.01.00.000",
+      "name": "1/ Ống khói",
+      "unitRaw": null
+    },
+    {
+      "stt": 304,
+      "code": "R00.00.04.01.00.001",
+      "name": "Ống khói xây gạch các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 305,
+      "code": "R00.00.04.01.00.002",
+      "name": "Ống khói BTCT các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 306,
+      "code": "R00.00.04.01.00.003",
+      "name": "Ống khói thép các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 307,
+      "code": "R00.00.04.02.00.000",
+      "name": "2/ Cổng và Bốt gác",
+      "unitRaw": null
+    },
+    {
+      "stt": 308,
+      "code": "R00.00.04.02.00.001",
+      "name": "Cổng có mái gắn liền bốt gác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 309,
+      "code": "R00.00.04.02.00.002",
+      "name": "Cổng có mái không gắn liền bốt gác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 310,
+      "code": "R00.00.04.02.00.003",
+      "name": "Cổng không có mái gắn liền bốt gác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 311,
+      "code": "R00.00.04.02.00.004",
+      "name": "Cổng không có mái không gắn liền bốt gác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 312,
+      "code": "R00.00.04.02.00.005",
+      "name": "Bốt gác cố định",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 313,
+      "code": "R00.00.04.02.00.006",
+      "name": "Bốt gác di động",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 314,
+      "code": "R00.00.04.02.00.999",
+      "name": "Các loại cổng khác",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 315,
+      "code": "R00.00.04.03.00.000",
+      "name": "3/ Đường đi",
+      "unitRaw": null
+    },
+    {
+      "stt": 316,
+      "code": "R00.00.04.03.00.001",
+      "name": "Đường bê tông xi măng",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 317,
+      "code": "R00.00.04.03.00.002",
+      "name": "Đường bê tông nhựa",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 318,
+      "code": "R00.00.04.03.00.003",
+      "name": "Đường cấp phối các loại",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 319,
+      "code": "R00.00.04.03.00.999",
+      "name": "Các loại đường khác",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 320,
+      "code": "R00.00.04.04.00.000",
+      "name": "4/ Sân bãi thể thao",
+      "unitRaw": null
+    },
+    {
+      "stt": 321,
+      "code": "R00.00.04.04.00.001",
+      "name": "Khán đài có mái che BTCT",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 322,
+      "code": "R00.00.04.04.00.002",
+      "name": "Bệ, bậc ngồi bằng BT",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 323,
+      "code": "R00.00.04.04.00.003",
+      "name": "Sân trồng cỏ tự nhiên",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 324,
+      "code": "R00.00.04.04.00.004",
+      "name": "Sân bãi bằng đất đầm chặt",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 325,
+      "code": "R00.00.04.04.00.005",
+      "name": "Bể bơi dùng để luyện tập, thi đấu",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 326,
+      "code": "R00.00.04.04.00.006",
+      "name": "Sân tenis",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 327,
+      "code": "R00.00.04.04.00.007",
+      "name": "Sân bóng chuyền",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 328,
+      "code": "R00.00.04.04.00.008",
+      "name": "Sân trồng cỏ nhân tạo",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 329,
+      "code": "R00.00.04.04.00.999",
+      "name": "Các loại khác",
+      "unitRaw": "m2 SD"
+    },
+    {
+      "stt": 330,
+      "code": "R00.00.04.05.00.000",
+      "name": "5/ Hàng rào",
+      "unitRaw": null
+    },
+    {
+      "stt": 331,
+      "code": "R00.00.04.05.00.001",
+      "name": "Hàng rào kín xây gạch, trụ gạch",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 332,
+      "code": "R00.00.04.05.00.002",
+      "name": "Hàng rào kín xây gạch, trụ bê tông cốt thép",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 333,
+      "code": "R00.00.04.05.00.003",
+      "name": "Hàng rào kín xây gạch, trụ thép",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 334,
+      "code": "R00.00.04.05.00.004",
+      "name": "Hàng rào hở, trụ gạch, rào bằng nan thép",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 335,
+      "code": "R00.00.04.05.00.005",
+      "name": "Hàng rào hở, trụ gạch, rào bằng lưới thép",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 336,
+      "code": "R00.00.04.05.00.006",
+      "name": "Hàng rào hở, trụ gạch, rào bằng dây thép gai",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 337,
+      "code": "R00.00.04.05.00.007",
+      "name": "Hàng rào hở, trụ gạch, rào bằng nan bê tông",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 338,
+      "code": "R00.00.04.05.00.008",
+      "name": "Hàng rào hở, trụ bê tông cốt thép, rào bằng nan thép",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 339,
+      "code": "R00.00.04.05.00.009",
+      "name": "Hàng rào hở, trụ bê tông cốt thép, rào bằng lưới thép",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 340,
+      "code": "R00.00.04.05.00.010",
+      "name": "Hàng rào hở, trụ bê tông cốt thép, rào bằng dây thép gai",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 341,
+      "code": "R00.00.04.05.00.011",
+      "name": "Hàng rào hở, trụ bê tông cốt thép, rào bằng nan bê tông",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 342,
+      "code": "R00.00.04.05.00.012",
+      "name": "Hàng rào dây thép gai",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 343,
+      "code": "R00.00.04.05.00.999",
+      "name": "Các loại hàng rào khác",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 344,
+      "code": "R00.00.04.06.00.000",
+      "name": "6/ Tường kè",
+      "unitRaw": null
+    },
+    {
+      "stt": 345,
+      "code": "R00.00.04.06.00.001",
+      "name": "Tường kè Bê tông các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 346,
+      "code": "R00.00.04.06.00.002",
+      "name": "Tường kè đá các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 347,
+      "code": "R00.00.04.06.00.999",
+      "name": "Tường kè các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 348,
+      "code": "R00.00.04.07.00.000",
+      "name": "Cột điện, cột đèn",
+      "unitRaw": null
+    },
+    {
+      "stt": 349,
+      "code": "R00.00.04.07.00.001",
+      "name": "Cột điện BTCT ly tâm cao 20m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 350,
+      "code": "R00.00.04.07.00.002",
+      "name": "Cột điện BTCT ly tâm cao 18m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 351,
+      "code": "R00.00.04.07.00.003",
+      "name": "Cột điện BTCT ly tâm cao 16m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 352,
+      "code": "R00.00.04.07.00.004",
+      "name": "Cột điện BTCT ly tâm cao 14m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 353,
+      "code": "R00.00.04.07.00.005",
+      "name": "Cột điện BTCT ly tâm cao 12m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 354,
+      "code": "R00.00.04.07.00.006",
+      "name": "Cột điện BTCT chữ H cao 10m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 355,
+      "code": "R00.00.04.07.00.007",
+      "name": "Cột điện BTCT chữ H cao 8m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 356,
+      "code": "R00.00.04.07.00.008",
+      "name": "Cột điện BTCT chữ H cao 6m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 357,
+      "code": "R00.00.04.07.00.009",
+      "name": "Cột đèn cao áp bằng thép 12m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 358,
+      "code": "R00.00.04.07.00.010",
+      "name": "Cột đèn cao áp bằng thép 10m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 359,
+      "code": "R00.00.04.07.00.011",
+      "name": "Cột đèn cao áp bằng thép 8m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 360,
+      "code": "R00.00.04.07.00.013",
+      "name": "Cột đèn cao áp bằng thép 6m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 361,
+      "code": "R00.00.04.07.00.014",
+      "name": "Cột đèn trang trí sân, vườn bằng thép 6m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 362,
+      "code": "R00.00.04.07.00.015",
+      "name": "Cột đèn trang trí sân, vườn bằng thép 4m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 363,
+      "code": "R00.00.04.07.00.016",
+      "name": "Cột đèn trang trí sân, vườn bằng thép 3m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 364,
+      "code": "R00.00.04.07.00.017",
+      "name": "Tháp đèn chiếu sáng di động (chạy nhiên liệu diezel) cao 3m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 365,
+      "code": "R00.00.04.07.00.018",
+      "name": "Tháp đèn chiếu sáng di động (chạy nhiên liệu diezel) cao 5m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 366,
+      "code": "R00.00.04.07.00.019",
+      "name": "Tháp đèn chiếu sáng di động (chạy nhiên liệu diezel) cao 7m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 367,
+      "code": "R00.00.04.07.00.020",
+      "name": "Tháp đèn chiếu sáng di động (chạy nhiên liệu diezel) cao 9m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 368,
+      "code": "R00.00.04.07.00.021",
+      "name": "Cột điện BTCT ly tâm cao ≤ 20m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 369,
+      "code": "R00.00.04.07.00.022",
+      "name": "Cột đèn cao áp bằng thép cao < 6m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 370,
+      "code": "R00.00.04.07.00.023",
+      "name": "Cột đèn cao áp bằng thép cao từ 6m÷8m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 371,
+      "code": "R00.00.04.07.00.024",
+      "name": "Cột đèn cao áp bằng thép cao từ 8m÷10m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 372,
+      "code": "R00.00.04.07.00.025",
+      "name": "Cột đèn trang trí sân, vườn bằng thép < 3m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 373,
+      "code": "R00.00.04.07.00.026",
+      "name": "Cột đèn trang trí sân, vườn bằng thép từ 3m÷6m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 374,
+      "code": "R00.00.04.07.00.027",
+      "name": "Cột đèn trang trí sân, vườn bằng thép ≥ 6m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 375,
+      "code": "R00.00.04.07.00.028",
+      "name": "Tháp đèn chiếu sáng di động (chạy nhiên liệu diezel) cao < 5m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 376,
+      "code": "R00.00.04.07.00.029",
+      "name": "Tháp đèn chiếu sáng di động (chạy nhiên liệu diezel) cao từ 5m÷7m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 377,
+      "code": "R00.00.04.07.00.030",
+      "name": "Tháp đèn chiếu sáng di động (chạy nhiên liệu diezel) cao từ 7m÷9m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 378,
+      "code": "R00.00.04.07.00.031",
+      "name": "Tháp đèn chiếu sáng di động (chạy nhiên liệu diezel) cao > 9m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 379,
+      "code": "R00.00.04.07.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 380,
+      "code": "R00.00.05.00.00.000",
+      "name": "V/ Cấp nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 381,
+      "code": "R00.00.05.01.00.000",
+      "name": "1/ Máy bơm nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 382,
+      "code": "R00.00.05.01.01.000",
+      "name": "Máy bơm nước chạy động cơ điện các loại",
+      "unitRaw": "Chiếc"
+    },
+    {
+      "stt": 383,
+      "code": "R00.00.05.01.01.001",
+      "name": "Máy bơm nước chạy động cơ điện, công suất đến 20m3/giờ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 384,
+      "code": "R00.00.05.01.01.002",
+      "name": "Máy bơm nước chạy động cơ điện, công suất trên 20m3/giờ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 385,
+      "code": "R00.00.05.01.01.003",
+      "name": "Máy bơm nước chạy động cơ điện, công suất đến 11KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 386,
+      "code": "R00.00.05.01.01.004",
+      "name": "Máy bơm nước chạy động cơ điện, từ 11kw đến 22KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 387,
+      "code": "R00.00.05.01.01.005",
+      "name": "Máy bơm nước chạy động cơ điện, trên 22KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 388,
+      "code": "R00.00.05.01.01.006",
+      "name": "Máy bơm nước tăng áp động cơ điện các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 389,
+      "code": "R00.00.05.01.01.007",
+      "name": "Máy bơm nước chạy động cơ điện 1 pha, công suất đến 20m3/giờ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 390,
+      "code": "R00.00.05.01.01.008",
+      "name": "Máy bơm nước chạy động cơ điện 1 pha, công suất trên 20m3/giờ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 391,
+      "code": "R00.00.05.01.01.009",
+      "name": "Máy bơm nước chạy động cơ điện 3 pha, công suất đến 20m3/giờ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 392,
+      "code": "R00.00.05.01.01.010",
+      "name": "Máy bơm nước chạy động cơ điện 3 pha, công suất trên 20m3/giờ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 393,
+      "code": "R00.00.05.01.01.011",
+      "name": "Máy bơm nước chạy động cơ điện 1 pha công suất đến 20 m3/h",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 394,
+      "code": "R00.00.05.01.01.012",
+      "name": "Máy bơm nước chạy động cơ điện 1 pha công suất hơn 20 m3/h",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 395,
+      "code": "R00.00.05.01.01.013",
+      "name": "Máy bơm nước chạy động cơ điện 3 pha công suất đến 20 m3/h",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 396,
+      "code": "R00.00.05.01.01.014",
+      "name": "Máy bơm sục khí tạo oxy",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 397,
+      "code": "R00.00.05.01.01.015",
+      "name": "Máy bơm nước dưới 1,5kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 398,
+      "code": "R00.00.05.01.01.016",
+      "name": "Máy bơm nước dưới 3kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 399,
+      "code": "R00.00.05.01.01.017",
+      "name": "Máy bơm nước 3-5kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 400,
+      "code": "R00.00.05.01.01.018",
+      "name": "Máy bơm nước từ 5-7,5 kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 401,
+      "code": "R00.00.05.01.01.019",
+      "name": "Máy bơm nước từ 7,5 - dưới 11 kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 402,
+      "code": "R00.00.05.01.01.020",
+      "name": "Máy xục khí dưới 1kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 403,
+      "code": "R00.00.05.01.01.021",
+      "name": "Máy xục khí trên 1-3kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 404,
+      "code": "R00.00.05.01.01.022",
+      "name": "Máy xục khí trên 3-5kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 405,
+      "code": "R00.00.05.01.01.023",
+      "name": "Máy xục khí trên 5-7kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 406,
+      "code": "R00.00.05.01.01.024",
+      "name": "Máy bơm nước từ 11 - dưới 25 kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 407,
+      "code": "R00.00.05.01.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 408,
+      "code": "R00.00.05.01.02.000",
+      "name": "Máy bơm nước chạy động cơ điezen các loại",
+      "unitRaw": "Chiếc"
+    },
+    {
+      "stt": 409,
+      "code": "R00.00.05.01.02.001",
+      "name": "Máy bơm nước chạy động cơ điezen, công suất đến 20m3/giờ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 410,
+      "code": "R00.00.05.01.02.002",
+      "name": "Máy bơm nước chạy động cơ điezen, công suất trên 20m3/giờ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 411,
+      "code": "R00.00.05.01.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 412,
+      "code": "R00.00.05.01.03.000",
+      "name": "Máy thông tắc lò xo",
+      "unitRaw": null
+    },
+    {
+      "stt": 413,
+      "code": "R00.00.05.01.03.001",
+      "name": "Máy thông tắc lo xo 150-2200W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 414,
+      "code": "R00.00.05.01.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 415,
+      "code": "R00.00.05.02.00.000",
+      "name": "2/ Bể chứa nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 416,
+      "code": "R00.00.05.02.00.001",
+      "name": "Bể chứa nước BTCT các loại",
+      "unitRaw": "m3"
+    },
+    {
+      "stt": 417,
+      "code": "R00.00.05.02.00.002",
+      "name": "Bể chứa nước xây gạch các loại",
+      "unitRaw": "m3"
+    },
+    {
+      "stt": 418,
+      "code": "R00.00.05.02.00.003",
+      "name": "Bể Kim loại khác các loại",
+      "unitRaw": "m3"
+    },
+    {
+      "stt": 419,
+      "code": "R00.00.05.02.00.004",
+      "name": "Bể chứa nước Inox các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 420,
+      "code": "R00.00.05.02.00.005",
+      "name": "Téc nước nhựa, dung tích 500L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 421,
+      "code": "R00.00.05.02.00.006",
+      "name": "Téc nước nhựa, dung tích 1000L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 422,
+      "code": "R00.00.05.02.00.007",
+      "name": "Téc nước nhựa, dung tích 1500L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 423,
+      "code": "R00.00.05.02.00.008",
+      "name": "Téc nước Inox, dung tích 500L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 424,
+      "code": "R00.00.05.02.00.009",
+      "name": "Téc nước Inox, dung tích 1000L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 425,
+      "code": "R00.00.05.02.00.010",
+      "name": "Téc nước Inox, dung tích 1500L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 426,
+      "code": "R00.00.05.02.00.011",
+      "name": "Téc nước Inox, dung tích 2000L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 427,
+      "code": "R00.00.05.02.00.012",
+      "name": "Téc nước Inox, dung tích 2500L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 428,
+      "code": "R00.00.05.02.00.013",
+      "name": "Téc inox dung tích 3000L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 429,
+      "code": "R00.00.05.02.00.999",
+      "name": "Các loại bể chứa nước khác",
+      "unitRaw": "m3"
+    },
+    {
+      "stt": 430,
+      "code": "R00.00.05.03.00.000",
+      "name": "3/ Đài chứa nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 431,
+      "code": "R00.00.05.03.00.001",
+      "name": "Đài BTCT các loại",
+      "unitRaw": "m3"
+    },
+    {
+      "stt": 432,
+      "code": "R00.00.05.03.00.002",
+      "name": "Đài xây gạch các loại",
+      "unitRaw": "m3"
+    },
+    {
+      "stt": 433,
+      "code": "R00.00.05.03.00.003",
+      "name": "Đài nước kim loại",
+      "unitRaw": "M3"
+    },
+    {
+      "stt": 434,
+      "code": "R00.00.05.03.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 435,
+      "code": "R00.00.05.04.00.000",
+      "name": "4/ Đường ống cấp nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 436,
+      "code": "R00.00.05.04.00.001",
+      "name": "Đường ống nước bằng gang, kẽm các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 437,
+      "code": "R00.00.05.04.00.002",
+      "name": "Đường ống nước bằng nhựa các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 438,
+      "code": "R00.00.05.04.00.003",
+      "name": "Đường ống cấp nước bằng kẽm",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 439,
+      "code": "R00.00.05.04.00.004",
+      "name": "Đường ống cấp nước, Ống nhựa PVC D21",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 440,
+      "code": "R00.00.05.04.00.006",
+      "name": "Đường ống cấp nước, Ống nhựa PVC D27",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 441,
+      "code": "R00.00.05.04.00.007",
+      "name": "Đường ống cấp nước, Ống hàn nhiệt D50",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 442,
+      "code": "R00.00.05.04.00.008",
+      "name": "Đường ống cấp nước, Ống hàn nhiệt D21",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 443,
+      "code": "R00.00.05.04.00.009",
+      "name": "Đường ống cấp nước, Ống hàn nhiệt D20",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 444,
+      "code": "R00.00.05.04.00.010",
+      "name": "Đường ống cấp nước, Ống nhựa PVC D42",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 445,
+      "code": "R00.00.05.04.00.011",
+      "name": "Đường ống cấp nước, Ống hàn nhiệt D90",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 446,
+      "code": "R00.00.05.04.00.012",
+      "name": "Đường ống cấp nước, ống kẽm D21",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 447,
+      "code": "R00.00.05.04.00.013",
+      "name": "Đường ống cấp nước, ống kẽm D27",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 448,
+      "code": "R00.00.05.04.00.014",
+      "name": "Đường ống cấp nước, ống kẽm D32",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 449,
+      "code": "R00.00.05.04.00.015",
+      "name": "Đường ống cấp nước, ống kẽm D50",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 450,
+      "code": "R00.00.05.04.00.016",
+      "name": "Đường ống cấp nước, ống kẽm D90",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 451,
+      "code": "R00.00.05.04.00.999",
+      "name": "Các loại đường ống nước khác",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 452,
+      "code": "R00.00.05.05.00.000",
+      "name": "5/ Giếng nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 453,
+      "code": "R00.00.05.05.00.001",
+      "name": "Giếng khoan",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 454,
+      "code": "R00.00.05.05.00.002",
+      "name": "Giếng đào",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 455,
+      "code": "R00.00.05.05.00.003",
+      "name": "Giếng xây gạch",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 456,
+      "code": "R00.00.05.05.00.004",
+      "name": "Giếng xây đá",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 457,
+      "code": "R00.00.05.05.00.005",
+      "name": "Giếng khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 458,
+      "code": "R00.00.05.05.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 459,
+      "code": "R00.00.05.06.00.000",
+      "name": "6/ Bình đun nước nóng bằng điện các loại",
+      "unitRaw": null
+    },
+    {
+      "stt": 460,
+      "code": "R00.00.05.06.00.001",
+      "name": "Bình đun nước nóng bằng điện các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 461,
+      "code": "R00.00.05.06.00.002",
+      "name": "Bình đun nước nóng bằng điện đến 30L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 462,
+      "code": "R00.00.05.06.00.003",
+      "name": "Bình đun nước nóng bằng điện đến 45L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 463,
+      "code": "R00.00.05.06.00.004",
+      "name": "Hệ thống nước nóng đun bằng điện dùng chung",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 464,
+      "code": "R00.00.05.06.00.005",
+      "name": "Bình đun nước nóng bằng điện 15L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 465,
+      "code": "R00.00.05.06.00.006",
+      "name": "Bình đun nước nóng bằng điện 20L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 466,
+      "code": "R00.00.05.06.00.999",
+      "name": "Bình đun nước nóng loại khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 467,
+      "code": "R00.00.05.07.00.000",
+      "name": "7/ Hệ thống xử lý nước sạch sinh hoạt",
+      "unitRaw": null
+    },
+    {
+      "stt": 468,
+      "code": "R00.00.05.07.00.001",
+      "name": "Hệ thống xử lý nước sạch sinh hoạt",
+      "unitRaw": "Hệ thống"
+    },
+    {
+      "stt": 469,
+      "code": "R00.00.05.07.00.002",
+      "name": "Hệ thống xử lý nước uống tinh khiết",
+      "unitRaw": "Hệ thống"
+    },
+    {
+      "stt": 470,
+      "code": "R00.00.05.07.00.003",
+      "name": "Hệ thống thiết bị lọc nước lọc nước loại 10m3/ngày đêm",
+      "unitRaw": "TB"
+    },
+    {
+      "stt": 471,
+      "code": "R00.00.05.07.00.004",
+      "name": "Hệ thống thiết bị lọc nước lọc nước loại 02m3/ngày đêm",
+      "unitRaw": "TB"
+    },
+    {
+      "stt": 472,
+      "code": "R00.00.05.07.00.999",
+      "name": "Hệ thống xử lý nước sạch sinh hoạt khác",
+      "unitRaw": "Hệ thống"
+    },
+    {
+      "stt": 473,
+      "code": "R00.00.05.08.00.000",
+      "name": "8/ Hệ thống xử lý nước uống tinh khiết",
+      "unitRaw": null
+    },
+    {
+      "stt": 474,
+      "code": "R00.00.05.09.00.000",
+      "name": "9/ Hệ thống tắm nước nóng",
+      "unitRaw": null
+    },
+    {
+      "stt": 475,
+      "code": "R00.00.05.09.00.001",
+      "name": "Hệ thống tắm nóng TN F2-50-2016-TCHC",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 476,
+      "code": "R00.00.05.09.00.002",
+      "name": "Hệ thống tắm nóng TN F2-100-2016-TCHC",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 477,
+      "code": "R00.00.05.09.00.003",
+      "name": "Hệ thống tắm nóng khác",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 478,
+      "code": "R00.00.05.09.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 479,
+      "code": "R00.00.05.10.00.000",
+      "name": "10/ Dụng cụ chứa nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 480,
+      "code": "R00.00.05.10.00.001",
+      "name": "Phuy các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 481,
+      "code": "R00.00.05.10.00.002",
+      "name": "Can sắt các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 482,
+      "code": "R00.00.05.10.00.003",
+      "name": "Can nhựa các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 483,
+      "code": "R00.00.05.10.00.004",
+      "name": "Stéc 3 - 5 m3",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 484,
+      "code": "R00.00.05.10.00.999",
+      "name": "Dụng cụ chứa nước khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 485,
+      "code": "R00.00.05.11.00.000",
+      "name": "11/ Dụng cụ chứa dầu",
+      "unitRaw": null
+    },
+    {
+      "stt": 486,
+      "code": "R00.00.05.11.00.001",
+      "name": "Phuy các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 487,
+      "code": "R00.00.05.11.00.002",
+      "name": "Can sắt các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 488,
+      "code": "R00.00.05.11.00.003",
+      "name": "Can nhựa các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 489,
+      "code": "R00.00.05.11.00.004",
+      "name": "Stéc 3 - 5 m3",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 490,
+      "code": "R00.00.05.11.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 491,
+      "code": "R00.00.05.12.00.000",
+      "name": "12/ Hệ thống xử lý nước sạch",
+      "unitRaw": null
+    },
+    {
+      "stt": 492,
+      "code": "R00.00.05.12.00.001",
+      "name": "Hệ thống xử lý nước sạch",
+      "unitRaw": "Hệ thống"
+    },
+    {
+      "stt": 493,
+      "code": "R00.00.05.12.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 494,
+      "code": "R00.00.05.13.00.000",
+      "name": "13/ Hệ thống máy nước nóng năng lượng mặt trời",
+      "unitRaw": null
+    },
+    {
+      "stt": 495,
+      "code": "R00.00.06.00.00.000",
+      "name": "-Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 496,
+      "code": "R00.00.06.00.00.999",
+      "name": "Các loại đường ống thoát nước khác",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 497,
+      "code": "R00.00.07.00.00.000",
+      "name": "VII/ Thiết bị điện",
+      "unitRaw": null
+    },
+    {
+      "stt": 498,
+      "code": "R00.00.07.01.00.000",
+      "name": "1/ Máy biến áp các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 499,
+      "code": "R00.00.07.01.00.001",
+      "name": "Máy biến áp, công suất dưới 50KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 500,
+      "code": "R00.00.07.01.00.002",
+      "name": "Máy biến áp, công suất từ 50KVA đến 100KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 501,
+      "code": "R00.00.07.01.00.003",
+      "name": "Máy biến áp, công suất từ 100KVA đến 250KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 502,
+      "code": "R00.00.07.01.00.004",
+      "name": "Máy biến áp, công suất từ 250KVA đến 400KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 503,
+      "code": "R00.00.07.01.00.005",
+      "name": "Máy biến áp, công suất từ 400KVA đến 1000KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 504,
+      "code": "R00.00.07.01.00.006",
+      "name": "Máy biến áp, công suất trên 1000KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 505,
+      "code": "R00.00.07.01.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 506,
+      "code": "R00.00.07.02.00.000",
+      "name": "2/ Tổ máy phát điện",
+      "unitRaw": null
+    },
+    {
+      "stt": 507,
+      "code": "R00.00.07.02.01.000",
+      "name": "Tổ máy phát lưu động các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 508,
+      "code": "R00.00.07.02.01.001",
+      "name": "Tổ máy phát lưu động, công suất đến 20KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 509,
+      "code": "R00.00.07.02.01.002",
+      "name": "Tổ máy phát lưu động, công suất trên 20KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 510,
+      "code": "R00.00.07.02.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 511,
+      "code": "R00.00.07.02.02.000",
+      "name": "Tổ máy phát cố định các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 512,
+      "code": "R00.00.07.02.02.001",
+      "name": "Tổ máy phát cố định, công suất đến 20KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 513,
+      "code": "R00.00.07.02.02.002",
+      "name": "Tổ máy phát cố định, công suất trên 20KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 514,
+      "code": "R00.00.07.02.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 515,
+      "code": "R00.00.07.02.03.000",
+      "name": "Tổ máy phát cố định 3 pha",
+      "unitRaw": null
+    },
+    {
+      "stt": 516,
+      "code": "R00.00.07.02.03.001",
+      "name": "Tổ máy phát cố định 3 pha, công suất đến 20KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 517,
+      "code": "R00.00.07.02.03.002",
+      "name": "Tổ máy phát cố định 3 pha, công suất trên 20KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 518,
+      "code": "R00.00.07.02.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 519,
+      "code": "R00.00.07.02.99.000",
+      "name": "Tổ máy phát điện khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 520,
+      "code": "R00.00.07.03.00.000",
+      "name": "3/ Điều hoà nhiệt độ 1 chiều các loại",
+      "unitRaw": null
+    },
+    {
+      "stt": 521,
+      "code": "R00.00.07.03.01.000",
+      "name": "Hệ thống điều hòa trung tâm",
+      "unitRaw": null
+    },
+    {
+      "stt": 522,
+      "code": "R00.00.07.03.01.001",
+      "name": "Hệ thống điều hòa trung tâm, 1 chiều các loại",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 523,
+      "code": "R00.00.07.03.01.002",
+      "name": "Hệ thống điều hòa trung tâm, 2 chiều các loại",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 524,
+      "code": "R00.00.07.03.01.999",
+      "name": "Hệ thống điều hòa trung tâm khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 525,
+      "code": "R00.00.07.03.02.000",
+      "name": "Điều hòa cục bộ",
+      "unitRaw": null
+    },
+    {
+      "stt": 526,
+      "code": "R00.00.07.03.02.001",
+      "name": "Điều hòa treo tường, 1 chiều các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 527,
+      "code": "R00.00.07.03.02.002",
+      "name": "Điều hòa treo tường, 2 chiều các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 528,
+      "code": "R00.00.07.03.02.003",
+      "name": "Điều hòa gắn trần, 1 chiều các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 529,
+      "code": "R00.00.07.03.02.004",
+      "name": "Điều hòa gắn trần, 2 chiều các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 530,
+      "code": "R00.00.07.03.02.005",
+      "name": "Điều hòa cây, 1 chiều các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 531,
+      "code": "R00.00.07.03.02.006",
+      "name": "Điều hòa cây, 2 chiều các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 532,
+      "code": "R00.00.07.03.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 533,
+      "code": "R00.00.07.04.00.000",
+      "name": "4/ Điều hoà nhiệt độ 2 chiều các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 534,
+      "code": "R00.00.07.05.00.000",
+      "name": "5/ Tủ lạnh các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 535,
+      "code": "R00.00.07.05.00.001",
+      "name": "Tủ lạnh cá nhân. dung tích 80L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 536,
+      "code": "R00.00.07.05.00.002",
+      "name": "Tủ lạnh dung tích 120L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 537,
+      "code": "R00.00.07.05.00.003",
+      "name": "Tủ lạnh dung tích 150L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 538,
+      "code": "R00.00.07.05.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 539,
+      "code": "R00.00.07.06.00.000",
+      "name": "6/ Quạt điện",
+      "unitRaw": null
+    },
+    {
+      "stt": 540,
+      "code": "R00.00.07.06.01.000",
+      "name": "Quạt trần",
+      "unitRaw": null
+    },
+    {
+      "stt": 541,
+      "code": "R00.00.07.06.01.001",
+      "name": "Quạt trần thông thường các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 542,
+      "code": "R00.00.07.06.01.002",
+      "name": "Quạt trần xoay, có lồng các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 543,
+      "code": "R00.00.07.06.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 544,
+      "code": "R00.00.07.06.02.000",
+      "name": "Quạt treo tường các loại",
+      "unitRaw": null
+    },
+    {
+      "stt": 545,
+      "code": "R00.00.07.06.03.000",
+      "name": "Quạt cây đứng các loại",
+      "unitRaw": null
+    },
+    {
+      "stt": 546,
+      "code": "R00.00.07.06.04.000",
+      "name": "Quạt thông gió các loại",
+      "unitRaw": null
+    },
+    {
+      "stt": 547,
+      "code": "R00.00.07.06.04.001",
+      "name": "Quạt thông gió công nghiệp, công suất 1,1kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 548,
+      "code": "R00.00.07.06.04.002",
+      "name": "Quạt thông gió công nghiệp, công suất 1,5kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 549,
+      "code": "R00.00.07.06.04.003",
+      "name": "Quạt thông gió công nghiệp, công suất 2,2kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 550,
+      "code": "R00.00.07.06.04.004",
+      "name": "Quạt thông gió công nghiệp, công suất 3,4kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 551,
+      "code": "R00.00.07.06.04.005",
+      "name": "Quạt thông gió công nghiệp, công suất 25kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 552,
+      "code": "R00.00.07.06.04.006",
+      "name": "Quạt thông gió công nghiệp, công suất 30kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 553,
+      "code": "R00.00.07.06.04.007",
+      "name": "Quạt thông gió công nghiệp, công suất 40kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 554,
+      "code": "R00.00.07.06.04.008",
+      "name": "Quạt thông gió công nghiệp, công suất 3,5kw÷30kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 555,
+      "code": "R00.00.07.06.04.009",
+      "name": "Quạt thông gió công nghiệp, công suất > 30kw",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 556,
+      "code": "R00.00.07.06.04.010",
+      "name": "Quạt thông gió thông thường công suất ≤ 50w",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 557,
+      "code": "R00.00.07.06.04.011",
+      "name": "Quạt thông gió thông thường công suất > 50w",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 558,
+      "code": "R00.00.07.06.04.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 559,
+      "code": "R00.00.07.06.05.000",
+      "name": "Quạt bàn",
+      "unitRaw": null
+    },
+    {
+      "stt": 560,
+      "code": "R00.00.07.06.05.001",
+      "name": "Quạt bàn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 561,
+      "code": "R00.00.07.06.05.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 562,
+      "code": "R00.00.07.07.00.000",
+      "name": "7/ Vật tư điện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 563,
+      "code": "R00.00.07.07.00.001",
+      "name": "Bóng đèn tròn 20W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 564,
+      "code": "R00.00.07.07.00.002",
+      "name": "Bóng đèn tròn 50W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 565,
+      "code": "R00.00.07.07.00.003",
+      "name": "Bóng đèn led âm trần 12W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 566,
+      "code": "R00.00.07.07.00.004",
+      "name": "Bóng đèn led 1,2m; 18W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 567,
+      "code": "R00.00.07.07.00.005",
+      "name": "Bóng đèn led 15W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 568,
+      "code": "R00.00.07.07.00.006",
+      "name": "Bóng đèn led 7W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 569,
+      "code": "R00.00.07.07.00.007",
+      "name": "Bóng Compac 7W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 570,
+      "code": "R00.00.07.07.00.008",
+      "name": "Bóng Compac 15W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 571,
+      "code": "R00.00.07.07.00.009",
+      "name": "Dây điện 2x2,5mm",
+      "unitRaw": "M"
+    },
+    {
+      "stt": 572,
+      "code": "R00.00.07.07.00.010",
+      "name": "Dây điện 2x1,5mm",
+      "unitRaw": "M"
+    },
+    {
+      "stt": 573,
+      "code": "R00.00.07.07.00.011",
+      "name": "Dây điện 2x0,75mm",
+      "unitRaw": "M"
+    },
+    {
+      "stt": 574,
+      "code": "R00.00.07.07.00.012",
+      "name": "Aptomat 1 cực 20A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 575,
+      "code": "R00.00.07.07.00.013",
+      "name": "Aptomat 2 cực 20A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 576,
+      "code": "R00.00.07.07.00.014",
+      "name": "Aptomat 1 cực 40-60A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 577,
+      "code": "R00.00.07.07.00.015",
+      "name": "Aptomat 2 cực 40-60A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 578,
+      "code": "R00.00.07.07.00.016",
+      "name": "Aptomat 3 pha LS250",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 579,
+      "code": "R00.00.07.07.00.017",
+      "name": "Ổ cắm đơn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 580,
+      "code": "R00.00.07.07.00.018",
+      "name": "Ổ cắm đôi",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 581,
+      "code": "R00.00.07.07.00.019",
+      "name": "Ổ cắm 3",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 582,
+      "code": "R00.00.07.07.00.020",
+      "name": "Hộp số quạt trần",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 583,
+      "code": "R00.00.07.07.00.021",
+      "name": "Triết áp quạt trần",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 584,
+      "code": "R00.00.07.07.00.022",
+      "name": "Đồng hồ điện 3 pha",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 585,
+      "code": "R00.00.07.07.00.023",
+      "name": "Đồng hồ điện 1 pha",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 586,
+      "code": "R00.00.07.07.00.024",
+      "name": "Van phao điện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 587,
+      "code": "R00.00.07.07.00.025",
+      "name": "Cầu dao điện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 588,
+      "code": "R00.00.07.07.00.026",
+      "name": "Công tắc điện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 589,
+      "code": "R00.00.07.07.00.027",
+      "name": "Đèn chùm",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 590,
+      "code": "R00.00.07.07.00.028",
+      "name": "Đèn led panel kích thước 300mmx1.200mm 48W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 591,
+      "code": "R00.00.07.07.00.029",
+      "name": "Đèn led panel kích thước 600mmx600mm 40W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 592,
+      "code": "R00.00.07.07.00.030",
+      "name": "Đèn pha led 50W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 593,
+      "code": "R00.00.07.07.00.031",
+      "name": "Đèn cao áp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 594,
+      "code": "R00.00.07.07.00.032",
+      "name": "Cột điện bê tông",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 595,
+      "code": "R00.00.07.07.00.033",
+      "name": "Dây cáp điện 3 pha",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 596,
+      "code": "R00.00.07.07.00.034",
+      "name": "Dây cáp điện 1 pha",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 597,
+      "code": "R00.00.07.07.00.035",
+      "name": "Dây điện đơn 1x1,0mm2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 598,
+      "code": "R00.00.07.07.00.036",
+      "name": "Dây điện đơn 1x1,5mm2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 599,
+      "code": "R00.00.07.07.00.037",
+      "name": "Dây điện đơn 1x2,5mm2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 600,
+      "code": "R00.00.07.07.00.038",
+      "name": "Dây điện đôi 2x4,0mm2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 601,
+      "code": "R00.00.07.07.00.039",
+      "name": "Dây điện đôi 2x6,0mm2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 602,
+      "code": "R00.00.07.07.00.040",
+      "name": "Dây đồng đỏ 3mm",
+      "unitRaw": "Kg"
+    },
+    {
+      "stt": 603,
+      "code": "R00.00.07.07.00.041",
+      "name": "Dây đồng đỏ 2,5mm",
+      "unitRaw": "Kg"
+    },
+    {
+      "stt": 604,
+      "code": "R00.00.07.07.00.042",
+      "name": "Đèn năng lượng mặt trời 40W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 605,
+      "code": "R00.00.07.07.00.043",
+      "name": "Đèn năng lượng mặt trời 80W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 606,
+      "code": "R00.00.07.07.00.044",
+      "name": "Đèn năng lượng mặt trời 120W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 607,
+      "code": "R00.00.07.07.00.045",
+      "name": "Đèn pha chiếu sáng 3000w",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 608,
+      "code": "R00.00.07.07.00.046",
+      "name": "Đèn pha chiếu sáng 2000w",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 609,
+      "code": "R00.00.07.07.00.047",
+      "name": "Đèn pha chiếu sáng 1000w",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 610,
+      "code": "R00.00.07.07.00.048",
+      "name": "Đèn pha chiếu sáng 750w",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 611,
+      "code": "R00.00.07.07.00.049",
+      "name": "Đèn pha chiếu sáng 500w",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 612,
+      "code": "R00.00.07.07.00.050",
+      "name": "Chấn lưu",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 613,
+      "code": "R00.00.07.07.00.051",
+      "name": "Mặt triết áp một lỗ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 614,
+      "code": "R00.00.07.07.00.052",
+      "name": "Mặt bịt trơn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 615,
+      "code": "R00.00.07.07.00.053",
+      "name": "Apttomat 1P 16A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 616,
+      "code": "R00.00.07.07.00.054",
+      "name": "Apttomat 1P 25A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 617,
+      "code": "R00.00.07.07.00.055",
+      "name": "Apttomat 1P 32A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 618,
+      "code": "R00.00.07.07.00.056",
+      "name": "Aptomat 1P 63A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 619,
+      "code": "R00.00.07.07.00.057",
+      "name": "Apttomat 2P 40A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 620,
+      "code": "R00.00.07.07.00.058",
+      "name": "Aptomat 3P 50A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 621,
+      "code": "R00.00.07.07.00.059",
+      "name": "Đèn LED ốp trần D300 24W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 622,
+      "code": "R00.00.07.07.00.060",
+      "name": "Đèn chống cận",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 623,
+      "code": "R00.00.07.07.00.061",
+      "name": "Đèn tích điện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 624,
+      "code": "R00.00.07.07.00.062",
+      "name": "Bóng đèn Led 60W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 625,
+      "code": "R00.00.07.07.00.063",
+      "name": "Bóng đèn Led 30W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 626,
+      "code": "R00.00.07.07.00.064",
+      "name": "Bóng đèn Led 20W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 627,
+      "code": "R00.00.07.07.00.065",
+      "name": "Bóng đèn Led 5W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 628,
+      "code": "R00.00.07.07.00.066",
+      "name": "Bóng đèn LED tuýp 0,6m 10W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 629,
+      "code": "R00.00.07.07.00.067",
+      "name": "Máng đèn LED Tube 2 bóng",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 630,
+      "code": "R00.00.07.07.00.068",
+      "name": "Máng đèn LED Tube 1 bóng",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 631,
+      "code": "R00.00.07.07.00.069",
+      "name": "Đui xoáy",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 632,
+      "code": "R00.00.07.07.00.070",
+      "name": "Phích cắm điện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 633,
+      "code": "R00.00.07.07.00.071",
+      "name": "Tụ quạt trần 2,5uf",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 634,
+      "code": "R00.00.07.07.00.072",
+      "name": "Vòng bi quạt trần",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 635,
+      "code": "R00.00.07.07.00.073",
+      "name": "Rơ le nhiệt 3 pha",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 636,
+      "code": "R00.00.07.07.00.074",
+      "name": "Khởi động từ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 637,
+      "code": "R00.00.07.07.00.075",
+      "name": "Công tắc các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 638,
+      "code": "R00.00.07.07.00.076",
+      "name": "Đèn năng lượng mặt trời, công suất ≤ 40W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 639,
+      "code": "R00.00.07.07.00.077",
+      "name": "Đèn năng lượng mặt trời, công suất từ 40W÷120W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 640,
+      "code": "R00.00.07.07.00.078",
+      "name": "Đèn pha chiếu sáng, công suất từ 500W ÷ 1000W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 641,
+      "code": "R00.00.07.07.00.079",
+      "name": "Đèn pha chiếu sáng, công suất từ 1000W ÷ 2000W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 642,
+      "code": "R00.00.07.07.00.080",
+      "name": "Đèn pha chiếu sáng công suất >2000W",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 643,
+      "code": "R00.00.07.07.00.081",
+      "name": "Chấn lưu đèn huỳnh quang",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 644,
+      "code": "R00.00.07.07.00.084",
+      "name": "Apttomat 1P công suất 20A÷50A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 645,
+      "code": "R00.00.07.07.00.085",
+      "name": "Apttomat 1P công suất > 50A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 646,
+      "code": "R00.00.07.07.00.086",
+      "name": "Apttomat 2P công suất 20A÷50A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 647,
+      "code": "R00.00.07.07.00.087",
+      "name": "Apttomat 2P công suất > 50A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 648,
+      "code": "R00.00.07.07.00.088",
+      "name": "Aptomat 3P công suất > 50A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 649,
+      "code": "R00.00.07.07.00.097",
+      "name": "Máng đèn LED Tube 2 bóng 1,2m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 650,
+      "code": "R00.00.07.07.00.098",
+      "name": "Máng đèn LED Tube 1 bóng 1,2m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 651,
+      "code": "R00.00.07.07.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 652,
+      "code": "R00.00.07.99.00.000",
+      "name": "8/ Các loại quạt khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 653,
+      "code": "R00.00.07.99.00.001",
+      "name": "Quạt cây các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 654,
+      "code": "R00.00.07.99.00.002",
+      "name": "Quạt trần đảo các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 655,
+      "code": "R00.00.07.99.00.003",
+      "name": "Quạt treo tường các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 656,
+      "code": "R00.00.07.99.00.004",
+      "name": "Quạt thông gió các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 657,
+      "code": "R00.00.07.99.00.999",
+      "name": "-Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 658,
+      "code": "R00.00.08.00.00.000",
+      "name": "VIII/Thiết bị phòng cháy, chữa cháy",
+      "unitRaw": null
+    },
+    {
+      "stt": 659,
+      "code": "R00.00.08.00.00.001",
+      "name": "Bơm chữa cháy các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 660,
+      "code": "R00.00.08.00.00.002",
+      "name": "Bình CO2",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 661,
+      "code": "R00.00.08.00.00.003",
+      "name": "Đầu báo cháy các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 662,
+      "code": "R00.00.08.00.00.004",
+      "name": "Chuông báo cháy các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 663,
+      "code": "R00.00.08.00.00.005",
+      "name": "Tủ trung tâm báo cháy các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 664,
+      "code": "R00.00.08.00.00.006",
+      "name": "Bình bọt các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 665,
+      "code": "R00.00.08.00.00.007",
+      "name": "Tủ chữa cháy",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 666,
+      "code": "R00.00.08.00.00.008",
+      "name": "Vòi chữa cháy",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 667,
+      "code": "R00.00.08.00.00.009",
+      "name": "Bình CO2 các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 668,
+      "code": "R00.00.08.00.00.010",
+      "name": "Các loại bình khí khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 669,
+      "code": "R00.00.08.00.00.999",
+      "name": "Thiết bị chữa cháy khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 670,
+      "code": "R00.00.09.00.00.000",
+      "name": "IX/ Phương tiện chống mối mọt",
+      "unitRaw": null
+    },
+    {
+      "stt": 671,
+      "code": "R00.00.09.00.00.001",
+      "name": "Bơm tay",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 672,
+      "code": "R00.00.09.00.00.002",
+      "name": "Máy phun thuốc trừ sâu",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 673,
+      "code": "R00.00.09.00.00.999",
+      "name": "Các phương tiện chống mối mọt khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 674,
+      "code": "R00.00.10.00.00.000",
+      "name": "X/ Doanh cụ",
+      "unitRaw": null
+    },
+    {
+      "stt": 675,
+      "code": "R00.00.10.01.00.000",
+      "name": "1/ Giường",
+      "unitRaw": null
+    },
+    {
+      "stt": 676,
+      "code": "R00.00.10.01.01.000",
+      "name": "1.1/ Giường gỗ nhóm IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 677,
+      "code": "R00.00.10.01.01.001",
+      "name": "Giường gỗ cán bộ (2,0 x 1,0)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 678,
+      "code": "R00.00.10.01.01.002",
+      "name": "Giường gỗ chiến sỹ 1 tầng (1,95 x 0,95)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 679,
+      "code": "R00.00.10.01.01.003",
+      "name": "Giường gỗ chiến sỹ 2 tầng (1,95 x 0,95)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 680,
+      "code": "R00.00.10.01.01.004",
+      "name": "Giường gỗ cán bộ 1,2 m (GGCB-Go-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 681,
+      "code": "R00.00.10.01.01.005",
+      "name": "Giường ván (ván + 2 mễ)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 682,
+      "code": "R00.00.10.01.01.006",
+      "name": "Giường gỗ (1m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 683,
+      "code": "R00.00.10.01.01.007",
+      "name": "Giường gỗ (1,2m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 684,
+      "code": "R00.00.10.01.01.008",
+      "name": "Giường môđéc đơn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 685,
+      "code": "R00.00.10.01.01.009",
+      "name": "Giường môđéc đôi",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 686,
+      "code": "R00.00.10.01.01.010",
+      "name": "Giường đôi thường",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 687,
+      "code": "R00.00.10.01.01.011",
+      "name": "Giường mô đéc đơn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 688,
+      "code": "R00.00.10.01.01.014",
+      "name": "Giường gỗ 1600x2000",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 689,
+      "code": "R00.00.10.01.01.015",
+      "name": "Giường gỗ cán bộ (1,6 x 2,0)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 690,
+      "code": "R00.00.10.01.01.016",
+      "name": "Giường gỗ cán bộ (2,0 x 1,2)m khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 691,
+      "code": "R00.00.10.01.01.017",
+      "name": "Giường gỗ cán bộ (2,0 x 1,4)mm",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 692,
+      "code": "R00.00.10.01.01.999",
+      "name": "Giường gỗ khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 693,
+      "code": "R00.00.10.01.02.000",
+      "name": "1.2/ Giường sắt",
+      "unitRaw": null
+    },
+    {
+      "stt": 694,
+      "code": "R00.00.10.01.02.001",
+      "name": "Giường chiến sỹ 2 tầng (GSCS2T-Sa-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 695,
+      "code": "R00.00.10.01.02.002",
+      "name": "Giường sắt chiến sỹ 1 tầng (GSCS1T-Sa-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 696,
+      "code": "R00.00.10.01.02.003",
+      "name": "Giường sắt bệnh viện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 697,
+      "code": "R00.00.10.01.02.004",
+      "name": "Giường sắt 2 tầng sắt V",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 698,
+      "code": "R00.00.10.01.02.005",
+      "name": "Giường sắt 2 tầng sắt hộp khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 699,
+      "code": "R00.00.10.01.02.999",
+      "name": "Giường sắt khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 700,
+      "code": "R00.00.10.01.99.000",
+      "name": "1.3/ Giường khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 701,
+      "code": "R00.00.10.02.00.000",
+      "name": "2/ Tủ",
+      "unitRaw": null
+    },
+    {
+      "stt": 702,
+      "code": "R00.00.10.02.01.000",
+      "name": "2.1/ Tủ gỗ nhóm IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 703,
+      "code": "R00.00.10.02.01.001",
+      "name": "Tủ gỗ đầu giường (1,0 x 0,6 x 0,45)m, gỗ tự nhiên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 704,
+      "code": "R00.00.10.02.01.002",
+      "name": "Tủ gỗ sỹ quan (1,83 x 1,0 x 0,5)m, gỗ tự nhiên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 705,
+      "code": "R00.00.10.02.01.003",
+      "name": "Tủ áo 3 buồng (TA3BGo-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 706,
+      "code": "R00.00.10.02.01.004",
+      "name": "Tủ áo gỗ 2 buồng (TA2BGo-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 707,
+      "code": "R00.00.10.02.01.005",
+      "name": "Tủ kệ Ti vi gỗ tự nhiên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 708,
+      "code": "R00.00.10.02.01.006",
+      "name": "Tủ tài liệu gỗ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 709,
+      "code": "R00.00.10.02.01.007",
+      "name": "Tủ áo gỗ các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 710,
+      "code": "R00.00.10.02.01.008",
+      "name": "Tủ đầu giường 500x500x450",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 711,
+      "code": "R00.00.10.02.01.009",
+      "name": "Tủ đầu giường (0,5 x 0,5 x 0,45)m, gỗ tự nhiên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 712,
+      "code": "R00.00.10.02.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 713,
+      "code": "R00.00.10.02.02.000",
+      "name": "2.2/ Tủ sắt",
+      "unitRaw": null
+    },
+    {
+      "stt": 714,
+      "code": "R00.00.10.02.02.001",
+      "name": "Tủ áo sỹ quan (1,83 x 1 x 0,55)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 715,
+      "code": "R00.00.10.02.02.002",
+      "name": "Tủ áo sỹ quan (1,83 x 1 x 0,50)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 716,
+      "code": "R00.00.10.02.02.003",
+      "name": "Tủ đựng tài liệu 2 buồng (1,83 x 1 x 0,5)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 717,
+      "code": "R00.00.10.02.02.004",
+      "name": "Tủ đựng tài liệu 4 buồng (1,83 x 1 x 0,5)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 718,
+      "code": "R00.00.10.02.02.005",
+      "name": "Tủ sắt, tủ đựng tài liệu 4 buồng (1,90 x 1,0 x 0,45)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 719,
+      "code": "R00.00.10.02.02.006",
+      "name": "Tủ sắt hòa phát 2 cánh",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 720,
+      "code": "R00.00.10.02.02.007",
+      "name": "Tủ sắt tài liệu 8 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 721,
+      "code": "R00.00.10.02.02.008",
+      "name": "Tủ sắt tài liệu 12 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 722,
+      "code": "R00.00.10.02.02.009",
+      "name": "Tủ sắt tài liệu 16 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 723,
+      "code": "R00.00.10.02.02.010",
+      "name": "Tủ tài liệu sắt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 724,
+      "code": "R00.00.10.02.02.011",
+      "name": "Tủ cá nhân (đầu giường)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 725,
+      "code": "R00.00.10.02.02.012",
+      "name": "Tủ tài liệu sắt (TTL-Sa-2021-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 726,
+      "code": "R00.00.10.02.02.013",
+      "name": "Tủ sắt, tủ đựng tài liệu 2 buồng (1,83 x 1,0 x 0,45)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 727,
+      "code": "R00.00.10.02.02.014",
+      "name": "Tủ sắt, Tủ tài liệu (TTL-Sa-2021-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 728,
+      "code": "R00.00.10.02.02.015",
+      "name": "Tủ tài liệu sắt 21 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 729,
+      "code": "R00.00.10.02.02.016",
+      "name": "Tủ tài liệu sắt 3 tầng (cửa kính)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 730,
+      "code": "R00.00.10.02.02.017",
+      "name": "Tủ tài liệu sắt 06 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 731,
+      "code": "R00.00.10.02.02.018",
+      "name": "Tủ tài liệu sắt 08 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 732,
+      "code": "R00.00.10.02.02.019",
+      "name": "Tủ tài liệu sắt 10 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 733,
+      "code": "R00.00.10.02.02.020",
+      "name": "Tủ tài liệu sắt 12 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 734,
+      "code": "R00.00.10.02.02.021",
+      "name": "Tủ tài liệu sắt 14 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 735,
+      "code": "R00.00.10.02.02.022",
+      "name": "Tủ tài liệu sắt 16 ngăn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 736,
+      "code": "R00.00.10.02.02.023",
+      "name": "Tủ đựng tài liệu 3 buồng, 9 ngăn (2,0x1,0x0,45)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 737,
+      "code": "R00.00.10.02.02.024",
+      "name": "Tủ đựng tài liệu 2 buồng, 6 ngăn (1,90x1,0x0,45)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 738,
+      "code": "R00.00.10.02.02.999",
+      "name": "Tủ sắt khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 739,
+      "code": "R00.00.10.02.03.000",
+      "name": "2.3/ Tủ gỗ công nghiệp",
+      "unitRaw": null
+    },
+    {
+      "stt": 740,
+      "code": "R00.00.10.02.03.001",
+      "name": "Tủ Tài liệu 3 buồng, gỗ công nhiệp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 741,
+      "code": "R00.00.10.02.03.002",
+      "name": "Tủ Tài liệu 4 buồng, gỗ công nghiệp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 742,
+      "code": "R00.00.10.02.03.003",
+      "name": "Tủ quần áo, gỗ công nghiệp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 743,
+      "code": "R00.00.10.02.03.004",
+      "name": "Tủ kệ Ti vi gỗ công nghiệp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 744,
+      "code": "R00.00.10.02.03.005",
+      "name": "Tủ Tài liệu 6 buồng, gỗ công nghiệp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 745,
+      "code": "R00.00.10.02.03.999",
+      "name": "Tủ gỗ công nghiệp khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 746,
+      "code": "R00.00.10.02.99.000",
+      "name": "2.4/ Tủ khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 747,
+      "code": "R00.00.10.02.99.001",
+      "name": "Tủ sách",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 748,
+      "code": "R00.00.10.02.99.002",
+      "name": "Két sắt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 749,
+      "code": "R00.00.10.02.99.003",
+      "name": "Tủ khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 750,
+      "code": "R00.00.10.02.99.004",
+      "name": "Tủ thuốc quân y",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 751,
+      "code": "R00.00.10.02.99.005",
+      "name": "Tủ đựng tài liệu 3 buồng, 9 ngăn (2,0x1,0x0,45)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 752,
+      "code": "R00.00.10.02.99.006",
+      "name": "Tủ đựng tài liệu 2 buồng, 6 ngăn (1,90x1,0x0,45)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 753,
+      "code": "R00.00.10.02.99.007",
+      "name": "Tủ tài liệu khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 754,
+      "code": "R00.00.10.02.99.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 755,
+      "code": "R00.00.10.03.00.000",
+      "name": "3/ Bàn",
+      "unitRaw": null
+    },
+    {
+      "stt": 756,
+      "code": "R00.00.10.03.01.000",
+      "name": "3.1/ Bàn gỗ nhóm IV",
+      "unitRaw": null
+    },
+    {
+      "stt": 757,
+      "code": "R00.00.10.03.01.001",
+      "name": "Bàn làm việc (1,2 x 0,7)m, bàn gỗ tự nhiên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 758,
+      "code": "R00.00.10.03.01.002",
+      "name": "Bàn làm việc (1,8 x 0,9)mm, bàn gỗ tự nhiên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 759,
+      "code": "R00.00.10.03.01.003",
+      "name": "Bàn họp- giao ban cấp c, d (BGBc,d Go-2016-TCHC )",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 760,
+      "code": "R00.00.10.03.01.004",
+      "name": "Bàn làm việc chỉ huy d (BLVCHd-Go-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 761,
+      "code": "R00.00.10.03.01.005",
+      "name": "Bàn làm việc trợ lý (BTL-Go-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 762,
+      "code": "R00.00.10.03.01.006",
+      "name": "Bàn hội trường (BHT-G-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 763,
+      "code": "R00.00.10.03.01.007",
+      "name": "Bàn làm việc chỉ huy Đội",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 764,
+      "code": "R00.00.10.03.01.008",
+      "name": "Bàn làm việc phân đội trưởng",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 765,
+      "code": "R00.00.10.03.01.009",
+      "name": "Bàn làm việc cấp b,c, trợ lý, nhân viên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 766,
+      "code": "R00.00.10.03.01.010",
+      "name": "Bàn hội trường",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 767,
+      "code": "R00.00.10.03.01.013",
+      "name": "Bàn uống nước gỗ tự nhiên kiểu dáng hiện đại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 768,
+      "code": "R00.00.10.03.01.014",
+      "name": "Bàn họp- giao ban cấp c, d (2,2 x 1,1 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 769,
+      "code": "R00.00.10.03.01.015",
+      "name": "Bàn làm việc chỉ huy d (1,6 x 0,75 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 770,
+      "code": "R00.00.10.03.01.016",
+      "name": "Bàn làm việc (1,6 x 0,8 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 771,
+      "code": "R00.00.10.03.01.017",
+      "name": "Bàn làm việc (1,25 x 0,6 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 772,
+      "code": "R00.00.10.03.01.018",
+      "name": "Bàn làm việc (0,8 x 0,6 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 773,
+      "code": "R00.00.10.03.01.019",
+      "name": "Bàn làm việc (1,8 x 0,8 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 774,
+      "code": "R00.00.10.03.01.020",
+      "name": "Bàn làm việc (1,4 x 0,7 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 775,
+      "code": "R00.00.10.03.01.021",
+      "name": "Bàn làm việc (4,0 x 1,5 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 776,
+      "code": "R00.00.10.03.01.022",
+      "name": "Bàn làm việc (308 x 1,5 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 777,
+      "code": "R00.00.10.03.01.023",
+      "name": "Bàn họp, giao ban (1,1 x 2,2)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 778,
+      "code": "R00.00.10.03.01.024",
+      "name": "Bàn làm việc trợ lý mẫu cũ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 779,
+      "code": "R00.00.10.03.01.025",
+      "name": "Bàn hội trường (1,2 x 0,6 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 780,
+      "code": "R00.00.10.03.01.026",
+      "name": "Bàn hội trường (1,8 x 0,6 x 0,75)m, bàn gỗ tự nhiên, nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 781,
+      "code": "R00.00.10.03.01.027",
+      "name": "Bàn họp, giao ban cấp c, d (mẫu cũ)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 782,
+      "code": "R00.00.10.03.01.028",
+      "name": "Bàn họp, giao ban cấp e, f",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 783,
+      "code": "R00.00.10.03.01.029",
+      "name": "Bàn gỗ kích thước (0,45 x 0,75 x 1,6)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 784,
+      "code": "R00.00.10.03.01.030",
+      "name": "Bàn gỗ kích thước (0,45 x 0,75 x 1,8)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 785,
+      "code": "R00.00.10.03.01.031",
+      "name": "Bàn uống nước gỗ tự nhiên, trạm khắc kiểu dáng cổ điển",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 786,
+      "code": "R00.00.10.03.01.032",
+      "name": "Bàn làm việc chỉ huy cấp Bộ Chỉ huy (2 x 1x 0,76)m, gỗ nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 787,
+      "code": "R00.00.10.03.01.033",
+      "name": "Bàn làm việc chi huy cấp e (1,6 x 0,6 x 0,75)m, gỗ nhóm IV",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 788,
+      "code": "R00.00.10.03.01.034",
+      "name": "Bàn tiếp khách phòng khánh tiết (1,2x0,6x0,55), gỗ TN",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 789,
+      "code": "R00.00.10.03.01.035",
+      "name": "Bàn làm việc của chỉ huy d trở lên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 790,
+      "code": "R00.00.10.03.01.036",
+      "name": "Bàn họp giao ban các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 791,
+      "code": "R00.00.10.03.01.999",
+      "name": "Bàn gỗ tự nhiên khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 792,
+      "code": "R00.00.10.03.03.000",
+      "name": "3.3/ Bàn gỗ tự nhiên",
+      "unitRaw": null
+    },
+    {
+      "stt": 793,
+      "code": "R00.00.10.03.03.001",
+      "name": "Bàn ăn tròn gỗ (2 lớp kính)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 794,
+      "code": "R00.00.10.03.03.002",
+      "name": "Bàn học viên chân sắt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 795,
+      "code": "R00.00.10.03.03.003",
+      "name": "Bộ bàn ghế (6 món)",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 796,
+      "code": "R00.00.10.03.03.004",
+      "name": "Bộ bàn uống nước (2 ghế)",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 797,
+      "code": "R00.00.10.03.03.005",
+      "name": "Bộ bàn uống nước (4 ghế)",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 798,
+      "code": "R00.00.10.03.03.006",
+      "name": "Bàn uống nước các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 799,
+      "code": "R00.00.10.03.03.008",
+      "name": "Bàn quây giao ban",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 800,
+      "code": "R00.00.10.03.03.009",
+      "name": "Bàn làm việc chỉ huy cấp Bộ Chỉ huy",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 801,
+      "code": "R00.00.10.03.03.010",
+      "name": "Bàn làm việc chi huy cấp e",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 802,
+      "code": "R00.00.10.03.03.011",
+      "name": "Bàn tiếp khách phòng khánh tiết",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 803,
+      "code": "R00.00.10.03.03.012",
+      "name": "Bàn ăn các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 804,
+      "code": "R00.00.10.03.03.013",
+      "name": "Bàn làm việc nhân viên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 805,
+      "code": "R00.00.10.03.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 806,
+      "code": "R00.00.10.03.04.000",
+      "name": "3.4 Bàn gỗ công nghiệp",
+      "unitRaw": null
+    },
+    {
+      "stt": 807,
+      "code": "R00.00.10.03.04.001",
+      "name": "Bàn để máy tính",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 808,
+      "code": "R00.00.10.03.04.002",
+      "name": "Bàn học viên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 809,
+      "code": "R00.00.10.03.04.003",
+      "name": "Bàn nghiệp vụ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 810,
+      "code": "R00.00.10.03.04.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 811,
+      "code": "R00.00.10.03.99.000",
+      "name": "3.2/ Bàn gỗ nhóm IV khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 812,
+      "code": "R00.00.10.03.99.001",
+      "name": "Bàn Inox tròn, đường kính 1,2m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 813,
+      "code": "R00.00.10.03.99.002",
+      "name": "Bàn Inox chữ nhật, kích thước 0,6 x 100 x 0,75m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 814,
+      "code": "R00.00.10.03.99.003",
+      "name": "Bàn gấp xếp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 815,
+      "code": "R00.00.10.03.99.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 816,
+      "code": "R00.00.10.04.00.000",
+      "name": "4/ Ghế",
+      "unitRaw": null
+    },
+    {
+      "stt": 817,
+      "code": "R00.00.10.04.01.000",
+      "name": "4.1/ Sa lông gỗ bọc giả gia có đệm các loại",
+      "unitRaw": null
+    },
+    {
+      "stt": 818,
+      "code": "R00.00.10.04.01.001",
+      "name": "Ghế tựa có đệm",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 819,
+      "code": "R00.00.10.04.01.002",
+      "name": "Ghế tựa ba nan",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 820,
+      "code": "R00.00.10.04.01.003",
+      "name": "Ghế Trợ lý (GTL-Go-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 821,
+      "code": "R00.00.10.04.01.004",
+      "name": "Ghế tựa uống nước gỗ tự nhiên",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 822,
+      "code": "R00.00.10.04.01.005",
+      "name": "Ghế gỗ trạm kiểu dáng cổ điển",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 823,
+      "code": "R00.00.10.04.01.006",
+      "name": "Ghế tựa gỗ có đệm, gỗ nhóm I, II",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 824,
+      "code": "R00.00.10.04.01.007",
+      "name": "Ghế tựa gỗ có đệm, gỗ nhóm III đến nhóm VI",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 825,
+      "code": "R00.00.10.04.01.008",
+      "name": "Ghế tựa gỗ khác (hội trường, phòng họp …)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 826,
+      "code": "R00.00.10.04.01.009",
+      "name": "Ghế đơn tay 15, ghế chủ tọa phòng họp (0,75x0,55x1)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 827,
+      "code": "R00.00.10.04.01.010",
+      "name": "Ghế đơn tay 12, ghế chủ tọa phòng họp (0,75x0,55x1)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 828,
+      "code": "R00.00.10.04.01.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 829,
+      "code": "R00.00.10.04.02.000",
+      "name": "4.2/ Ghế gỗ",
+      "unitRaw": null
+    },
+    {
+      "stt": 830,
+      "code": "R00.00.10.04.02.001",
+      "name": "Ghế tựa gỗ Hội trường",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 831,
+      "code": "R00.00.10.04.02.002",
+      "name": "Ghế trợ lý (GTL-Go 2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 832,
+      "code": "R00.00.10.04.02.003",
+      "name": "Ghế đơn tay 10, ghế chủ tọa phòng họp (0,75x0,55x0,1)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 833,
+      "code": "R00.00.10.04.02.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 834,
+      "code": "R00.00.10.04.03.000",
+      "name": "4.3/ Ghế đệm xoay",
+      "unitRaw": null
+    },
+    {
+      "stt": 835,
+      "code": "R00.00.10.04.03.001",
+      "name": "Ghế đệm xoay to",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 836,
+      "code": "R00.00.10.04.03.002",
+      "name": "Ghế đệm xoay nhỏ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 837,
+      "code": "R00.00.10.04.03.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 838,
+      "code": "R00.00.10.04.04.000",
+      "name": "4.4/ Ghế tựa sắt Xuân Hòa",
+      "unitRaw": null
+    },
+    {
+      "stt": 839,
+      "code": "R00.00.10.04.04.001",
+      "name": "Ghế tựa sắt Xuân Hòa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 840,
+      "code": "R00.00.10.04.04.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 841,
+      "code": "R00.00.10.04.07.000",
+      "name": "4.7/Ghế Inox",
+      "unitRaw": null
+    },
+    {
+      "stt": 842,
+      "code": "R00.00.10.04.07.001",
+      "name": "Ghế inox có tựa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 843,
+      "code": "R00.00.10.04.07.002",
+      "name": "Ghế inox không có tựa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 844,
+      "code": "R00.00.10.04.07.003",
+      "name": "Ghế tựa chân quỳ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 845,
+      "code": "R00.00.10.04.07.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 846,
+      "code": "R00.00.10.04.08.000",
+      "name": "4.8/Ghế liền bàn",
+      "unitRaw": null
+    },
+    {
+      "stt": 847,
+      "code": "R00.00.10.04.99.000",
+      "name": "4.5/ Ghế khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 848,
+      "code": "R00.00.10.04.99.001",
+      "name": "Ghế hội trường, ghế nhựa…",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 849,
+      "code": "R00.00.10.04.99.002",
+      "name": "Ghế tựa gỗ các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 850,
+      "code": "R00.00.10.04.99.003",
+      "name": "Ghế tựa sắt các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 851,
+      "code": "R00.00.10.04.99.004",
+      "name": "Ghế đẩu",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 852,
+      "code": "R00.00.10.04.99.005",
+      "name": "Ghế băng tựa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 853,
+      "code": "R00.00.10.04.99.006",
+      "name": "Xa lông đệm",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 854,
+      "code": "R00.00.10.04.99.007",
+      "name": "Xa lông mây",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 855,
+      "code": "R00.00.10.04.99.008",
+      "name": "Xa lông gỗ",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 856,
+      "code": "R00.00.10.04.99.009",
+      "name": "Ghế tựa gỗ có đệm",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 857,
+      "code": "R00.00.10.04.99.010",
+      "name": "Ghế tựa sắt có đệm",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 858,
+      "code": "R00.00.10.04.99.012",
+      "name": "Ghế hội trường",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 859,
+      "code": "R00.00.10.04.99.020",
+      "name": "Ghế nhựa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 860,
+      "code": "R00.00.10.04.99.021",
+      "name": "Ghế đệm xoay, chiều rộng đến 0,6m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 861,
+      "code": "R00.00.10.04.99.022",
+      "name": "Ghế đệm xoay, chiều rộng lớn hơn 0,6m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 862,
+      "code": "R00.00.10.04.99.023",
+      "name": "Ghế tựa sắt Xuân Hòa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 863,
+      "code": "R00.00.10.04.99.025",
+      "name": "Ghế đa năng (20.TK.GĐN-2020-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 864,
+      "code": "R00.00.10.04.99.026",
+      "name": "Ghế học viên chân sắt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 865,
+      "code": "R00.00.10.04.99.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 866,
+      "code": "R00.00.10.05.00.000",
+      "name": "5/ Phản gỗ",
+      "unitRaw": null
+    },
+    {
+      "stt": 867,
+      "code": "R00.00.10.06.00.000",
+      "name": "6/ Bục Phát biểu",
+      "unitRaw": null
+    },
+    {
+      "stt": 868,
+      "code": "R00.00.10.07.00.000",
+      "name": "7/ Bục để tượng Bác Hồ",
+      "unitRaw": null
+    },
+    {
+      "stt": 869,
+      "code": "R00.00.10.08.00.000",
+      "name": "8/ Giá các loại",
+      "unitRaw": null
+    },
+    {
+      "stt": 870,
+      "code": "R00.00.10.08.00.001",
+      "name": "Giá để sách các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 871,
+      "code": "R00.00.10.08.00.002",
+      "name": "Giá để dụng cụ các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 872,
+      "code": "R00.00.10.08.00.003",
+      "name": "Kệ lưu trữ hồ sơ (2x0,45x2)m",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 873,
+      "code": "R00.00.10.08.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 874,
+      "code": "R00.00.10.09.00.000",
+      "name": "9. Vật tư sửa chữa doanh cụ",
+      "unitRaw": null
+    },
+    {
+      "stt": 875,
+      "code": "R00.00.10.09.00.001",
+      "name": "Các loại khoá tủ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 876,
+      "code": "R00.00.10.09.00.002",
+      "name": "Các loại ray ngăn kéo",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 877,
+      "code": "R00.00.10.09.00.003",
+      "name": "Các loại khoá tay gạt cửa nhôm kính",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 878,
+      "code": "R00.00.10.09.00.004",
+      "name": "Cọc màn giường gỗ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 879,
+      "code": "R00.00.10.09.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 880,
+      "code": "R00.00.11.00.00.000",
+      "name": "XI/ Dụng cụ sinh hoạt bằng nhựa",
+      "unitRaw": null
+    },
+    {
+      "stt": 881,
+      "code": "R00.00.11.00.00.001",
+      "name": "Chậu giặt (CGnh-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 882,
+      "code": "R00.00.11.00.00.002",
+      "name": "Xô múc nước (XMN-Nh-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 883,
+      "code": "R00.00.11.00.00.003",
+      "name": "Chậu rửa mặt (CRM-Nh-2016-TCHC)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 884,
+      "code": "R00.00.11.00.00.004",
+      "name": "Chậu giặt bằng nhôm D600",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 885,
+      "code": "R00.00.11.00.00.005",
+      "name": "Chậu nhôm rửa mặt D370",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 886,
+      "code": "R00.00.11.00.00.006",
+      "name": "Xô múc nước bằng tôn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 887,
+      "code": "R00.00.11.00.00.007",
+      "name": "Chậu giặt bằng nhôm",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 888,
+      "code": "R00.00.11.00.00.008",
+      "name": "Chậu nhôm rửa mặt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 889,
+      "code": "R00.00.11.00.00.009",
+      "name": "Chậu nhựa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 890,
+      "code": "R00.00.11.00.00.010",
+      "name": "Chậu nhựa rửa mặt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 891,
+      "code": "R00.00.11.00.00.011",
+      "name": "Thùng đựng nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 892,
+      "code": "R00.00.11.00.00.012",
+      "name": "Xô nhựa múc nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 893,
+      "code": "R00.00.11.00.00.013",
+      "name": "Gáo múc nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 894,
+      "code": "R00.00.11.00.00.014",
+      "name": "Giá phơi quần áo",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 895,
+      "code": "R00.00.11.00.00.015",
+      "name": "Cây treo quần áo",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 896,
+      "code": "R00.00.11.00.00.016",
+      "name": "Móc áo treo inox",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 897,
+      "code": "R00.00.11.00.00.017",
+      "name": "Thùng rác nhựa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 898,
+      "code": "R00.00.11.00.00.018",
+      "name": "Chậu rửa (La va bô) các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 899,
+      "code": "R00.00.11.00.00.024",
+      "name": "Thùng nhựa 120L",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 900,
+      "code": "R00.00.11.00.00.025",
+      "name": "Ca nhựa múc nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 901,
+      "code": "R00.00.11.00.00.026",
+      "name": "Chổi quét nhựa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 902,
+      "code": "R00.00.11.00.00.027",
+      "name": "Chổi quét khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 903,
+      "code": "R00.00.11.00.00.999",
+      "name": "Các dụng cụ khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 904,
+      "code": "R00.00.12.00.00.000",
+      "name": "XII/ Hàng dự trữ SSCĐ theo Chỉ thị số 22/CT-TM và dùng chung HL",
+      "unitRaw": null
+    },
+    {
+      "stt": 905,
+      "code": "R00.00.12.01.00.000",
+      "name": "1/ Nhà bạt",
+      "unitRaw": null
+    },
+    {
+      "stt": 906,
+      "code": "R00.00.12.01.00.001",
+      "name": "Nhà bạt chỉ huy",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 907,
+      "code": "R00.00.12.01.00.002",
+      "name": "Nhà bạt Trung đội",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 908,
+      "code": "R00.00.12.01.00.003",
+      "name": "Nhà bạt Tiểu đội",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 909,
+      "code": "R00.00.12.01.00.004",
+      "name": "Nhà bạt Quân y S16A",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 910,
+      "code": "R00.00.12.01.00.005",
+      "name": "Nhà bạt Quân y S16B",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 911,
+      "code": "R00.00.12.01.00.006",
+      "name": "Nhà bạt diễn tập",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 912,
+      "code": "R00.00.12.01.00.008",
+      "name": "Nhà bạt trung đội SX1998",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 913,
+      "code": "R00.00.12.01.00.009",
+      "name": "Nhà bạt chỉ huy SX2007",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 914,
+      "code": "R00.00.12.01.00.010",
+      "name": "Nhà bạt Quân y S16A SX2015",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 915,
+      "code": "R00.00.12.01.00.011",
+      "name": "Nhà bạt Quân y S16B SX2015",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 916,
+      "code": "R00.00.12.01.00.012",
+      "name": "Nhà bạt diễn tập 96m2 QK7 SX2014",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 917,
+      "code": "R00.00.12.01.00.014",
+      "name": "Nhà bạt tiểu đội SX2003",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 918,
+      "code": "R00.00.12.01.00.015",
+      "name": "Nhà bạt tiểu đội SX 2004",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 919,
+      "code": "R00.00.12.01.00.016",
+      "name": "Nhà bạt tiểu đội TQ đồng bộ SX1996",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 920,
+      "code": "R00.00.12.01.00.017",
+      "name": "Nhà bạt tiểu đội SX2009 nhập 2010",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 921,
+      "code": "R00.00.12.01.00.020",
+      "name": "Nhà bạt diễn tập QK7 SX2005",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 922,
+      "code": "R00.00.12.01.00.021",
+      "name": "Nhà bạt chỉ huy SX1998",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 923,
+      "code": "R00.00.12.01.00.022",
+      "name": "Nhà bạt tiểu đội SX2011",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 924,
+      "code": "R00.00.12.01.00.024",
+      "name": "Nhà bạt Quân y S16A SX2002",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 925,
+      "code": "R00.00.12.01.00.025",
+      "name": "Nhà bạt Quân y S16A SX2005",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 926,
+      "code": "R00.00.12.01.00.026",
+      "name": "Nhà bạt Quân y S16B SX2005",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 927,
+      "code": "R00.00.12.01.00.032",
+      "name": "Nhà bạt tiểu đội TQ",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 928,
+      "code": "R00.00.12.01.00.033",
+      "name": "Nhà bạt diễn tập 96m2 Cty My Thanh Trình SX 2019",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 929,
+      "code": "R00.00.12.01.00.034",
+      "name": "Nhà bạt diễn tập 96m2 DM7 SX 2019",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 930,
+      "code": "R00.00.12.01.00.035",
+      "name": "Nhà bạt Quân y S16A SX2001",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 931,
+      "code": "R00.00.12.01.00.036",
+      "name": "Nhà bạt Quân y S16B SX2001",
+      "unitRaw": "bộ"
+    },
+    {
+      "stt": 932,
+      "code": "R00.00.12.01.00.037",
+      "name": "Nhà bạt diễn tập 16,5m2",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 933,
+      "code": "R00.00.12.01.00.038",
+      "name": "Nhà bạt diễn tập 24,5m2",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 934,
+      "code": "R00.00.12.01.00.039",
+      "name": "Nhà bạt diễn tập 24,75m2",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 935,
+      "code": "R00.00.12.01.00.040",
+      "name": "Nhà bạt cứu sinh 16,5 m²",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 936,
+      "code": "R00.00.12.01.00.041",
+      "name": "Nhà bạt cứu sinh 24,5 m²",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 937,
+      "code": "R00.00.12.01.00.042",
+      "name": "Nhà bạt cứu sinh 24,75 m²",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 938,
+      "code": "R00.00.12.01.00.999",
+      "name": "Nhà bạt khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 939,
+      "code": "R00.00.12.02.00.000",
+      "name": "2/ Bàn ghế gấp xếp",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 940,
+      "code": "R00.00.12.03.00.000",
+      "name": "3/ Can nhựa các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 941,
+      "code": "R00.00.12.03.00.001",
+      "name": "Can nhựa 20 lít",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 942,
+      "code": "R00.00.12.03.00.999",
+      "name": "Can nhựa khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 943,
+      "code": "R00.00.12.04.00.000",
+      "name": "4/ Gùi nhựa các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 944,
+      "code": "R00.00.12.05.00.000",
+      "name": "5/ Stéc các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 945,
+      "code": "R00.00.12.06.00.000",
+      "name": "6/ NILON dày",
+      "unitRaw": "m2"
+    },
+    {
+      "stt": 946,
+      "code": "R00.00.12.07.00.000",
+      "name": "7/ Máy phát điện",
+      "unitRaw": null
+    },
+    {
+      "stt": 947,
+      "code": "R00.00.12.07.00.001",
+      "name": "Máy phát điện công suất 20 KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 948,
+      "code": "R00.00.12.07.00.002",
+      "name": "Máy phát điện công suất 15 KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 949,
+      "code": "R00.00.12.07.00.003",
+      "name": "Máy phát điện công suất 10 KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 950,
+      "code": "R00.00.12.07.00.004",
+      "name": "Máy phát điện công suất 05 KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 951,
+      "code": "R00.00.12.07.00.005",
+      "name": "Máy phát điện công suất 03 KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 952,
+      "code": "R00.00.12.07.00.006",
+      "name": "Công suất 15KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 953,
+      "code": "R00.00.12.07.00.007",
+      "name": "Máy phát điện 10KVA (HY1200LE)",
+      "unitRaw": "cái"
+    },
+    {
+      "stt": 954,
+      "code": "R00.00.12.07.00.008",
+      "name": "Máy phát điện 3pha HT3I25, 250 KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 955,
+      "code": "R00.00.12.07.00.009",
+      "name": "Máy phát điện tự động, 110KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 956,
+      "code": "R00.00.12.07.00.010",
+      "name": "Máy phát điện tự động, 2,5KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 957,
+      "code": "R00.00.12.07.00.011",
+      "name": "Máy phát điện Đia mô, 2KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 958,
+      "code": "R00.00.12.07.00.012",
+      "name": "Máy phát điện, 5KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 959,
+      "code": "R00.00.12.07.00.013",
+      "name": "Máy phát điện 3pha HT, 800KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 960,
+      "code": "R00.00.12.07.00.014",
+      "name": "Máy phát điện EP650HT, 15KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 961,
+      "code": "R00.00.12.07.00.015",
+      "name": "Máy phát điện Vikyno, 15KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 962,
+      "code": "R00.00.12.07.00.016",
+      "name": "Máy phát điện 3pha HTI10, 110KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 963,
+      "code": "R00.00.12.07.00.017",
+      "name": "Máy phát điện, 388 KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 964,
+      "code": "R00.00.12.07.00.018",
+      "name": "Máy phát điện, 5KW",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 965,
+      "code": "R00.00.12.07.00.019",
+      "name": "Máy phát điện 3 pha, 500KVA",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 966,
+      "code": "R00.00.12.07.00.999",
+      "name": "Máy phát điện khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 967,
+      "code": "R00.00.12.08.00.000",
+      "name": "8/ Dầu thắp sáng",
+      "unitRaw": "Lít"
+    },
+    {
+      "stt": 968,
+      "code": "R00.00.12.09.00.000",
+      "name": "9/ Đèn bão",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 969,
+      "code": "R00.00.12.09.00.001",
+      "name": "Đèn bão",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 970,
+      "code": "R00.00.12.09.00.002",
+      "name": "Bóng đèn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 971,
+      "code": "R00.00.12.09.00.003",
+      "name": "Bấc đèn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 972,
+      "code": "R00.00.12.09.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 973,
+      "code": "R00.00.12.10.00.000",
+      "name": "10/ Bể mềm chứa nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 974,
+      "code": "R00.00.12.10.00.001",
+      "name": "Bể mềm chứa nước sạch loại 2 m3",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 975,
+      "code": "R00.00.12.10.00.002",
+      "name": "Bể mềm chứa nước sạch loại 5 m3",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 976,
+      "code": "R00.00.12.10.00.003",
+      "name": "Bể mềm chứa nước sạch loại 10 m3",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 977,
+      "code": "R00.00.12.10.00.999",
+      "name": "Bể mềm chứa nước lạnh loại khác",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 978,
+      "code": "R00.00.12.11.00.000",
+      "name": "11/Vật chất khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 979,
+      "code": "R00.00.12.11.00.001",
+      "name": "Thiết bị lọc nước CB2 nhập năm 2008",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 980,
+      "code": "R00.00.12.11.00.002",
+      "name": "Khuy nhà bạt nhựa",
+      "unitRaw": "kg"
+    },
+    {
+      "stt": 981,
+      "code": "R00.00.12.11.00.003",
+      "name": "Kính nhà bạt trung đội LX",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 982,
+      "code": "R00.00.12.11.00.004",
+      "name": "Kính nhà bạt tiểu đội LX",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 983,
+      "code": "R00.00.12.11.00.005",
+      "name": "Khung nhà bạt chỉ huy",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 984,
+      "code": "R00.00.12.11.00.006",
+      "name": "Bạt cách nhiệt trung đội",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 985,
+      "code": "R00.00.12.11.00.007",
+      "name": "Đèn pin đội đầu",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 986,
+      "code": "R00.00.12.11.00.008",
+      "name": "Đèn pin đa dụng chống nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 987,
+      "code": "R00.00.12.11.00.009",
+      "name": "Đèn ắc quy 12V",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 988,
+      "code": "R00.00.12.11.00.010",
+      "name": "Đèn ác quy đội đầu",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 989,
+      "code": "R00.00.12.11.00.011",
+      "name": "Đèn pin tiểu",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 990,
+      "code": "R00.00.12.11.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 991,
+      "code": "R00.00.12.12.00.000",
+      "name": "12/ Phuy các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 992,
+      "code": "R00.00.12.13.00.000",
+      "name": "13. Máy bơm theo bể mềm",
+      "unitRaw": null
+    },
+    {
+      "stt": 993,
+      "code": "R00.00.13.00.00.000",
+      "name": "XIII/ Hàng dự trữ nhiệm vụ đột xuất theo Quyết định số 921/QĐ-BQP ngày 30/3/2021 của Bộ Quốc phòng",
+      "unitRaw": null
+    },
+    {
+      "stt": 994,
+      "code": "R00.00.13.01.00.000",
+      "name": "1/ Nhà bạt",
+      "unitRaw": null
+    },
+    {
+      "stt": 995,
+      "code": "R00.00.13.01.00.001",
+      "name": "Nhà bạt diễn tập 96m2",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 996,
+      "code": "R00.00.13.01.00.002",
+      "name": "Nhà bạt tiểu đội",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 997,
+      "code": "R00.00.13.01.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 998,
+      "code": "R00.00.13.02.00.000",
+      "name": "2/ Giường sắt 2 tầng",
+      "unitRaw": null
+    },
+    {
+      "stt": 999,
+      "code": "R00.00.13.03.00.000",
+      "name": "3/ Dụng cụ sinh hoạt bằng nhựa",
+      "unitRaw": null
+    },
+    {
+      "stt": 1000,
+      "code": "R06.00.00.00.00.000",
+      "name": "XIV/ Thoát nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 1001,
+      "code": "R06.01.00.00.00.000",
+      "name": "Đường ống thoát nước",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1002,
+      "code": "R06.01.00.00.00.001",
+      "name": "Ống bê tông li tâm các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1003,
+      "code": "R06.01.00.00.00.002",
+      "name": "Ống nhựa thoát nước các loại",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1004,
+      "code": "R06.01.00.00.00.999",
+      "name": "-Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1005,
+      "code": "R06.02.00.00.00.000",
+      "name": "Rãnh thoát nước",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1006,
+      "code": "R06.02.00.00.00.001",
+      "name": "Rãnh thoát nước bê tông, có nắp",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1007,
+      "code": "R06.02.00.00.00.002",
+      "name": "Rãnh thoát nước bê tông, rãnh hở",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1008,
+      "code": "R06.02.00.00.00.003",
+      "name": "Rãnh thoát nước xây gạch, có nắp",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1009,
+      "code": "R06.02.00.00.00.004",
+      "name": "Rãnh thoát nước xây gạch, rãnh hở",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1010,
+      "code": "R06.02.00.00.00.999",
+      "name": "Các loại rãnh thoát nước khác (Rãnh đá, rãnh đất …)",
+      "unitRaw": null
+    },
+    {
+      "stt": 1011,
+      "code": "R06.03.00.00.00.000",
+      "name": "Hệ thống xử lý nước thải",
+      "unitRaw": "Hệ thống"
+    },
+    {
+      "stt": 1012,
+      "code": "R06.03.01.00.00.000",
+      "name": "Hệ thống xử lý nước thải công nghiệp",
+      "unitRaw": null
+    },
+    {
+      "stt": 1013,
+      "code": "R06.03.01.00.00.001",
+      "name": "Hệ thống xử lý nước thải công nghiệp (30m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1014,
+      "code": "R06.03.01.00.00.002",
+      "name": "Hệ thống xử lý nước thải công nghiệp (50m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1015,
+      "code": "R06.03.01.00.00.003",
+      "name": "Hệ thống xử lý nước thải công nghiệp (100m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1016,
+      "code": "R06.03.01.00.00.004",
+      "name": "Hệ thống xử lý nước thải công nghiệp (150m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1017,
+      "code": "R06.03.01.00.00.005",
+      "name": "Hệ thống xử lý nước thải công nghiệp (200m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1018,
+      "code": "R06.03.01.00.00.006",
+      "name": "Hệ thống xử lý nước thải công nghiệp (300m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1019,
+      "code": "R06.03.01.00.00.007",
+      "name": "Hệ thống xử lý nước thải công nghiệp (500m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1020,
+      "code": "R06.03.01.00.00.008",
+      "name": "Hệ thống xử lý nước thải công nghiệp (1000m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1021,
+      "code": "R06.03.01.00.00.009",
+      "name": "Hệ thống xử lý nước thải công nghiệp (1500m3/ngày đêm)",
+      "unitRaw": "HT"
+    },
+    {
+      "stt": 1022,
+      "code": "R06.03.01.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1023,
+      "code": "R06.03.02.00.00.000",
+      "name": "Hệ thống xử lý nước thải sinh hoạt",
+      "unitRaw": null
+    },
+    {
+      "stt": 1024,
+      "code": "R06.03.02.00.00.001",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (30m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1025,
+      "code": "R06.03.02.00.00.002",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (50m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1026,
+      "code": "R06.03.02.00.00.003",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (100m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1027,
+      "code": "R06.03.02.00.00.004",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (150m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1028,
+      "code": "R06.03.02.00.00.005",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (200m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1029,
+      "code": "R06.03.02.00.00.006",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (300m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1030,
+      "code": "R06.03.02.00.00.007",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (500m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1031,
+      "code": "R06.03.02.00.00.008",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (1000m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1032,
+      "code": "R06.03.02.00.00.009",
+      "name": "Hệ thống xử lý nước thải sinh hoạt (1500m3/ngày đêm)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1033,
+      "code": "R06.03.02.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1034,
+      "code": "R06.04.00.00.00.000",
+      "name": "Vật tư, thiết bị nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 1035,
+      "code": "R06.04.01.00.00.000",
+      "name": "Vật tư nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 1036,
+      "code": "R06.04.01.00.00.001",
+      "name": "Van đồng 1 chiều D32",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1037,
+      "code": "R06.04.01.00.00.002",
+      "name": "Tê nhựa D42",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1038,
+      "code": "R06.04.01.00.00.003",
+      "name": "Cút nhựa D42",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1039,
+      "code": "R06.04.01.00.00.004",
+      "name": "Ren ngoài nhựa D42",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1040,
+      "code": "R06.04.01.00.00.005",
+      "name": "Cút nhựa D34",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1041,
+      "code": "R06.04.01.00.00.006",
+      "name": "Ren ngoài nhựa D34",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1042,
+      "code": "R06.04.01.00.00.007",
+      "name": "Cút kẽm D25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1043,
+      "code": "R06.04.01.00.00.008",
+      "name": "Ren ngoài nhựa D110",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1044,
+      "code": "R06.04.01.00.00.009",
+      "name": "Bịt trơn nhựa D110",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1045,
+      "code": "R06.04.01.00.00.010",
+      "name": "Măng sông D90",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1046,
+      "code": "R06.04.01.00.00.011",
+      "name": "Ren ngoài nhựa hàn nhiệt D20",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1047,
+      "code": "R06.04.01.00.00.012",
+      "name": "Cút ren ngoài hàn nhiệt D20",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1048,
+      "code": "R06.04.01.00.00.013",
+      "name": "Cút ren ngoài hàn nhiệt D21",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1049,
+      "code": "R06.04.01.00.00.014",
+      "name": "Măng sông hàn nhiệt D20",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1050,
+      "code": "R06.04.01.00.00.015",
+      "name": "Thoát chậu rửa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1051,
+      "code": "R06.04.01.00.00.016",
+      "name": "Thoát tiểu treo",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1052,
+      "code": "R06.04.01.00.00.017",
+      "name": "Chậu rửa mặt C100",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1053,
+      "code": "R06.04.01.00.00.018",
+      "name": "Gương soi + Phụ kiện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1054,
+      "code": "R06.04.01.00.00.019",
+      "name": "Xí bệt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1055,
+      "code": "R06.04.01.00.00.020",
+      "name": "Xi phông chậu (nhựa)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1056,
+      "code": "R06.04.01.00.00.021",
+      "name": "Dây cấp chậu",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1057,
+      "code": "R06.04.01.00.00.022",
+      "name": "Vòi xịt bệt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1058,
+      "code": "R06.04.01.00.00.023",
+      "name": "Vòi chậu đơn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1059,
+      "code": "R06.04.01.00.00.024",
+      "name": "Vòi chậu đôi",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1060,
+      "code": "R06.04.01.00.00.025",
+      "name": "Vòi tắm hương sen",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1061,
+      "code": "R06.04.01.00.00.026",
+      "name": "Đồng hồ nước D32",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1062,
+      "code": "R06.04.01.00.00.027",
+      "name": "Đồng hồ nước D25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1063,
+      "code": "R06.04.01.00.00.028",
+      "name": "Van phao D25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1064,
+      "code": "R06.04.01.00.00.029",
+      "name": "Cút kẽm D27",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1065,
+      "code": "R06.04.01.00.00.030",
+      "name": "Măng sông ren ngoài D50",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1066,
+      "code": "R06.04.01.00.00.031",
+      "name": "Măng sông ren ngoài D32",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1067,
+      "code": "R06.04.01.00.00.032",
+      "name": "Măng sông nhựa D21",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1068,
+      "code": "R06.04.01.00.00.033",
+      "name": "Van nhựa D21",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1069,
+      "code": "R06.04.01.00.00.034",
+      "name": "Tê nhựa D21",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1070,
+      "code": "R06.04.01.00.00.035",
+      "name": "Chõ máy bơm D27",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1071,
+      "code": "R06.04.01.00.00.036",
+      "name": "Cút nhựa D27",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1072,
+      "code": "R06.04.01.00.00.037",
+      "name": "Đầu bịt D110PE",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1073,
+      "code": "R06.04.01.00.00.038",
+      "name": "Chõ gang D90",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1074,
+      "code": "R06.04.01.00.00.039",
+      "name": "Đai khởi thủy D110",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1075,
+      "code": "R06.04.01.00.00.040",
+      "name": "Vòi nhôm D15",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1076,
+      "code": "R06.04.01.00.00.041",
+      "name": "Van phao cơ D32",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1077,
+      "code": "R06.04.01.00.00.042",
+      "name": "Van phao cơ D20",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1078,
+      "code": "R06.04.01.00.00.043",
+      "name": "Van phao D100, D200",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1079,
+      "code": "R06.04.01.00.00.044",
+      "name": "Cánh bơm",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1080,
+      "code": "R06.04.01.00.00.045",
+      "name": "Vòng bi máy bơm nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1081,
+      "code": "R06.04.01.00.00.046",
+      "name": "Cần gạt nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1082,
+      "code": "R06.04.01.00.00.047",
+      "name": "Nút ấn tiểu treo (van xả tiểu nam)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1083,
+      "code": "R06.04.01.00.00.048",
+      "name": "Vòi gạt đồng MI ½",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1084,
+      "code": "R06.04.01.00.00.049",
+      "name": "Chân sen tắm Inox 304",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1085,
+      "code": "R06.04.01.00.00.050",
+      "name": "Bộ gạt xả bồn cầu gạt",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1086,
+      "code": "R06.04.01.00.00.051",
+      "name": "Bộ xả bồn cầu 2 nhấn",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1087,
+      "code": "R06.04.01.00.00.052",
+      "name": "Dây bát sen tắm các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1088,
+      "code": "R06.04.01.00.00.053",
+      "name": "Sợi đốt bình nóng lạnh",
+      "unitRaw": "Sợi"
+    },
+    {
+      "stt": 1089,
+      "code": "R06.04.01.00.00.054",
+      "name": "Rơ le bình nóng lạnh",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1090,
+      "code": "R06.04.01.00.00.055",
+      "name": "Van 1 chiều kẽm bình nóng lạnh",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1091,
+      "code": "R06.04.01.00.00.056",
+      "name": "Ghen điện nhựa cỡ trung",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1092,
+      "code": "R06.04.01.00.00.057",
+      "name": "Ống nhiệt lạnh PPR D20x2.3",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1093,
+      "code": "R06.04.01.00.00.058",
+      "name": "Ống nhiệt lạnh PPR D25x2.8",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1094,
+      "code": "R06.04.01.00.00.059",
+      "name": "Ống nhiệt lạnh PPR D32x2.9",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1095,
+      "code": "R06.04.01.00.00.060",
+      "name": "Ống nhiệt lạnh PPR D40x3.7",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1096,
+      "code": "R06.04.01.00.00.061",
+      "name": "Đầu nối thăng PPR D20",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1097,
+      "code": "R06.04.01.00.00.062",
+      "name": "Nối góc 90 độ ren trong PPR 20-1/2",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1098,
+      "code": "R06.04.01.00.00.063",
+      "name": "Nối ren trong PPR 20-1/2",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1099,
+      "code": "R06.04.01.00.00.064",
+      "name": "Ống nhựa uPVC D21 C2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1100,
+      "code": "R06.04.01.00.00.065",
+      "name": "Ống nhựa uPVC D27 C2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1101,
+      "code": "R06.04.01.00.00.066",
+      "name": "Ống nhựa uPVC D34 C2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1102,
+      "code": "R06.04.01.00.00.067",
+      "name": "Ống nhựa uPVC D42 C2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1103,
+      "code": "R06.04.01.00.00.068",
+      "name": "Nối góc ren trong uPVC PN10 21x1/2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1104,
+      "code": "R06.04.01.00.00.069",
+      "name": "Nối góc ren trong uPVC PN10 27x3/4",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1105,
+      "code": "R06.04.01.00.00.070",
+      "name": "Đầu nối ren trong uPVC PN10 21x1/2",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1106,
+      "code": "R06.04.01.00.00.072",
+      "name": "Đầu nối thẳng uPVC PN10 D21",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1107,
+      "code": "R06.04.01.00.00.073",
+      "name": "Đầu nối thẳng uPVC PN10 D27",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1108,
+      "code": "R06.04.01.00.00.074",
+      "name": "Đầu nối thẳng uPVC PN10 D34",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1109,
+      "code": "R06.04.01.00.00.075",
+      "name": "Đầu nối thẳng uPVC PN10 D42",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1110,
+      "code": "R06.04.01.00.00.076",
+      "name": "Nối góc 90 độ PE D25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1111,
+      "code": "R06.04.01.00.00.077",
+      "name": "Nối góc 90 độ PE D32",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1112,
+      "code": "R06.04.01.00.00.078",
+      "name": "Nối góc 90 độ PE D40",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1113,
+      "code": "R06.04.01.00.00.079",
+      "name": "Nối góc 90 độ PE D50",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1114,
+      "code": "R06.04.01.00.00.080",
+      "name": "Đầu nối thẳng PE D25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1115,
+      "code": "R06.04.01.00.00.081",
+      "name": "Đầu nối thẳng PE D40",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1116,
+      "code": "R06.04.01.00.00.082",
+      "name": "Đồng hồ nước D20",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1117,
+      "code": "R06.04.01.00.00.083",
+      "name": "Đồng hồ nước D15",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1118,
+      "code": "R06.04.01.00.00.084",
+      "name": "Van phao cơ đồng DN15",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1119,
+      "code": "R06.04.01.00.00.085",
+      "name": "Van phao cơ đồng DN25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1120,
+      "code": "R06.04.01.00.00.086",
+      "name": "Van phao cơ đồng DN40",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1121,
+      "code": "R06.04.01.00.00.087",
+      "name": "Van phao cơ đồng DN50",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1122,
+      "code": "R06.04.01.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1123,
+      "code": "R06.04.02.00.00.000",
+      "name": "Lavabo",
+      "unitRaw": null
+    },
+    {
+      "stt": 1124,
+      "code": "R06.04.02.00.00.001",
+      "name": "Lavabo gắn tường cả vòi chậu đôi",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1125,
+      "code": "R06.04.02.00.00.002",
+      "name": "Lavabo gắn tường cả vòi chậu đơn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1126,
+      "code": "R06.04.02.00.00.003",
+      "name": "Lavabo có chân cả vòi chậu đôi",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1127,
+      "code": "R06.04.02.00.00.004",
+      "name": "Lavabo có chân cả vòi chậu đơn",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1128,
+      "code": "R06.04.02.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1129,
+      "code": "R06.04.03.00.00.000",
+      "name": "Xí",
+      "unitRaw": null
+    },
+    {
+      "stt": 1130,
+      "code": "R06.04.03.00.00.001",
+      "name": "Xí bệt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1131,
+      "code": "R06.04.03.00.00.002",
+      "name": "Xí xổm",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1132,
+      "code": "R06.04.03.00.00.003",
+      "name": "Tiểu treo nam",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1133,
+      "code": "R06.04.03.00.00.004",
+      "name": "Tiểu nữ",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1134,
+      "code": "R06.04.03.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1135,
+      "code": "R06.04.04.00.00.000",
+      "name": "Sen tắm",
+      "unitRaw": null
+    },
+    {
+      "stt": 1136,
+      "code": "R06.04.04.00.00.001",
+      "name": "Sen tắm gắn tường đôi",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1137,
+      "code": "R06.04.04.00.00.002",
+      "name": "Sen tắm gắn tường đơn",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1138,
+      "code": "R06.04.04.00.00.003",
+      "name": "Sen tắm cây đôi",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1139,
+      "code": "R06.04.04.00.00.004",
+      "name": "Sen tắm cây đơn",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1140,
+      "code": "R06.04.04.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1141,
+      "code": "R06.04.05.00.00.000",
+      "name": "Bồn tắm",
+      "unitRaw": null
+    },
+    {
+      "stt": 1142,
+      "code": "R06.04.05.00.00.001",
+      "name": "Bốn tắm thường",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1143,
+      "code": "R06.04.05.00.00.002",
+      "name": "Bốn tắm cả sục",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1144,
+      "code": "R06.04.05.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1145,
+      "code": "R06.04.06.00.00.000",
+      "name": "Máy sấy",
+      "unitRaw": null
+    },
+    {
+      "stt": 1146,
+      "code": "R06.04.06.00.00.001",
+      "name": "Máy sấy tay gắn tường",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1147,
+      "code": "R06.04.06.00.00.002",
+      "name": "Máy sấy tóc",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1148,
+      "code": "R06.04.06.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1149,
+      "code": "R06.05.00.00.00.000",
+      "name": "Các loại hệ thống thoát nước khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1150,
+      "code": "R06.99.00.00.00.000",
+      "name": "Các loại hệ thống thoát nước khác (mương thoát nước …)",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1151,
+      "code": "R13.00.00.00.00.000",
+      "name": "XV/ Thiết bị nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 1152,
+      "code": "R13.01.00.00.00.000",
+      "name": "1. Vật tư nước",
+      "unitRaw": null
+    },
+    {
+      "stt": 1153,
+      "code": "R13.01.00.00.00.001",
+      "name": "Cánh quạt máy bơm nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1154,
+      "code": "R13.01.00.00.00.002",
+      "name": "Vòng bi máy bơm nước",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1155,
+      "code": "R13.01.00.00.00.003",
+      "name": "Nút ấn tiểu treo (van xả tiểu nam)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1156,
+      "code": "R13.01.00.00.00.004",
+      "name": "Vòi gạt đồng MI ½",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1157,
+      "code": "R13.01.00.00.00.005",
+      "name": "Chân sen tắm Inox 304",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1158,
+      "code": "R13.01.00.00.00.006",
+      "name": "Bộ gạt xả bồn cầu gạt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1159,
+      "code": "R13.01.00.00.00.007",
+      "name": "Bộ xả bồn cầu 2 nhấn",
+      "unitRaw": "Bộ"
+    },
+    {
+      "stt": 1160,
+      "code": "R13.01.00.00.00.008",
+      "name": "Dây bát sen tắm các loại",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1161,
+      "code": "R13.01.00.00.00.009",
+      "name": "Sợi đốt bình nóng lạnh",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1162,
+      "code": "R13.01.00.00.00.010",
+      "name": "Rơ le bình nóng lạnh",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1163,
+      "code": "R13.01.00.00.00.011",
+      "name": "Van 1 chiều kẽm bình nóng lạnh",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1164,
+      "code": "R13.01.00.00.00.012",
+      "name": "Ghen điện nhựa cỡ trung",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1165,
+      "code": "R13.01.00.00.00.013",
+      "name": "Ống nhiệt lạnh PPR D20x2.3",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1166,
+      "code": "R13.01.00.00.00.014",
+      "name": "Ống nhiệt lạnh PPR D25x2.8",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1167,
+      "code": "R13.01.00.00.00.015",
+      "name": "Ống nhiệt lạnh PPR D32x2.9",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1168,
+      "code": "R13.01.00.00.00.016",
+      "name": "Ống nhiệt lạnh PPR D40x3.7",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1169,
+      "code": "R13.01.00.00.00.017",
+      "name": "Đầu nối thăng PPR D20",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1170,
+      "code": "R13.01.00.00.00.018",
+      "name": "Nối góc 90 độ ren trong PPR 20-1/2",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1171,
+      "code": "R13.01.00.00.00.019",
+      "name": "Nối ren trong PPR 20-1/2",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1172,
+      "code": "R13.01.00.00.00.020",
+      "name": "Ống nhựa uPVC D21 C2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1173,
+      "code": "R13.01.00.00.00.021",
+      "name": "Ống nhựa uPVC D27 C2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1174,
+      "code": "R13.01.00.00.00.022",
+      "name": "Ống nhựa uPVC D34 C2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1175,
+      "code": "R13.01.00.00.00.023",
+      "name": "Ống nhựa uPVC D42 C2",
+      "unitRaw": "m"
+    },
+    {
+      "stt": 1176,
+      "code": "R13.01.00.00.00.024",
+      "name": "Nối góc ren trong uPVC PN10 21x1/2",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1177,
+      "code": "R13.01.00.00.00.025",
+      "name": "Nối góc ren trong uPVC PN10 27x3/4",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1178,
+      "code": "R13.01.00.00.00.026",
+      "name": "Đầu nối ren trong uPVC PN10 21x1/2",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1179,
+      "code": "R13.01.00.00.00.027",
+      "name": "Đầu nối thẳng uPVC PN10 D21",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1180,
+      "code": "R13.01.00.00.00.028",
+      "name": "Đầu nối thẳng uPVC PN10 D27",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1181,
+      "code": "R13.01.00.00.00.029",
+      "name": "Đầu nối thẳng uPVC PN10 D34",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1182,
+      "code": "R13.01.00.00.00.030",
+      "name": "Đầu nối thẳng uPVC PN10 D42",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1183,
+      "code": "R13.01.00.00.00.031",
+      "name": "Nối góc 90 độ PE D25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1184,
+      "code": "R13.01.00.00.00.032",
+      "name": "Nối góc 90 độ PE D32",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1185,
+      "code": "R13.01.00.00.00.033",
+      "name": "Nối góc 90 độ PE D40",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1186,
+      "code": "R13.01.00.00.00.034",
+      "name": "Nối góc 90 độ PE D50",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1187,
+      "code": "R13.01.00.00.00.035",
+      "name": "Đầu nối thẳng PE D25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1188,
+      "code": "R13.01.00.00.00.036",
+      "name": "Đầu nối thẳng PE D40",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1189,
+      "code": "R13.01.00.00.00.037",
+      "name": "Đồng hồ nước D20",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1190,
+      "code": "R13.01.00.00.00.038",
+      "name": "Đồng hồ nước D15",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1191,
+      "code": "R13.01.00.00.00.039",
+      "name": "Van phao cơ đồng DN15",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1192,
+      "code": "R13.01.00.00.00.040",
+      "name": "Van phao cơ đồng DN25",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1193,
+      "code": "R13.01.00.00.00.041",
+      "name": "Van phao cơ đồng DN40",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1194,
+      "code": "R13.01.00.00.00.042",
+      "name": "Van phao cơ đồng DN50",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1195,
+      "code": "R13.01.00.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1196,
+      "code": "R14.00.00.00.00.000",
+      "name": "XVI/ Máy, thiết bị xây dựng",
+      "unitRaw": null
+    },
+    {
+      "stt": 1197,
+      "code": "R14.01.00.00.00.000",
+      "name": "Máy, thiết bị vận chuyển",
+      "unitRaw": null
+    },
+    {
+      "stt": 1198,
+      "code": "R14.01.01.00.00.000",
+      "name": "Máy, thiết bị vận chuyển ngang",
+      "unitRaw": null
+    },
+    {
+      "stt": 1199,
+      "code": "R14.01.01.00.00.001",
+      "name": "Xe bò",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1200,
+      "code": "R14.01.01.00.00.002",
+      "name": "Xe rùa",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1201,
+      "code": "R14.01.01.00.00.003",
+      "name": "Xe tải",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1202,
+      "code": "R14.01.01.00.00.004",
+      "name": "Máy kéo",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1203,
+      "code": "R14.01.01.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1204,
+      "code": "R14.01.02.00.00.000",
+      "name": "Máy, thiết bị vận chuyển đứng",
+      "unitRaw": null
+    },
+    {
+      "stt": 1205,
+      "code": "R14.01.02.00.00.001",
+      "name": "Bu lăng xích",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1206,
+      "code": "R14.01.02.00.00.002",
+      "name": "Máy tời",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1207,
+      "code": "R14.01.02.00.00.003",
+      "name": "Thang nâng tự hành (chiều cao làm việc <8m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1208,
+      "code": "R14.01.02.00.00.004",
+      "name": "Thang nâng tự hành (chiều cao làm việc 8-14m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1209,
+      "code": "R14.01.02.00.00.005",
+      "name": "Thang nâng tự hành (chiều cao làm việc 15-30m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1210,
+      "code": "R14.01.02.00.00.006",
+      "name": "Thang nâng tự hành (chiều cao làm việc >31m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1211,
+      "code": "R14.01.02.00.00.007",
+      "name": "Xe nâng (chiều cao làm việc <10m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1212,
+      "code": "R14.01.02.00.00.008",
+      "name": "Xe nâng (chiều cao làm việc 11-20m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1213,
+      "code": "R14.01.02.00.00.009",
+      "name": "Xe nâng (chiều cao làm việc 21-40m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1214,
+      "code": "R14.01.02.00.00.010",
+      "name": "Xe nâng (chiều cao làm việc >41m)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1215,
+      "code": "R14.01.02.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1216,
+      "code": "R14.02.00.00.00.000",
+      "name": "Máy, thiết bị làm đất",
+      "unitRaw": null
+    },
+    {
+      "stt": 1217,
+      "code": "R14.02.01.00.00.000",
+      "name": "Máy đào",
+      "unitRaw": null
+    },
+    {
+      "stt": 1218,
+      "code": "R14.02.01.00.00.001",
+      "name": "Máy đào gầu thuận bánh xích",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1219,
+      "code": "R14.02.01.00.00.002",
+      "name": "Máy đào gầu nghịch bánh xích",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1220,
+      "code": "R14.02.01.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1221,
+      "code": "R14.02.02.00.00.000",
+      "name": "Máy đào vận chuyển đất",
+      "unitRaw": null
+    },
+    {
+      "stt": 1222,
+      "code": "R14.02.02.00.00.001",
+      "name": "Máy ủi bánh xích",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1223,
+      "code": "R14.02.02.00.00.002",
+      "name": "Máy san đất bánh lốp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1224,
+      "code": "R14.02.02.00.00.003",
+      "name": "Máy xúc lật bánh lốp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1225,
+      "code": "R14.02.02.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1226,
+      "code": "R14.02.03.00.00.000",
+      "name": "Máy dầm đất",
+      "unitRaw": null
+    },
+    {
+      "stt": 1227,
+      "code": "R14.02.03.00.00.001",
+      "name": "Máy lu bánh sắt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1228,
+      "code": "R14.02.03.00.00.002",
+      "name": "Máy lu bánh lốp",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1229,
+      "code": "R14.02.03.00.00.003",
+      "name": "Máy lu chân cừu",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1230,
+      "code": "R14.02.03.00.00.004",
+      "name": "Máy đầm cóc",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1231,
+      "code": "R14.02.03.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1232,
+      "code": "R14.03.00.00.00.000",
+      "name": "Máy, thiết bị sản xuất vật liệu",
+      "unitRaw": null
+    },
+    {
+      "stt": 1233,
+      "code": "R14.03.01.00.00.000",
+      "name": "Công tác sắt",
+      "unitRaw": null
+    },
+    {
+      "stt": 1234,
+      "code": "R14.03.01.00.00.001",
+      "name": "Máy cắt sắt",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1235,
+      "code": "R14.03.01.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1236,
+      "code": "R14.03.02.00.00.000",
+      "name": "Công tác bê tông",
+      "unitRaw": null
+    },
+    {
+      "stt": 1237,
+      "code": "R14.03.02.00.00.001",
+      "name": "Máy trộn bê tông",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1238,
+      "code": "R14.03.02.00.00.002",
+      "name": "Đầm dùi chạy điện",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1239,
+      "code": "R14.03.02.00.00.003",
+      "name": "Đầm dùi chạy xăng",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1240,
+      "code": "R14.03.02.00.00.004",
+      "name": "Xe chở bê tông",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1241,
+      "code": "R14.03.02.00.00.005",
+      "name": "Xe bơm bê tông",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1242,
+      "code": "R14.03.02.00.00.006",
+      "name": "Trạm trộn bê tông",
+      "unitRaw": "Trạm"
+    },
+    {
+      "stt": 1243,
+      "code": "R14.03.02.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1244,
+      "code": "R14.04.00.00.00.000",
+      "name": "Máy gia cố nền móng",
+      "unitRaw": null
+    },
+    {
+      "stt": 1245,
+      "code": "R14.04.00.00.00.001",
+      "name": "Máy đóng cọc",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1246,
+      "code": "R14.04.00.00.00.002",
+      "name": "Máy ép cọc",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1247,
+      "code": "R14.04.00.00.00.003",
+      "name": "Máy khoan nhồi cọc",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1248,
+      "code": "R14.04.00.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1249,
+      "code": "R15.00.00.00.00.000",
+      "name": "XVII/ Nhà che đậy khí tài đặc chủng",
+      "unitRaw": null
+    },
+    {
+      "stt": 1250,
+      "code": "R15.00.00.00.00.001",
+      "name": "Nhà 1 tầng, cột BTCT, tường gạch, kèo thép, mái tôn",
+      "unitRaw": "M2"
+    },
+    {
+      "stt": 1251,
+      "code": "R15.00.00.00.00.002",
+      "name": "Nhà 1 tầng, cột BTCT, kèo thép, mái tôn",
+      "unitRaw": "M2"
+    },
+    {
+      "stt": 1252,
+      "code": "R15.00.00.00.00.003",
+      "name": "Nhà 1 tầng, khung BTCT, trần BTCT, lợp tôn chống nóng",
+      "unitRaw": "M2"
+    },
+    {
+      "stt": 1253,
+      "code": "R15.00.00.00.00.004",
+      "name": "Nhà 1 tầng, khung thép tiền chế lắp ghép, mái tôn",
+      "unitRaw": "M2"
+    },
+    {
+      "stt": 1254,
+      "code": "R15.00.00.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1255,
+      "code": "R16.00.00.00.00.000",
+      "name": "XVIII/ Thang máy",
+      "unitRaw": null
+    },
+    {
+      "stt": 1256,
+      "code": "R16.01.00.00.00.000",
+      "name": "Thang máy chở người",
+      "unitRaw": null
+    },
+    {
+      "stt": 1257,
+      "code": "R16.01.00.00.00.001",
+      "name": "Thang máy chở người (250kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1258,
+      "code": "R16.01.00.00.00.002",
+      "name": "Thang máy chở người (350kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1259,
+      "code": "R16.01.00.00.00.003",
+      "name": "Thang máy chở người (500kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1260,
+      "code": "R16.01.00.00.00.004",
+      "name": "Thang máy chở người (750kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1261,
+      "code": "R16.01.00.00.00.005",
+      "name": "Thang máy chở người (1000kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1262,
+      "code": "R16.01.00.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1263,
+      "code": "R16.02.00.00.00.000",
+      "name": "Thang máy chở hàng",
+      "unitRaw": null
+    },
+    {
+      "stt": 1264,
+      "code": "R16.02.00.00.00.001",
+      "name": "Thang máy chở hàng (200kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1265,
+      "code": "R16.02.00.00.00.002",
+      "name": "Thang máy chở hàng (500kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1266,
+      "code": "R16.02.00.00.00.003",
+      "name": "Thang máy chở hàng (700kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1267,
+      "code": "R16.02.00.00.00.004",
+      "name": "Thang máy chở hàng (1000kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1268,
+      "code": "R16.02.00.00.00.005",
+      "name": "Thang máy chở hàng (2000kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1269,
+      "code": "R16.02.00.00.00.006",
+      "name": "Thang máy chở hàng (3000kg)",
+      "unitRaw": "Cái"
+    },
+    {
+      "stt": 1270,
+      "code": "R16.02.00.00.00.999",
+      "name": "Các loại khác",
+      "unitRaw": null
+    },
+    {
+      "stt": 1271,
+      "code": "R16.03.00.00.00.000",
+      "name": "Thang tời thực phẩm",
+      "unitRaw": null
+    }
+  ]
+}

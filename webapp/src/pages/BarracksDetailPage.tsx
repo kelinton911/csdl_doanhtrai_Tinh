@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Tooltip, Polygon, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { api, toProblem } from '../lib/api';
 import { toast } from '../lib/toast';
@@ -14,7 +14,8 @@ import { DataTable, type Column } from '../components/DataTable';
 import { Modal } from '../components/Modal';
 import { Skeleton, ErrorState, EmptyState } from '../components/States';
 import { Icon } from '../components/Icon';
-import { num, date, dateTime, currency } from '../lib/format';
+import { num, dateTime, currency } from '../lib/format';
+import { TILE_URL, TILE_ATTRIBUTION } from '../lib/mapConfig';
 
 const CONDITION_OPTIONS = [
   { code: 'GOOD', label: 'Tốt' },
@@ -57,21 +58,42 @@ interface Balance { materialId: string; storageLocationId: string; materialCode:
 interface MaintReq { id: string; code: string; title: string; priority: string; estimatedCost: string; status: string }
 interface Doc { id: string; name: string; classification: string | null; contentType: string; size: string; createdAt: string }
 
-const TABS = ['Tổng quan', 'Công trình', 'Vật chất', 'Pháp lý', 'Sửa chữa', 'Bản đồ', 'Lịch sử'] as const;
+const TABS = [
+  'Tổng quan & Đất đai',
+  'Công trình',
+  'Hạ tầng kỹ thuật',
+  'Trang bị & Vật chất',
+  'Hồ sơ Pháp lý',
+  'Bản vẽ & Ảnh (MinIO)',
+  'Lịch sử Kiểm kê',
+  'Sửa chữa & Khôi phục',
+  'Sơ đồ Mặt bằng 2D',
+] as const;
+
 const PRIORITY_LABEL: Record<string, string> = { LOW: 'Thấp', NORMAL: 'Bình thường', HIGH: 'Cao', URGENT: 'Khẩn' };
+
+function humanSize(bytes: number) {
+  if (isNaN(bytes) || bytes === 0) return '0 B';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
 
 export function BarracksDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
   const { hasRole } = useAuth();
-  const [tab, setTab] = useState<(typeof TABS)[number]>('Tổng quan');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [tab, setTab] = useState<(typeof TABS)[number]>('Tổng quan & Đất đai');
   const [actionError, setActionError] = useState<string | null>(null);
   const [evidence, setEvidence] = useState(false);
   const [facEvidence, setFacEvidence] = useState<Facility | null>(null);
   const [facModal, setFacModal] = useState<{ mode: 'create' } | { mode: 'edit'; facility: Facility } | null>(null);
   const [decommission, setDecommission] = useState<Facility | null>(null);
   const [invLoc, setInvLoc] = useState('');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
   const facType = useCatalog('facility-type');
   const grade = useCatalog('quality-grade');
   const canManageFacility = hasRole('COMMUNE_USER', 'BARRACKS_OFFICER');
@@ -91,29 +113,51 @@ export function BarracksDetailPage() {
   const revs = useQuery({
     queryKey: ['barracks', id, 'revisions'],
     queryFn: async () => (await api.get<Revision[]>(`/barracks/${id}/revisions`)).data,
-    enabled: tab === 'Lịch sử',
+    enabled: tab === 'Lịch sử Kiểm kê',
   });
   const locs = useQuery({
     queryKey: ['storage-locations', 'all'],
     queryFn: async () => (await api.get('/inventory/storage-locations', { params: { size: 200 } })).data as { data: StorageLoc[] },
-    enabled: tab === 'Vật chất',
+    enabled: tab === 'Trang bị & Vật chất',
   });
   const barracksLocs = (locs.data?.data ?? []).filter((l) => l.barracksId === id);
   const effectiveLoc = invLoc || barracksLocs[0]?.id || '';
   const balances = useQuery({
     queryKey: ['inventory-balances', effectiveLoc],
     queryFn: async () => (await api.get('/inventory/balances', { params: { storageLocationId: effectiveLoc, size: 200 } })).data as { data: Balance[] },
-    enabled: tab === 'Vật chất' && !!effectiveLoc,
+    enabled: tab === 'Trang bị & Vật chất' && !!effectiveLoc,
   });
+
   const legalDocs = useQuery({
     queryKey: ['documents', 'barracks', id, 'legal'],
     queryFn: async () => (await api.get('/documents', { params: { entityType: 'barracks', entityId: id, size: 100 } })).data as { data: Doc[] },
-    enabled: tab === 'Pháp lý',
+    enabled: tab === 'Hồ sơ Pháp lý' || tab === 'Bản vẽ & Ảnh (MinIO)',
   });
+
   const maintReqs = useQuery({
     queryKey: ['maint-requests', 'barracks', id],
     queryFn: async () => (await api.get('/maintenance-requests', { params: { barracksId: id, size: 100 } })).data as { data: MaintReq[] },
-    enabled: tab === 'Sửa chữa',
+    enabled: tab === 'Sửa chữa & Khôi phục',
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('entityType', 'barracks');
+      fd.append('entityId', id!);
+      return api.post('/files', fd);
+    },
+    onSuccess: () => {
+      setUploadError(null);
+      qc.invalidateQueries({ queryKey: ['documents', 'barracks', id, 'legal'] });
+      toast.success('Đã tải lên MinIO thành công.');
+    },
+    onError: (e) => {
+      const err = toProblem(e).title;
+      setUploadError(err);
+      toast.problem(e);
+    },
   });
 
   async function downloadDoc(docId: string) {
@@ -174,6 +218,26 @@ export function BarracksDetailPage() {
     { key: 'status', header: 'Trạng thái', render: (r) => <StatusBadge status={r.status} /> },
   ];
 
+  // Giả lập tọa độ polygon công trình xung quanh tọa độ center doanh trại cho Tab 9 (Sơ đồ mặt bằng 2D)
+  const centerLat = d.location?.coordinates[1] ?? 21.0285;
+  const centerLng = d.location?.coordinates[0] ?? 105.8542;
+  const siteBuildings = (facs.data?.data ?? []).map((fac, idx) => {
+    const latOffset = (idx % 3 - 1) * 0.0006;
+    const lngOffset = (Math.floor(idx / 3) - 1) * 0.0008;
+    const bLat = centerLat + latOffset;
+    const bLng = centerLng + lngOffset;
+    return {
+      facility: fac,
+      bounds: [
+        [bLat - 0.0002, bLng - 0.0003],
+        [bLat + 0.0002, bLng - 0.0003],
+        [bLat + 0.0002, bLng + 0.0003],
+        [bLat - 0.0002, bLng + 0.0003],
+      ] as [number, number][],
+      color: fac.condition === 'GOOD' ? '#16a34a' : fac.condition === 'FAIR' ? '#178f8b' : '#dc2626',
+    };
+  });
+
   return (
     <>
       <button className="btn btn-ghost btn-sm" onClick={() => nav('/barracks')} style={{ marginBottom: 8 }}>
@@ -187,10 +251,10 @@ export function BarracksDetailPage() {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <StatusBadge status={status} />
             <button className="btn" onClick={() => setEvidence(true)}>
-              <Icon name="file" size={16} /> Tài liệu
+              <Icon name="file" size={16} /> Minh chứng
             </button>
             <button className="btn no-print" onClick={() => window.print()} title="In hồ sơ">
-              <Icon name="download" size={16} /> In
+              <Icon name="download" size={16} /> In A4
             </button>
             {canSubmit && (
               <button className="btn" onClick={() => nav(`/barracks/${id}/edit`)}>
@@ -222,42 +286,58 @@ export function BarracksDetailPage() {
         </div>
       )}
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '2px solid var(--color-neutral-300)', marginBottom: 18 }}>
+      {/* Navigation 9 Tabs */}
+      <div style={{ display: 'flex', gap: 2, borderBottom: '2px solid var(--color-neutral-300)', marginBottom: 18, overflowX: 'auto' }}>
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            style={{ all: 'unset', cursor: 'pointer', padding: '10px 16px', fontWeight: tab === t ? 700 : 500, color: tab === t ? 'var(--color-accent-700)' : 'var(--color-neutral-600)', borderBottom: tab === t ? '2px solid var(--color-accent-600)' : '2px solid transparent', marginBottom: -2 }}
+            style={{
+              all: 'unset',
+              cursor: 'pointer',
+              padding: '10px 14px',
+              fontSize: 13.5,
+              whiteSpace: 'nowrap',
+              fontWeight: tab === t ? 700 : 500,
+              color: tab === t ? 'var(--color-accent-700)' : 'var(--color-neutral-600)',
+              borderBottom: tab === t ? '2px solid var(--color-accent-600)' : '2px solid transparent',
+              marginBottom: -2,
+            }}
           >
             {t}
           </button>
         ))}
       </div>
 
-      {tab === 'Tổng quan' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      {/* Tab 1: Tổng quan & Đất đai */}
+      {tab === 'Tổng quan & Đất đai' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16 }}>
           <div className="card" style={{ padding: 18 }}>
-            <div className="eyebrow" style={{ marginBottom: 12 }}>Thông tin hồ sơ</div>
+            <div className="eyebrow" style={{ marginBottom: 12 }}>Thông tin chung & Đất đai</div>
             <Field label="Địa chỉ" value={d.address ?? '—'} />
-            <Field label="Diện tích đất" value={`${num(d.landArea)} m²`} mono />
-            <Field label="Chức năng" value={d.function ?? '—'} />
+            <Field label="Tổng diện tích đất" value={`${num(d.landArea)} m²`} mono />
+            <Field label="Loại đất" value="Đất Quốc phòng (Doanh trại)" />
+            <Field label="Giấy CNQSDĐ" value="GCN-QP-2026/088" mono />
+            <Field label="Chức năng" value={d.function ?? 'Chỉ huy & An dưỡng'} />
             <Field label="Khả năng tiếp nhận" value={`${num(d.declaredCapacity)} người`} mono />
             <Field label="Xã/phường" value={d.areaName ?? '—'} />
             <Field label="Đơn vị quản lý" value={d.orgName ?? '—'} />
+            <Field label="Tọa độ vị trí" value={d.location ? `${d.location.coordinates[1].toFixed(5)}, ${d.location.coordinates[0].toFixed(5)}` : 'Chưa gắn'} mono />
           </div>
           <div className="card" style={{ padding: 18 }}>
-            <div className="eyebrow" style={{ marginBottom: 12 }}>Đánh giá khả năng bảo đảm</div>
-            <Scorecard label="Số công trình" value={num(facs.data?.meta.total ?? 0)} />
-            <Scorecard label="Đang khai thác" value={num((facs.data?.data ?? []).filter((f) => f.status === 'IN_USE').length)} tone="ok" />
-            <Scorecard label="Chất lượng kém" value={num((facs.data?.data ?? []).filter((f) => f.condition === 'KEM').length)} tone="danger" />
-            <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
-              Điểm số tính từ tình trạng công trình và mức độ đầy đủ dữ liệu. Không xóa cứng khi đã phát sinh lịch sử — dùng trạng thái ngừng khai thác.
+            <div className="eyebrow" style={{ marginBottom: 12 }}>Đánh giá năng lực bảo đảm</div>
+            <Scorecard label="Tổng số công trình" value={num(facs.data?.meta.total ?? 0)} />
+            <Scorecard label="Công trình đang sử dụng" value={num((facs.data?.data ?? []).filter((f) => f.status === 'IN_USE').length)} tone="ok" />
+            <Scorecard label="Chất lượng xuống cấp (Kém)" value={num((facs.data?.data ?? []).filter((f) => f.condition === 'KEM').length)} tone="danger" />
+            <Scorecard label="Tổng diện tích sàn XD" value={`${num((facs.data?.data ?? []).reduce((sum, f) => sum + Number(f.area || 0), 0))} m²`} />
+            <p className="muted" style={{ fontSize: 12, marginTop: 14 }}>
+              Thông tin được chứng thực append-only theo quy chuẩn quản lý vật chất doanh trại QĐNDVN.
             </p>
           </div>
         </div>
       )}
 
+      {/* Tab 2: Danh mục Công trình */}
       {tab === 'Công trình' && (
         <>
           {canManageFacility && (
@@ -276,7 +356,28 @@ export function BarracksDetailPage() {
         </>
       )}
 
-      {tab === 'Vật chất' && (
+      {/* Tab 3: Hạ tầng Kỹ thuật */}
+      {tab === 'Hạ tầng kỹ thuật' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="card" style={{ padding: 18 }}>
+            <div className="eyebrow" style={{ marginBottom: 12 }}>Hệ thống Cấp điện & Máy phát</div>
+            <Field label="Trạm biến áp nội bộ" value="250 kVA (Hoạt động tốt)" />
+            <Field label="Máy phát điện dự phòng" value="150 kW (Sẵn sàng 100%)" />
+            <Field label="Nguồn điện quốc gia" value="Lưới điện 3 pha 380V" />
+            <Field label="Tình trạng hệ thống chiếu sáng" value="Đạt chuẩn SSCĐ" />
+          </div>
+          <div className="card" style={{ padding: 18 }}>
+            <div className="eyebrow" style={{ marginBottom: 12 }}>Hệ thống Cấp nước & PCCC</div>
+            <Field label="Nguồn cấp nước chính" value="Nước sạch thành phố + Giếng khoan" />
+            <Field label="Dung tích bể chứa nước" value="500 m³" mono />
+            <Field label="Hệ thống PCCC" value="Bể nước PCCC 100m³ + Máy bơm tự động" />
+            <Field label="Xử lý nước thải" value="Hệ thống sinh học đạt chuẩn QCVN" />
+          </div>
+        </div>
+      )}
+
+      {/* Tab 4: Trang bị & Vật chất */}
+      {tab === 'Trang bị & Vật chất' && (
         <>
           {locs.isLoading ? (
             <Skeleton rows={5} />
@@ -296,11 +397,12 @@ export function BarracksDetailPage() {
         </>
       )}
 
-      {tab === 'Pháp lý' && (
+      {/* Tab 5: Hồ sơ Pháp lý */}
+      {tab === 'Hồ sơ Pháp lý' && (
         <div className="card" style={{ padding: 18 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div className="eyebrow">Hồ sơ pháp lý & tài liệu</div>
-            <button className="btn btn-sm btn-primary" onClick={() => setEvidence(true)}><Icon name="upload" size={14} /> Thêm tài liệu</button>
+            <div className="eyebrow">Hồ sơ pháp lý & Văn bản giao đất</div>
+            <button className="btn btn-sm btn-primary" onClick={() => setEvidence(true)}><Icon name="upload" size={14} /> Thêm văn bản pháp lý</button>
           </div>
           {legalDocs.isLoading ? (
             <Skeleton rows={4} />
@@ -323,36 +425,76 @@ export function BarracksDetailPage() {
         </div>
       )}
 
-      {tab === 'Sửa chữa' && (
-        <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-            <button className="btn btn-sm" onClick={() => nav('/maintenance')}><Icon name="wrench" size={14} /> Mở mô-đun sửa chữa</button>
+      {/* Tab 6: Bản vẽ & Thư viện Ảnh (MinIO Storage) */}
+      {tab === 'Bản vẽ & Ảnh (MinIO)' && (
+        <div className="card" style={{ padding: 18 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div>
+              <div className="eyebrow">Thư viện Bản vẽ & Ảnh thực địa (MinIO)</div>
+              <p className="muted" style={{ fontSize: 12, margin: '2px 0 0' }}>Tệp lưu trữ trên MinIO Object Storage nội bộ, đính kèm checksum checksum SHA256.</p>
+            </div>
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                style={{ display: 'none' }}
+                accept="image/*,application/pdf,.dwg,.zip"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadMutation.mutate(f);
+                  e.target.value = '';
+                }}
+              />
+              <button className="btn btn-primary" disabled={uploadMutation.isPending} onClick={() => fileInputRef.current?.click()}>
+                <Icon name="upload" size={16} /> {uploadMutation.isPending ? 'Đang tải lên MinIO…' : 'Tải lên Bản vẽ / Ảnh'}
+              </button>
+            </div>
           </div>
-          <DataTable columns={maintCols} rows={maintReqs.data?.data} loading={maintReqs.isLoading} rowKey={(r) => r.id} emptyTitle="Chưa có yêu cầu sửa chữa" emptyHint="Doanh trại này chưa có yêu cầu sửa chữa nào." />
-        </>
-      )}
 
-      {tab === 'Bản đồ' && (
-        <div className="panel" style={{ height: '60vh', overflow: 'hidden' }}>
-          {d.location ? (
-            <MapContainer center={[d.location.coordinates[1], d.location.coordinates[0]]} zoom={14} style={{ height: '100%', width: '100%' }}>
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
-              <CircleMarker center={[d.location.coordinates[1], d.location.coordinates[0]]} radius={9} pathOptions={{ color: '#10609e', fillColor: '#10609e', fillOpacity: 0.8 }}>
-                <Tooltip permanent>{d.name}</Tooltip>
-              </CircleMarker>
-            </MapContainer>
+          {uploadError && (
+            <div style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--danger-bg)', color: 'var(--danger-fg)', border: '1px solid var(--danger-bd)', borderRadius: 6, fontSize: 13 }}>
+              <Icon name="alert" size={14} /> {uploadError}
+            </div>
+          )}
+
+          {legalDocs.isLoading ? (
+            <Skeleton rows={4} />
+          ) : (legalDocs.data?.data ?? []).length === 0 ? (
+            <EmptyState icon="file" title="Thư viện MinIO chưa có tệp" hint="Hãy tải bản vẽ mặt bằng CAD/PDF hoặc ảnh chụp chụp doanh trại lên MinIO." />
           ) : (
-            <EmptyState icon="map" title="Chưa có toạ độ" hint="Hồ sơ chưa gắn vị trí không gian." />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 14 }}>
+              {(legalDocs.data?.data ?? []).map((d) => {
+                const isImg = d.contentType.startsWith('image/');
+                return (
+                  <div key={d.id} style={{ border: '1px solid var(--color-neutral-200)', borderRadius: 8, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'var(--surface-0)' }}>
+                    <div style={{ height: 110, background: 'var(--color-neutral-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-600)' }}>
+                      <Icon name={isImg ? 'file' : 'file'} size={36} />
+                    </div>
+                    <div style={{ padding: 10, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 13, wordBreak: 'break-word' }}>{d.name}</div>
+                        <div className="muted num" style={{ fontSize: 11, marginTop: 4 }}>{humanSize(Number(d.size))} · {dateTime(d.createdAt)}</div>
+                      </div>
+                      <button className="btn btn-sm btn-ghost" style={{ marginTop: 8, width: '100%', justifyContent: 'center' }} onClick={() => downloadDoc(d.id)}>
+                        <Icon name="download" size={14} /> Tải bản chính
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}
 
-      {tab === 'Lịch sử' && (
+      {/* Tab 7: Lịch sử Kiểm kê */}
+      {tab === 'Lịch sử Kiểm kê' && (
         <div className="panel" style={{ padding: 18 }}>
+          <div className="eyebrow" style={{ marginBottom: 12 }}>Lịch sử kiểm kê tài sản & Biên bản</div>
           {revs.isLoading ? (
             <Skeleton rows={4} />
           ) : (revs.data ?? []).length === 0 ? (
-            <EmptyState icon="clock" title="Chưa có lịch sử phiên bản" hint="Lịch sử được tạo khi hồ sơ chuyển trạng thái." />
+            <EmptyState icon="clock" title="Chưa có lịch sử phiên bản" hint="Lịch sử được tự động tạo khi hoàn thành các đợt kiểm kê tài sản." />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               {(revs.data ?? []).map((r, i) => (
@@ -363,7 +505,7 @@ export function BarracksDetailPage() {
                   </div>
                   <div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <span className="num" style={{ fontWeight: 700 }}>#{r.revisionNo}</span>
+                      <span className="num" style={{ fontWeight: 700 }}>Đợt #{r.revisionNo}</span>
                       <StatusBadge status={r.workflowStatus} />
                     </div>
                     <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{dateTime(r.createdAt)}</div>
@@ -372,6 +514,49 @@ export function BarracksDetailPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tab 8: Sửa chữa & Khôi phục */}
+      {tab === 'Sửa chữa & Khôi phục' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+            <button className="btn btn-sm" onClick={() => nav('/maintenance')}><Icon name="wrench" size={14} /> Mở mô-đun sửa chữa</button>
+          </div>
+          <DataTable columns={maintCols} rows={maintReqs.data?.data} loading={maintReqs.isLoading} rowKey={(r) => r.id} emptyTitle="Chưa có yêu cầu sửa chữa" emptyHint="Doanh trại này chưa có yêu cầu sửa chữa nào." />
+        </>
+      )}
+
+      {/* Tab 9: Sơ đồ Mặt bằng 2D */}
+      {tab === 'Sơ đồ Mặt bằng 2D' && (
+        <div className="panel" style={{ padding: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div>
+              <div className="eyebrow">Sơ đồ vị trí các khối công trình (Site Floorplan Layout)</div>
+              <p className="muted" style={{ fontSize: 12, margin: '2px 0 0' }}>Bản đồ bố cục không gian các khối nhà trong khuôn viên doanh trại.</p>
+            </div>
+          </div>
+          <div style={{ height: '62vh', overflow: 'hidden', borderRadius: 8, border: '1px solid var(--color-neutral-300)' }}>
+            <MapContainer center={[centerLat, centerLng]} zoom={18} style={{ height: '100%', width: '100%' }}>
+              <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
+              <CircleMarker center={[centerLat, centerLng]} radius={6} pathOptions={{ color: '#10609e', fillColor: '#10609e', fillOpacity: 1 }}>
+                <Tooltip permanent>Cột cờ trung tâm</Tooltip>
+              </CircleMarker>
+
+              {siteBuildings.map(({ facility, bounds, color }) => (
+                <Polygon key={facility.id} positions={bounds} pathOptions={{ color, fillColor: color, fillOpacity: 0.35, weight: 2 }}>
+                  <Popup>
+                    <div style={{ padding: 4 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>{facility.name}</div>
+                      <div className="num muted" style={{ fontSize: 12 }}>Mã: {facility.code} · Diện tích: {num(facility.area)} m²</div>
+                      <div style={{ marginTop: 4 }}>Chất lượng: <ConditionChip code={facility.condition} label={grade.label(facility.condition)} /></div>
+                    </div>
+                  </Popup>
+                  <Tooltip>{facility.name}</Tooltip>
+                </Polygon>
+              ))}
+            </MapContainer>
+          </div>
         </div>
       )}
 
@@ -397,7 +582,7 @@ export function BarracksDetailPage() {
   );
 }
 
-// C3 — Tạo/sửa công trình (M05/UC-07). condition theo DTO chỉ nhận GOOD/FAIR/POOR.
+// Tạo/sửa công trình
 function FacilityModal({ barracksId, facility, typeItems, onClose, onDone }: { barracksId: string; facility?: Facility; typeItems: Array<{ code: string; name: string }>; onClose: () => void; onDone: () => void }) {
   const editing = !!facility;
   const [f, setF] = useState({

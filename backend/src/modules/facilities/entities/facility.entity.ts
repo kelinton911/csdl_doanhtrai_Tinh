@@ -30,6 +30,17 @@ export class Facility {
   @Column({ name: 'type', type: 'varchar', nullable: true })
   type!: string | null;
 
+  // Mã trong TỔNG DANH MỤC TÀI SẢN NGÀNH DOANH TRẠI (Phụ lục CV 2837/DT-QLDT),
+  // các chương I–IV và XVII (đất, nhà, nhà kho-xưởng, vật kiến trúc, nhà che khí tài).
+  // Tham chiếu MỀM tới asset_catalog_items.code.
+  @Index()
+  @Column({ name: 'asset_code', type: 'varchar', nullable: true })
+  assetCode!: string | null;
+
+  // UNMAPPED | MAPPED | OUT_OF_SCOPE | PROPOSED
+  @Column({ name: 'asset_code_status', default: 'UNMAPPED' })
+  assetCodeStatus!: string;
+
   // Diện tích (m2) — numeric để đối chiếu chính xác, không dùng float.
   @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
   area!: string;

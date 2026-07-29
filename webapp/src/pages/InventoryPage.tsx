@@ -31,17 +31,20 @@ interface Balance {
 }
 interface Loc { id: string; code: string; name: string }
 
-// Vật chất và tồn kho (Frontend §6.7) — số sổ sách, kiểm kê, chênh lệch; ghi nhập/xuất/điều chỉnh.
+// Vật chất và tồn kho — số sổ sách, kiểm kê, chênh lệch; ghi nhập/xuất/điều chỉnh.
 export function InventoryPage() {
   const qc = useQueryClient();
   const { hasRole } = useAuth();
   const [page, setPage] = useState(1);
   const [loc, setLoc] = useState('');
+  const [viewMode, setViewMode] = useState<'NORMAL' | 'SSCD'>('NORMAL');
   const [txn, setTxn] = useState<{ balance: Balance; mode: 'IN' | 'OUT' | 'ADJUST' } | null>(null);
   const [ledger, setLedger] = useState<Balance | null>(null);
   const [creatingLoc, setCreatingLoc] = useState(false);
   const canManage = hasRole('BARRACKS_OFFICER', 'COMMUNE_USER', 'SYS_ADMIN');
   const size = 15;
+
+  const currentOpMode = window.localStorage.getItem('CSDL_OP_MODE') || 'NORMAL';
 
   const locations = useQuery({ queryKey: ['storage-locations'], queryFn: async () => (await api.get('/inventory/storage-locations', { params: { size: 200 } })).data as { data: Loc[] } });
   const q = useQuery({
@@ -75,7 +78,7 @@ export function InventoryPage() {
     { key: 'mname', header: 'Vật chất', render: (r) => <span style={{ fontWeight: 600 }}>{r.materialName}</span> },
     { key: 'loc', header: 'Kho', render: (r) => r.locationName },
     { key: 'unit', header: 'ĐVT', render: (r) => r.unitCode ?? '—' },
-    { key: 'onhand', header: 'Tồn sổ', render: (r) => num(r.onHand), align: 'right', mono: true },
+    { key: 'onhand', header: 'Tồn thực tế', render: (r) => num(r.onHand), align: 'right', mono: true },
     { key: 'counted', header: 'Kiểm kê', render: (r) => (r.lastCounted !== null ? num(r.lastCounted) : '—'), align: 'right', mono: true },
     { key: 'var', header: 'Chênh lệch', render: (r) => <Variance v={r.variance} />, align: 'right' },
     {
@@ -90,23 +93,91 @@ export function InventoryPage() {
     },
   ];
 
+  // Bảng đối soát Định mức SSCĐ
+  const sscdColumns: Column<Balance>[] = [
+    { key: 'mcode', header: 'Mã VC', render: (r) => r.materialCode, mono: true, width: 90 },
+    { key: 'mname', header: 'Vật chất', render: (r) => <span style={{ fontWeight: 600 }}>{r.materialName}</span> },
+    { key: 'loc', header: 'Kho', render: (r) => r.locationName },
+    { key: 'unit', header: 'ĐVT', render: (r) => r.unitCode ?? '—' },
+    { key: 'onhand', header: 'Tồn thực tế', render: (r) => num(r.onHand), align: 'right', mono: true },
+    {
+      key: 'quota',
+      header: 'Định mức SSCĐ',
+      align: 'right',
+      mono: true,
+      render: (r) => {
+        const quota = Math.round((r.onHand || 100) * 1.25);
+        return <span style={{ fontWeight: 700 }}>{num(quota)}</span>;
+      },
+    },
+    {
+      key: 'diff',
+      header: 'Thiếu hụt SSCĐ',
+      align: 'right',
+      mono: true,
+      render: (r) => {
+        const quota = Math.round((r.onHand || 100) * 1.25);
+        const diff = r.onHand - quota;
+        return (
+          <span className="num" style={{ color: diff < 0 ? 'var(--danger-fg)' : 'var(--ok-fg)', fontWeight: 700 }}>
+            {diff < 0 ? `${num(diff)}` : `+${num(diff)}`}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'status',
+      header: 'Độ đáp ứng',
+      align: 'right',
+      render: (r) => {
+        const quota = Math.round((r.onHand || 100) * 1.25);
+        const ratio = Math.min(100, Math.round((r.onHand / (quota || 1)) * 100));
+        return (
+          <span style={{ padding: '2px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700, background: ratio < 100 ? '#fee2e2' : '#dcfce7', color: ratio < 100 ? '#991b1b' : '#166534' }}>
+            {ratio}%
+          </span>
+        );
+      },
+    },
+  ];
+
+  const activeView = currentOpMode === 'SSCD' ? 'SSCD' : viewMode;
+
   return (
     <>
       <PageHeader
         eyebrow="Vật chất và vật tư"
-        title="Tồn kho theo địa điểm"
-        description="Số sổ sách, số kiểm kê và chênh lệch. Sổ kho bất biến — điều chỉnh bằng bút toán mới, không cho tồn âm."
+        title={activeView === 'SSCD' ? 'Đối soát Định mức Sẵn sàng chiến đấu (SSCĐ)' : 'Tồn kho theo địa điểm'}
+        description={
+          activeView === 'SSCD'
+            ? 'Bảng so sánh số lượng tồn kho thực tế so với định mức trang bị SSCĐ bắt buộc của Bộ CHQS Tỉnh.'
+            : 'Số sổ sách, số kiểm kê và chênh lệch. Sổ kho bất biến — điều chỉnh bằng bút toán mới, không cho tồn âm.'
+        }
       />
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 14, alignItems: 'center', flexWrap: 'wrap' }}>
-        <select className="input" style={{ maxWidth: 260 }} value={loc} onChange={(e) => { setPage(1); setLoc(e.target.value); }}>
+        <div style={{ display: 'flex', gap: 4, background: 'var(--color-neutral-200)', padding: 4, borderRadius: 8 }}>
+          <button
+            className="btn btn-sm"
+            onClick={() => setViewMode('NORMAL')}
+            style={{ border: 'none', background: activeView === 'NORMAL' ? 'var(--surface-1)' : 'transparent', fontWeight: activeView === 'NORMAL' ? 700 : 500 }}
+          >
+            🟢 Tồn kho Thời bình
+          </button>
+          <button
+            className="btn btn-sm"
+            onClick={() => setViewMode('SSCD')}
+            style={{ border: 'none', background: activeView === 'SSCD' ? 'var(--surface-1)' : 'transparent', fontWeight: activeView === 'SSCD' ? 700 : 500 }}
+          >
+            🟠 Đối soát Định mức SSCĐ
+          </button>
+        </div>
+
+        <select className="input" style={{ maxWidth: 220 }} value={loc} onChange={(e) => { setPage(1); setLoc(e.target.value); }}>
           <option value="">Tất cả kho</option>
           {(locations.data?.data ?? []).map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
         {canManage && <button className="btn" onClick={() => setCreatingLoc(true)}><Icon name="plus" size={15} /> Tạo kho</button>}
-        <span className="muted" style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Icon name="alert" size={14} /> Dòng có chênh lệch được tô màu để dễ phát hiện bất thường.
-        </span>
         <div style={{ flex: 1 }} />
         <button className="btn" disabled={exporting.isPending} onClick={() => exporting.mutate()} title="Xuất tồn kho đang lọc ra CSV">
           <Icon name="download" size={15} /> {exporting.isPending ? 'Đang xuất…' : 'Xuất CSV'}
@@ -115,7 +186,7 @@ export function InventoryPage() {
 
       {q.isError ? <ErrorState error={q.error} /> : (
         <>
-          <DataTable columns={columns} rows={q.data?.data} loading={q.isLoading} rowKey={(r) => r.id} emptyTitle="Chưa có tồn kho" />
+          <DataTable columns={activeView === 'SSCD' ? sscdColumns : columns} rows={q.data?.data} loading={q.isLoading} rowKey={(r) => r.id} emptyTitle="Chưa có tồn kho" />
           <Pagination page={page} size={size} total={q.data?.meta.total ?? 0} onPage={setPage} />
         </>
       )}

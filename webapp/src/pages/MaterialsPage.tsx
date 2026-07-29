@@ -24,6 +24,16 @@ interface Material {
   qualityGrade: string | null;
   status: string; // DRAFT | PUBLISHED | INACTIVE
   version: number;
+  assetCode: string | null;
+  assetCodeStatus: string;
+  // Ngữ cảnh cây danh mục tài sản, dựng sẵn khi nạp (xem seed-official-catalog.ts)
+  // để hiển thị/xuất báo cáo không phải join sang asset_catalog_items.
+  attributes?: {
+    assetPathNames?: string;
+    chapter?: string | null;
+    chapterName?: string | null;
+    unitRaw?: string | null;
+  };
 }
 
 export function MaterialsPage() {
@@ -66,11 +76,26 @@ export function MaterialsPage() {
   });
 
   const columns: Column<Material>[] = [
-    { key: 'code', header: 'Mã VC', render: (m) => m.code, mono: true, width: 110 },
-    { key: 'name', header: 'Tên vật chất', render: (m) => <span style={{ fontWeight: 600 }}>{m.name}</span> },
-    { key: 'cat', header: 'Nhóm', render: (m) => cat.label(m.categoryCode) },
-    { key: 'unit', header: 'ĐVT', render: (m) => unit.label(m.unitCode) },
-    { key: 'spec', header: 'Quy cách', render: (m) => m.spec ?? '—' },
+    // Mã quốc gia theo Phụ lục CV 2837/DT-QLDT, dạng R##.##.##.##.##.### (19 ký tự).
+    { key: 'code', header: 'Mã vật tư', render: (m) => m.code, mono: true, width: 168 },
+    {
+      key: 'name',
+      header: 'Tên vật chất',
+      render: (m) => (
+        <div>
+          <span style={{ fontWeight: 600 }}>{m.name}</span>
+          {/* Đường dẫn nhóm: cần thiết vì nhiều tên chỉ có nghĩa trong ngữ cảnh cây. */}
+          {m.attributes?.assetPathNames && (
+            <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
+              {m.attributes.assetPathNames}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    { key: 'chapter', header: 'Chương', render: (m) => m.attributes?.chapter ?? '—', width: 78 },
+    // ĐVT nguyên văn theo phụ lục (vd "m2 SD") — đây là giá trị nộp lên BQP.
+    { key: 'unit', header: 'ĐVT', render: (m) => m.attributes?.unitRaw ?? unit.label(m.unitCode), width: 74 },
     { key: 'ver', header: 'PB', render: (m) => `v${m.version}`, mono: true, align: 'right', width: 60 },
     { key: 'status', header: 'Trạng thái', render: (m) => <StatusBadge status={m.status} /> },
     { key: 'act', header: '', align: 'right', render: (m) => (

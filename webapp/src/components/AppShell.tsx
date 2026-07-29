@@ -243,6 +243,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div style={{ flex: 1 }} />
 
+          {/* Bộ chọn Trạng thái Vận hành Toàn cục (3 Trạng thái: Thời bình / SSCĐ / Mô phỏng) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--color-neutral-100)', padding: '3px 6px', borderRadius: 8, border: '1px solid var(--color-neutral-300)' }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--color-neutral-600)', textTransform: 'uppercase' }}>Bối cảnh:</span>
+            <select
+              className="input"
+              style={{ padding: '2px 8px', fontSize: 12, fontWeight: 700, cursor: 'pointer', height: 28 }}
+              value={window.localStorage.getItem('CSDL_OP_MODE') || 'NORMAL'}
+              onChange={(e) => {
+                window.localStorage.setItem('CSDL_OP_MODE', e.target.value);
+                window.location.reload();
+              }}
+            >
+              <option value="NORMAL">🟢 Thời bình (Peacetime)</option>
+              <option value="SSCD">🟠 Sẵn sàng chiến đấu (SSCĐ)</option>
+              <option value="SCENARIO">🔵 Mô phỏng Giả định (Scenario)</option>
+            </select>
+          </div>
+
           {/* Phạm vi dữ liệu THẬT của tài khoản (read-only). Việc lọc thực thi ở tầng server. */}
           <span
             className="hide-sm"
@@ -377,7 +395,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </button>
         </header>
 
-        <main id="main-content" className="scrl app-main" style={{ padding: 24, flex: 1, overflow: 'auto', maxWidth: 1600, width: '100%', margin: '0 auto' }}>
+        <main id="main-content" className="scrl app-main" style={{ padding: 24, flex: 1, overflow: 'auto', maxWidth: 1600, width: '100%', margin: '0 auto', position: 'relative' }}>
+          {(window.localStorage.getItem('CSDL_OP_MODE') || 'NORMAL') === 'SSCD' && (
+            <div style={{ marginBottom: 16, padding: '10px 16px', borderRadius: 8, background: '#fff7ed', border: '1px solid #fdba74', color: '#c2410c', fontWeight: 700, display: 'flex', gap: 10, alignItems: 'center', fontSize: 13 }}>
+              <Icon name="target" size={18} /> 🚨 BỐI CẢNH SẴN SÀNG CHIẾN ĐẤU (SSCĐ) — ĐÁNH GIÁ ĐỘ ĐÁP ỨNG VÀ CHÊNH LỆCH ĐỊNH MỨC SSCĐ TOÀN TỈNH
+            </div>
+          )}
+          {(window.localStorage.getItem('CSDL_OP_MODE') || 'NORMAL') === 'SCENARIO' && (
+            <div style={{ marginBottom: 16, padding: '10px 16px', borderRadius: 8, background: '#eff6ff', border: '1px dashed #60a5fa', color: '#1d4ed8', fontWeight: 700, display: 'flex', gap: 10, alignItems: 'center', fontSize: 13 }}>
+              <Icon name="alert" size={18} /> ⚠️ CHẾ ĐỘ MÔ PHỎNG GIẢ ĐỊNH (SCENARIO) — SỐ LIỆU MÔ PHỎNG CÁCH LY, KHÔNG GHI ĐÈ CSDL THỜI BÌNH
+            </div>
+          )}
           {children}
         </main>
       </div>

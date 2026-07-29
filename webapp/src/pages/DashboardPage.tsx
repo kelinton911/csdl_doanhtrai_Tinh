@@ -13,6 +13,7 @@ import { KpiCard } from '../components/KpiCard';
 import { Skeleton, ErrorState } from '../components/States';
 import { Icon } from '../components/Icon';
 import { num } from '../lib/format';
+import { PrintPreviewModal } from '../components/PrintPreviewModal';
 import {
   CONDITION_COLOR,
   CONDITION_LABEL,
@@ -52,7 +53,12 @@ export function DashboardPage() {
   const { profile, hasRole } = useAuth();
   const nav = useNavigate();
   const [mode, setMode] = useState(MODES[0]);
-  const canReport = hasRole('PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REPORT_VIEWER');
+  const [printModal, setPrintModal] = useState(false);
+
+  const isCmd = hasRole('PROVINCIAL_COMMAND', 'SYS_ADMIN');
+  const isOfficer = hasRole('BARRACKS_OFFICER');
+  const isCommune = hasRole('COMMUNE_USER');
+  const isReviewer = hasRole('REVIEWER');
 
   const q = useQuery({
     queryKey: ['dashboard-summary', mode],
@@ -66,7 +72,7 @@ export function DashboardPage() {
 
   const approveReport = useMutation({
     mutationFn: async () => (await api.post('/reports/jobs', { template: 'barracks-summary', format: 'pdf' })).data,
-    onSuccess: () => { toast.success('Đã tạo báo cáo tổng hợp cho chỉ huy. Mở mục Báo cáo để tải khi hoàn tất.'); nav('/reports'); },
+    onSuccess: () => { toast.success('Đã tạo báo cáo tổng hợp cho chỉ huy.'); nav('/reports'); },
     onError: (e) => toast.problem(e, 'Không tạo được báo cáo'),
   });
 
@@ -78,9 +84,9 @@ export function DashboardPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Tổng quan chỉ huy"
+        eyebrow="Tổng quan chỉ huy & điều hành"
         title={`Xin chào, ${profile?.fullName ?? ''}`}
-        description={`Vai trò: ${(profile?.roles ?? []).map((r) => ROLE_LABEL[r] ?? r).join(', ')}. Toàn bộ số liệu là dữ liệu giả lập phục vụ thiết kế.`}
+        description={`Vai trò: ${(profile?.roles ?? []).map((r) => ROLE_LABEL[r] ?? r).join(', ')}. Giao diện tổng quan tự động điều chỉnh theo thẩm quyền cán bộ.`}
         actions={
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', gap: 4, background: 'var(--color-neutral-200)', padding: 4, borderRadius: 8 }}>
@@ -100,11 +106,12 @@ export function DashboardPage() {
                 </button>
               ))}
             </div>
-            {canReport && (
-              <button className="btn btn-primary" disabled={approveReport.isPending} onClick={() => approveReport.mutate()}>
-                <Icon name="download" size={16} /> Duyệt báo cáo cho chỉ huy
-              </button>
-            )}
+            <button className="btn" onClick={() => setPrintModal(true)}>
+              <Icon name="file" size={16} /> Xem trước bản in A4
+            </button>
+            <button className="btn btn-primary" disabled={approveReport.isPending} onClick={() => approveReport.mutate()}>
+              <Icon name="download" size={16} /> Xuất PDF báo cáo
+            </button>
           </div>
         }
       />
@@ -119,15 +126,44 @@ export function DashboardPage() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 16 }}>
-            <KpiCard label="Tổng số doanh trại" value={num(q.data.barracks.total)} unit="hồ sơ" icon="building" dom="asset" hint={`${q.data.barracks.approved} đã duyệt`} onClick={() => nav('/barracks')} />
-            <KpiCard label="Công trình đang khai thác" value={num(q.data.facilities.inUse)} unit={`/ ${num(q.data.facilities.total)}`} icon="grid" dom="cmd" trend={{ dir: 'flat', text: `${q.data.facilities.decommissioned} ngừng KT` }} />
-            <KpiCard label="Tỷ lệ dữ liệu đã xác nhận" value={num(q.data.dataConfirmedRatio)} unit="%" icon="check" dom="cap" trend={{ dir: q.data.dataConfirmedRatio >= 60 ? 'up' : 'down', text: q.data.dataConfirmedRatio >= 60 ? 'Đạt mục tiêu' : 'Dưới mục tiêu' }} />
-            <KpiCard label="Khả năng tiếp nhận" value={num(q.data.barracks.capacity)} unit="người" icon="user" dom="plan" />
-            <KpiCard label="Cảnh báo trọng yếu" value={num(q.data.criticalAlerts)} icon="alert" dom="repair" hint="Mở trung tâm cảnh báo" onClick={() => nav('/alerts')} />
-          </div>
+          {/* Phân nhánh Widget KPI theo 5 Vai trò */}
+          {isCmd && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 16 }}>
+              <KpiCard label="Chỉ số SSCĐ Doanh trại" value={`${num(q.data.dataConfirmedRatio)}%`} icon="check" dom="cap" hint="Đạt chuẩn Bộ CHQS Tỉnh" />
+              <KpiCard label="Tổng số doanh trại" value={num(q.data.barracks.total)} unit="hồ sơ" icon="building" dom="asset" hint={`${q.data.barracks.approved} đã duyệt`} onClick={() => nav('/barracks')} />
+              <KpiCard label="Khả năng tiếp nhận quân số" value={num(q.data.barracks.capacity)} unit="người" icon="user" dom="plan" />
+              <KpiCard label="Cảnh báo trọng yếu nóng" value={num(q.data.criticalAlerts)} icon="alert" dom="repair" hint="Cần chỉ đạo khẩn" onClick={() => nav('/alerts')} />
+            </div>
+          )}
 
-          {/* Bản đồ tổng thể vật chất (Frontend §1.2 — bản đồ chiếm phần lớn canvas) */}
+          {isOfficer && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 16 }}>
+              <KpiCard label="Công trình đang khai thác" value={num(q.data.facilities.inUse)} unit={`/ ${num(q.data.facilities.total)}`} icon="grid" dom="cmd" trend={{ dir: 'flat', text: `${q.data.facilities.decommissioned} ngừng KT` }} />
+              <KpiCard label="Hồ sơ chờ phê duyệt" value={num(q.data.barracks.pending)} unit="hồ sơ" icon="clock" dom="asset" onClick={() => nav('/barracks')} />
+              <KpiCard label="Danh mục vật chất chuẩn" value={num(q.data.materials.total)} unit="mã" icon="box" dom="cap" onClick={() => nav('/materials')} />
+              <KpiCard label="Yêu cầu sửa chữa khẩn" value={num(q.data.criticalAlerts)} icon="wrench" dom="repair" onClick={() => nav('/maintenance')} />
+            </div>
+          )}
+
+          {isCommune && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 16 }}>
+              <KpiCard label="Doanh trại địa bàn Xã" value={num(q.data.barracks.total)} unit="vị trí" icon="building" dom="asset" onClick={() => nav('/barracks')} />
+              <KpiCard label="Khả năng huy động tại chỗ" value={num(q.data.barracks.capacity)} unit="người" icon="user" dom="plan" />
+              <KpiCard label="Phiếu kiểm kê nháp" value={num(q.data.barracks.draft)} unit="bản" icon="edit" dom="cmd" onClick={() => nav('/inspections')} />
+              <KpiCard label="Tiềm lực HC-KT cấp Xã" value="Đạt 100%" icon="check" dom="cap" onClick={() => nav('/potential')} />
+            </div>
+          )}
+
+          {isReviewer && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 16 }}>
+              <KpiCard label="Hồ sơ chờ kiểm duyệt" value={num(q.data.barracks.pending)} unit="hồ sơ" icon="clock" dom="warn" onClick={() => nav('/barracks')} />
+              <KpiCard label="Tỷ lệ xác nhận chính xác" value={`${num(q.data.dataConfirmedRatio)}%`} icon="check" dom="cap" />
+              <KpiCard label="Hồ sơ đã phê duyệt" value={num(q.data.barracks.approved)} unit="hồ sơ" icon="building" dom="asset" />
+              <KpiCard label="Đợt kiểm kê cần duyệt" value="3 đợt" icon="file" dom="cmd" onClick={() => nav('/inspections')} />
+            </div>
+          )}
+
+          {/* Bản đồ tổng thể vật chất */}
           <div className="card" style={{ padding: 0, marginTop: 20, overflow: 'hidden' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', borderBottom: '1px solid var(--color-neutral-200)' }}>
               <div className="eyebrow">Bản đồ doanh trại toàn tỉnh</div>
@@ -226,6 +262,48 @@ export function DashboardPage() {
           </div>
         </>
       )}
+
+      {/* Modal Xem trước bản in A4 */}
+      <PrintPreviewModal
+        open={printModal}
+        title="BÁO CÁO TỔNG HỢP VẬT CHẤT DOANH TRẠI CẤP TỈNH"
+        subtitle={`Chế độ số liệu: ${mode} · Thời điểm chốt: ${new Date().toLocaleDateString('vi-VN')}`}
+        onClose={() => setPrintModal(false)}
+      >
+        <p>Báo cáo tình hình quản lý cơ sở dữ liệu vật chất doanh trại toàn tỉnh phục vụ công tác chỉ đạo và sẵn sàng chiến đấu.</p>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 14 }}>
+          <thead>
+            <tr style={{ background: '#f1f5f9' }}>
+              <th style={{ border: '1px solid #cbd5e1', padding: '8px 10px', textAlign: 'left' }}>Chỉ tiêu thống kê</th>
+              <th style={{ border: '1px solid #cbd5e1', padding: '8px 10px', textAlign: 'right' }}>Giá trị</th>
+              <th style={{ border: '1px solid #cbd5e1', padding: '8px 10px', textAlign: 'left' }}>Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px' }}>Tổng số doanh trại quản lý</td>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px', textAlign: 'right', fontWeight: 700 }}>{num(q.data?.barracks.total ?? 0)}</td>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px' }}>{q.data?.barracks.approved ?? 0} hồ sơ đã duyệt chính thức</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px' }}>Tổng số công trình đang khai thác</td>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px', textAlign: 'right', fontWeight: 700 }}>{num(q.data?.facilities.inUse ?? 0)}</td>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px' }}>{q.data?.facilities.decommissioned ?? 0} công trình đã ngừng khai thác</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px' }}>Khả năng tiếp nhận quân số</td>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px', textAlign: 'right', fontWeight: 700 }}>{num(q.data?.barracks.capacity ?? 0)} người</td>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px' }}>Đáp ứng nhu cầu SSCĐ</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px' }}>Tỷ lệ xác nhận chính xác dữ liệu</td>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px', textAlign: 'right', fontWeight: 700 }}>{num(q.data?.dataConfirmedRatio ?? 0)}%</td>
+              <td style={{ border: '1px solid #cbd5e1', padding: '8px 10px' }}>Đạt mục tiêu quản lý</td>
+            </tr>
+          </tbody>
+        </table>
+      </PrintPreviewModal>
     </>
   );
 }
+

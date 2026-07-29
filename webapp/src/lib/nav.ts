@@ -22,6 +22,13 @@ export const NAV: NavItem[] = [
     roles: ['BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND', 'COMMUNE_USER'],
   },
   {
+    to: '/asset-catalog',
+    label: 'Danh mục tài sản BQP',
+    icon: 'clipboard',
+    dom: 'stock',
+    roles: ['BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND', 'COMMUNE_USER', 'REVIEWER'],
+  },
+  {
     to: '/import',
     label: 'Nhập liệu & đồng bộ',
     icon: 'upload',
