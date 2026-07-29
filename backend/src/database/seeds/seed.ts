@@ -45,13 +45,24 @@ async function run() {
   const barracksRepo = dataSource.getRepository(Barracks);
   const facilityRepo = dataSource.getRepository(Facility);
 
-  // 1) Đơn vị cấp tỉnh
+  // 1) Đơn vị cấp tỉnh — đặt tên theo tỉnh demo nếu có DEMO_PROVINCE_CODE (địa bàn thật đã nạp).
+  const demoProvinceCode = process.env.DEMO_PROVINCE_CODE || null;
+  const demoProvinceArea = demoProvinceCode
+    ? await areaRepo.findOne({ where: { code: demoProvinceCode, level: 'PROVINCE' } })
+    : null;
+  const provinceOrgName = demoProvinceArea
+    ? `Bộ CHQS tỉnh ${demoProvinceArea.name.replace(/^(Tỉnh|Thành phố)\s+/i, '')} (demo)`
+    : 'Bộ CHQS tỉnh (giả lập)';
   let province = await orgRepo.findOne({ where: { code: 'TINH-GL' } });
   if (!province) {
     province = await orgRepo.save(
-      orgRepo.create({ code: 'TINH-GL', name: 'Bộ CHQS tỉnh (giả lập)', type: 'PROVINCE', status: 'ACTIVE' }),
+      orgRepo.create({ code: 'TINH-GL', name: provinceOrgName, type: 'PROVINCE', status: 'ACTIVE' }),
     );
-    console.log('  + Đơn vị cấp tỉnh:', province.code);
+    console.log('  + Đơn vị cấp tỉnh:', province.code, '-', provinceOrgName);
+  } else if (province.name !== provinceOrgName) {
+    province.name = provinceOrgName;
+    await orgRepo.save(province);
+    console.log('  = Cập nhật tên đơn vị tỉnh →', provinceOrgName);
   }
 
   // 2) Tài khoản demo
