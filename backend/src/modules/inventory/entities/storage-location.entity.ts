@@ -28,6 +28,15 @@ export class StorageLocation {
   @Column({ name: 'barracks_id', type: 'uuid', nullable: true })
   barracksId!: string | null;
 
+  // Vị trí kho trên bản đồ (PostGIS Point, SRID 4326). Nullable khi chưa có toạ độ.
+  @Column({
+    type: 'geometry',
+    spatialFeatureType: 'Point',
+    srid: 4326,
+    nullable: true,
+  })
+  location!: unknown;
+
   @Column({ default: 'ACTIVE' })
   status!: string;
 

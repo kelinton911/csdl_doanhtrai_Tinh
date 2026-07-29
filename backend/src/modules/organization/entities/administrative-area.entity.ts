@@ -7,8 +7,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-// Xã/phường (M02). Cấp tỉnh quản lý trực tiếp cấp xã — không có cấp huyện.
-// Hình học lưu PostGIS (geometry) với SRID 4326; nạp sau khi có dữ liệu không gian.
+// Địa bàn hành chính (M02). Cấp tỉnh quản lý trực tiếp cấp xã — không có cấp huyện.
+// Một bảng chứa cả cấp tỉnh (level=PROVINCE) và cấp xã (level=COMMUNE) theo sắp xếp 2025.
+// Hình học lưu PostGIS (geometry) với SRID 4326; nạp từ dữ liệu ranh giới thật.
 @Entity('administrative_areas')
 export class AdministrativeArea {
   @PrimaryGeneratedColumn('uuid')
@@ -21,11 +22,23 @@ export class AdministrativeArea {
   @Column()
   name!: string;
 
-  // WARD | COMMUNE
+  // Cấp hành chính: PROVINCE | COMMUNE.
+  @Column({ default: 'COMMUNE' })
+  level!: string;
+
+  // Loại đơn vị: cấp tỉnh (TINH | THANH_PHO) hoặc cấp xã (WARD | COMMUNE | SPECIAL_ZONE = đặc khu).
   @Column({ default: 'COMMUNE' })
   type!: string;
 
-  // Ranh giới (MultiPolygon, SRID 4326). Nullable ở giai đoạn dữ liệu giả lập.
+  // Mã đơn vị cha (mã tỉnh với cấp xã). Cấp tỉnh để trống.
+  @Column({ name: 'parent_code', type: 'varchar', nullable: true })
+  parentCode!: string | null;
+
+  // Mã tỉnh (tiện lọc nhanh theo tỉnh cho cả tỉnh lẫn xã).
+  @Column({ name: 'province_code', type: 'varchar', nullable: true })
+  provinceCode!: string | null;
+
+  // Ranh giới (MultiPolygon, SRID 4326). Nullable khi chưa có dữ liệu không gian.
   @Column({
     type: 'geometry',
     spatialFeatureType: 'MultiPolygon',
@@ -33,6 +46,19 @@ export class AdministrativeArea {
     nullable: true,
   })
   geometry!: string | null;
+
+  // Điểm đại diện để đặt nhãn/marker (Point, SRID 4326).
+  @Column({
+    type: 'geometry',
+    spatialFeatureType: 'Point',
+    srid: 4326,
+    nullable: true,
+  })
+  centroid!: string | null;
+
+  // Nguồn dữ liệu (tên tệp/nghị quyết) để truy vết, không bịa.
+  @Column({ type: 'varchar', nullable: true })
+  source!: string | null;
 
   @Column({ default: 'ACTIVE' })
   status!: string;

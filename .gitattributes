@@ -1,0 +1,2 @@
+thu[[:space:]]thập[[:space:]]CSDL.zip filter=lfs diff=lfs merge=lfs -text
+docs/vietnam_gis_admin_2026_geojson/vietnam_gis_admin_2026/full_boundaries/vietnam_communes_2026_polygons.geojson filter=lfs diff=lfs merge=lfs -text
