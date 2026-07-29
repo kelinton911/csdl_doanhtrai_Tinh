@@ -49,6 +49,13 @@ export const NAV: NavItem[] = [
     dom: 'plan',
     roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN'],
   },
+  {
+    to: '/potential',
+    label: 'Tiềm lực HC-KT',
+    icon: 'target',
+    dom: 'cmd',
+    roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'],
+  },
   { to: '/reports', label: 'Báo cáo - phân tích', icon: 'chart', dom: 'report' },
   {
     to: '/admin',

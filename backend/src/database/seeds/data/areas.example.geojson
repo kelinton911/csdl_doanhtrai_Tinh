@@ -1,0 +1,31 @@
+{
+  "type": "FeatureCollection",
+  "name": "vi-du-dia-gioi-cap-xa",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "code": "XA-VIDU-01", "name": "Xã Ví Dụ 01", "type": "COMMUNE" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[108.20, 15.90], [108.24, 15.90], [108.24, 15.94], [108.20, 15.94], [108.20, 15.90]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "code": "PHUONG-VIDU-01", "name": "Phường Ví Dụ 01", "type": "WARD" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[108.24, 15.90], [108.28, 15.90], [108.28, 15.94], [108.24, 15.94], [108.24, 15.90]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "code": "DACKHU-VIDU-01", "name": "Đặc khu Ví Dụ 01", "type": "SPECIAL_ZONE" },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [[[[108.28, 15.90], [108.32, 15.90], [108.32, 15.94], [108.28, 15.94], [108.28, 15.90]]]]
+      }
+    }
+  ]
+}

@@ -41,9 +41,11 @@ export function AdminPage() {
   );
 }
 
-interface OrgRow { id: string; code: string; name: string; type: string | null; status: string }
+interface OrgRow { id: string; code: string; name: string; type: string | null; status: string; parentId: string | null }
 interface AreaRow { id: string; code: string; name: string; type: string | null }
 const ORG_TYPE_LABEL: Record<string, string> = { PROVINCE: 'Cấp tỉnh', COMMUNE: 'Cấp xã', UNIT: 'Đơn vị' };
+// Loại địa bàn hành chính (cấp xã) sau sáp nhập 2025: Xã / Phường / Đặc khu.
+const AREA_TYPE_LABEL: Record<string, string> = { COMMUNE: 'Xã', WARD: 'Phường', SPECIAL_ZONE: 'Đặc khu' };
 
 // E1 — Quản trị đơn vị quản lý và địa bàn hành chính (xã/phường). UC-04.
 function OrgAreaTab() {
@@ -54,50 +56,45 @@ function OrgAreaTab() {
   const orgs = useQuery({ queryKey: ['orgs-admin'], queryFn: async () => (await api.get('/organizations', { params: { size: 200 } })).data as { data: OrgRow[] } });
   const areas = useQuery({ queryKey: ['areas-admin'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 200 } })).data as { data: AreaRow[] } });
 
-  const orgCols: Column<OrgRow>[] = [
-    { key: 'code', header: 'Mã', render: (o) => o.code, mono: true, width: 120 },
-    { key: 'name', header: 'Tên đơn vị', render: (o) => <span style={{ fontWeight: 600 }}>{o.name}</span> },
-    { key: 'type', header: 'Cấp', render: (o) => ORG_TYPE_LABEL[o.type ?? ''] ?? o.type ?? '—' },
-    { key: 'status', header: 'Trạng thái', render: (o) => <StatusBadge status={o.status === 'ACTIVE' ? 'ACTIVE' : 'LOCKED'} /> },
-    { key: 'act', header: '', align: 'right', render: (o) => <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setEditingOrg(o); }}><Icon name="edit" size={14} /> Sửa</button> },
-  ];
   const areaCols: Column<AreaRow>[] = [
     { key: 'code', header: 'Mã', render: (a) => a.code, mono: true, width: 120 },
-    { key: 'name', header: 'Xã/phường', render: (a) => <span style={{ fontWeight: 600 }}>{a.name}</span> },
-    { key: 'type', header: 'Loại', render: (a) => a.type === 'WARD' ? 'Phường' : 'Xã' },
+    { key: 'name', header: 'Địa bàn', render: (a) => <span style={{ fontWeight: 600 }}>{a.name}</span> },
+    { key: 'type', header: 'Loại', render: (a) => AREA_TYPE_LABEL[a.type ?? ''] ?? a.type ?? 'Xã' },
   ];
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <div className="eyebrow">Đơn vị quản lý</div>
+          <div className="eyebrow">Đơn vị quản lý (cây tổ chức)</div>
           <button className="btn btn-sm btn-primary" onClick={() => setCreatingOrg(true)}><Icon name="plus" size={14} /> Thêm đơn vị</button>
         </div>
-        {orgs.isError ? <ErrorState error={orgs.error} /> : <DataTable columns={orgCols} rows={orgs.data?.data} loading={orgs.isLoading} rowKey={(o) => o.id} emptyTitle="Chưa có đơn vị" />}
+        {orgs.isError ? <ErrorState error={orgs.error} /> : orgs.isLoading ? <Skeleton rows={5} /> : <OrgTree orgs={orgs.data?.data ?? []} onEdit={setEditingOrg} />}
       </div>
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <div className="eyebrow">Địa bàn hành chính</div>
-          <button className="btn btn-sm btn-primary" onClick={() => setCreatingArea(true)}><Icon name="plus" size={14} /> Thêm xã/phường</button>
+          <button className="btn btn-sm btn-primary" onClick={() => setCreatingArea(true)}><Icon name="plus" size={14} /> Thêm địa bàn</button>
         </div>
         {areas.isError ? <ErrorState error={areas.error} /> : <DataTable columns={areaCols} rows={areas.data?.data} loading={areas.isLoading} rowKey={(a) => a.id} emptyTitle="Chưa có xã/phường" />}
       </div>
-      {creatingOrg && <OrgModal onClose={() => setCreatingOrg(false)} onDone={() => { setCreatingOrg(false); qc.invalidateQueries({ queryKey: ['orgs-admin'] }); }} />}
-      {editingOrg && <OrgModal org={editingOrg} onClose={() => setEditingOrg(null)} onDone={() => { setEditingOrg(null); qc.invalidateQueries({ queryKey: ['orgs-admin'] }); }} />}
+      {creatingOrg && <OrgModal orgs={orgs.data?.data ?? []} onClose={() => setCreatingOrg(false)} onDone={() => { setCreatingOrg(false); qc.invalidateQueries({ queryKey: ['orgs-admin'] }); }} />}
+      {editingOrg && <OrgModal org={editingOrg} orgs={orgs.data?.data ?? []} onClose={() => setEditingOrg(null)} onDone={() => { setEditingOrg(null); qc.invalidateQueries({ queryKey: ['orgs-admin'] }); }} />}
       {creatingArea && <AreaModal onClose={() => setCreatingArea(false)} onDone={() => { setCreatingArea(false); qc.invalidateQueries({ queryKey: ['areas-admin'] }); }} />}
     </div>
   );
 }
 
-function OrgModal({ org, onClose, onDone }: { org?: OrgRow; onClose: () => void; onDone: () => void }) {
+function OrgModal({ org, orgs, onClose, onDone }: { org?: OrgRow; orgs: OrgRow[]; onClose: () => void; onDone: () => void }) {
   const editing = !!org;
-  const [f, setF] = useState({ code: org?.code ?? '', name: org?.name ?? '', type: org?.type ?? 'UNIT', status: org?.status ?? 'ACTIVE' });
+  const [f, setF] = useState({ code: org?.code ?? '', name: org?.name ?? '', type: org?.type ?? 'UNIT', status: org?.status ?? 'ACTIVE', parentId: org?.parentId ?? '' });
   const [error, setError] = useState<string | null>(null);
+  // Không cho chọn chính đơn vị đang sửa làm cấp trên (chống tự trỏ — server cũng chặn WF-001).
+  const parentOptions = orgs.filter((o) => o.id !== org?.id);
   const save = useMutation({
     mutationFn: async () => editing
-      ? api.put(`/organizations/${org!.id}`, { name: f.name, type: f.type, status: f.status })
-      : api.post('/organizations', { code: f.code, name: f.name, type: f.type }),
+      ? api.put(`/organizations/${org!.id}`, { name: f.name, type: f.type, status: f.status, parentId: f.parentId || undefined })
+      : api.post('/organizations', { code: f.code, name: f.name, type: f.type, parentId: f.parentId || undefined }),
     onSuccess: () => { toast.success(editing ? 'Đã lưu đơn vị.' : 'Đã tạo đơn vị.'); onDone(); }, onError: (e) => setError(toProblem(e).title),
   });
   return (
@@ -110,23 +107,62 @@ function OrgModal({ org, onClose, onDone }: { org?: OrgRow; onClose: () => void;
           <div style={{ flex: 1 }}><label className="field-label">Cấp</label><select className="input" value={f.type} onChange={(e) => setF((s) => ({ ...s, type: e.target.value }))}><option value="PROVINCE">Cấp tỉnh</option><option value="COMMUNE">Cấp xã</option><option value="UNIT">Đơn vị</option></select></div>
           {editing && <div style={{ flex: 1 }}><label className="field-label">Trạng thái</label><select className="input" value={f.status} onChange={(e) => setF((s) => ({ ...s, status: e.target.value }))}><option value="ACTIVE">Hoạt động</option><option value="INACTIVE">Ngừng</option></select></div>}
         </div>
+        <div><label className="field-label">Đơn vị cấp trên</label>
+          <select className="input" value={f.parentId} onChange={(e) => setF((s) => ({ ...s, parentId: e.target.value }))}>
+            <option value="">— Không (cấp gốc) —</option>
+            {parentOptions.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+          </select>
+        </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={(!editing && !f.code) || !f.name || save.isPending} onClick={() => save.mutate()}>{editing ? 'Lưu' : 'Tạo đơn vị'}</button></div>
       </div>
     </Modal>
   );
 }
 
+// Cây tổ chức đơn vị (M02) dựng từ parentId — hiển thị phân cấp thay cho bảng phẳng. UC-04.
+function OrgTree({ orgs, onEdit }: { orgs: OrgRow[]; onEdit: (o: OrgRow) => void }) {
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  if (orgs.length === 0) return <div className="muted" style={{ padding: '24px 8px', textAlign: 'center' }}>Chưa có đơn vị</div>;
+  const ids = new Set(orgs.map((o) => o.id));
+  const childrenOf = (pid: string | null) => orgs.filter((o) => (o.parentId ?? null) === pid);
+  // Gốc = không có cấp trên, hoặc cấp trên không nằm trong danh sách (mồ côi → coi như gốc).
+  const roots = orgs.filter((o) => !o.parentId || !ids.has(o.parentId));
+  const toggle = (id: string) => setCollapsed((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  const renderNode = (o: OrgRow, depth: number): React.ReactNode => {
+    const kids = childrenOf(o.id);
+    const isCollapsed = collapsed.has(o.id);
+    return (
+      <div key={o.id}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', paddingLeft: 8 + depth * 20, borderBottom: '1px solid var(--color-neutral-200)' }}>
+          {kids.length > 0 ? (
+            <button type="button" onClick={() => toggle(o.id)} aria-label={isCollapsed ? 'Mở rộng' : 'Thu gọn'} style={{ all: 'unset', cursor: 'pointer', display: 'inline-flex', color: 'var(--color-neutral-600)', transform: isCollapsed ? 'none' : 'rotate(90deg)', transition: 'transform .12s' }}><Icon name="chevron" size={14} /></button>
+          ) : <span style={{ width: 14, display: 'inline-block' }} />}
+          <span className="num muted" style={{ fontSize: 12, minWidth: 96 }}>{o.code}</span>
+          <span style={{ fontWeight: 600, flex: 1 }}>{o.name}</span>
+          <span style={{ fontSize: 11, background: 'var(--role-hckt-bg)', color: 'var(--role-hckt)', padding: '1px 7px', borderRadius: 5 }}>{ORG_TYPE_LABEL[o.type ?? ''] ?? o.type ?? '—'}</span>
+          <StatusBadge status={o.status === 'ACTIVE' ? 'ACTIVE' : 'LOCKED'} />
+          <button className="btn btn-sm" onClick={() => onEdit(o)}><Icon name="edit" size={14} /> Sửa</button>
+        </div>
+        {!isCollapsed && kids.map((k) => renderNode(k, depth + 1))}
+      </div>
+    );
+  };
+
+  return <div style={{ border: '1px solid var(--color-neutral-300)', borderRadius: 8, overflow: 'hidden' }}>{roots.map((r) => renderNode(r, 0))}</div>;
+}
+
 function AreaModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const [f, setF] = useState({ code: '', name: '', type: 'COMMUNE' });
   const [error, setError] = useState<string | null>(null);
-  const save = useMutation({ mutationFn: async () => api.post('/administrative-areas', { code: f.code, name: f.name, type: f.type }), onSuccess: () => { toast.success('Đã tạo xã/phường.'); onDone(); }, onError: (e) => setError(toProblem(e).title) });
+  const save = useMutation({ mutationFn: async () => api.post('/administrative-areas', { code: f.code, name: f.name, type: f.type }), onSuccess: () => { toast.success('Đã tạo địa bàn.'); onDone(); }, onError: (e) => setError(toProblem(e).title) });
   return (
-    <Modal open title="Thêm xã/phường" onClose={onClose}>
+    <Modal open title="Thêm địa bàn (xã/phường/đặc khu)" onClose={onClose}>
       {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div><label className="field-label">Mã</label><input className="input" value={f.code} onChange={(e) => setF((s) => ({ ...s, code: e.target.value }))} /></div>
         <div><label className="field-label">Tên</label><input className="input" value={f.name} onChange={(e) => setF((s) => ({ ...s, name: e.target.value }))} /></div>
-        <div><label className="field-label">Loại</label><select className="input" value={f.type} onChange={(e) => setF((s) => ({ ...s, type: e.target.value }))}><option value="COMMUNE">Xã</option><option value="WARD">Phường</option></select></div>
+        <div><label className="field-label">Loại</label><select className="input" value={f.type} onChange={(e) => setF((s) => ({ ...s, type: e.target.value }))}><option value="COMMUNE">Xã</option><option value="WARD">Phường</option><option value="SPECIAL_ZONE">Đặc khu</option></select></div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={!f.code || !f.name || save.isPending} onClick={() => save.mutate()}>Tạo</button></div>
       </div>
     </Modal>
@@ -218,13 +254,21 @@ function UsersTab() {
   const [manage, setManage] = useState<User | null>(null);
   const [search, setSearch] = useState('');
   const users = useQuery({ queryKey: ['users'], queryFn: async () => (await api.get('/users', { params: { size: 100 } })).data as { data: User[] } });
+  const areas = useQuery({ queryKey: ['admin-areas'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 200 } })).data as { data: Area[] } });
+  const areaMap = new Map((areas.data?.data ?? []).map((a) => [a.id, a.name] as const));
   const kw = search.trim().toLowerCase();
   const filtered = (users.data?.data ?? []).filter((u) => !kw || u.username.toLowerCase().includes(kw) || u.fullName.toLowerCase().includes(kw) || u.roles.some((r) => (ROLE_LABEL[r] ?? r).toLowerCase().includes(kw)));
   const columns: Column<User>[] = [
     { key: 'username', header: 'Tài khoản', render: (u) => <span className="num" style={{ fontWeight: 600 }}>{u.username}</span> },
     { key: 'name', header: 'Họ tên', render: (u) => u.fullName },
     { key: 'roles', header: 'Vai trò', render: (u) => <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{u.roles.map((r) => <span key={r} style={{ fontSize: 11, background: 'var(--role-hckt-bg)', color: 'var(--role-hckt)', padding: '1px 7px', borderRadius: 5 }}>{ROLE_LABEL[r] ?? r}</span>)}</div> },
-    { key: 'scopes', header: 'Phạm vi', render: (u) => <span className="muted" style={{ fontSize: 12 }}>{u.dataScopes && u.dataScopes.length > 0 ? `${u.dataScopes.length} phạm vi` : 'Toàn tỉnh'}</span> },
+    { key: 'scopes', header: 'Phạm vi', render: (u) => {
+      const scopes = u.dataScopes ?? [];
+      if (scopes.length === 0) return <span className="muted" style={{ fontSize: 12 }}>Toàn tỉnh</span>;
+      const areaNames = scopes.filter((s) => s.type === 'AREA').map((s) => areaMap.get(s.refId) ?? s.refId);
+      const other = scopes.length - areaNames.length;
+      return <span className="muted" style={{ fontSize: 12 }} title={areaNames.join(', ')}>{areaNames.length > 0 ? areaNames.join(', ') : `${scopes.length} phạm vi`}{other > 0 ? ` +${other} đơn vị/CT` : ''}</span>;
+    } },
     { key: 'status', header: 'Trạng thái', render: (u) => <StatusBadge status={u.status === 'ACTIVE' ? 'ACTIVE' : 'LOCKED'} /> },
     { key: 'act', header: '', align: 'right', render: (u) => <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setManage(u); }}><Icon name="shield" size={14} /> Quản lý</button> },
   ];
@@ -381,13 +425,29 @@ function UserManageModal({ userId, username, onClose, onDone }: { userId: string
   );
 }
 
+// Tạo tài khoản. Cho gán ngay ĐƠN VỊ quản lý (organizationId) và ĐỊA BÀN (data-scope type=AREA)
+// để dựng nhanh tài khoản cấp xã/phường/đặc khu — mỗi địa bàn 1 tài khoản, chỉ cập nhật CSDL của mình.
 function CreateUserModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
-  const [f, setF] = useState({ username: '', password: '', fullName: '', roles: ['COMMUNE_USER'] as string[] });
+  const [f, setF] = useState({ username: '', password: '', fullName: '', roles: ['COMMUNE_USER'] as string[], organizationId: '' });
+  const [areaIds, setAreaIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const create = useMutation({ mutationFn: async () => api.post('/users', f), onSuccess: () => { toast.success('Đã tạo tài khoản.'); onDone(); }, onError: (e) => setError(toProblem(e).title) });
+  const orgs = useQuery({ queryKey: ['orgs'], queryFn: async () => (await api.get('/organizations', { params: { size: 200 } })).data as { data: Org[] } });
+  const areas = useQuery({ queryKey: ['admin-areas'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 200 } })).data as { data: Area[] } });
+  const create = useMutation({
+    mutationFn: async () => {
+      const res = await api.post('/users', { username: f.username, password: f.password, fullName: f.fullName, roles: f.roles, organizationId: f.organizationId || undefined });
+      const id = (res.data as { id?: string }).id;
+      if (id && areaIds.length > 0) {
+        await api.post(`/users/${id}/scopes`, { scopes: areaIds.map((refId) => ({ type: 'AREA', refId })) });
+      }
+      return res;
+    },
+    onSuccess: () => { toast.success('Đã tạo tài khoản.'); onDone(); }, onError: (e) => setError(toProblem(e).title),
+  });
   const toggleRole = (r: string) => setF((s) => ({ ...s, roles: s.roles.includes(r) ? s.roles.filter((x) => x !== r) : [...s.roles, r] }));
+  const toggleArea = (id: string) => setAreaIds((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
   return (
-    <Modal open title="Tạo tài khoản" onClose={onClose} width={520}>
+    <Modal open title="Tạo tài khoản" onClose={onClose} width={560}>
       {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -402,6 +462,21 @@ function CreateUserModal({ onClose, onDone }: { onClose: () => void; onDone: () 
               <button key={r} type="button" onClick={() => toggleRole(r)} className="btn btn-sm" style={{ background: f.roles.includes(r) ? 'var(--color-accent-600)' : 'var(--surface-1)', color: f.roles.includes(r) ? '#fff' : 'var(--color-text)', borderColor: f.roles.includes(r) ? 'var(--color-accent-600)' : 'var(--color-neutral-400)', fontSize: 12 }}>{ROLE_LABEL[r]}</button>
             ))}
           </div>
+        </div>
+        <div><label className="field-label">Đơn vị quản lý (tùy chọn)</label>
+          <select className="input" value={f.organizationId} onChange={(e) => setF((s) => ({ ...s, organizationId: e.target.value }))}>
+            <option value="">— Không gán —</option>
+            {(orgs.data?.data ?? []).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="field-label">Địa bàn được cập nhật (data-scope)</label>
+          <p className="muted" style={{ fontSize: 12, margin: '2px 0 6px', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="lock" size={13} /> Không chọn = xem toàn tỉnh. Chọn địa bàn để tài khoản chỉ thấy & cập nhật CSDL của địa bàn đó.</p>
+          {areas.isLoading ? <Skeleton rows={2} /> : (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxHeight: 140, overflow: 'auto' }}>
+              {(areas.data?.data ?? []).map((a) => <button key={a.id} type="button" onClick={() => toggleArea(a.id)} className="btn btn-sm" style={{ background: areaIds.includes(a.id) ? 'var(--color-accent-600)' : 'var(--surface-1)', color: areaIds.includes(a.id) ? '#fff' : 'var(--color-text)', borderColor: areaIds.includes(a.id) ? 'var(--color-accent-600)' : 'var(--color-neutral-400)', fontSize: 12 }}>{a.name}</button>)}
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={!f.username || f.password.length < 6 || !f.fullName || f.roles.length === 0 || create.isPending} onClick={() => create.mutate()}>Tạo tài khoản</button></div>
       </div>

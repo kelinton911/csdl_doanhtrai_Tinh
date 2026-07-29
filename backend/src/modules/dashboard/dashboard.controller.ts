@@ -14,4 +14,10 @@ export class DashboardController {
   summary(@Query('mode') mode?: string) {
     return this.service.summary(mode);
   }
+
+  @Get('potential-by-area')
+  @ApiOperation({ summary: 'Tổng hợp tiềm lực HC-KT theo địa bàn (xã/phường/đặc khu)' })
+  potentialByArea() {
+    return this.service.potentialByArea();
+  }
 }

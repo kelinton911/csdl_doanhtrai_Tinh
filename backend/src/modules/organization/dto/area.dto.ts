@@ -12,8 +12,9 @@ export class CreateAreaDto {
   @MinLength(2)
   name!: string;
 
-  @ApiProperty({ enum: ['COMMUNE', 'WARD'], default: 'COMMUNE' })
+  // COMMUNE = Xã, WARD = Phường, SPECIAL_ZONE = Đặc khu (cấp xã sau sáp nhập 2025).
+  @ApiProperty({ enum: ['COMMUNE', 'WARD', 'SPECIAL_ZONE'], default: 'COMMUNE' })
   @IsOptional()
-  @IsIn(['COMMUNE', 'WARD'])
+  @IsIn(['COMMUNE', 'WARD', 'SPECIAL_ZONE'])
   type?: string;
 }

@@ -71,10 +71,12 @@ async function run() {
   const officer = await userRepo.findOne({ where: { username: 'hckt' } });
   const authorId = officer?.id ?? null;
 
-  // 3) 12 xã/phường + đơn vị Ban CHQS xã
+  // 3) 12 địa bàn cấp xã (8 xã + 3 phường + 1 đặc khu) + đơn vị Ban CHQS tương ứng.
+  // Sau sáp nhập 2025: cấp xã gồm Xã (COMMUNE) / Phường (WARD) / Đặc khu (SPECIAL_ZONE).
   const areaDefs = [
-    ...Array.from({ length: 9 }, (_, i) => ({ code: `XA-A${String(i + 1).padStart(2, '0')}`, name: `Xã A${String(i + 1).padStart(2, '0')} (giả lập)`, type: 'COMMUNE' })),
+    ...Array.from({ length: 8 }, (_, i) => ({ code: `XA-A${String(i + 1).padStart(2, '0')}`, name: `Xã A${String(i + 1).padStart(2, '0')} (giả lập)`, type: 'COMMUNE' })),
     ...Array.from({ length: 3 }, (_, i) => ({ code: `PHUONG-P${String(i + 1).padStart(2, '0')}`, name: `Phường P${String(i + 1).padStart(2, '0')} (giả lập)`, type: 'WARD' })),
+    { code: 'DACKHU-DK01', name: 'Đặc khu DK01 (giả lập)', type: 'SPECIAL_ZONE' },
   ];
   const areas: AdministrativeArea[] = [];
   for (const a of areaDefs) {

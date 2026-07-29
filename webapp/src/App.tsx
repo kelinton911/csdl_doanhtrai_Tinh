@@ -16,6 +16,7 @@ import { MaintenancePage } from './pages/MaintenancePage';
 import { ScenarioPage } from './pages/ScenarioPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { PotentialPage } from './pages/PotentialPage';
 import { AdminPage } from './pages/AdminPage';
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -52,6 +53,7 @@ export default function App() {
       <Route path="/inspection/sheet/:id" element={<Protected><InspectionWizardPage /></Protected>} />
       <Route path="/maintenance" element={<Protected><MaintenancePage /></Protected>} />
       <Route path="/scenarios" element={<Protected><ScenarioPage /></Protected>} />
+      <Route path="/potential" element={<Protected><PotentialPage /></Protected>} />
       <Route path="/reports" element={<Protected><ReportsPage /></Protected>} />
       <Route path="/alerts" element={<Protected><AlertsPage /></Protected>} />
       <Route path="/admin" element={<Protected><AdminPage /></Protected>} />

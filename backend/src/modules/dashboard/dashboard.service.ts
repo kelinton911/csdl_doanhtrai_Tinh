@@ -118,4 +118,53 @@ export class DashboardService {
       topIssues,
     };
   }
+
+  // Tổng hợp TIỀM LỰC hậu cần - kỹ thuật theo địa bàn (xã/phường/đặc khu): gom doanh trại,
+  // công trình, sức chứa, diện tích, tồn kho về từng administrative_area. Dùng subquery theo
+  // area để tránh nhân dòng khi join nhiều bảng. Tồn kho gắn địa bàn qua kho → doanh trại.
+  async potentialByArea() {
+    const rows = await this.ds.query(`
+      SELECT
+        a.id, a.code, a.name, a.type,
+        (SELECT COUNT(*) FROM barracks b WHERE b.area_id = a.id)::int AS barracks_count,
+        (SELECT COALESCE(SUM(b.declared_capacity), 0) FROM barracks b WHERE b.area_id = a.id)::int AS capacity,
+        (SELECT COALESCE(SUM(b.land_area), 0) FROM barracks b WHERE b.area_id = a.id)::numeric AS land_area,
+        (SELECT COUNT(*) FROM facilities f JOIN barracks b ON b.id = f.barracks_id
+           WHERE b.area_id = a.id)::int AS facility_count,
+        (SELECT COUNT(*) FROM facilities f JOIN barracks b ON b.id = f.barracks_id
+           WHERE b.area_id = a.id AND f.condition = 'KEM' AND f.status = 'IN_USE')::int AS poor_facilities,
+        (SELECT COALESCE(SUM(sb.on_hand), 0) FROM stock_balances sb
+           JOIN storage_locations sl ON sl.id = sb.storage_location_id
+           JOIN barracks b ON b.id = sl.barracks_id
+           WHERE b.area_id = a.id)::numeric AS stock_on_hand
+      FROM administrative_areas a
+      WHERE a.status = 'ACTIVE'
+      ORDER BY a.code ASC
+    `);
+
+    // Tồn kho ở kho KHÔNG gắn doanh trại (barracks_id NULL) → không quy được về địa bàn.
+    const [unallocated] = await this.ds.query(`
+      SELECT COALESCE(SUM(sb.on_hand), 0)::numeric AS stock_on_hand
+      FROM stock_balances sb
+      JOIN storage_locations sl ON sl.id = sb.storage_location_id
+      WHERE sl.barracks_id IS NULL
+    `);
+
+    return {
+      generatedAt: new Date().toISOString(),
+      areas: rows.map((r: Record<string, unknown>) => ({
+        id: r.id,
+        code: r.code,
+        name: r.name,
+        type: r.type,
+        barracksCount: Number(r.barracks_count),
+        capacity: Number(r.capacity),
+        landArea: Number(r.land_area),
+        facilityCount: Number(r.facility_count),
+        poorFacilities: Number(r.poor_facilities),
+        stockOnHand: Number(r.stock_on_hand),
+      })),
+      unallocatedStockOnHand: Number(unallocated?.stock_on_hand ?? 0),
+    };
+  }
 }
