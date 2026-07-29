@@ -1,0 +1,76 @@
+name: csdl-test
+
+# Ngăn xếp KIỂM THỬ biệt lập, dùng cho pipeline `npm run verify` (scripts/verify.sh).
+# - CSDL/hạ tầng EPHEMERAL (tmpfs, không volume) → mỗi lần chạy là môi trường sạch, tất định.
+# - Không publish cổng ra host → không đụng cổng dự án khác (5435/6380/9004...).
+# - Thông tin đăng nhập ở đây là GIẢ dùng-một-lần cho test, KHÔNG phải bí mật thật.
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    tmpfs:
+      - /var/lib/postgresql/data   # dữ liệu nằm trong RAM → nhanh + tự xoá.
+    environment:
+      POSTGRES_USER: csdl
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: csdl_doanhtrai_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U csdl -d csdl_doanhtrai_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: csdl
+      MINIO_ROOT_PASSWORD: test_password
+    tmpfs:
+      - /data
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: 3000
+      API_PREFIX: api/v1
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: csdl
+      DB_PASSWORD: test_password
+      DB_NAME: csdl_doanhtrai_test
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USER: csdl
+      MINIO_PASSWORD: test_password
+      MINIO_BUCKET: csdl-documents
+      JWT_ACCESS_SECRET: test-access-secret
+      JWT_REFRESH_SECRET: test-refresh-secret
+      CORS_ORIGINS: http://localhost:5190
+      RUN_MIGRATIONS: "true"
+      SEED_ON_START: "true"          # DB sạch → cần seed để có tài khoản demo cho e2e.
+
+  e2e:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile.e2e
+    depends_on:
+      backend:
+        condition: service_healthy   # chờ /api/v1/health = ok mới chạy test.
+    environment:
+      BACKEND_ORIGIN: http://backend:3000
+      PW_CHANNEL: chromium
+      CI: "true"

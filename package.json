@@ -1,0 +1,25 @@
+{
+  "name": "csdl-doanhtrai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Điều phối ngăn xếp CSDL Vật chất Doanh trại cấp tỉnh (backend NestJS + webapp Vite/React) trong container. Lệnh gộp cho phát triển và kiểm thử tự động.",
+  "scripts": {
+    "verify": "bash scripts/verify.sh",
+    "verify:unit": "bash scripts/verify.sh --unit-only",
+    "verify:e2e": "bash scripts/verify.sh --e2e-only",
+
+    "stack": "docker compose --profile app up --build",
+    "stack:up": "docker compose --profile app up --build -d",
+    "stack:down": "docker compose --profile app down",
+    "stack:logs": "docker compose --profile app logs -f",
+
+    "infra": "docker compose up -d db redis minio",
+    "infra:down": "docker compose down",
+
+    "dev:backend": "npm --prefix backend run start:dev",
+    "dev:webapp": "npm --prefix webapp run dev",
+
+    "hooks:install": "bash scripts/install-hooks.sh",
+    "prepare": "bash scripts/install-hooks.sh"
+  }
+}

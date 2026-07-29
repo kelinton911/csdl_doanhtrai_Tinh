@@ -1,0 +1,12 @@
+# Giữ build context nhẹ.
+node_modules
+dist
+test-results
+playwright-report
+.env
+.env.*
+*.log
+.git
+Dockerfile
+Dockerfile.e2e
+.dockerignore

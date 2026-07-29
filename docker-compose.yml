@@ -68,6 +68,63 @@ services:
     depends_on:
       - db
 
+  # ---- Ứng dụng container hoá (profile "app") ----
+  # Mặc định `docker compose up` chỉ dựng hạ tầng (giữ nguyên workflow cũ).
+  # Cả ngăn xếp (giống một app kiểu Next.js): `docker compose --profile app up`.
+  backend:
+    profiles: ["app"]
+    build:
+      context: ./backend
+    container_name: csdl-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: 3000
+      API_PREFIX: api/v1
+      # Trong mạng compose dùng CỔNG NỘI BỘ (không phải cổng host tuỳ biến).
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-csdl}
+      DB_PASSWORD: ${DB_PASSWORD:-csdl_dev_pw}
+      DB_NAME: ${DB_NAME:-csdl_doanhtrai}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USER: ${MINIO_USER:-csdl}
+      MINIO_PASSWORD: ${MINIO_PASSWORD:-csdl_dev_pw}
+      MINIO_BUCKET: ${MINIO_BUCKET:-csdl-documents}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh-secret}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8000,http://localhost:5173}
+      # Chạy migration khi khởi động; seed tuỳ chọn (mặc định tắt để không đụng dữ liệu).
+      RUN_MIGRATIONS: "true"
+      SEED_ON_START: ${SEED_ON_START:-false}
+    ports:
+      - "${BACKEND_HOST_PORT:-3010}:3000"
+
+  webapp:
+    profiles: ["app"]
+    build:
+      context: ./webapp
+    container_name: csdl-webapp
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      # Proxy /api → backend qua tên service trong mạng compose.
+      BACKEND_ORIGIN: http://backend:3000
+    ports:
+      - "${FRONTEND_HOST_PORT:-8000}:5173"
+
 volumes:
   db_data:
   redis_data:

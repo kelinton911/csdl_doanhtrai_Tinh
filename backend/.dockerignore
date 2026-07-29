@@ -1,0 +1,10 @@
+# Không đưa vào build context — giữ image nhẹ và tránh lộ bí mật.
+node_modules
+dist
+.env
+.env.*
+*.log
+coverage
+.git
+Dockerfile
+.dockerignore

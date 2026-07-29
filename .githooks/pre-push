@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Git hook: chạy kiểm thử tự động toàn stack TRƯỚC khi push. Fail → chặn push.
+# Bỏ qua khi cần: `git push --no-verify` hoặc `SKIP_VERIFY=1 git push`.
+set -e
+cd "$(git rev-parse --show-toplevel)"
+
+if [ "${SKIP_VERIFY:-0}" = "1" ]; then
+  echo "⚠ SKIP_VERIFY=1 → bỏ qua kiểm thử trước khi push."
+  exit 0
+fi
+
+# Docker chưa chạy → cảnh báo và chặn (đổi thành 'exit 0' nếu muốn không chặn).
+if ! docker info >/dev/null 2>&1; then
+  echo "✘ Docker chưa chạy — không thể verify trước push."
+  echo "  Khởi động Docker, hoặc bỏ qua: SKIP_VERIFY=1 git push"
+  exit 1
+fi
+
+echo "▸ pre-push: chạy 'npm run verify' (build + unit + e2e)..."
+bash scripts/verify.sh

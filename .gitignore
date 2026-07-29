@@ -24,6 +24,9 @@ yarn-error.log*
 # Test / coverage
 coverage/
 .nyc_output/
+webapp/test-results/
+webapp/playwright-report/
+playwright-report/
 
 # Editor / OS
 .vscode/*

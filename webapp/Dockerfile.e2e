@@ -1,0 +1,22 @@
+# Image chạy E2E (Playwright) trong pipeline kiểm thử tự động.
+# Tự dựng Chromium bundled (không phụ thuộc Chrome hệ thống) + cài OS deps.
+# Playwright tự khởi động Vite dev (cổng 5190) trỏ BACKEND_ORIGIN vào container backend.
+FROM node:22-bookworm
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+# Kiểm tra biên dịch/build webapp (bắt lỗi TypeScript) như một phần của "verify".
+RUN npm run build
+
+# Cài Chromium + phụ thuộc hệ điều hành cho Playwright (theo phiên bản trong node_modules).
+RUN npx playwright install --with-deps chromium
+
+# Dùng Chromium bundled thay vì channel 'chrome'.
+ENV PW_CHANNEL=chromium
+ENV CI=true
+
+CMD ["npx", "playwright", "test"]

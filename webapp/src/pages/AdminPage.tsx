@@ -49,8 +49,8 @@ function OrgAreaTab() {
   const [creatingOrg, setCreatingOrg] = useState(false);
   const [editingOrg, setEditingOrg] = useState<OrgRow | null>(null);
   const [creatingArea, setCreatingArea] = useState(false);
-  const orgs = useQuery({ queryKey: ['orgs-admin'], queryFn: async () => (await api.get('/organizations', { params: { size: 300 } })).data as { data: OrgRow[] } });
-  const areas = useQuery({ queryKey: ['areas-admin'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 500 } })).data as { data: AreaRow[] } });
+  const orgs = useQuery({ queryKey: ['orgs-admin'], queryFn: async () => (await api.get('/organizations', { params: { size: 200 } })).data as { data: OrgRow[] } });
+  const areas = useQuery({ queryKey: ['areas-admin'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 200 } })).data as { data: AreaRow[] } });
 
   const orgCols: Column<OrgRow>[] = [
     { key: 'code', header: 'Mã', render: (o) => o.code, mono: true, width: 120 },
@@ -242,8 +242,8 @@ function UserManageModal({ userId, username, onClose, onDone }: { userId: string
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const detail = useQuery({ queryKey: ['user', userId], queryFn: async () => (await api.get(`/users/${userId}`)).data as User });
-  const areas = useQuery({ queryKey: ['admin-areas'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 500 } })).data as { data: Area[] } });
-  const orgs = useQuery({ queryKey: ['orgs'], queryFn: async () => (await api.get('/organizations', { params: { size: 500 } })).data as { data: Org[] } });
+  const areas = useQuery({ queryKey: ['admin-areas'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 200 } })).data as { data: Area[] } });
+  const orgs = useQuery({ queryKey: ['orgs'], queryFn: async () => (await api.get('/organizations', { params: { size: 200 } })).data as { data: Org[] } });
 
   const [fullName, setFullName] = useState('');
   const [status, setStatus] = useState('ACTIVE');
