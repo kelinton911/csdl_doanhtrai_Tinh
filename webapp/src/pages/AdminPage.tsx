@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, toProblem } from '../lib/api';
+import { toast } from '../lib/toast';
 import { ROLE_LABEL } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, type Column } from '../components/DataTable';
+import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
 import { Icon } from '../components/Icon';
@@ -96,7 +98,7 @@ function OrgModal({ org, onClose, onDone }: { org?: OrgRow; onClose: () => void;
     mutationFn: async () => editing
       ? api.put(`/organizations/${org!.id}`, { name: f.name, type: f.type, status: f.status })
       : api.post('/organizations', { code: f.code, name: f.name, type: f.type }),
-    onSuccess: onDone, onError: (e) => setError(toProblem(e).title),
+    onSuccess: () => { toast.success(editing ? 'Đã lưu đơn vị.' : 'Đã tạo đơn vị.'); onDone(); }, onError: (e) => setError(toProblem(e).title),
   });
   return (
     <Modal open title={editing ? `Sửa đơn vị · ${org!.code}` : 'Thêm đơn vị'} onClose={onClose}>
@@ -117,7 +119,7 @@ function OrgModal({ org, onClose, onDone }: { org?: OrgRow; onClose: () => void;
 function AreaModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const [f, setF] = useState({ code: '', name: '', type: 'COMMUNE' });
   const [error, setError] = useState<string | null>(null);
-  const save = useMutation({ mutationFn: async () => api.post('/administrative-areas', { code: f.code, name: f.name, type: f.type }), onSuccess: onDone, onError: (e) => setError(toProblem(e).title) });
+  const save = useMutation({ mutationFn: async () => api.post('/administrative-areas', { code: f.code, name: f.name, type: f.type }), onSuccess: () => { toast.success('Đã tạo xã/phường.'); onDone(); }, onError: (e) => setError(toProblem(e).title) });
   return (
     <Modal open title="Thêm xã/phường" onClose={onClose}>
       {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
@@ -143,7 +145,7 @@ function CatalogTab() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Catalog | null>(null);
   const list = useQuery({ queryKey: ['catalog-admin', type], queryFn: async () => (await api.get(`/master-data/${type}`, { params: { size: 200 } })).data as { data: Catalog[] } });
-  const publish = useMutation({ mutationFn: async (id: string) => api.post(`/master-data/${type}/${id}/publish`), onSuccess: () => qc.invalidateQueries({ queryKey: ['catalog-admin', type] }) });
+  const publish = useMutation({ mutationFn: async (id: string) => api.post(`/master-data/${type}/${id}/publish`), onSuccess: () => { qc.invalidateQueries({ queryKey: ['catalog-admin', type] }); toast.success('Đã phát hành mục danh mục.'); }, onError: (e) => toast.problem(e, 'Không phát hành được') });
   const refresh = () => qc.invalidateQueries({ queryKey: ['catalog-admin', type] });
 
   const columns: Column<Catalog>[] = [
@@ -178,7 +180,7 @@ function CatalogTab() {
 function EditCatalogModal({ type, item, onClose, onDone }: { type: string; item: Catalog; onClose: () => void; onDone: () => void }) {
   const [f, setF] = useState({ name: item.name, description: item.description ?? '' });
   const [error, setError] = useState<string | null>(null);
-  const update = useMutation({ mutationFn: async () => api.put(`/master-data/${type}/${item.id}`, { name: f.name, description: f.description || undefined }), onSuccess: onDone, onError: (e) => setError(toProblem(e).title) });
+  const update = useMutation({ mutationFn: async () => api.put(`/master-data/${type}/${item.id}`, { name: f.name, description: f.description || undefined }), onSuccess: () => { toast.success('Đã lưu mục danh mục.'); onDone(); }, onError: (e) => setError(toProblem(e).title) });
   return (
     <Modal open title={`Sửa mục · ${item.code}`} onClose={onClose}>
       {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
@@ -194,7 +196,7 @@ function EditCatalogModal({ type, item, onClose, onDone }: { type: string; item:
 function CreateCatalogModal({ type, onClose, onDone }: { type: string; onClose: () => void; onDone: () => void }) {
   const [f, setF] = useState({ code: '', name: '', description: '' });
   const [error, setError] = useState<string | null>(null);
-  const create = useMutation({ mutationFn: async () => api.post(`/master-data/${type}`, { code: f.code, name: f.name, description: f.description || undefined }), onSuccess: onDone, onError: (e) => setError(toProblem(e).title) });
+  const create = useMutation({ mutationFn: async () => api.post(`/master-data/${type}`, { code: f.code, name: f.name, description: f.description || undefined }), onSuccess: () => { toast.success('Đã tạo mục danh mục (nháp).'); onDone(); }, onError: (e) => setError(toProblem(e).title) });
   return (
     <Modal open title="Thêm mục danh mục" onClose={onClose}>
       {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
@@ -214,7 +216,10 @@ function UsersTab() {
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [manage, setManage] = useState<User | null>(null);
+  const [search, setSearch] = useState('');
   const users = useQuery({ queryKey: ['users'], queryFn: async () => (await api.get('/users', { params: { size: 100 } })).data as { data: User[] } });
+  const kw = search.trim().toLowerCase();
+  const filtered = (users.data?.data ?? []).filter((u) => !kw || u.username.toLowerCase().includes(kw) || u.fullName.toLowerCase().includes(kw) || u.roles.some((r) => (ROLE_LABEL[r] ?? r).toLowerCase().includes(kw)));
   const columns: Column<User>[] = [
     { key: 'username', header: 'Tài khoản', render: (u) => <span className="num" style={{ fontWeight: 600 }}>{u.username}</span> },
     { key: 'name', header: 'Họ tên', render: (u) => u.fullName },
@@ -225,8 +230,14 @@ function UsersTab() {
   ];
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}><button className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Tạo tài khoản</button></div>
-      {users.isError ? <ErrorState error={users.error} /> : <DataTable columns={columns} rows={users.data?.data} loading={users.isLoading} rowKey={(u) => u.id} emptyTitle="Chưa có người dùng" />}
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, maxWidth: 340 }}>
+          <span style={{ position: 'absolute', left: 10, top: 9, color: 'var(--color-neutral-500)' }}><Icon name="search" size={16} /></span>
+          <input className="input" style={{ paddingLeft: 32 }} placeholder="Tìm tài khoản, họ tên, vai trò…" aria-label="Tìm người dùng" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        <button className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Tạo tài khoản</button>
+      </div>
+      {users.isError ? <ErrorState error={users.error} /> : <DataTable columns={columns} rows={filtered} loading={users.isLoading} rowKey={(u) => u.id} emptyTitle={kw ? 'Không tìm thấy người dùng' : 'Chưa có người dùng'} />}
       {creating && <CreateUserModal onClose={() => setCreating(false)} onDone={() => { setCreating(false); qc.invalidateQueries({ queryKey: ['users'] }); }} />}
       {manage && <UserManageModal userId={manage.id} username={manage.username} onClose={() => setManage(null)} onDone={() => qc.invalidateQueries({ queryKey: ['users'] })} />}
     </>
@@ -244,12 +255,16 @@ function UserManageModal({ userId, username, onClose, onDone }: { userId: string
   const detail = useQuery({ queryKey: ['user', userId], queryFn: async () => (await api.get(`/users/${userId}`)).data as User });
   const areas = useQuery({ queryKey: ['admin-areas'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 200 } })).data as { data: Area[] } });
   const orgs = useQuery({ queryKey: ['orgs'], queryFn: async () => (await api.get('/organizations', { params: { size: 200 } })).data as { data: Org[] } });
+  const facilities = useQuery({ queryKey: ['admin-facilities'], queryFn: async () => (await api.get('/facilities', { params: { size: 200 } })).data as { data: Array<{ id: string; code: string; name: string; barracksName: string | null }> } });
 
   const [fullName, setFullName] = useState('');
   const [status, setStatus] = useState('ACTIVE');
   const [organizationId, setOrganizationId] = useState('');
   const [roles, setRoles] = useState<string[]>([]);
   const [areaIds, setAreaIds] = useState<string[]>([]);
+  const [orgScopeIds, setOrgScopeIds] = useState<string[]>([]);
+  const [facScopeIds, setFacScopeIds] = useState<string[]>([]);
+  const [newPassword, setNewPassword] = useState('');
   const [seeded, setSeeded] = useState(false);
 
   // Nạp giá trị hiện tại vào form lần đầu.
@@ -259,18 +274,35 @@ function UserManageModal({ userId, username, onClose, onDone }: { userId: string
     setOrganizationId(detail.data.organizationId ?? '');
     setRoles(detail.data.roles);
     setAreaIds((detail.data.dataScopes ?? []).filter((s) => s.type === 'AREA').map((s) => s.refId));
+    setOrgScopeIds((detail.data.dataScopes ?? []).filter((s) => s.type === 'ORGANIZATION').map((s) => s.refId));
+    setFacScopeIds((detail.data.dataScopes ?? []).filter((s) => s.type === 'FACILITY').map((s) => s.refId));
     setSeeded(true);
   }
 
-  const done = (m: string) => { setMsg(m); setError(null); qc.invalidateQueries({ queryKey: ['user', userId] }); onDone(); };
-  const fail = (e: unknown) => { setError(toProblem(e).title); setMsg(null); };
+  const done = (m: string) => { setMsg(m); setError(null); toast.success(m); qc.invalidateQueries({ queryKey: ['user', userId] }); onDone(); };
+  const fail = (e: unknown) => { setError(toProblem(e).title); setMsg(null); toast.problem(e); };
 
   const saveInfo = useMutation({ mutationFn: async () => api.put(`/users/${userId}`, { fullName, status, organizationId: organizationId || undefined }), onSuccess: () => done('Đã cập nhật thông tin tài khoản.'), onError: fail });
   const saveRoles = useMutation({ mutationFn: async () => api.post(`/users/${userId}/roles`, { roles }), onSuccess: () => done('Đã gán vai trò.'), onError: fail });
-  const saveScopes = useMutation({ mutationFn: async () => api.post(`/users/${userId}/scopes`, { scopes: areaIds.map((refId) => ({ type: 'AREA', refId })) }), onSuccess: () => done('Đã gán phạm vi dữ liệu.'), onError: fail });
+  const saveScopes = useMutation({
+    mutationFn: async () => api.post(`/users/${userId}/scopes`, {
+      scopes: [
+        ...areaIds.map((refId) => ({ type: 'AREA', refId })),
+        ...orgScopeIds.map((refId) => ({ type: 'ORGANIZATION', refId })),
+        ...facScopeIds.map((refId) => ({ type: 'FACILITY', refId })),
+      ],
+    }),
+    onSuccess: () => done('Đã gán phạm vi dữ liệu.'), onError: fail,
+  });
+  const resetPassword = useMutation({
+    mutationFn: async () => api.post(`/users/${userId}/reset-password`, { password: newPassword }),
+    onSuccess: () => { setNewPassword(''); done('Đã đặt lại mật khẩu và mở khóa tài khoản.'); }, onError: fail,
+  });
 
   const toggleRole = (r: string) => setRoles((s) => s.includes(r) ? s.filter((x) => x !== r) : [...s, r]);
   const toggleArea = (id: string) => setAreaIds((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
+  const toggleOrgScope = (id: string) => setOrgScopeIds((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
+  const toggleFacScope = (id: string) => setFacScopeIds((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
 
   return (
     <Modal open title={`Quản lý tài khoản · ${username}`} onClose={onClose} width={620}>
@@ -307,15 +339,40 @@ function UserManageModal({ userId, username, onClose, onDone }: { userId: string
           {/* Phạm vi dữ liệu */}
           <section>
             <div className="eyebrow" style={{ marginBottom: 4 }}>Phạm vi dữ liệu (data-scope)</div>
-            <p className="muted" style={{ fontSize: 12, margin: '0 0 8px', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="lock" size={13} /> Không chọn = xem toàn tỉnh. Chọn xã/phường để giới hạn dữ liệu người dùng chỉ thấy được.</p>
+            <p className="muted" style={{ fontSize: 12, margin: '0 0 8px', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="lock" size={13} /> Không chọn = xem toàn tỉnh. Giới hạn theo xã/phường và/hoặc đơn vị quản lý.</p>
+            <div className="field-label" style={{ marginBottom: 6 }}>Theo xã/phường (AREA)</div>
             {areas.isLoading ? <Skeleton rows={3} /> : (
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxHeight: 160, overflow: 'auto' }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxHeight: 140, overflow: 'auto' }}>
                 {(areas.data?.data ?? []).map((a) => <button key={a.id} type="button" onClick={() => toggleArea(a.id)} className="btn btn-sm" style={{ background: areaIds.includes(a.id) ? 'var(--color-accent-600)' : 'var(--surface-1)', color: areaIds.includes(a.id) ? '#fff' : 'var(--color-text)', borderColor: areaIds.includes(a.id) ? 'var(--color-accent-600)' : 'var(--color-neutral-400)', fontSize: 12 }}>{a.name}</button>)}
               </div>
             )}
+            <div className="field-label" style={{ margin: '12px 0 6px' }}>Theo đơn vị quản lý (ORGANIZATION)</div>
+            {orgs.isLoading ? <Skeleton rows={2} /> : (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxHeight: 120, overflow: 'auto' }}>
+                {(orgs.data?.data ?? []).map((o) => <button key={o.id} type="button" onClick={() => toggleOrgScope(o.id)} className="btn btn-sm" style={{ background: orgScopeIds.includes(o.id) ? 'var(--dom-plan)' : 'var(--surface-1)', color: orgScopeIds.includes(o.id) ? '#fff' : 'var(--color-text)', borderColor: orgScopeIds.includes(o.id) ? 'var(--dom-plan)' : 'var(--color-neutral-400)', fontSize: 12 }}>{o.name}</button>)}
+              </div>
+            )}
+            <div className="field-label" style={{ margin: '12px 0 6px' }}>Theo công trình (FACILITY)</div>
+            {facilities.isLoading ? <Skeleton rows={2} /> : (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxHeight: 120, overflow: 'auto' }}>
+                {(facilities.data?.data ?? []).map((fa) => <button key={fa.id} type="button" onClick={() => toggleFacScope(fa.id)} className="btn btn-sm" style={{ background: facScopeIds.includes(fa.id) ? 'var(--dom-asset)' : 'var(--surface-1)', color: facScopeIds.includes(fa.id) ? '#fff' : 'var(--color-text)', borderColor: facScopeIds.includes(fa.id) ? 'var(--dom-asset)' : 'var(--color-neutral-400)', fontSize: 12 }} title={fa.barracksName ?? ''}>{fa.code} · {fa.name}</button>)}
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8, gap: 8 }}>
-              <span className="muted" style={{ fontSize: 12, alignSelf: 'center' }}>{areaIds.length} xã/phường được chọn</span>
+              <span className="muted" style={{ fontSize: 12, alignSelf: 'center' }}>{areaIds.length} xã/phường · {orgScopeIds.length} đơn vị · {facScopeIds.length} công trình</span>
               <button className="btn btn-sm btn-primary" disabled={saveScopes.isPending} onClick={() => saveScopes.mutate()}>Lưu phạm vi</button>
+            </div>
+          </section>
+
+          {/* Bảo mật: đặt lại mật khẩu + mở khóa */}
+          <section>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Bảo mật</div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+              <div style={{ flex: 1 }}>
+                <label className="field-label">Mật khẩu mới (≥ 6 ký tự)</label>
+                <input className="input" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Đặt lại mật khẩu người dùng" />
+              </div>
+              <button className="btn btn-sm" disabled={newPassword.length < 6 || resetPassword.isPending} onClick={() => resetPassword.mutate()}><Icon name="lock" size={14} /> Đặt lại & mở khóa</button>
             </div>
           </section>
         </div>
@@ -327,7 +384,7 @@ function UserManageModal({ userId, username, onClose, onDone }: { userId: string
 function CreateUserModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const [f, setF] = useState({ username: '', password: '', fullName: '', roles: ['COMMUNE_USER'] as string[] });
   const [error, setError] = useState<string | null>(null);
-  const create = useMutation({ mutationFn: async () => api.post('/users', f), onSuccess: onDone, onError: (e) => setError(toProblem(e).title) });
+  const create = useMutation({ mutationFn: async () => api.post('/users', f), onSuccess: () => { toast.success('Đã tạo tài khoản.'); onDone(); }, onError: (e) => setError(toProblem(e).title) });
   const toggleRole = (r: string) => setF((s) => ({ ...s, roles: s.roles.includes(r) ? s.roles.filter((x) => x !== r) : [...s.roles, r] }));
   return (
     <Modal open title="Tạo tài khoản" onClose={onClose} width={520}>
@@ -354,10 +411,12 @@ function CreateUserModal({ onClose, onDone }: { onClose: () => void; onDone: () 
 
 interface Audit { id: string; action: string; actorName: string | null; entityType: string | null; statusCode: number | null; correlationId: string | null; createdAt: string }
 
+const AUDIT_SIZE = 20;
+
 function AuditTab() {
   const [detailId, setDetailId] = useState<string | null>(null);
-  const audit = useQuery({ queryKey: ['audit'], queryFn: async () => (await api.get('/audit-logs', { params: { size: 100 } })).data as { data: Audit[] } });
-  if (audit.isLoading) return <Skeleton rows={8} />;
+  const [page, setPage] = useState(1);
+  const audit = useQuery({ queryKey: ['audit', page], queryFn: async () => (await api.get('/audit-logs', { params: { page, size: AUDIT_SIZE } })).data as { data: Audit[]; meta?: { total: number } } });
   if (audit.isError) return <ErrorState error={audit.error} />;
   const columns: Column<Audit>[] = [
     { key: 'time', header: 'Thời điểm', render: (a) => dateTime(a.createdAt), mono: true },
@@ -369,7 +428,8 @@ function AuditTab() {
   return (
     <>
       <p className="muted" style={{ fontSize: 13, marginBottom: 12, display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="lock" size={14} /> Nhật ký append-only — không sửa/xóa qua ứng dụng. Bấm một dòng để xem chi tiết truy nguyên.</p>
-      <DataTable columns={columns} rows={audit.data?.data} rowKey={(a) => a.id} onRowClick={(a) => setDetailId(a.id)} emptyTitle="Chưa có nhật ký" />
+      <DataTable columns={columns} rows={audit.data?.data} loading={audit.isLoading} rowKey={(a) => a.id} onRowClick={(a) => setDetailId(a.id)} emptyTitle="Chưa có nhật ký" />
+      {audit.data?.meta && <Pagination page={page} size={AUDIT_SIZE} total={audit.data.meta.total} onPage={setPage} />}
       {detailId && <AuditDetailModal id={detailId} onClose={() => setDetailId(null)} />}
     </>
   );

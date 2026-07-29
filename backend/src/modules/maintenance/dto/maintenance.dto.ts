@@ -118,6 +118,18 @@ export class CreateMaintenanceRequestDto {
   @IsInt()
   @Min(0)
   plannedDays?: number;
+
+  @ApiPropertyOptional({ description: 'Kỹ thuật viên/nhà thầu được phân công' })
+  @IsOptional()
+  @IsString()
+  assigneeName?: string;
+}
+
+export class StartDto {
+  @ApiPropertyOptional({ description: 'Phân công kỹ thuật viên khi bắt đầu thực hiện' })
+  @IsOptional()
+  @IsString()
+  assigneeName?: string;
 }
 
 export class AcceptDto {

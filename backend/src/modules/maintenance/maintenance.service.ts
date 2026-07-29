@@ -12,6 +12,7 @@ import {
   AcceptDto,
   CreateDamageEventDto,
   CreateMaintenanceRequestDto,
+  StartDto,
   UpdateDamageEventDto,
 } from './dto/maintenance.dto';
 import { MaintenanceStatus } from '../../common/workflow';
@@ -101,6 +102,7 @@ export class MaintenanceService {
         priority: dto.priority ?? 'NORMAL',
         estimatedCost: String(dto.estimatedCost ?? 0),
         plannedDays: dto.plannedDays ?? 0,
+        assigneeName: dto.assigneeName ?? null,
         status: MaintenanceStatus.DRAFT,
         createdBy: user.sub,
       }),
@@ -124,8 +126,14 @@ export class MaintenanceService {
     return this.requests.save(r);
   }
 
-  async start(id: string) {
-    return this.transition(id, [MaintenanceStatus.APPROVED], MaintenanceStatus.IN_PROGRESS, null);
+  async start(id: string, dto?: StartDto) {
+    const r = await this.getRequest(id);
+    if (r.status !== MaintenanceStatus.APPROVED) {
+      throw new ConflictException(`WF-001: Trạng thái ${r.status} không cho phép bắt đầu thực hiện`);
+    }
+    if (dto?.assigneeName !== undefined) r.assigneeName = dto.assigneeName;
+    r.status = MaintenanceStatus.IN_PROGRESS;
+    return this.requests.save(r);
   }
 
   async accept(id: string, dto: AcceptDto) {

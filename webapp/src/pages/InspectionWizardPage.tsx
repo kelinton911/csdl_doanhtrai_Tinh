@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, toProblem } from '../lib/api';
+import { toast } from '../lib/toast';
 import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
+import { EvidenceDrawer } from '../components/EvidenceDrawer';
 import { Skeleton, ErrorState } from '../components/States';
 import { Icon } from '../components/Icon';
 import { num } from '../lib/format';
@@ -36,6 +38,7 @@ export function InspectionWizardPage() {
   const [note, setNote] = useState('');
   const [lines, setLines] = useState<Line[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [evidence, setEvidence] = useState(false);
 
   const sheet = useQuery({
     queryKey: ['sheet', id],
@@ -75,9 +78,10 @@ export function InspectionWizardPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sheets'] });
+      toast.success('Đã gửi phiếu kiểm kê đi kiểm duyệt.');
       nav('/inspection');
     },
-    onError: (e) => setError(toProblem(e).title),
+    onError: (e) => { setError(toProblem(e).title); toast.problem(e); },
   });
 
   if (sheet.isLoading) return <Skeleton rows={6} />;
@@ -101,7 +105,18 @@ export function InspectionWizardPage() {
       <button className="btn btn-ghost btn-sm" onClick={() => nav('/inspection')} style={{ marginBottom: 8 }}>
         <Icon name="chevron" size={14} className="rot180" /> Kiểm kê
       </button>
-      <PageHeader eyebrow="Phiếu kiểm kê" title="Nhập phiếu kiểm kê" actions={<StatusBadge status={sheet.data.status} />} />
+      <PageHeader
+        eyebrow="Phiếu kiểm kê"
+        title="Nhập phiếu kiểm kê"
+        actions={
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <StatusBadge status={sheet.data.status} />
+            <button className="btn" onClick={() => setEvidence(true)}>
+              <Icon name="file" size={16} /> Ảnh minh chứng
+            </button>
+          </div>
+        }
+      />
 
       {/* Stepper */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 22 }}>
@@ -206,7 +221,7 @@ export function InspectionWizardPage() {
           <Icon name="chevron" size={14} className="rot180" /> Trước
         </button>
         <div style={{ display: 'flex', gap: 10 }}>
-          {editable && <button className="btn" onClick={() => save.mutate()} disabled={save.isPending}><Icon name="check" size={15} /> Lưu nháp</button>}
+          {editable && <button className="btn" onClick={() => save.mutate(undefined, { onSuccess: () => toast.success('Đã lưu nháp phiếu.') })} disabled={save.isPending}><Icon name="check" size={15} /> Lưu nháp</button>}
           {step < STEPS.length - 1 ? (
             <button className="btn btn-primary" onClick={next}>Tiếp <Icon name="chevron" size={14} /></button>
           ) : (
@@ -214,6 +229,8 @@ export function InspectionWizardPage() {
           )}
         </div>
       </div>
+
+      {evidence && <EvidenceDrawer entityType="inspection-sheet" entityId={id!} title="Ảnh & minh chứng kiểm kê" onClose={() => setEvidence(false)} />}
     </>
   );
 }

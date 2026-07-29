@@ -43,6 +43,14 @@ export class User {
   @Column({ name: 'failed_attempts', default: 0 })
   failedAttempts!: number;
 
+  // Khóa tạm thời tới thời điểm này (đăng nhập sai nhiều lần). null = không khóa.
+  @Column({ name: 'locked_until', type: 'timestamptz', nullable: true })
+  lockedUntil!: Date | null;
+
+  // Bí mật TOTP (base32) khi đã đăng ký OTP. null = chưa bật OTP.
+  @Column({ name: 'mfa_secret', type: 'varchar', nullable: true })
+  mfaSecret!: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

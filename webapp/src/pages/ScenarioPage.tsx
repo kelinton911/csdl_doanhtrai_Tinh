@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, toProblem } from '../lib/api';
+import { toast } from '../lib/toast';
 import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
@@ -28,26 +29,42 @@ export function ScenarioPage() {
   const [showCompare, setShowCompare] = useState(false);
   const toggleCompare = (id: string) => setCompareIds((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
 
+  const troop = Number(params.troopCount);
+  const days = Number(params.durationDays);
+  const damage = Number(params.damageLevel);
+  const troopErr = !(troop > 0) ? 'Quân số phải là số dương.' : null;
+  const daysErr = !(days > 0) ? 'Thời gian phải lớn hơn 0 ngày.' : null;
+  const damageErr = !(damage >= 0 && damage <= 1) ? 'Mức hư hỏng phải từ 0 đến 1.' : null;
+  const paramsValid = !troopErr && !daysErr && !damageErr;
+
   const calc = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (p: typeof params) => {
       const code = `TH-${Date.now().toString().slice(-6)}`;
-      const sc = (await api.post('/scenarios', { code, name: `Tình huống ${code}`, parameters: { troopCount: Number(params.troopCount), durationDays: Number(params.durationDays), damageLevel: Number(params.damageLevel) } })).data as Scenario;
+      const sc = (await api.post('/scenarios', { code, name: `Tình huống ${code}`, parameters: { troopCount: Number(p.troopCount), durationDays: Number(p.durationDays), damageLevel: Number(p.damageLevel) } })).data as Scenario;
       setScenarioId(sc.id);
       return (await api.post(`/scenarios/${sc.id}/runs`)).data as Run;
     },
-    onSuccess: (r) => { setRun(r); setError(null); qc.invalidateQueries({ queryKey: ['scenarios'] }); },
-    onError: (e) => setError(toProblem(e).title),
+    onSuccess: (r) => { setRun(r); setError(null); qc.invalidateQueries({ queryKey: ['scenarios'] }); toast.success('Đã chạy tính toán tình huống.'); },
+    onError: (e) => { setError(toProblem(e).title); toast.problem(e, 'Chạy tính toán thất bại'); },
   });
+
+  // Phân tích what-if: điều chỉnh một tham số rồi chạy lại để xem độ nhạy.
+  const runWith = (patch: Partial<typeof params>) => {
+    const next = { ...params, ...patch };
+    setParams(next);
+    calc.mutate(next);
+  };
 
   const savePlan = useMutation({
     mutationFn: async () => {
       const code = `PA-${Date.now().toString().slice(-6)}`;
       return api.post('/plans', { code, name: `Phương án ${code}`, scenarioRunId: run!.id, assumptions: `Quân số ${params.troopCount}, ${params.durationDays} ngày, hư hỏng ${Number(params.damageLevel) * 100}%` });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['plans'] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['plans'] }); toast.success('Đã lưu thành phương án.'); },
+    onError: (e) => toast.problem(e, 'Không lưu được phương án'),
   });
 
-  const approve = useMutation({ mutationFn: async (id: string) => api.post(`/plans/${id}/approve`), onSuccess: () => qc.invalidateQueries({ queryKey: ['plans'] }) });
+  const approve = useMutation({ mutationFn: async (id: string) => api.post(`/plans/${id}/approve`), onSuccess: () => { qc.invalidateQueries({ queryKey: ['plans'] }); toast.success('Đã chốt phương án.'); }, onError: (e) => toast.problem(e, 'Không chốt được phương án') });
 
   const m = run?.metrics;
 
@@ -60,14 +77,23 @@ export function ScenarioPage() {
         <div className="card" style={{ padding: 18, height: 'fit-content' }}>
           <div className="eyebrow" style={{ marginBottom: 14 }}>Giả định tình huống</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div><label className="field-label">Quân số cần bảo đảm</label><input className="input num" type="number" value={params.troopCount} onChange={(e) => setParams((p) => ({ ...p, troopCount: e.target.value }))} /></div>
-            <div><label className="field-label">Thời gian (ngày)</label><input className="input num" type="number" value={params.durationDays} onChange={(e) => setParams((p) => ({ ...p, durationDays: e.target.value }))} /></div>
+            <div>
+              <label className="field-label">Quân số cần bảo đảm</label>
+              <input className="input num" type="number" min={1} value={params.troopCount} onChange={(e) => setParams((p) => ({ ...p, troopCount: e.target.value }))} />
+              {troopErr && <div style={{ color: 'var(--danger-fg)', fontSize: 12, marginTop: 4 }}>{troopErr}</div>}
+            </div>
+            <div>
+              <label className="field-label">Thời gian (ngày)</label>
+              <input className="input num" type="number" min={1} value={params.durationDays} onChange={(e) => setParams((p) => ({ ...p, durationDays: e.target.value }))} />
+              {daysErr && <div style={{ color: 'var(--danger-fg)', fontSize: 12, marginTop: 4 }}>{daysErr}</div>}
+            </div>
             <div>
               <label className="field-label">Mức hư hỏng hạ tầng: {Math.round(Number(params.damageLevel) * 100)}%</label>
               <input type="range" min="0" max="1" step="0.05" value={params.damageLevel} onChange={(e) => setParams((p) => ({ ...p, damageLevel: e.target.value }))} style={{ width: '100%' }} />
+              {damageErr && <div style={{ color: 'var(--danger-fg)', fontSize: 12, marginTop: 4 }}>{damageErr}</div>}
             </div>
             {error && <div style={{ color: 'var(--danger-fg)', fontSize: 13, display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
-            <button className="btn btn-primary" style={{ justifyContent: 'center' }} onClick={() => calc.mutate()} disabled={calc.isPending}>
+            <button className="btn btn-primary" style={{ justifyContent: 'center' }} onClick={() => calc.mutate(params)} disabled={calc.isPending || !paramsValid}>
               <Icon name="target" size={16} /> {calc.isPending ? 'Đang tính…' : 'Chạy tính toán'}
             </button>
           </div>
@@ -107,6 +133,18 @@ export function ScenarioPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Phân tích what-if (độ nhạy) */}
+              <div className="panel" style={{ padding: 14, marginBottom: 16 }}>
+                <div className="eyebrow" style={{ marginBottom: 8 }}>Phân tích what-if (độ nhạy)</div>
+                <p className="muted" style={{ fontSize: 12, margin: '0 0 10px' }}>Chạy nhanh biến thể để xem kết quả thay đổi thế nào theo từng giả định.</p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button className="btn btn-sm" disabled={calc.isPending} onClick={() => runWith({ troopCount: String(Math.round(troop * 1.1)) })}>Quân số +10%</button>
+                  <button className="btn btn-sm" disabled={calc.isPending} onClick={() => runWith({ troopCount: String(Math.max(1, Math.round(troop * 0.9))) })}>Quân số −10%</button>
+                  <button className="btn btn-sm" disabled={calc.isPending} onClick={() => runWith({ durationDays: String(Math.round(days * 1.5)) })}>Thời gian +50%</button>
+                  <button className="btn btn-sm" disabled={calc.isPending} onClick={() => runWith({ damageLevel: String(Math.min(1, +(damage + 0.2).toFixed(2))) })}>Hư hỏng +20%</button>
+                </div>
               </div>
 
               <button className="btn btn-primary" onClick={() => savePlan.mutate()} disabled={savePlan.isPending}>

@@ -8,7 +8,8 @@ import { DataSource } from 'typeorm';
 export class DashboardService {
   constructor(@InjectDataSource() private readonly ds: DataSource) {}
 
-  async summary() {
+  async summary(mode?: string) {
+    const m = ['NORMAL', 'SSCD', 'SCENARIO'].includes(mode ?? '') ? (mode as string) : 'NORMAL';
     const [barracks] = await this.ds.query(`
       SELECT
         COUNT(*)::int AS total,
@@ -71,7 +72,28 @@ export class DashboardService {
     if (noFac.c > 0)
       topIssues.push({ severity: 'warn', title: 'Doanh trại chưa khai báo công trình', count: noFac.c });
 
+    // Chế độ hiển thị (Frontend §6.2): SSCĐ nhấn mức sẵn sàng; Tình huống giả định
+    // đưa dữ liệu mô phỏng (scenario=true) vào tổng hợp, tách khỏi số liệu thực (NORMAL).
+    if (m === 'SSCD') {
+      const notReady = total - barracks.approved;
+      if (notReady > 0)
+        topIssues.unshift({ severity: 'warn', title: 'Hồ sơ chưa sẵn sàng chiến đấu (chưa duyệt)', count: notReady });
+    } else if (m === 'SCENARIO') {
+      try {
+        const [sim] = await this.ds.query(
+          `SELECT COUNT(*)::int AS c FROM damage_events WHERE scenario = true AND status <> 'RESOLVED'`,
+        );
+        if (sim?.c > 0) {
+          topIssues.unshift({ severity: 'danger', title: 'Thiệt hại mô phỏng theo tình huống giả định', count: sim.c });
+          criticalAlerts += sim.c;
+        }
+      } catch {
+        /* bảng có thể chưa tồn tại — bỏ qua an toàn */
+      }
+    }
+
     return {
+      mode: m,
       generatedAt: new Date().toISOString(),
       barracks: {
         total,

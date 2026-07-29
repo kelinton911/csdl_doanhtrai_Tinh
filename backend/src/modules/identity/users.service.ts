@@ -11,6 +11,7 @@ import {
   AssignRolesDto,
   AssignScopesDto,
   CreateUserDto,
+  ResetPasswordDto,
   UpdateUserDto,
 } from './dto/user.dto';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
@@ -80,5 +81,17 @@ export class UsersService {
     if (!u) throw new NotFoundException('DATA-001: Không tìm thấy người dùng');
     u.dataScopes = dto.scopes;
     return this.safe(await this.repo.save(u));
+  }
+
+  // UC-02: quản trị đặt lại mật khẩu và mở khóa tài khoản (không xóa cứng).
+  async resetPassword(id: string, dto: ResetPasswordDto) {
+    const u = await this.repo.findOne({ where: { id } });
+    if (!u) throw new NotFoundException('DATA-001: Không tìm thấy người dùng');
+    u.passwordHash = await bcrypt.hash(dto.password, 10);
+    u.failedAttempts = 0;
+    u.lockedUntil = null;
+    if (u.status === 'LOCKED') u.status = 'ACTIVE';
+    await this.repo.save(u);
+    return { ok: true, message: 'Đã đặt lại mật khẩu và mở khóa tài khoản.' };
   }
 }

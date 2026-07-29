@@ -49,6 +49,10 @@ export class MaintenanceRequest {
   @Column({ type: 'varchar', default: MaintenanceStatus.DRAFT })
   status!: MaintenanceStatus;
 
+  // Kỹ thuật viên/nhà thầu được phân công thực hiện (M09/UC-14).
+  @Column({ name: 'assignee_name', type: 'varchar', nullable: true })
+  assigneeName!: string | null;
+
   @Column({ name: 'acceptance_note', type: 'varchar', nullable: true })
   acceptanceNote!: string | null;
 

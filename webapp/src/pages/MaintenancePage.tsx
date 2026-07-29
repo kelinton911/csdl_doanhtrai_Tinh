@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, toProblem } from '../lib/api';
+import { toast } from '../lib/toast';
 import { useAuth } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, type Column } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
+import { EvidenceDrawer } from '../components/EvidenceDrawer';
 import { Icon } from '../components/Icon';
 import { Skeleton, ErrorState } from '../components/States';
 import { currency, dateTime, num } from '../lib/format';
 
-interface Req { id: string; code: string; title: string; priority: string; estimatedCost: string; plannedDays: number; status: string; createdBy: string | null; barracksId: string | null; acceptanceNote: string | null }
+interface Req { id: string; code: string; title: string; priority: string; estimatedCost: string; plannedDays: number; status: string; createdBy: string | null; barracksId: string | null; acceptanceNote: string | null; assigneeName: string | null }
 interface Damage { id: string; entityType: string; entityId: string; severity: string; description: string | null; estimatedLoss: string; status: string; scenario: boolean; occurredAt: string }
 interface Barracks { id: string; name: string }
 
@@ -74,14 +76,21 @@ function RequestsTab() {
 
 const LIFECYCLE = ['DRAFT', 'PROPOSED', 'APPROVED', 'IN_PROGRESS', 'ACCEPTED', 'CLOSED'];
 
+const ACT_LABEL: Record<string, string> = { submit: 'Đã trình thẩm định.', approve: 'Đã phê duyệt yêu cầu.', start: 'Đã bắt đầu thực hiện.', accept: 'Đã nghiệm thu.', close: 'Đã đóng yêu cầu.' };
+
 function ReqDetailModal({ req, onClose, onChanged }: { req: Req; onClose: () => void; onChanged: () => void }) {
   const { profile, hasRole } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [cur, setCur] = useState(req);
+  const [evidence, setEvidence] = useState(false);
+  const [assignee, setAssignee] = useState(req.assigneeName ?? '');
   const act = useMutation({
-    mutationFn: async (action: string) => (await api.post(`/maintenance-requests/${req.id}/${action}`, action === 'accept' ? { note: 'Nghiệm thu đạt yêu cầu' } : {})).data as Req,
-    onSuccess: (d) => { setCur(d); setError(null); onChanged(); },
-    onError: (e) => setError(toProblem(e).title),
+    mutationFn: async (action: string) => {
+      const body = action === 'accept' ? { note: 'Nghiệm thu đạt yêu cầu' } : action === 'start' ? { assigneeName: assignee || undefined } : {};
+      return (await api.post(`/maintenance-requests/${req.id}/${action}`, body)).data as Req;
+    },
+    onSuccess: (d, action) => { setCur(d); setError(null); onChanged(); toast.success(ACT_LABEL[action] ?? 'Đã cập nhật yêu cầu.'); },
+    onError: (e) => { setError(toProblem(e).title); toast.problem(e); },
   });
   const isCreator = profile?.id === cur.createdBy;
   const step = LIFECYCLE.indexOf(cur.status);
@@ -102,9 +111,18 @@ function ReqDetailModal({ req, onClose, onChanged }: { req: Req; onClose: () => 
         <StatusBadge status={cur.status} />
         <span className="num" style={{ fontWeight: 700 }}>{currency(cur.estimatedCost)}</span>
       </div>
+      {cur.assigneeName && <div className="muted" style={{ marginBottom: 8, fontSize: 13, display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="user" size={14} /> Kỹ thuật viên: <b>{cur.assigneeName}</b></div>}
       {cur.acceptanceNote && <div className="muted" style={{ marginBottom: 12, fontSize: 13 }}>Nghiệm thu: {cur.acceptanceNote}</div>}
 
+      {cur.status === 'APPROVED' && (
+        <div style={{ marginBottom: 12 }}>
+          <label className="field-label">Phân công kỹ thuật viên (khi bắt đầu)</label>
+          <input className="input" value={assignee} onChange={(e) => setAssignee(e.target.value)} placeholder="Họ tên KTV hoặc đơn vị thi công" />
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        <button className="btn" onClick={() => setEvidence(true)}><Icon name="file" size={15} /> Tài liệu/Ảnh</button>
         {cur.status === 'DRAFT' && <button className="btn btn-primary" onClick={() => act.mutate('submit')}>Trình thẩm định</button>}
         {cur.status === 'PROPOSED' && hasRole('PROVINCIAL_COMMAND', 'BARRACKS_OFFICER') && !isCreator && <button className="btn btn-primary" onClick={() => act.mutate('approve')}>Phê duyệt</button>}
         {cur.status === 'PROPOSED' && isCreator && <span className="muted" style={{ fontSize: 12 }}>Người lập không tự duyệt</span>}
@@ -112,17 +130,18 @@ function ReqDetailModal({ req, onClose, onChanged }: { req: Req; onClose: () => 
         {cur.status === 'IN_PROGRESS' && <button className="btn btn-primary" onClick={() => act.mutate('accept')}>Nghiệm thu</button>}
         {cur.status === 'ACCEPTED' && <button className="btn" onClick={() => act.mutate('close')}>Đóng yêu cầu</button>}
       </div>
+      {evidence && <EvidenceDrawer entityType="maintenance-request" entityId={cur.id} title={`Tài liệu sửa chữa · ${cur.code}`} onClose={() => setEvidence(false)} />}
     </Modal>
   );
 }
 
 function CreateReqModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
-  const [f, setF] = useState({ code: '', title: '', barracksId: '', priority: 'NORMAL', estimatedCost: '', plannedDays: '' });
+  const [f, setF] = useState({ code: '', title: '', barracksId: '', priority: 'NORMAL', estimatedCost: '', plannedDays: '', assigneeName: '' });
   const [error, setError] = useState<string | null>(null);
   const barracks = useQuery({ queryKey: ['barracks-all'], queryFn: async () => (await api.get('/barracks', { params: { size: 200 } })).data as { data: Barracks[] } });
   const create = useMutation({
-    mutationFn: async () => api.post('/maintenance-requests', { code: f.code, title: f.title, barracksId: f.barracksId || undefined, priority: f.priority, estimatedCost: f.estimatedCost ? Number(f.estimatedCost) : undefined, plannedDays: f.plannedDays ? Number(f.plannedDays) : undefined }),
-    onSuccess: onDone,
+    mutationFn: async () => api.post('/maintenance-requests', { code: f.code, title: f.title, barracksId: f.barracksId || undefined, priority: f.priority, estimatedCost: f.estimatedCost ? Number(f.estimatedCost) : undefined, plannedDays: f.plannedDays ? Number(f.plannedDays) : undefined, assigneeName: f.assigneeName || undefined }),
+    onSuccess: () => { toast.success('Đã lập yêu cầu sửa chữa (nháp).'); onDone(); },
     onError: (e) => setError(toProblem(e).title),
   });
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((s) => ({ ...s, [k]: e.target.value }));
@@ -138,6 +157,7 @@ function CreateReqModal({ onClose, onDone }: { onClose: () => void; onDone: () =
           <div style={{ flex: 1 }}><label className="field-label">Số ngày</label><input className="input num" type="number" value={f.plannedDays} onChange={set('plannedDays')} /></div>
         </div>
         <div><label className="field-label">Kinh phí dự kiến (đồng)</label><input className="input num" type="number" value={f.estimatedCost} onChange={set('estimatedCost')} placeholder="0" /></div>
+        <div><label className="field-label">Kỹ thuật viên/nhà thầu (tùy chọn)</label><input className="input" value={f.assigneeName} onChange={set('assigneeName')} placeholder="Họ tên KTV hoặc đơn vị thi công" /></div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
           <button className="btn" onClick={onClose}>Hủy</button>
           <button className="btn btn-primary" disabled={!f.code || !f.title || create.isPending} onClick={() => create.mutate()}><Icon name="check" size={15} /> Lưu nháp</button>
@@ -151,8 +171,13 @@ function DamagesTab() {
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Damage | null>(null);
+  const [docDamage, setDocDamage] = useState<Damage | null>(null);
   const q = useQuery({ queryKey: ['damages'], queryFn: async () => (await api.get('/damage-events', { params: { size: 100 } })).data as { data: Damage[] } });
-  const verify = useMutation({ mutationFn: async (id: string) => api.post(`/damage-events/${id}/verify`), onSuccess: () => qc.invalidateQueries({ queryKey: ['damages'] }) });
+  const verify = useMutation({
+    mutationFn: async (id: string) => api.post(`/damage-events/${id}/verify`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['damages'] }); toast.success('Đã xác minh sự kiện hư hỏng.'); },
+    onError: (e) => toast.problem(e, 'Không xác minh được'),
+  });
 
   const columns: Column<Damage>[] = [
     { key: 'occurred', header: 'Thời điểm', render: (d) => dateTime(d.occurredAt), mono: true },
@@ -161,10 +186,11 @@ function DamagesTab() {
     { key: 'loss', header: 'Ước tính', render: (d) => currency(d.estimatedLoss), align: 'right', mono: true },
     { key: 'scenario', header: 'Loại', render: (d) => d.scenario ? <span style={{ color: 'var(--warn-fg)', fontSize: 12 }}>Mô phỏng</span> : <span style={{ color: 'var(--color-neutral-600)', fontSize: 12 }}>Thực</span> },
     { key: 'status', header: 'Trạng thái', render: (d) => d.status === 'VERIFIED' ? <StatusBadge status="APPROVED" /> : <span style={{ display: 'inline-flex', gap: 6 }}><StatusBadge status="PENDING_REVIEW" /></span> },
-    { key: 'act', header: '', align: 'right', render: (d) => d.status !== 'VERIFIED' && (
+    { key: 'act', header: '', align: 'right', render: (d) => (
       <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-        <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setEditing(d); }}><Icon name="edit" size={14} /> Sửa</button>
-        <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); verify.mutate(d.id); }}><Icon name="check" size={14} /> Xác minh</button>
+        <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setDocDamage(d); }} title="Ảnh minh chứng"><Icon name="file" size={14} /></button>
+        {d.status !== 'VERIFIED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setEditing(d); }}><Icon name="edit" size={14} /> Sửa</button>}
+        {d.status !== 'VERIFIED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); verify.mutate(d.id); }}><Icon name="check" size={14} /> Xác minh</button>}
       </div>
     ) },
   ];
@@ -177,6 +203,7 @@ function DamagesTab() {
       {q.isError ? <ErrorState error={q.error} /> : <DataTable columns={columns} rows={q.data?.data} loading={q.isLoading} rowKey={(d) => d.id} emptyTitle="Chưa ghi nhận hư hỏng" />}
       {creating && <CreateDamageModal onClose={() => setCreating(false)} onDone={() => { setCreating(false); qc.invalidateQueries({ queryKey: ['damages'] }); }} />}
       {editing && <EditDamageModal damage={editing} onClose={() => setEditing(null)} onDone={() => { setEditing(null); qc.invalidateQueries({ queryKey: ['damages'] }); }} />}
+      {docDamage && <EvidenceDrawer entityType="damage-event" entityId={docDamage.id} title="Ảnh & minh chứng hư hỏng" onClose={() => setDocDamage(null)} />}
     </>
   );
 }
@@ -187,7 +214,7 @@ function EditDamageModal({ damage, onClose, onDone }: { damage: Damage; onClose:
   const [error, setError] = useState<string | null>(null);
   const save = useMutation({
     mutationFn: async () => api.put(`/damage-events/${damage.id}`, { severity: f.severity, description: f.description || undefined, estimatedLoss: f.estimatedLoss ? Number(f.estimatedLoss) : undefined }),
-    onSuccess: onDone,
+    onSuccess: () => { toast.success('Đã lưu sự kiện hư hỏng.'); onDone(); },
     onError: (e) => setError(toProblem(e).title),
   });
   return (
@@ -211,7 +238,7 @@ function CreateDamageModal({ onClose, onDone }: { onClose: () => void; onDone: (
   const barracks = useQuery({ queryKey: ['barracks-all'], queryFn: async () => (await api.get('/barracks', { params: { size: 200 } })).data as { data: Barracks[] } });
   const create = useMutation({
     mutationFn: async () => api.post('/damage-events', { entityType: 'barracks', entityId: f.entityId, severity: f.severity, description: f.description || undefined, estimatedLoss: f.estimatedLoss ? Number(f.estimatedLoss) : undefined, scenario: f.scenario }),
-    onSuccess: onDone,
+    onSuccess: () => { toast.success('Đã ghi nhận hư hỏng.'); onDone(); },
     onError: (e) => setError(toProblem(e).title),
   });
   return (

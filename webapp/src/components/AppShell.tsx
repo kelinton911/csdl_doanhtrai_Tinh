@@ -1,33 +1,73 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Icon } from './Icon';
+import { AlertCloseModal } from './AlertCloseModal';
+import { MfaEnrollModal } from './MfaEnrollModal';
 import { api } from '../lib/api';
+import { toast } from '../lib/toast';
 import { visibleNav } from '../lib/nav';
 import { ROLE_LABEL, useAuth } from '../lib/auth';
 import { useTheme } from '../lib/theme';
+import { dateTime } from '../lib/format';
 
 interface SearchResult {
   barracks: Array<{ id: string; code: string; name: string }>;
   facilities: Array<{ id: string; code: string; name: string; barracks_id: string }>;
   materials: Array<{ id: string; code: string; name: string }>;
 }
+interface AlertLite {
+  id: string;
+  severity: string;
+  title: string;
+  status: string;
+  dueAt: string | null;
+  createdAt: string;
+}
+
+const SEV_COLOR: Record<string, string> = {
+  CRITICAL: 'var(--danger-fg)',
+  HIGH: 'var(--danger-fg)',
+  MEDIUM: 'var(--warn-fg)',
+  LOW: 'var(--info-fg)',
+};
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { profile, logout } = useAuth();
+  const { profile, logout, hasRole } = useAuth();
   const { theme, toggle } = useTheme();
+  const qc = useQueryClient();
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [closing, setClosing] = useState<{ id: string; title: string } | null>(null);
+  const [mfaOpen, setMfaOpen] = useState(false);
   const nav = visibleNav(profile?.roles ?? []);
   const primaryRole = profile?.roles?.[0] ?? '';
+  const canAct = hasRole('BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND');
 
   const alertCount = useQuery({
     queryKey: ['alert-summary'],
     queryFn: async () => (await api.get('/alerts/summary')).data as { open: number },
     refetchInterval: 60_000,
   });
+  const recentAlerts = useQuery({
+    queryKey: ['alerts', 'OPEN', 'notif'],
+    queryFn: async () => (await api.get('/alerts', { params: { status: 'OPEN', size: 6 } })).data as { data: AlertLite[] },
+    enabled: notifOpen,
+  });
+  const assign = useMutation({
+    mutationFn: async (id: string) => api.post(`/alerts/${id}/assign`, {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['alerts'] });
+      qc.invalidateQueries({ queryKey: ['alert-summary'] });
+      toast.success('Đã nhận xử lý cảnh báo.');
+    },
+    onError: (e) => toast.problem(e, 'Không nhận được cảnh báo'),
+  });
+
   const searchResults = useQuery({
     queryKey: ['global-search', search],
     queryFn: async () => (await api.get<SearchResult>('/search', { params: { q: search } })).data,
@@ -41,17 +81,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const current = nav.find((n) => location.pathname.startsWith(n.to));
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `${collapsed ? 72 : 248}px 1fr`, minHeight: '100vh' }}>
+    <div
+      className={`app-shell${mobileOpen ? ' nav-open' : ''}`}
+      style={{ ['--sidebar-w' as string]: collapsed ? '72px' : '248px' }}
+    >
+      <a href="#main-content" className="skip-link">Bỏ qua tới nội dung</a>
+      <div className="app-backdrop" onClick={() => setMobileOpen(false)} />
       {/* Sidebar */}
       <aside
+        className="app-sidebar"
         style={{
           background: 'var(--nav-bg)',
           color: 'var(--nav-fg)',
           display: 'flex',
           flexDirection: 'column',
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
         }}
       >
         <div
@@ -96,6 +139,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               key={item.to}
               to={item.to}
               className="navitem"
+              onClick={() => setMobileOpen(false)}
               style={({ isActive }) => ({
                 display: 'flex',
                 alignItems: 'center',
@@ -121,7 +165,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <button
           onClick={() => setCollapsed((c) => !c)}
-          className="navitem"
+          className="navitem hide-sm"
           style={{
             all: 'unset',
             cursor: 'pointer',
@@ -140,6 +184,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Topbar */}
         <header
+          className="app-topbar"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -152,6 +197,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             zIndex: 10,
           }}
         >
+          <button
+            className="btn btn-ghost btn-sm only-mobile"
+            aria-label="Mở menu điều hướng"
+            onClick={() => setMobileOpen(true)}
+          >
+            <Icon name="grid" size={18} />
+          </button>
+
           <div style={{ fontSize: 13, color: 'var(--color-neutral-600)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Icon name={current?.icon ?? 'grid'} size={15} />
             <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>{current?.label ?? 'Hệ thống'}</span>
@@ -164,6 +217,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <input
               className="input"
               placeholder="Tìm doanh trại, công trình, vật chất…"
+              aria-label="Tìm kiếm toàn hệ thống"
               style={{ paddingLeft: 32 }}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -189,7 +243,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div style={{ flex: 1 }} />
 
           {/* Chọn phạm vi dữ liệu */}
-          <select className="input" style={{ width: 'auto', maxWidth: 200 }} defaultValue="all" title="Phạm vi dữ liệu">
+          <select className="input hide-sm" style={{ width: 'auto', maxWidth: 200 }} defaultValue="all" title="Phạm vi dữ liệu" aria-label="Phạm vi dữ liệu">
             <option value="all">Phạm vi: Toàn tỉnh</option>
             <option value="unit">Đơn vị trực thuộc</option>
             <option value="commune">Xã/phường</option>
@@ -197,6 +251,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Trạng thái kết nối */}
           <span
+            className="hide-sm"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -214,19 +269,75 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             Trực tuyến
           </span>
 
-          <button className="btn btn-ghost btn-sm" title="Cảnh báo" onClick={() => navigate('/alerts')} style={{ position: 'relative' }}>
-            <Icon name="bell" size={18} />
-            {(alertCount.data?.open ?? 0) > 0 && (
-              <span style={{ position: 'absolute', top: 0, right: 0, minWidth: 16, height: 16, padding: '0 4px', borderRadius: 8, background: 'var(--danger)', color: '#fff', fontSize: 10, fontWeight: 700, display: 'grid', placeItems: 'center' }}>
-                {alertCount.data!.open > 99 ? '99+' : alertCount.data!.open}
-              </span>
+          {/* Trung tâm cảnh báo */}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="btn btn-ghost btn-sm"
+              title="Trung tâm cảnh báo"
+              aria-label="Trung tâm cảnh báo"
+              aria-haspopup="true"
+              aria-expanded={notifOpen}
+              onClick={() => setNotifOpen((o) => !o)}
+              style={{ position: 'relative' }}
+            >
+              <Icon name="bell" size={18} />
+              {(alertCount.data?.open ?? 0) > 0 && (
+                <span style={{ position: 'absolute', top: 0, right: 0, minWidth: 16, height: 16, padding: '0 4px', borderRadius: 8, background: 'var(--danger)', color: '#fff', fontSize: 10, fontWeight: 700, display: 'grid', placeItems: 'center' }}>
+                  {alertCount.data!.open > 99 ? '99+' : alertCount.data!.open}
+                </span>
+              )}
+            </button>
+            {notifOpen && (
+              <>
+                <div style={{ position: 'fixed', inset: 0, zIndex: 29 }} onClick={() => setNotifOpen(false)} />
+                <div
+                  className="card scrl"
+                  role="menu"
+                  style={{ position: 'absolute', top: 40, right: 0, width: 340, maxWidth: '92vw', maxHeight: 420, overflow: 'auto', zIndex: 30, boxShadow: '0 10px 30px rgba(0,0,0,0.18)' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: '1px solid var(--color-neutral-200)' }}>
+                    <strong style={{ fontSize: 13 }}>Cảnh báo cần xử lý ({alertCount.data?.open ?? 0})</strong>
+                    <button className="btn btn-ghost btn-sm" onClick={() => { setNotifOpen(false); navigate('/alerts'); }}>Xem tất cả</button>
+                  </div>
+                  {recentAlerts.isLoading ? (
+                    <div className="muted" style={{ padding: 16, fontSize: 13 }}>Đang tải…</div>
+                  ) : (recentAlerts.data?.data ?? []).length === 0 ? (
+                    <div className="muted" style={{ padding: 16, fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}><Icon name="check" size={16} /> Không có cảnh báo đang mở.</div>
+                  ) : (
+                    (recentAlerts.data?.data ?? []).map((a) => (
+                      <div key={a.id} style={{ padding: '10px 14px', borderBottom: '1px solid var(--color-neutral-200)', borderLeft: `3px solid ${SEV_COLOR[a.severity] ?? 'var(--info-fg)'}` }}>
+                        <div style={{ fontWeight: 600, fontSize: 13 }}>{a.title}</div>
+                        <div className="muted num" style={{ fontSize: 11, marginTop: 2 }}>
+                          {dateTime(a.createdAt)}{a.dueAt ? ` · Hạn: ${dateTime(a.dueAt)}` : ''}
+                        </div>
+                        {canAct && (
+                          <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                            {a.status === 'OPEN' && (
+                              <button className="btn btn-sm" disabled={assign.isPending} onClick={() => assign.mutate(a.id)}>
+                                <Icon name="user" size={13} /> Nhận
+                              </button>
+                            )}
+                            <button className="btn btn-sm btn-primary" onClick={() => { setNotifOpen(false); setClosing({ id: a.id, title: a.title }); }}>
+                              <Icon name="check" size={13} /> Đóng
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
             )}
+          </div>
+
+          <button className="btn btn-ghost btn-sm" onClick={() => setMfaOpen(true)} title="Bảo mật OTP" aria-label="Bảo mật OTP">
+            <Icon name="shield" size={18} />
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={toggle} title="Đổi giao diện sáng/tối">
+          <button className="btn btn-ghost btn-sm" onClick={toggle} title="Đổi giao diện sáng/tối" aria-label="Đổi giao diện sáng/tối">
             <Icon name={theme === 'light' ? 'moon' : 'sun'} size={18} />
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 12, borderLeft: '1px solid var(--color-neutral-300)' }}>
+          <div className="hide-sm" style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 12, borderLeft: '1px solid var(--color-neutral-300)' }}>
             <div style={{ textAlign: 'right', lineHeight: 1.25 }}>
               <div style={{ fontSize: 13, fontWeight: 700 }}>{profile?.fullName}</div>
               <div style={{ fontSize: 11, color: 'var(--color-neutral-600)' }}>
@@ -246,16 +357,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Icon name="user" size={18} />
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={logout} title="Đăng xuất">
-              <Icon name="logout" size={18} />
-            </button>
           </div>
+          <button className="btn btn-ghost btn-sm" onClick={logout} title="Đăng xuất" aria-label="Đăng xuất">
+            <Icon name="logout" size={18} />
+          </button>
         </header>
 
-        <main className="scrl" style={{ padding: 24, flex: 1, overflow: 'auto', maxWidth: 1600, width: '100%', margin: '0 auto' }}>
+        <main id="main-content" className="scrl app-main" style={{ padding: 24, flex: 1, overflow: 'auto', maxWidth: 1600, width: '100%', margin: '0 auto' }}>
           {children}
         </main>
       </div>
+
+      <AlertCloseModal alert={closing} onClose={() => setClosing(null)} />
+      {mfaOpen && <MfaEnrollModal onClose={() => setMfaOpen(false)} />}
     </div>
   );
 }

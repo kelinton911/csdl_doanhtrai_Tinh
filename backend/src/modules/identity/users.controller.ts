@@ -14,6 +14,7 @@ import {
   AssignRolesDto,
   AssignScopesDto,
   CreateUserDto,
+  ResetPasswordDto,
   UpdateUserDto,
 } from './dto/user.dto';
 import { PaginationQuery } from '../../common/dto/pagination.dto';
@@ -62,5 +63,11 @@ export class UsersController {
   @ApiOperation({ summary: 'UC-02: Gán phạm vi dữ liệu' })
   scopes(@Param('id', ParseUUIDPipe) id: string, @Body() dto: AssignScopesDto) {
     return this.service.assignScopes(id, dto);
+  }
+
+  @Post(':id/reset-password')
+  @ApiOperation({ summary: 'UC-02: Đặt lại mật khẩu và mở khóa tài khoản' })
+  resetPassword(@Param('id', ParseUUIDPipe) id: string, @Body() dto: ResetPasswordDto) {
+    return this.service.resetPassword(id, dto);
   }
 }

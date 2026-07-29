@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
   @ApiProperty({ example: 'admin' })
@@ -11,6 +11,11 @@ export class LoginDto {
   @IsString()
   @MinLength(6)
   password!: string;
+
+  @ApiPropertyOptional({ example: '123456', description: 'Mã OTP 6 số (nếu tài khoản đã bật)' })
+  @IsOptional()
+  @IsString()
+  otp?: string;
 }
 
 export class RefreshDto {

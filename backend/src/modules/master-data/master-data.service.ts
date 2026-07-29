@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Catalog } from './entities/catalog.entity';
 import { Material } from './entities/material.entity';
+import { MaterialVersion } from './entities/material-version.entity';
 import {
   CreateCatalogDto,
   CreateMaterialDto,
@@ -22,7 +23,37 @@ export class MasterDataService {
   constructor(
     @InjectRepository(Catalog) private readonly catalogs: Repository<Catalog>,
     @InjectRepository(Material) private readonly materials: Repository<Material>,
+    @InjectRepository(MaterialVersion) private readonly versions: Repository<MaterialVersion>,
   ) {}
+
+  // Ghi snapshot bất biến vào lịch sử phiên bản vật chất (M03) để đối chiếu/diff.
+  private async snapshotMaterial(m: Material, changeType: string, userId: string) {
+    const count = await this.versions.count({ where: { materialId: m.id } });
+    await this.versions.save(
+      this.versions.create({
+        materialId: m.id,
+        version: count + 1,
+        changeType,
+        snapshot: {
+          code: m.code,
+          name: m.name,
+          categoryCode: m.categoryCode,
+          unitCode: m.unitCode,
+          spec: m.spec,
+          qualityGrade: m.qualityGrade,
+          defaultScale: m.defaultScale,
+          attributes: m.attributes,
+          status: m.status,
+        },
+        createdBy: userId,
+      }),
+    );
+  }
+
+  async getMaterialVersions(id: string) {
+    await this.getMaterial(id);
+    return this.versions.find({ where: { materialId: id }, order: { version: 'DESC' } });
+  }
 
   // ------- Catalog (UC-03) -------
   async listCatalog(type: string, q: PaginationQuery) {
@@ -102,7 +133,7 @@ export class MasterDataService {
   async createMaterial(dto: CreateMaterialDto, user: AuthUser) {
     const dup = await this.materials.findOne({ where: { code: dto.code } });
     if (dup) throw new ConflictException(`DATA-003: Trùng mã vật chất ${dto.code}`);
-    return this.materials.save(
+    const saved = await this.materials.save(
       this.materials.create({
         code: dto.code,
         name: dto.name,
@@ -117,6 +148,8 @@ export class MasterDataService {
         updatedBy: user.sub,
       }),
     );
+    await this.snapshotMaterial(saved, 'CREATE', user.sub);
+    return saved;
   }
 
   async updateMaterial(id: string, dto: UpdateMaterialDto, user: AuthUser) {
@@ -131,7 +164,9 @@ export class MasterDataService {
     if (dto.qualityGrade !== undefined) m.qualityGrade = dto.qualityGrade;
     if (dto.attributes !== undefined) m.attributes = dto.attributes;
     m.updatedBy = user.sub;
-    return this.materials.save(m);
+    const saved = await this.materials.save(m);
+    await this.snapshotMaterial(saved, 'UPDATE', user.sub);
+    return saved;
   }
 
   async publishMaterial(id: string, user: AuthUser) {
@@ -140,7 +175,10 @@ export class MasterDataService {
       throw new ConflictException('WF-001: Vật chất đã phát hành');
     }
     m.status = 'PUBLISHED';
+    m.version = (m.version ?? 1) + 1;
     m.updatedBy = user.sub;
-    return this.materials.save(m);
+    const saved = await this.materials.save(m);
+    await this.snapshotMaterial(saved, 'PUBLISH', user.sub);
+    return saved;
   }
 }

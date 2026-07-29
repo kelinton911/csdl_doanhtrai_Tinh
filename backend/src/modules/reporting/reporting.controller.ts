@@ -18,7 +18,7 @@ class CreateReportDto {
   @IsString()
   template!: string;
 
-  @IsIn(['pdf', 'excel'])
+  @IsIn(['pdf', 'excel', 'word'])
   format!: string;
 }
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { api, toProblem } from '../lib/api';
+import { toast } from '../lib/toast';
 import { useCatalog } from '../lib/catalogs';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, type Column } from '../components/DataTable';
@@ -8,7 +9,8 @@ import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
 import { Icon } from '../components/Icon';
-import { ErrorState } from '../components/States';
+import { ErrorState, Skeleton, EmptyState } from '../components/States';
+import { dateTime } from '../lib/format';
 
 // M03 — Danh mục vật chất (UC-07): tạo (nháp) → sửa khi chưa phát hành → phát hành (bất biến).
 interface Material {
@@ -30,6 +32,7 @@ export function MaterialsPage() {
   const [category, setCategory] = useState('');
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Material | null>(null);
+  const [versionsOf, setVersionsOf] = useState<Material | null>(null);
   const size = 15;
   const cat = useCatalog('material-category');
   const unit = useCatalog('unit-of-measure');
@@ -39,7 +42,7 @@ export function MaterialsPage() {
     queryFn: async () => (await api.get('/materials', { params: { page, size, search: search || undefined, category: category || undefined } })).data as { data: Material[]; meta: { total: number } },
     placeholderData: keepPreviousData,
   });
-  const publish = useMutation({ mutationFn: async (id: string) => api.post(`/materials/${id}/publish`), onSuccess: () => qc.invalidateQueries({ queryKey: ['materials'] }) });
+  const publish = useMutation({ mutationFn: async (id: string) => api.post(`/materials/${id}/publish`), onSuccess: () => { qc.invalidateQueries({ queryKey: ['materials'] }); toast.success('Đã phát hành vật chất.'); }, onError: (e) => toast.problem(e, 'Không phát hành được') });
 
   const columns: Column<Material>[] = [
     { key: 'code', header: 'Mã VC', render: (m) => m.code, mono: true, width: 110 },
@@ -51,6 +54,7 @@ export function MaterialsPage() {
     { key: 'status', header: 'Trạng thái', render: (m) => <StatusBadge status={m.status} /> },
     { key: 'act', header: '', align: 'right', render: (m) => (
       <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+        <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setVersionsOf(m); }} title="Lịch sử phiên bản"><Icon name="clock" size={14} /></button>
         {m.status !== 'PUBLISHED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setEditing(m); }}><Icon name="edit" size={14} /> Sửa</button>}
         {m.status !== 'PUBLISHED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); publish.mutate(m.id); }}><Icon name="check" size={14} /> Phát hành</button>}
       </div>
@@ -83,7 +87,65 @@ export function MaterialsPage() {
 
       {creating && <MaterialModal onClose={() => setCreating(false)} onDone={() => { setCreating(false); qc.invalidateQueries({ queryKey: ['materials'] }); }} />}
       {editing && <MaterialModal id={editing.id} onClose={() => setEditing(null)} onDone={() => { setEditing(null); qc.invalidateQueries({ queryKey: ['materials'] }); }} />}
+      {versionsOf && <VersionsModal material={versionsOf} onClose={() => setVersionsOf(null)} />}
     </>
+  );
+}
+
+interface VersionRow { id: string; version: number; changeType: string; snapshot: Record<string, unknown>; createdAt: string }
+const FIELD_LABEL: Record<string, string> = { code: 'Mã', name: 'Tên', categoryCode: 'Nhóm', unitCode: 'ĐVT', spec: 'Quy cách', qualityGrade: 'Cấp CL', status: 'Trạng thái' };
+const CHANGE_LABEL: Record<string, string> = { CREATE: 'Tạo mới', UPDATE: 'Chỉnh sửa', PUBLISH: 'Phát hành' };
+
+// Lịch sử phiên bản + diff trường giữa các lần thay đổi (BE-5: GET /materials/:id/versions).
+function VersionsModal({ material, onClose }: { material: Material; onClose: () => void }) {
+  const q = useQuery({
+    queryKey: ['material-versions', material.id],
+    queryFn: async () => (await api.get(`/materials/${material.id}/versions`)).data as VersionRow[],
+  });
+  const rows = q.data ?? [];
+  return (
+    <Modal open title={`Lịch sử phiên bản · ${material.code}`} onClose={onClose} width={620}>
+      {q.isLoading ? <Skeleton rows={4} /> : q.isError ? <ErrorState error={q.error} /> : rows.length === 0 ? (
+        <EmptyState icon="clock" title="Chưa có lịch sử" hint="Lịch sử được ghi khi tạo, sửa hoặc phát hành vật chất." />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {rows.map((v, i) => {
+            const prev = rows[i + 1]?.snapshot; // rows sắp xếp version giảm dần → phần tử sau là cũ hơn
+            const changed = prev
+              ? Object.keys(FIELD_LABEL).filter((k) => String(v.snapshot[k] ?? '') !== String(prev[k] ?? ''))
+              : Object.keys(FIELD_LABEL).filter((k) => v.snapshot[k] != null && v.snapshot[k] !== '');
+            return (
+              <div key={v.id} style={{ display: 'flex', gap: 14, paddingBottom: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--color-accent-600)', marginTop: 4 }} />
+                  {i < rows.length - 1 && <div style={{ width: 2, flex: 1, background: 'var(--color-neutral-300)' }} />}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <span className="num" style={{ fontWeight: 700 }}>v{v.version}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-accent-700)' }}>{CHANGE_LABEL[v.changeType] ?? v.changeType}</span>
+                    <span className="muted num" style={{ fontSize: 11 }}>{dateTime(v.createdAt)}</span>
+                  </div>
+                  {changed.length === 0 ? (
+                    <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>Không thay đổi trường dữ liệu.</div>
+                  ) : (
+                    <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {changed.map((k) => (
+                        <div key={k} style={{ fontSize: 12.5, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          <span className="muted" style={{ minWidth: 70 }}>{FIELD_LABEL[k]}:</span>
+                          {prev && <><span style={{ color: 'var(--danger-fg)', textDecoration: 'line-through' }}>{String(prev[k] ?? '—')}</span><Icon name="chevron" size={12} /></>}
+                          <span style={{ color: 'var(--ok-fg)', fontWeight: 600 }}>{String(v.snapshot[k] ?? '—')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Modal>
   );
 }
 
@@ -109,7 +171,7 @@ function MaterialModal({ id, onClose, onDone }: { id?: string; onClose: () => vo
       const body = { name: f.name, categoryCode: f.categoryCode || undefined, unitCode: f.unitCode || undefined, spec: f.spec || undefined, qualityGrade: f.qualityGrade || undefined };
       return editing ? api.put(`/materials/${id}`, body) : api.post('/materials', { code: f.code, ...body });
     },
-    onSuccess: onDone,
+    onSuccess: () => { toast.success(editing ? 'Đã lưu vật chất.' : 'Đã tạo vật chất (nháp).'); onDone(); },
     onError: (e) => setError(toProblem(e).title),
   });
 

@@ -36,6 +36,12 @@ export class MasterDataController {
     return this.service.listMaterials(q, q.category, q.search);
   }
 
+  @Get('materials/:id/versions')
+  @ApiOperation({ summary: 'UC-07: Lịch sử phiên bản vật chất (để đối chiếu/diff)' })
+  getMaterialVersions(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.getMaterialVersions(id);
+  }
+
   @Get('materials/:id')
   @ApiOperation({ summary: 'UC-07: Chi tiết vật chất' })
   getMaterial(@Param('id', ParseUUIDPipe) id: string) {

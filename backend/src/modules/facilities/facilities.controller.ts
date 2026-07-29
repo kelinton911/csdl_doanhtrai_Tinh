@@ -46,6 +46,16 @@ export class FacilitiesController {
     return this.service.create(barracksId, dto, user);
   }
 
+  @Get('facilities')
+  @ApiOperation({ summary: 'UC-07: Danh sách công trình toàn hệ thống (kèm tên doanh trại)' })
+  listAll(
+    @Query() q: PaginationQuery,
+    @Query('barracksId') barracksId?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.service.listAll(q, { barracksId, search });
+  }
+
   @Get('facilities/:id')
   @ApiOperation({ summary: 'UC-07: Xem hồ sơ công trình' })
   get(@Param('id', ParseUUIDPipe) id: string) {

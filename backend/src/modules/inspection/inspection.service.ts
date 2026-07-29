@@ -68,6 +68,23 @@ export class InspectionService {
     return this.campaigns.save(c);
   }
 
+  // UC-09: đóng đợt kiểm kê (không xóa cứng). Chỉ đóng khi đang mở/đang xử lý.
+  async closeCampaign(id: string, user: AuthUser) {
+    const c = await this.getCampaign(id);
+    const closable = [
+      InspectionStatus.OPEN,
+      InspectionStatus.IN_PROGRESS,
+      InspectionStatus.SUBMITTED,
+      InspectionStatus.RECONCILED,
+    ];
+    if (!closable.includes(c.status)) {
+      throw new ConflictException(`WF-001: Không thể đóng đợt đang ở trạng thái ${c.status}`);
+    }
+    c.status = InspectionStatus.CLOSED;
+    c.updatedBy = user.sub;
+    return this.campaigns.save(c);
+  }
+
   async campaignProgress(id: string) {
     await this.getCampaign(id);
     const rows = await this.sheets

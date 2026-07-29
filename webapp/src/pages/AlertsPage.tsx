@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, toProblem } from '../lib/api';
+import { api } from '../lib/api';
+import { toast } from '../lib/toast';
 import { useAuth } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
+import { AlertCloseModal } from '../components/AlertCloseModal';
 import { Icon } from '../components/Icon';
 import { Skeleton, ErrorState, EmptyState } from '../components/States';
 import { dateTime } from '../lib/format';
@@ -27,15 +29,15 @@ export function AlertsPage() {
   const { hasRole } = useAuth();
   const canAct = hasRole('BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND');
   const [status, setStatus] = useState('OPEN');
+  const [closing, setClosing] = useState<{ id: string; title: string } | null>(null);
 
   const summary = useQuery({ queryKey: ['alert-summary'], queryFn: async () => (await api.get('/alerts/summary')).data as { open: number; bySeverity: Record<string, number> } });
   const alerts = useQuery({ queryKey: ['alerts', status], queryFn: async () => (await api.get('/alerts', { params: { status: status || undefined, size: 100 } })).data as { data: Alert[] } });
 
-  const assign = useMutation({ mutationFn: async (id: string) => api.post(`/alerts/${id}/assign`, {}), onSuccess: () => invalidate() });
-  const close = useMutation({ mutationFn: async ({ id, resolution }: { id: string; resolution: string }) => api.post(`/alerts/${id}/close`, { resolution }), onSuccess: () => invalidate() });
+  const assign = useMutation({ mutationFn: async (id: string) => api.post(`/alerts/${id}/assign`, {}), onSuccess: () => { invalidate(); toast.success('Đã nhận xử lý cảnh báo.'); }, onError: (e) => toast.problem(e, 'Không nhận được cảnh báo') });
   function invalidate() { qc.invalidateQueries({ queryKey: ['alerts'] }); qc.invalidateQueries({ queryKey: ['alert-summary'] }); }
 
-  const generate = useMutation({ mutationFn: async () => api.post('/alerts/generate'), onSuccess: () => invalidate() });
+  const generate = useMutation({ mutationFn: async () => api.post('/alerts/generate'), onSuccess: () => { invalidate(); toast.success('Đã quét và cập nhật cảnh báo.'); }, onError: (e) => toast.problem(e, 'Quét cảnh báo thất bại') });
 
   const rows = [...(alerts.data?.data ?? [])].sort((a, b) => (SEV[a.severity]?.order ?? 9) - (SEV[b.severity]?.order ?? 9));
 
@@ -69,12 +71,14 @@ export function AlertsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {rows.map((a) => {
             const s = SEV[a.severity] ?? SEV.MEDIUM;
+            const overdue = a.dueAt != null && a.status !== 'CLOSED' && new Date(a.dueAt).getTime() < Date.now();
             return (
-              <div key={a.id} className="panel" style={{ padding: '12px 16px', borderLeft: `4px solid ${s.fg}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+              <div key={a.id} className="panel" style={{ padding: '12px 16px', borderLeft: `4px solid ${overdue ? 'var(--danger-fg)' : s.fg}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: s.fg, background: s.bg, border: `1px solid ${s.bd}`, padding: '1px 7px', borderRadius: 5 }}>{s.label}</span>
                     <span style={{ fontWeight: 600 }}>{a.title}</span>
+                    {overdue && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--danger-fg)', background: 'var(--danger-bg)', border: '1px solid var(--danger-bd)', padding: '1px 7px', borderRadius: 5, display: 'inline-flex', gap: 4, alignItems: 'center' }}><Icon name="clock" size={12} /> Quá hạn SLA</span>}
                   </div>
                   <div className="muted num" style={{ fontSize: 11.5, marginTop: 3 }}>
                     {a.description ? a.description + ' · ' : ''}{dateTime(a.createdAt)}{a.dueAt ? ` · Hạn: ${dateTime(a.dueAt)}` : ''}
@@ -82,8 +86,8 @@ export function AlertsPage() {
                 </div>
                 {canAct && a.status !== 'CLOSED' && (
                   <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                    {a.status === 'OPEN' && <button className="btn btn-sm" onClick={() => assign.mutate(a.id)}><Icon name="user" size={14} /> Nhận</button>}
-                    <button className="btn btn-sm btn-primary" onClick={() => { const r = prompt('Kết quả xử lý:'); if (r) close.mutate({ id: a.id, resolution: r }); }}><Icon name="check" size={14} /> Đóng</button>
+                    {a.status === 'OPEN' && <button className="btn btn-sm" disabled={assign.isPending} onClick={() => assign.mutate(a.id)}><Icon name="user" size={14} /> Nhận</button>}
+                    <button className="btn btn-sm btn-primary" onClick={() => setClosing({ id: a.id, title: a.title })}><Icon name="check" size={14} /> Đóng</button>
                   </div>
                 )}
                 {a.status === 'CLOSED' && <span style={{ fontSize: 12, color: 'var(--ok-fg)', flexShrink: 0 }}><Icon name="check" size={14} /> Đã đóng</span>}
@@ -92,6 +96,8 @@ export function AlertsPage() {
           })}
         </div>
       )}
+
+      <AlertCloseModal alert={closing} onClose={() => setClosing(null)} />
     </>
   );
 }

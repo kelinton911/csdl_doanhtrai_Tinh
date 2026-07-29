@@ -99,7 +99,7 @@ export class ReportingService {
   async createReport(template: string, format: string, user: AuthUser) {
     const def = TEMPLATES[template];
     if (!def) throw new BadRequestException(`VAL-001: Mẫu báo cáo không hợp lệ (${template})`);
-    if (!['pdf', 'excel'].includes(format)) throw new BadRequestException('VAL-001: format phải là pdf|excel');
+    if (!['pdf', 'excel', 'word'].includes(format)) throw new BadRequestException('VAL-001: format phải là pdf|excel|word');
 
     const snapshotAt = new Date();
     const rows: Record<string, unknown>[] = await this.ds.query(def.query);
@@ -108,11 +108,15 @@ export class ReportingService {
     const watermark = `${user.username} · ${snapshotAt.toLocaleString('vi-VN')}`;
     const buffer = format === 'excel'
       ? await this.buildExcel(def, rows, snapshotAt, watermark)
-      : await this.buildPdf(def, rows, snapshotAt, watermark);
+      : format === 'word'
+        ? this.buildRtf(def, rows, snapshotAt, watermark)
+        : await this.buildPdf(def, rows, snapshotAt, watermark);
 
     const contentType = format === 'excel'
       ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      : 'application/pdf';
+      : format === 'word'
+        ? 'application/rtf'
+        : 'application/pdf';
     const stored = await this.storage.putObject(buffer, contentType, 'reports');
 
     return this.jobs.save(
@@ -150,6 +154,36 @@ export class ReportingService {
     ws.columns.forEach((col) => { col.width = 22; });
     const out = await wb.xlsx.writeBuffer();
     return Buffer.from(out as ArrayBuffer);
+  }
+
+  // Xuất Word bằng RTF (Rich Text Format) — Word mở trực tiếp, không cần thư viện ngoài.
+  // Hỗ trợ Unicode tiếng Việt qua escape \uN.
+  private buildRtf(def: TemplateDef, rows: Record<string, unknown>[], at: Date, watermark: string): Buffer {
+    const esc = (s: string) => {
+      let out = '';
+      for (const ch of String(s)) {
+        const code = ch.codePointAt(0)!;
+        if (ch === '\\' || ch === '{' || ch === '}') out += '\\' + ch;
+        else if (code > 127) out += `\\u${code}?`;
+        else out += ch;
+      }
+      return out;
+    };
+    const cellW = Math.floor(9000 / def.columns.length);
+    const rowRtf = (values: string[], bold = false) => {
+      let r = '\\trowd\\trgaph80';
+      for (let i = 0; i < values.length; i++) r += `\\cellx${cellW * (i + 1)}`;
+      for (const v of values) r += `\\intbl ${bold ? '\\b ' : ''}${esc(v)}${bold ? '\\b0' : ''}\\cell`;
+      return r + '\\row\n';
+    };
+    let body = '{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Arial;}}\\fs22\n';
+    body += `{\\b\\fs28 ${esc(def.title)}}\\par\n`;
+    body += `{\\fs18 Thời điểm chốt: ${esc(at.toLocaleString('vi-VN'))} · Nguồn: CSDL Vật chất Doanh trại (dữ liệu giả lập)}\\par\n`;
+    body += `{\\fs16\\cf1 Người tải: ${esc(watermark)}}\\par\\par\n`;
+    body += rowRtf(def.columns.map((c) => c.header), true);
+    for (const r of rows) body += rowRtf(def.columns.map((c) => String(r[c.key] ?? '')));
+    body += `\\par{\\fs16 Tổng số dòng: ${rows.length}}\\par\n}`;
+    return Buffer.from(body, 'utf8');
   }
 
   private buildPdf(def: TemplateDef, rows: Record<string, unknown>[], at: Date, watermark: string): Promise<Buffer> {

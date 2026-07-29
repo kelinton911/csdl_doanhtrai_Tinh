@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api, toProblem } from '../lib/api';
+import { toast } from '../lib/toast';
 import { useAuth } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, type Column } from '../components/DataTable';
@@ -55,7 +56,9 @@ function SheetsTab() {
   const campaigns = useQuery({ queryKey: ['campaigns'], queryFn: async () => (await api.get('/inspection-campaigns', { params: { size: 100 } })).data as { data: Campaign[] } });
   const activeCampaign = campaignId || campaigns.data?.data?.[0]?.id || '';
   const activeObj = (campaigns.data?.data ?? []).find((c) => c.id === activeCampaign);
-  const openCampaign = useMutation({ mutationFn: async (id: string) => api.post(`/inspection-campaigns/${id}/open`), onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }) });
+  const openCampaign = useMutation({ mutationFn: async (id: string) => api.post(`/inspection-campaigns/${id}/open`), onSuccess: () => { qc.invalidateQueries({ queryKey: ['campaigns'] }); toast.success('Đã mở đợt kiểm kê.'); }, onError: (e) => toast.problem(e, 'Không mở được đợt') });
+  const closeCampaign = useMutation({ mutationFn: async (id: string) => api.post(`/inspection-campaigns/${id}/close`), onSuccess: () => { qc.invalidateQueries({ queryKey: ['campaigns'] }); toast.success('Đã đóng đợt kiểm kê.'); }, onError: (e) => toast.problem(e, 'Không đóng được đợt') });
+  const CLOSABLE = ['OPEN', 'IN_PROGRESS', 'SUBMITTED', 'RECONCILED'];
   const progress = useQuery({
     queryKey: ['campaign-progress', activeCampaign],
     queryFn: async () => (await api.get(`/inspection-campaigns/${activeCampaign}/progress`)).data as { total: number; approved: number; completion: number },
@@ -93,6 +96,9 @@ function SheetsTab() {
         <div style={{ flex: 1 }} />
         {canManage && activeObj && activeObj.status === 'PLANNED' && (
           <button className="btn" disabled={openCampaign.isPending} onClick={() => openCampaign.mutate(activeCampaign)}><Icon name="upload" size={15} /> Mở đợt</button>
+        )}
+        {canManage && activeObj && CLOSABLE.includes(activeObj.status) && (
+          <button className="btn" disabled={closeCampaign.isPending} onClick={() => closeCampaign.mutate(activeCampaign)}><Icon name="lock" size={15} /> Đóng đợt</button>
         )}
         {canManage && <button className="btn" onClick={() => setCreatingCampaign(true)}><Icon name="clipboard" size={15} /> Tạo đợt</button>}
         <button className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Tạo phiếu</button>

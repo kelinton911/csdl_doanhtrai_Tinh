@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { api, toProblem } from '../lib/api';
+import { toast } from '../lib/toast';
 import { useAuth } from '../lib/auth';
 import { useCatalog } from '../lib/catalogs';
 import { PageHeader } from '../components/PageHeader';
@@ -13,7 +14,7 @@ import { DataTable, type Column } from '../components/DataTable';
 import { Modal } from '../components/Modal';
 import { Skeleton, ErrorState, EmptyState } from '../components/States';
 import { Icon } from '../components/Icon';
-import { num, date, dateTime } from '../lib/format';
+import { num, date, dateTime, currency } from '../lib/format';
 
 const CONDITION_OPTIONS = [
   { code: 'GOOD', label: 'Tốt' },
@@ -51,8 +52,13 @@ interface Revision {
   createdAt: string;
   createdBy: string | null;
 }
+interface StorageLoc { id: string; code: string; name: string; barracksId?: string | null }
+interface Balance { materialId: string; storageLocationId: string; materialCode: string; materialName: string; unitCode: string | null; onHand: string; locationName: string; variance: number | null }
+interface MaintReq { id: string; code: string; title: string; priority: string; estimatedCost: string; status: string }
+interface Doc { id: string; name: string; classification: string | null; contentType: string; size: string; createdAt: string }
 
-const TABS = ['Tổng quan', 'Công trình', 'Bản đồ', 'Lịch sử'] as const;
+const TABS = ['Tổng quan', 'Công trình', 'Vật chất', 'Pháp lý', 'Sửa chữa', 'Bản đồ', 'Lịch sử'] as const;
+const PRIORITY_LABEL: Record<string, string> = { LOW: 'Thấp', NORMAL: 'Bình thường', HIGH: 'Cao', URGENT: 'Khẩn' };
 
 export function BarracksDetailPage() {
   const { id } = useParams();
@@ -62,8 +68,10 @@ export function BarracksDetailPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>('Tổng quan');
   const [actionError, setActionError] = useState<string | null>(null);
   const [evidence, setEvidence] = useState(false);
+  const [facEvidence, setFacEvidence] = useState<Facility | null>(null);
   const [facModal, setFacModal] = useState<{ mode: 'create' } | { mode: 'edit'; facility: Facility } | null>(null);
   const [decommission, setDecommission] = useState<Facility | null>(null);
+  const [invLoc, setInvLoc] = useState('');
   const facType = useCatalog('facility-type');
   const grade = useCatalog('quality-grade');
   const canManageFacility = hasRole('COMMUNE_USER', 'BARRACKS_OFFICER');
@@ -85,16 +93,44 @@ export function BarracksDetailPage() {
     queryFn: async () => (await api.get<Revision[]>(`/barracks/${id}/revisions`)).data,
     enabled: tab === 'Lịch sử',
   });
+  const locs = useQuery({
+    queryKey: ['storage-locations', 'all'],
+    queryFn: async () => (await api.get('/inventory/storage-locations', { params: { size: 200 } })).data as { data: StorageLoc[] },
+    enabled: tab === 'Vật chất',
+  });
+  const barracksLocs = (locs.data?.data ?? []).filter((l) => l.barracksId === id);
+  const effectiveLoc = invLoc || barracksLocs[0]?.id || '';
+  const balances = useQuery({
+    queryKey: ['inventory-balances', effectiveLoc],
+    queryFn: async () => (await api.get('/inventory/balances', { params: { storageLocationId: effectiveLoc, size: 200 } })).data as { data: Balance[] },
+    enabled: tab === 'Vật chất' && !!effectiveLoc,
+  });
+  const legalDocs = useQuery({
+    queryKey: ['documents', 'barracks', id, 'legal'],
+    queryFn: async () => (await api.get('/documents', { params: { entityType: 'barracks', entityId: id, size: 100 } })).data as { data: Doc[] },
+    enabled: tab === 'Pháp lý',
+  });
+  const maintReqs = useQuery({
+    queryKey: ['maint-requests', 'barracks', id],
+    queryFn: async () => (await api.get('/maintenance-requests', { params: { barracksId: id, size: 100 } })).data as { data: MaintReq[] },
+    enabled: tab === 'Sửa chữa',
+  });
+
+  async function downloadDoc(docId: string) {
+    const { data } = await api.get(`/files/${docId}/download-url`);
+    window.open(data.url, '_blank');
+  }
 
   const act = useMutation({
     mutationFn: async (action: 'submit' | 'approve' | 'request-changes') =>
       (await api.post(`/barracks/${id}/${action}`)).data,
-    onSuccess: () => {
+    onSuccess: (_d, action) => {
       setActionError(null);
       qc.invalidateQueries({ queryKey: ['barracks', id] });
       qc.invalidateQueries({ queryKey: ['barracks', id, 'revisions'] });
+      toast.success(action === 'submit' ? 'Đã gửi hồ sơ đi duyệt.' : action === 'approve' ? 'Đã phê duyệt hồ sơ.' : 'Đã gửi yêu cầu bổ sung.');
     },
-    onError: (e) => setActionError(toProblem(e).title),
+    onError: (e) => { setActionError(toProblem(e).title); toast.problem(e); },
   });
 
   if (b.isLoading) return <Skeleton rows={6} />;
@@ -112,14 +148,30 @@ export function BarracksDetailPage() {
     { key: 'year', header: 'Năm XD', render: (f) => f.buildYear ?? '—', align: 'right', mono: true },
     { key: 'cond', header: 'Chất lượng', render: (f) => <ConditionChip code={f.condition} label={grade.label(f.condition)} /> },
     { key: 'status', header: 'Khai thác', render: (f) => <StatusBadge status={f.status} /> },
-    ...(canManageFacility ? [{
+    {
       key: 'act', header: '', align: 'right' as const, render: (f: Facility) => (
         <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-          {f.status !== 'DECOMMISSIONED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setFacModal({ mode: 'edit', facility: f }); }}><Icon name="edit" size={14} /> Sửa</button>}
-          {f.status !== 'DECOMMISSIONED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setDecommission(f); }} title="Ngừng khai thác"><Icon name="lock" size={14} /></button>}
+          <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setFacEvidence(f); }} title="Tài liệu & ảnh"><Icon name="file" size={14} /></button>
+          {canManageFacility && f.status !== 'DECOMMISSIONED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setFacModal({ mode: 'edit', facility: f }); }}><Icon name="edit" size={14} /> Sửa</button>}
+          {canManageFacility && f.status !== 'DECOMMISSIONED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setDecommission(f); }} title="Ngừng khai thác"><Icon name="lock" size={14} /></button>}
         </div>
       ),
-    }] : []),
+    },
+  ];
+
+  const balCols: Column<Balance>[] = [
+    { key: 'mcode', header: 'Mã VC', render: (b) => b.materialCode, mono: true, width: 90 },
+    { key: 'mname', header: 'Vật chất', render: (b) => <span style={{ fontWeight: 600 }}>{b.materialName}</span> },
+    { key: 'onhand', header: 'Tồn sổ', render: (b) => num(b.onHand), align: 'right', mono: true },
+    { key: 'unit', header: 'ĐVT', render: (b) => b.unitCode ?? '—' },
+    { key: 'var', header: 'Chênh lệch', render: (b) => <span className="num" style={{ color: b.variance == null || b.variance === 0 ? 'var(--color-neutral-600)' : 'var(--danger-fg)', fontWeight: 600 }}>{b.variance == null ? '—' : (b.variance > 0 ? '+' : '') + num(b.variance)}</span>, align: 'right' },
+  ];
+  const maintCols: Column<MaintReq>[] = [
+    { key: 'code', header: 'Mã', render: (r) => r.code, mono: true, width: 110 },
+    { key: 'title', header: 'Nội dung', render: (r) => <span style={{ fontWeight: 600 }}>{r.title}</span> },
+    { key: 'prio', header: 'Ưu tiên', render: (r) => PRIORITY_LABEL[r.priority] ?? r.priority },
+    { key: 'cost', header: 'Kinh phí', render: (r) => currency(r.estimatedCost), align: 'right', mono: true },
+    { key: 'status', header: 'Trạng thái', render: (r) => <StatusBadge status={r.status} /> },
   ];
 
   return (
@@ -137,6 +189,14 @@ export function BarracksDetailPage() {
             <button className="btn" onClick={() => setEvidence(true)}>
               <Icon name="file" size={16} /> Tài liệu
             </button>
+            <button className="btn no-print" onClick={() => window.print()} title="In hồ sơ">
+              <Icon name="download" size={16} /> In
+            </button>
+            {canSubmit && (
+              <button className="btn" onClick={() => nav(`/barracks/${id}/edit`)}>
+                <Icon name="edit" size={16} /> Sửa hồ sơ
+              </button>
+            )}
             {canSubmit && (
               <button className="btn btn-primary" disabled={act.isPending} onClick={() => act.mutate('submit')}>
                 <Icon name="upload" size={16} /> Gửi duyệt
@@ -216,6 +276,62 @@ export function BarracksDetailPage() {
         </>
       )}
 
+      {tab === 'Vật chất' && (
+        <>
+          {locs.isLoading ? (
+            <Skeleton rows={5} />
+          ) : barracksLocs.length === 0 ? (
+            <EmptyState icon="box" title="Chưa có kho tại doanh trại" hint="Tạo kho ở mục 'Vật chất và vật tư' và gán cho doanh trại này để theo dõi tồn kho." />
+          ) : (
+            <>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 12 }}>
+                <span className="field-label">Kho:</span>
+                <select className="input" style={{ maxWidth: 300 }} value={effectiveLoc} onChange={(e) => setInvLoc(e.target.value)}>
+                  {barracksLocs.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+                </select>
+              </div>
+              <DataTable columns={balCols} rows={balances.data?.data} loading={balances.isLoading} rowKey={(b) => `${b.materialId}-${b.storageLocationId}`} emptyTitle="Kho chưa có tồn" emptyHint="Nhập/xuất vật chất ở mục Vật chất và vật tư." />
+            </>
+          )}
+        </>
+      )}
+
+      {tab === 'Pháp lý' && (
+        <div className="card" style={{ padding: 18 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div className="eyebrow">Hồ sơ pháp lý & tài liệu</div>
+            <button className="btn btn-sm btn-primary" onClick={() => setEvidence(true)}><Icon name="upload" size={14} /> Thêm tài liệu</button>
+          </div>
+          {legalDocs.isLoading ? (
+            <Skeleton rows={4} />
+          ) : (legalDocs.data?.data ?? []).length === 0 ? (
+            <EmptyState icon="file" title="Chưa có tài liệu pháp lý" hint="Tải quyết định giao đất, sơ đồ, biên bản, giấy tờ pháp lý liên quan." />
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {(legalDocs.data?.data ?? []).map((d) => (
+                <div key={d.id} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '10px 12px', border: '1px solid var(--color-neutral-200)', borderRadius: 8 }}>
+                  <Icon name="file" size={18} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name}</div>
+                    <div className="muted num" style={{ fontSize: 11 }}>{d.classification ?? 'Chưa phân loại'} · {dateTime(d.createdAt)}</div>
+                  </div>
+                  <button className="btn btn-sm btn-ghost" onClick={() => downloadDoc(d.id)} title="Tải xuống"><Icon name="download" size={16} /></button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'Sửa chữa' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+            <button className="btn btn-sm" onClick={() => nav('/maintenance')}><Icon name="wrench" size={14} /> Mở mô-đun sửa chữa</button>
+          </div>
+          <DataTable columns={maintCols} rows={maintReqs.data?.data} loading={maintReqs.isLoading} rowKey={(r) => r.id} emptyTitle="Chưa có yêu cầu sửa chữa" emptyHint="Doanh trại này chưa có yêu cầu sửa chữa nào." />
+        </>
+      )}
+
       {tab === 'Bản đồ' && (
         <div className="panel" style={{ height: '60vh', overflow: 'hidden' }}>
           {d.location ? (
@@ -260,6 +376,7 @@ export function BarracksDetailPage() {
       )}
 
       {evidence && <EvidenceDrawer entityType="barracks" entityId={id!} onClose={() => setEvidence(false)} />}
+      {facEvidence && <EvidenceDrawer entityType="facility" entityId={facEvidence.id} title={`Tài liệu công trình · ${facEvidence.code}`} onClose={() => setFacEvidence(null)} />}
       {facModal && (
         <FacilityModal
           barracksId={id!}

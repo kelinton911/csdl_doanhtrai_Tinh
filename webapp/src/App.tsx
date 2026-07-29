@@ -43,6 +43,7 @@ export default function App() {
       <Route path="/map" element={<Protected><MapPage /></Protected>} />
       <Route path="/barracks" element={<Protected><BarracksListPage /></Protected>} />
       <Route path="/barracks/new" element={<Protected><BarracksFormPage /></Protected>} />
+      <Route path="/barracks/:id/edit" element={<Protected><BarracksFormPage /></Protected>} />
       <Route path="/barracks/:id" element={<Protected><BarracksDetailPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/materials" element={<Protected><MaterialsPage /></Protected>} />

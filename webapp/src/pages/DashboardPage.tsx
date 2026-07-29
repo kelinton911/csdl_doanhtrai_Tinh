@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Doughnut, Bar } from 'react-chartjs-2';
+import { MapContainer, TileLayer, CircleMarker, Tooltip, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { api } from '../lib/api';
+import { toast } from '../lib/toast';
 import { useAuth, ROLE_LABEL } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
 import { KpiCard } from '../components/KpiCard';
@@ -28,8 +32,15 @@ interface Summary {
   };
   topIssues: Array<{ severity: string; title: string; count: number }>;
 }
+interface Feature {
+  type: 'Feature';
+  geometry: { type: 'Point'; coordinates: [number, number] } | null;
+  properties: Record<string, unknown>;
+}
+interface FC { type: 'FeatureCollection'; features: Feature[] }
 
 const MODES = ['Bình thường', 'SSCĐ', 'Tình huống giả định'];
+const MODE_CODE: Record<string, string> = { 'Bình thường': 'NORMAL', 'SSCĐ': 'SSCD', 'Tình huống giả định': 'SCENARIO' };
 const SEV: Record<string, { fg: string; bg: string; bd: string }> = {
   danger: { fg: 'var(--danger-fg)', bg: 'var(--danger-bg)', bd: 'var(--danger-bd)' },
   warn: { fg: 'var(--warn-fg)', bg: 'var(--warn-bg)', bd: 'var(--warn-bd)' },
@@ -37,12 +48,31 @@ const SEV: Record<string, { fg: string; bg: string; bd: string }> = {
 };
 
 export function DashboardPage() {
-  const { profile } = useAuth();
+  const { profile, hasRole } = useAuth();
+  const nav = useNavigate();
   const [mode, setMode] = useState(MODES[0]);
+  const canReport = hasRole('PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REPORT_VIEWER');
+
   const q = useQuery({
-    queryKey: ['dashboard-summary'],
-    queryFn: async () => (await api.get<Summary>('/dashboard/summary')).data,
+    queryKey: ['dashboard-summary', mode],
+    queryFn: async () => (await api.get<Summary>('/dashboard/summary', { params: { mode: MODE_CODE[mode] } })).data,
+    refetchInterval: 60_000,
   });
+  const geo = useQuery({
+    queryKey: ['gis', 'barracks'],
+    queryFn: async () => (await api.get<FC>('/gis/features', { params: { layer: 'barracks' } })).data,
+  });
+
+  const approveReport = useMutation({
+    mutationFn: async () => (await api.post('/reports/jobs', { template: 'barracks-summary', format: 'pdf' })).data,
+    onSuccess: () => { toast.success('Đã tạo báo cáo tổng hợp cho chỉ huy. Mở mục Báo cáo để tải khi hoàn tất.'); nav('/reports'); },
+    onError: (e) => toast.problem(e, 'Không tạo được báo cáo'),
+  });
+
+  const points = (geo.data?.features ?? []).filter((f) => f.geometry?.coordinates);
+  const mapCenter: [number, number] = points.length
+    ? [points[0].geometry!.coordinates[1], points[0].geometry!.coordinates[0]]
+    : [15.9, 108.2];
 
   return (
     <>
@@ -51,22 +81,29 @@ export function DashboardPage() {
         title={`Xin chào, ${profile?.fullName ?? ''}`}
         description={`Vai trò: ${(profile?.roles ?? []).map((r) => ROLE_LABEL[r] ?? r).join(', ')}. Toàn bộ số liệu là dữ liệu giả lập phục vụ thiết kế.`}
         actions={
-          <div style={{ display: 'flex', gap: 4, background: 'var(--color-neutral-200)', padding: 4, borderRadius: 8 }}>
-            {MODES.map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className="btn btn-sm"
-                style={{
-                  border: 'none',
-                  background: mode === m ? 'var(--surface-1)' : 'transparent',
-                  fontWeight: mode === m ? 700 : 500,
-                  boxShadow: mode === m ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                }}
-              >
-                {m}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 4, background: 'var(--color-neutral-200)', padding: 4, borderRadius: 8 }}>
+              {MODES.map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className="btn btn-sm"
+                  style={{
+                    border: 'none',
+                    background: mode === m ? 'var(--surface-1)' : 'transparent',
+                    fontWeight: mode === m ? 700 : 500,
+                    boxShadow: mode === m ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  }}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+            {canReport && (
+              <button className="btn btn-primary" disabled={approveReport.isPending} onClick={() => approveReport.mutate()}>
+                <Icon name="download" size={16} /> Duyệt báo cáo cho chỉ huy
               </button>
-            ))}
+            )}
           </div>
         }
       />
@@ -77,16 +114,44 @@ export function DashboardPage() {
         <>
           {mode !== 'Bình thường' && (
             <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, border: '1px dashed var(--warn-bd)', background: 'var(--warn-bg)', color: 'var(--warn-fg)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Icon name="target" size={16} /> Đang xem ở chế độ <b>{mode}</b> — số liệu mô phỏng, tách biệt với dữ liệu thực.
+              <Icon name="target" size={16} /> Chế độ <b>{mode}</b> — vấn đề cần xử lý & cảnh báo đã tính lại theo bối cảnh {mode === 'SSCĐ' ? '(nhấn mức sẵn sàng chiến đấu)' : '(gồm thiệt hại mô phỏng, tách khỏi số liệu thực)'}.
             </div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 16 }}>
-            <KpiCard label="Tổng số doanh trại" value={num(q.data.barracks.total)} unit="hồ sơ" icon="building" dom="asset" hint={`${q.data.barracks.approved} đã duyệt`} />
+            <KpiCard label="Tổng số doanh trại" value={num(q.data.barracks.total)} unit="hồ sơ" icon="building" dom="asset" hint={`${q.data.barracks.approved} đã duyệt`} onClick={() => nav('/barracks')} />
             <KpiCard label="Công trình đang khai thác" value={num(q.data.facilities.inUse)} unit={`/ ${num(q.data.facilities.total)}`} icon="grid" dom="cmd" trend={{ dir: 'flat', text: `${q.data.facilities.decommissioned} ngừng KT` }} />
             <KpiCard label="Tỷ lệ dữ liệu đã xác nhận" value={num(q.data.dataConfirmedRatio)} unit="%" icon="check" dom="cap" trend={{ dir: q.data.dataConfirmedRatio >= 60 ? 'up' : 'down', text: q.data.dataConfirmedRatio >= 60 ? 'Đạt mục tiêu' : 'Dưới mục tiêu' }} />
             <KpiCard label="Khả năng tiếp nhận" value={num(q.data.barracks.capacity)} unit="người" icon="user" dom="plan" />
-            <KpiCard label="Cảnh báo trọng yếu" value={num(q.data.criticalAlerts)} icon="alert" dom="repair" hint="Trung tâm cảnh báo (Pha H)" />
+            <KpiCard label="Cảnh báo trọng yếu" value={num(q.data.criticalAlerts)} icon="alert" dom="repair" hint="Mở trung tâm cảnh báo" onClick={() => nav('/alerts')} />
+          </div>
+
+          {/* Bản đồ tổng thể vật chất (Frontend §1.2 — bản đồ chiếm phần lớn canvas) */}
+          <div className="card" style={{ padding: 0, marginTop: 20, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', borderBottom: '1px solid var(--color-neutral-200)' }}>
+              <div className="eyebrow">Bản đồ doanh trại toàn tỉnh</div>
+              <button className="btn btn-sm" onClick={() => nav('/map')}><Icon name="map" size={14} /> Mở bản đồ đầy đủ</button>
+            </div>
+            <div style={{ height: '42vh', minHeight: 300 }}>
+              <MapContainer center={mapCenter} zoom={9} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
+                <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                {points.map((f) => {
+                  const [lng, lat] = f.geometry!.coordinates;
+                  return (
+                    <CircleMarker key={String(f.properties.id)} center={[lat, lng]} radius={7} pathOptions={{ color: '#10609e', fillColor: '#10609e', fillOpacity: 0.75, weight: 1.5 }}>
+                      <Tooltip>{String(f.properties.name)}</Tooltip>
+                      <Popup>
+                        <div style={{ minWidth: 160 }}>
+                          <div style={{ fontWeight: 700 }}>{String(f.properties.name)}</div>
+                          <div className="num" style={{ fontSize: 12, color: '#627d98' }}>{String(f.properties.code)}</div>
+                          <button className="btn btn-sm btn-primary" style={{ marginTop: 6 }} onClick={() => nav(`/barracks/${f.properties.id}`)}>Mở hồ sơ</button>
+                        </div>
+                      </Popup>
+                    </CircleMarker>
+                  );
+                })}
+              </MapContainer>
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 20 }}>
@@ -139,12 +204,20 @@ export function DashboardPage() {
                 {q.data.topIssues.map((iss, i) => {
                   const s = SEV[iss.severity] ?? SEV.info;
                   return (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', border: `1px solid ${s.bd}`, background: s.bg, borderRadius: 8 }}>
+                    <button
+                      key={i}
+                      onClick={() => nav('/alerts')}
+                      title="Mở trung tâm cảnh báo"
+                      style={{ all: 'unset', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', border: `1px solid ${s.bd}`, background: s.bg, borderRadius: 8 }}
+                    >
                       <span style={{ display: 'flex', alignItems: 'center', gap: 10, color: s.fg, fontWeight: 600 }}>
                         <Icon name="alert" size={16} /> {iss.title}
                       </span>
-                      <span className="num" style={{ fontWeight: 700, color: s.fg }}>{num(iss.count)}</span>
-                    </div>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: s.fg }}>
+                        <span className="num" style={{ fontWeight: 700 }}>{num(iss.count)}</span>
+                        <Icon name="chevron" size={15} />
+                      </span>
+                    </button>
                   );
                 })}
               </div>

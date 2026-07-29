@@ -35,6 +35,25 @@ Backend đã hoàn thiện 15 module (M01–M15). Frontend `webapp/` đã nối 
 - [x] E5 — GIS truy vấn bán kính: `POST /gis/search-within`
 - [x] E6 — Chi tiết nhật ký: `GET /audit-logs/:id`
 
+## Đợt hoàn thiện production FE (2026-07-29, pha 1–6)
+Nâng FE lên chuẩn production theo hồ sơ thiết kế trên 4 nhóm. Trạng thái: `[x]` đã code + tsc/build PASS.
+- [x] P1 — Khung UX: hệ thống toast (`lib/toast.tsx`, `components/Toast.tsx`), responsive 768/1024 + drawer mobile, `@media print` + nút In, trung tâm cảnh báo (dropdown + `AlertCloseModal` tái dùng).
+- [x] P2 — Sửa hồ sơ nháp doanh trại `PUT /barracks/:id` (route `/barracks/:id/edit`); đính kèm `EvidenceDrawer` cho kiểm kê/sửa chữa/hư hỏng/công trình; dashboard drill-down + widget bản đồ + "Duyệt báo cáo cho chỉ huy"; đồng bộ offline `POST /sync/batches` + giải quyết xung đột.
+- [x] P3 — Reports polling/preview PDF/tiến độ; Alerts đóng bằng modal + SLA quá hạn; Admin phân trang audit + tìm user + scope `ORGANIZATION` + toasts.
+- [x] P4 — Hồ sơ doanh trại đủ tab (Vật chất/Pháp lý/Sửa chữa) + nút In; Scenario validate tham số + what-if độ nhạy.
+- [x] P5 — A11y WCAG: skip-link, Modal role=dialog + Esc + aria-labelledby, aria-label nút icon, focus ring; Login gỡ credentials demo ở PROD (`import.meta.env.DEV`) + chỉ báo khóa 423/429; toast 409 xung đột.
+- [x] P6 — Cập nhật checklist + ADR (ghi các khoảng thiếu BE), `tsc --noEmit` PASS, `vite build` PASS (217 modules).
+
+### Khoảng thiếu backend đã phát hiện (chờ bổ sung BE — xem ADR)
+- [ ] BE-1 — Đóng đợt kiểm kê: chỉ có `/inspection-campaigns/:id/open`, chưa có `.../close`.
+- [ ] BE-2 — `GET /dashboard/summary` chưa nhận tham số `mode` (SSCĐ/tình huống) → toggle mode hiện chỉ là bối cảnh hiển thị.
+- [ ] BE-3 — OTP trong `POST /auth/login` (thiết kế §1.1 yêu cầu OTP 6 số).
+- [ ] BE-4 — `POST /reports/jobs` chỉ nhận `pdf|excel` (VAL-001) → chưa có Word; chưa có tham số lọc/khoảng thời gian.
+- [ ] BE-5 — Chưa có endpoint lịch sử phiên bản materials; revisions doanh trại không kèm payload trường → chưa diff nội dung được.
+- [ ] BE-6 — `UpdateUserDto` không có trường password → chưa reset mật khẩu từ FE.
+- [ ] BE-7 — Data-scope `FACILITY` cần bộ chọn công trình toàn hệ thống (đã hỗ trợ `AREA` + `ORGANIZATION`).
+- [ ] BE-8 — `CreateMaintenanceRequestDto` không có trường phân công kỹ thuật viên.
+
 ## Kiểm thử end-to-end
 - [x] T1 — Chạy BE (đọc cổng thật) + FE (5173), đăng nhập `admin/admin@123`
 - [x] T2 — Gán role/scope cho `xa01` → đăng nhập lại kiểm data-scope (chỉ thấy xã A01)

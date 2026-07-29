@@ -16,6 +16,7 @@ import {
   CreateMaintenanceRequestDto,
   DamageQuery,
   MaintenanceQuery,
+  StartDto,
   UpdateDamageEventDto,
 } from './dto/maintenance.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -93,9 +94,9 @@ export class MaintenanceController {
 
   @Post('maintenance-requests/:id/start')
   @Roles(Role.BARRACKS_OFFICER)
-  @ApiOperation({ summary: 'UC-14: Bắt đầu thực hiện (IN_PROGRESS)' })
-  start(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.start(id);
+  @ApiOperation({ summary: 'UC-14: Bắt đầu thực hiện (IN_PROGRESS) + phân công kỹ thuật viên' })
+  start(@Param('id', ParseUUIDPipe) id: string, @Body() dto: StartDto) {
+    return this.service.start(id, dto);
   }
 
   @Post('maintenance-requests/:id/accept')

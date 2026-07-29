@@ -75,3 +75,10 @@ export class AssignScopesDto {
   @IsArray()
   scopes!: ScopeItemDto[];
 }
+
+export class ResetPasswordDto {
+  @ApiProperty({ example: 'MatKhauMoi@123', minLength: 6 })
+  @IsString()
+  @MinLength(6)
+  password!: string;
+}

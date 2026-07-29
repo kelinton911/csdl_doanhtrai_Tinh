@@ -51,6 +51,13 @@ export class InspectionController {
     return this.service.openCampaign(id, user);
   }
 
+  @Post('inspection-campaigns/:id/close')
+  @Roles(Role.BARRACKS_OFFICER, Role.SYS_ADMIN)
+  @ApiOperation({ summary: 'UC-09: Đóng đợt kiểm kê' })
+  closeCampaign(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
+    return this.service.closeCampaign(id, user);
+  }
+
   @Get('inspection-campaigns/:id/progress')
   @ApiOperation({ summary: 'UC-09: Tiến độ đợt kiểm kê' })
   progress(@Param('id', ParseUUIDPipe) id: string) {

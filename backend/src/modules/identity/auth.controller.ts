@@ -13,9 +13,23 @@ export class AuthController {
   @Public()
   @Post('auth/login')
   @HttpCode(200)
-  @ApiOperation({ summary: 'UC-01: Đăng nhập và tạo phiên truy cập' })
+  @ApiOperation({ summary: 'UC-01: Đăng nhập và tạo phiên truy cập (hỗ trợ OTP + khóa tạm)' })
   login(@Body() dto: LoginDto) {
-    return this.auth.validateAndLogin(dto.username, dto.password);
+    return this.auth.validateAndLogin(dto.username, dto.password, dto.otp);
+  }
+
+  @Post('auth/mfa/enroll')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'UC-01: Bật OTP (TOTP) cho tài khoản hiện tại' })
+  enrollMfa(@CurrentUser() user: AuthUser) {
+    return this.auth.enrollMfa(user.sub);
+  }
+
+  @Post('auth/mfa/disable')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'UC-01: Tắt OTP cho tài khoản hiện tại' })
+  disableMfa(@CurrentUser() user: AuthUser) {
+    return this.auth.disableMfa(user.sub);
   }
 
   @Public()

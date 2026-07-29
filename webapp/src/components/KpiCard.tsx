@@ -10,6 +10,7 @@ export function KpiCard({
   dom = 'cmd',
   trend,
   hint,
+  onClick,
 }: {
   label: string;
   value: ReactNode;
@@ -18,6 +19,7 @@ export function KpiCard({
   dom?: string;
   trend?: { dir: 'up' | 'down' | 'flat'; text: string };
   hint?: string;
+  onClick?: () => void;
 }) {
   const color = `var(--dom-${dom})`;
   const trendColor =
@@ -27,7 +29,14 @@ export function KpiCard({
         ? 'var(--danger-fg)'
         : 'var(--color-neutral-600)';
   return (
-    <div className="card" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div
+      className="card"
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+      style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10, cursor: onClick ? 'pointer' : undefined }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <span className="eyebrow">{label}</span>
         <span

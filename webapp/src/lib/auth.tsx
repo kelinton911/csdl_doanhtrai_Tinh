@@ -32,7 +32,7 @@ const REFRESH_KEY = 'csdl.refreshToken';
 interface AuthState {
   profile: Profile | null;
   ready: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, otp?: string) => Promise<void>;
   logout: () => void;
   hasRole: (...roles: string[]) => boolean;
 }
@@ -78,8 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       profile,
       ready,
-      login: async (username, password) => {
-        const res = await api.post('/auth/login', { username, password });
+      login: async (username, password, otp) => {
+        const res = await api.post('/auth/login', { username, password, otp: otp || undefined });
         applySession(res.data);
       },
       logout: () => {

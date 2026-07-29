@@ -36,6 +36,35 @@ export class FacilitiesService {
     return paginated(data, total, q);
   }
 
+  // UC-07: liệt kê công trình toàn hệ thống (kèm tên doanh trại) — phục vụ bộ chọn
+  // phạm vi dữ liệu type=FACILITY và tra cứu chung.
+  async listAll(q: PaginationQuery, filters: { barracksId?: string; search?: string }) {
+    const params: unknown[] = [];
+    let where = '';
+    if (filters.barracksId) {
+      params.push(filters.barracksId);
+      where += ` AND f.barracks_id = $${params.length}`;
+    }
+    if (filters.search) {
+      params.push(`%${filters.search}%`);
+      where += ` AND (f.code ILIKE $${params.length} OR f.name ILIKE $${params.length})`;
+    }
+    const rows = await this.repo.query(
+      `SELECT f.id, f.code, f.name, f.barracks_id AS "barracksId", b.name AS "barracksName",
+              f.status, f.condition
+       FROM facilities f LEFT JOIN barracks b ON b.id = f.barracks_id
+       WHERE 1=1 ${where}
+       ORDER BY b.name NULLS LAST, f.code
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, q.size, q.skip],
+    );
+    const [{ count }] = await this.repo.query(
+      `SELECT COUNT(*)::int AS count FROM facilities f WHERE 1=1 ${where}`,
+      params,
+    );
+    return paginated(rows, count, q);
+  }
+
   async get(id: string): Promise<Facility> {
     const f = await this.repo.findOne({ where: { id } });
     if (!f) throw new NotFoundException('DATA-001: Không tìm thấy công trình');
