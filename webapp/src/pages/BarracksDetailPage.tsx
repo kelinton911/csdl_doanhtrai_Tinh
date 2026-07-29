@@ -10,9 +10,16 @@ import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { EvidenceDrawer } from '../components/EvidenceDrawer';
 import { DataTable, type Column } from '../components/DataTable';
+import { Modal } from '../components/Modal';
 import { Skeleton, ErrorState, EmptyState } from '../components/States';
 import { Icon } from '../components/Icon';
 import { num, date, dateTime } from '../lib/format';
+
+const CONDITION_OPTIONS = [
+  { code: 'GOOD', label: 'Tốt' },
+  { code: 'FAIR', label: 'Trung bình' },
+  { code: 'POOR', label: 'Kém' },
+];
 
 interface Barracks {
   id: string;
@@ -55,8 +62,11 @@ export function BarracksDetailPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>('Tổng quan');
   const [actionError, setActionError] = useState<string | null>(null);
   const [evidence, setEvidence] = useState(false);
+  const [facModal, setFacModal] = useState<{ mode: 'create' } | { mode: 'edit'; facility: Facility } | null>(null);
+  const [decommission, setDecommission] = useState<Facility | null>(null);
   const facType = useCatalog('facility-type');
   const grade = useCatalog('quality-grade');
+  const canManageFacility = hasRole('COMMUNE_USER', 'BARRACKS_OFFICER');
 
   const b = useQuery({
     queryKey: ['barracks', id],
@@ -102,6 +112,14 @@ export function BarracksDetailPage() {
     { key: 'year', header: 'Năm XD', render: (f) => f.buildYear ?? '—', align: 'right', mono: true },
     { key: 'cond', header: 'Chất lượng', render: (f) => <ConditionChip code={f.condition} label={grade.label(f.condition)} /> },
     { key: 'status', header: 'Khai thác', render: (f) => <StatusBadge status={f.status} /> },
+    ...(canManageFacility ? [{
+      key: 'act', header: '', align: 'right' as const, render: (f: Facility) => (
+        <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+          {f.status !== 'DECOMMISSIONED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setFacModal({ mode: 'edit', facility: f }); }}><Icon name="edit" size={14} /> Sửa</button>}
+          {f.status !== 'DECOMMISSIONED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setDecommission(f); }} title="Ngừng khai thác"><Icon name="lock" size={14} /></button>}
+        </div>
+      ),
+    }] : []),
   ];
 
   return (
@@ -181,14 +199,21 @@ export function BarracksDetailPage() {
       )}
 
       {tab === 'Công trình' && (
-        <DataTable
-          columns={facColumns}
-          rows={facs.data?.data}
-          loading={facs.isLoading}
-          rowKey={(f) => f.id}
-          emptyTitle="Chưa có công trình"
-          emptyHint="Doanh trại này chưa khai báo công trình nào."
-        />
+        <>
+          {canManageFacility && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+              <button className="btn btn-primary" onClick={() => setFacModal({ mode: 'create' })}><Icon name="plus" size={16} /> Thêm công trình</button>
+            </div>
+          )}
+          <DataTable
+            columns={facColumns}
+            rows={facs.data?.data}
+            loading={facs.isLoading}
+            rowKey={(f) => f.id}
+            emptyTitle="Chưa có công trình"
+            emptyHint="Doanh trại này chưa khai báo công trình nào."
+          />
+        </>
       )}
 
       {tab === 'Bản đồ' && (
@@ -235,7 +260,87 @@ export function BarracksDetailPage() {
       )}
 
       {evidence && <EvidenceDrawer entityType="barracks" entityId={id!} onClose={() => setEvidence(false)} />}
+      {facModal && (
+        <FacilityModal
+          barracksId={id!}
+          facility={facModal.mode === 'edit' ? facModal.facility : undefined}
+          typeItems={facType.items}
+          onClose={() => setFacModal(null)}
+          onDone={() => { setFacModal(null); qc.invalidateQueries({ queryKey: ['barracks', id, 'facilities'] }); }}
+        />
+      )}
+      {decommission && (
+        <DecommissionModal
+          facility={decommission}
+          onClose={() => setDecommission(null)}
+          onDone={() => { setDecommission(null); qc.invalidateQueries({ queryKey: ['barracks', id, 'facilities'] }); }}
+        />
+      )}
     </>
+  );
+}
+
+// C3 — Tạo/sửa công trình (M05/UC-07). condition theo DTO chỉ nhận GOOD/FAIR/POOR.
+function FacilityModal({ barracksId, facility, typeItems, onClose, onDone }: { barracksId: string; facility?: Facility; typeItems: Array<{ code: string; name: string }>; onClose: () => void; onDone: () => void }) {
+  const editing = !!facility;
+  const [f, setF] = useState({
+    code: facility?.code ?? '',
+    name: facility?.name ?? '',
+    type: facility?.type ?? '',
+    area: facility ? String(facility.area) : '',
+    buildYear: facility?.buildYear ? String(facility.buildYear) : '',
+    condition: facility?.condition ?? '',
+  });
+  const [error, setError] = useState<string | null>(null);
+  const save = useMutation({
+    mutationFn: async () => {
+      const body = {
+        name: f.name,
+        type: f.type || undefined,
+        area: f.area ? Number(f.area) : undefined,
+        buildYear: f.buildYear ? Number(f.buildYear) : undefined,
+        condition: f.condition || undefined,
+      };
+      return editing
+        ? api.put(`/facilities/${facility!.id}`, body)
+        : api.post(`/barracks/${barracksId}/facilities`, { code: f.code, ...body });
+    },
+    onSuccess: onDone,
+    onError: (e) => setError(toProblem(e).title),
+  });
+  return (
+    <Modal open title={editing ? `Sửa công trình · ${facility!.code}` : 'Thêm công trình'} onClose={onClose} width={560}>
+      {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ flex: 1 }}><label className="field-label">Mã công trình</label><input className="input" value={f.code} disabled={editing} onChange={(e) => setF((s) => ({ ...s, code: e.target.value }))} /></div>
+          <div style={{ flex: 2 }}><label className="field-label">Tên</label><input className="input" value={f.name} onChange={(e) => setF((s) => ({ ...s, name: e.target.value }))} /></div>
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ flex: 1 }}><label className="field-label">Loại</label><select className="input" value={f.type} onChange={(e) => setF((s) => ({ ...s, type: e.target.value }))}><option value="">—</option>{typeItems.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
+          <div style={{ flex: 1 }}><label className="field-label">Diện tích (m²)</label><input className="input num" type="number" value={f.area} onChange={(e) => setF((s) => ({ ...s, area: e.target.value }))} /></div>
+          <div style={{ flex: 1 }}><label className="field-label">Năm XD</label><input className="input num" type="number" value={f.buildYear} onChange={(e) => setF((s) => ({ ...s, buildYear: e.target.value }))} /></div>
+        </div>
+        <div><label className="field-label">Chất lượng hiện trạng</label><select className="input" value={f.condition} onChange={(e) => setF((s) => ({ ...s, condition: e.target.value }))}><option value="">—</option>{CONDITION_OPTIONS.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}</select></div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={(!editing && f.code.length < 2) || f.name.length < 2 || save.isPending} onClick={() => save.mutate()}>{editing ? 'Lưu thay đổi' : 'Tạo công trình'}</button></div>
+      </div>
+    </Modal>
+  );
+}
+
+function DecommissionModal({ facility, onClose, onDone }: { facility: Facility; onClose: () => void; onDone: () => void }) {
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const mut = useMutation({ mutationFn: async () => api.post(`/facilities/${facility.id}/decommission`, { reason }), onSuccess: onDone, onError: (e) => setError(toProblem(e).title) });
+  return (
+    <Modal open title={`Ngừng khai thác · ${facility.code}`} onClose={onClose}>
+      <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>Không xóa cứng — công trình được chuyển sang trạng thái ngừng khai thác và giữ nguyên lịch sử.</p>
+      {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div><label className="field-label">Lý do</label><input className="input" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Xuống cấp không thể khai thác…" autoFocus /></div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={reason.trim().length < 3 || mut.isPending} onClick={() => mut.mutate()}>Xác nhận ngừng khai thác</button></div>
+      </div>
+    </Modal>
   );
 }
 

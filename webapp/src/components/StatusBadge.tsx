@@ -35,7 +35,13 @@ const MAP: Record<string, { label: string; tone: Tone; icon: IconName }> = {
   CLOSED: { label: 'Đã đóng', tone: 'neutral', icon: 'lock' },
   // Cơ sở/công trình
   IN_USE: { label: 'Đang khai thác', tone: 'ok', icon: 'check' },
+  LIMITED: { label: 'Hạn chế khai thác', tone: 'warn', icon: 'alert' },
+  SUSPENDED: { label: 'Tạm dừng', tone: 'warn', icon: 'clock' },
+  DAMAGED: { label: 'Hư hỏng', tone: 'danger', icon: 'alert' },
+  RECOVERING: { label: 'Đang khôi phục', tone: 'info', icon: 'refresh' },
   DECOMMISSIONED: { label: 'Ngừng khai thác', tone: 'neutral', icon: 'lock' },
+  // Danh mục/vật chất
+  INACTIVE: { label: 'Ngừng hiệu lực', tone: 'neutral', icon: 'lock' },
   // Sửa chữa
   PROPOSED: { label: 'Đề xuất', tone: 'info', icon: 'upload' },
   ACCEPTED: { label: 'Đã nghiệm thu', tone: 'ok', icon: 'check' },

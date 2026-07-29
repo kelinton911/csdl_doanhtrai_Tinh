@@ -15,6 +15,20 @@ export const NAV: NavItem[] = [
   { to: '/barracks', label: 'Doanh trại và công trình', icon: 'building', dom: 'asset' },
   { to: '/inventory', label: 'Vật chất và vật tư', icon: 'box', dom: 'stock' },
   {
+    to: '/materials',
+    label: 'Danh mục vật chất',
+    icon: 'clipboard',
+    dom: 'stock',
+    roles: ['BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND', 'COMMUNE_USER'],
+  },
+  {
+    to: '/import',
+    label: 'Nhập liệu & đồng bộ',
+    icon: 'upload',
+    dom: 'admin',
+    roles: ['BARRACKS_OFFICER', 'SYS_ADMIN', 'INTEGRATION_CLIENT'],
+  },
+  {
     to: '/inspection',
     label: 'Kiểm kê - biến động',
     icon: 'clipboard',

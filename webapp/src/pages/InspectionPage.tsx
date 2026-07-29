@@ -46,11 +46,16 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
 function SheetsTab() {
   const nav = useNavigate();
   const qc = useQueryClient();
+  const { hasRole } = useAuth();
+  const canManage = hasRole('BARRACKS_OFFICER', 'SYS_ADMIN');
   const [campaignId, setCampaignId] = useState('');
   const [creating, setCreating] = useState(false);
+  const [creatingCampaign, setCreatingCampaign] = useState(false);
 
   const campaigns = useQuery({ queryKey: ['campaigns'], queryFn: async () => (await api.get('/inspection-campaigns', { params: { size: 100 } })).data as { data: Campaign[] } });
   const activeCampaign = campaignId || campaigns.data?.data?.[0]?.id || '';
+  const activeObj = (campaigns.data?.data ?? []).find((c) => c.id === activeCampaign);
+  const openCampaign = useMutation({ mutationFn: async (id: string) => api.post(`/inspection-campaigns/${id}/open`), onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }) });
   const progress = useQuery({
     queryKey: ['campaign-progress', activeCampaign],
     queryFn: async () => (await api.get(`/inspection-campaigns/${activeCampaign}/progress`)).data as { total: number; approved: number; completion: number },
@@ -85,13 +90,48 @@ function SheetsTab() {
             <span className="num" style={{ fontSize: 12, fontWeight: 700 }}>{progress.data.completion}% ({progress.data.approved}/{progress.data.total})</span>
           </div>
         )}
+        <div style={{ flex: 1 }} />
+        {canManage && activeObj && activeObj.status === 'PLANNED' && (
+          <button className="btn" disabled={openCampaign.isPending} onClick={() => openCampaign.mutate(activeCampaign)}><Icon name="upload" size={15} /> Mở đợt</button>
+        )}
+        {canManage && <button className="btn" onClick={() => setCreatingCampaign(true)}><Icon name="clipboard" size={15} /> Tạo đợt</button>}
         <button className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Tạo phiếu</button>
       </div>
 
-      <DataTable columns={columns} rows={sheets.data?.data} loading={sheets.isLoading} rowKey={(s) => s.id} onRowClick={(s) => nav(`/inspection/sheet/${s.id}`)} emptyTitle="Chưa có phiếu kiểm kê" emptyHint="Bấm 'Tạo phiếu' để bắt đầu nhập số liệu." />
+      {(campaigns.data?.data ?? []).length === 0 ? (
+        <EmptyState icon="clipboard" title="Chưa có đợt kiểm kê" hint={canManage ? "Bấm 'Tạo đợt' để mở một đợt kiểm kê mới." : 'Chờ cán bộ doanh trại mở đợt kiểm kê.'} />
+      ) : (
+        <DataTable columns={columns} rows={sheets.data?.data} loading={sheets.isLoading} rowKey={(s) => s.id} onRowClick={(s) => nav(`/inspection/sheet/${s.id}`)} emptyTitle="Chưa có phiếu kiểm kê" emptyHint="Bấm 'Tạo phiếu' để bắt đầu nhập số liệu." />
+      )}
 
       {creating && <CreateSheetModal campaignId={activeCampaign} onClose={() => setCreating(false)} onCreated={(id) => { qc.invalidateQueries({ queryKey: ['sheets'] }); nav(`/inspection/sheet/${id}`); }} />}
+      {creatingCampaign && <CreateCampaignModal onClose={() => setCreatingCampaign(false)} onDone={(id) => { setCreatingCampaign(false); setCampaignId(id); qc.invalidateQueries({ queryKey: ['campaigns'] }); }} />}
     </>
+  );
+}
+
+// E2 — Tạo đợt kiểm kê (M07/UC-09). Đợt mới ở trạng thái đã lập, mở để phát hành.
+function CreateCampaignModal({ onClose, onDone }: { onClose: () => void; onDone: (id: string) => void }) {
+  const [f, setF] = useState({ code: '', name: '', plannedFrom: '', plannedTo: '' });
+  const [error, setError] = useState<string | null>(null);
+  const create = useMutation({
+    mutationFn: async () => (await api.post('/inspection-campaigns', { code: f.code, name: f.name, plannedFrom: f.plannedFrom || undefined, plannedTo: f.plannedTo || undefined })).data as { id: string },
+    onSuccess: (d) => onDone(d.id),
+    onError: (e) => setError(toProblem(e).title),
+  });
+  return (
+    <Modal open title="Tạo đợt kiểm kê" onClose={onClose}>
+      {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div><label className="field-label">Mã đợt</label><input className="input" value={f.code} onChange={(e) => setF((s) => ({ ...s, code: e.target.value }))} placeholder="KK-2026-Q1" /></div>
+        <div><label className="field-label">Tên đợt</label><input className="input" value={f.name} onChange={(e) => setF((s) => ({ ...s, name: e.target.value }))} placeholder="Kiểm kê quý I/2026" /></div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ flex: 1 }}><label className="field-label">Từ ngày</label><input className="input" type="date" value={f.plannedFrom} onChange={(e) => setF((s) => ({ ...s, plannedFrom: e.target.value }))} /></div>
+          <div style={{ flex: 1 }}><label className="field-label">Đến ngày</label><input className="input" type="date" value={f.plannedTo} onChange={(e) => setF((s) => ({ ...s, plannedTo: e.target.value }))} /></div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={f.code.length < 3 || f.name.length < 3 || create.isPending} onClick={() => create.mutate()}>Tạo đợt</button></div>
+      </div>
+    </Modal>
   );
 }
 

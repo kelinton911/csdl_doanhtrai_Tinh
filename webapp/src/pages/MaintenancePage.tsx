@@ -150,6 +150,7 @@ function CreateReqModal({ onClose, onDone }: { onClose: () => void; onDone: () =
 function DamagesTab() {
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState<Damage | null>(null);
   const q = useQuery({ queryKey: ['damages'], queryFn: async () => (await api.get('/damage-events', { params: { size: 100 } })).data as { data: Damage[] } });
   const verify = useMutation({ mutationFn: async (id: string) => api.post(`/damage-events/${id}/verify`), onSuccess: () => qc.invalidateQueries({ queryKey: ['damages'] }) });
 
@@ -160,7 +161,12 @@ function DamagesTab() {
     { key: 'loss', header: 'Ước tính', render: (d) => currency(d.estimatedLoss), align: 'right', mono: true },
     { key: 'scenario', header: 'Loại', render: (d) => d.scenario ? <span style={{ color: 'var(--warn-fg)', fontSize: 12 }}>Mô phỏng</span> : <span style={{ color: 'var(--color-neutral-600)', fontSize: 12 }}>Thực</span> },
     { key: 'status', header: 'Trạng thái', render: (d) => d.status === 'VERIFIED' ? <StatusBadge status="APPROVED" /> : <span style={{ display: 'inline-flex', gap: 6 }}><StatusBadge status="PENDING_REVIEW" /></span> },
-    { key: 'act', header: '', align: 'right', render: (d) => d.status !== 'VERIFIED' && <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); verify.mutate(d.id); }}><Icon name="check" size={14} /> Xác minh</button> },
+    { key: 'act', header: '', align: 'right', render: (d) => d.status !== 'VERIFIED' && (
+      <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+        <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setEditing(d); }}><Icon name="edit" size={14} /> Sửa</button>
+        <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); verify.mutate(d.id); }}><Icon name="check" size={14} /> Xác minh</button>
+      </div>
+    ) },
   ];
 
   return (
@@ -170,7 +176,32 @@ function DamagesTab() {
       </div>
       {q.isError ? <ErrorState error={q.error} /> : <DataTable columns={columns} rows={q.data?.data} loading={q.isLoading} rowKey={(d) => d.id} emptyTitle="Chưa ghi nhận hư hỏng" />}
       {creating && <CreateDamageModal onClose={() => setCreating(false)} onDone={() => { setCreating(false); qc.invalidateQueries({ queryKey: ['damages'] }); }} />}
+      {editing && <EditDamageModal damage={editing} onClose={() => setEditing(null)} onDone={() => { setEditing(null); qc.invalidateQueries({ queryKey: ['damages'] }); }} />}
     </>
+  );
+}
+
+// E3 — Sửa sự kiện hư hỏng khi chưa xác minh (M09/UC-13).
+function EditDamageModal({ damage, onClose, onDone }: { damage: Damage; onClose: () => void; onDone: () => void }) {
+  const [f, setF] = useState({ severity: damage.severity, description: damage.description ?? '', estimatedLoss: String(damage.estimatedLoss ?? '') });
+  const [error, setError] = useState<string | null>(null);
+  const save = useMutation({
+    mutationFn: async () => api.put(`/damage-events/${damage.id}`, { severity: f.severity, description: f.description || undefined, estimatedLoss: f.estimatedLoss ? Number(f.estimatedLoss) : undefined }),
+    onSuccess: onDone,
+    onError: (e) => setError(toProblem(e).title),
+  });
+  return (
+    <Modal open title="Sửa sự kiện hư hỏng" onClose={onClose}>
+      {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ flex: 1 }}><label className="field-label">Mức độ</label><select className="input" value={f.severity} onChange={(e) => setF((s) => ({ ...s, severity: e.target.value }))}>{Object.entries(SEVERITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+          <div style={{ flex: 1 }}><label className="field-label">Ước tính thiệt hại (đồng)</label><input className="input num" type="number" value={f.estimatedLoss} onChange={(e) => setF((s) => ({ ...s, estimatedLoss: e.target.value }))} /></div>
+        </div>
+        <div><label className="field-label">Mô tả</label><input className="input" value={f.description} onChange={(e) => setF((s) => ({ ...s, description: e.target.value }))} /></div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={save.isPending} onClick={() => save.mutate()}>Lưu thay đổi</button></div>
+      </div>
+    </Modal>
   );
 }
 

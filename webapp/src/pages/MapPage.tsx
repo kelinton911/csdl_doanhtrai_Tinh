@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip } from 'react-leaflet';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Tooltip, useMapEvents } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
-import { api } from '../lib/api';
+import { api, toProblem } from '../lib/api';
 import { PageHeader } from '../components/PageHeader';
 import { Skeleton, ErrorState } from '../components/States';
 import { StatusBadge } from '../components/StatusBadge';
@@ -25,18 +25,39 @@ const LAYERS = [
 ];
 
 // Bản đồ doanh trại split-view (Frontend §6.3). Dữ liệu không gian từ PostGIS (/gis/features).
+// Bắt sự kiện click trên bản đồ để chọn tâm truy vấn bán kính.
+function ClickCapture({ onPick }: { onPick: (lat: number, lng: number) => void }) {
+  useMapEvents({ click: (e) => onPick(e.latlng.lat, e.latlng.lng) });
+  return null;
+}
+
 export function MapPage() {
   const [layer, setLayer] = useState('barracks');
+  const [center2, setCenter2] = useState<[number, number] | null>(null); // tâm truy vấn bán kính
+  const [radiusKm, setRadiusKm] = useState('5');
+  const [searchFC, setSearchFC] = useState<FC | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const nav = useNavigate();
   const q = useQuery({
     queryKey: ['gis', layer],
     queryFn: async () => (await api.get<FC>('/gis/features', { params: { layer } })).data,
   });
 
-  const points = useMemo(
-    () => (q.data?.features ?? []).filter((f) => f.geometry?.coordinates),
-    [q.data],
+  const searchWithin = useMutation({
+    mutationFn: async () => {
+      const [lat, lng] = center2!;
+      return (await api.post('/gis/search-within', { layer, lat, lng, radiusMeters: Number(radiusKm) * 1000 })).data as FC;
+    },
+    onSuccess: (fc) => { setSearchFC(fc); setSearchError(null); },
+    onError: (e) => { setSearchError(toProblem(e).title); setSearchFC(null); },
+  });
+  const clearSearch = () => { setSearchFC(null); setCenter2(null); setSearchError(null); };
+
+  const allPoints = useMemo(
+    () => ((searchFC ?? q.data)?.features ?? []).filter((f) => f.geometry?.coordinates),
+    [q.data, searchFC],
   );
+  const points = allPoints;
   const center = useMemo<[number, number]>(() => {
     if (points.length === 0) return [15.9, 108.2];
     const [lng, lat] = points[0].geometry!.coordinates;
@@ -75,6 +96,13 @@ export function MapPage() {
               attribution="&copy; OpenStreetMap"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            <ClickCapture onPick={(lat, lng) => { setCenter2([lat, lng]); setSearchFC(null); }} />
+            {center2 && (
+              <>
+                <Circle center={center2} radius={Number(radiusKm) * 1000} pathOptions={{ color: '#a8571f', fillColor: '#a8571f', fillOpacity: 0.08 }} />
+                <CircleMarker center={center2} radius={5} pathOptions={{ color: '#a8571f', fillColor: '#a8571f', fillOpacity: 1 }}><Tooltip permanent>Tâm truy vấn</Tooltip></CircleMarker>
+              </>
+            )}
             {points.map((f) => {
               const [lng, lat] = f.geometry!.coordinates;
               return (
@@ -107,7 +135,20 @@ export function MapPage() {
 
         <div className="panel scrl" style={{ overflow: 'auto', padding: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div className="eyebrow">Kết quả ({points.length})</div>
+            <div className="eyebrow">{searchFC ? `Lân cận (${points.length})` : `Kết quả (${points.length})`}</div>
+          </div>
+
+          {/* E5 — Truy vấn lân cận theo bán kính (POST /gis/search-within) */}
+          <div style={{ border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 10, marginBottom: 12 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6, display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="target" size={14} /> Tìm lân cận theo bán kính</div>
+            <p className="muted" style={{ fontSize: 12, margin: '0 0 8px' }}>Bấm lên bản đồ để chọn tâm, chọn bán kính rồi tìm.</p>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span className="num muted" style={{ fontSize: 12 }}>{center2 ? `${center2[0].toFixed(4)}, ${center2[1].toFixed(4)}` : 'Chưa chọn tâm'}</span>
+              <input className="input num" style={{ width: 90 }} type="number" min="0.1" step="0.5" value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)} /> <span className="muted" style={{ fontSize: 12 }}>km</span>
+              <button className="btn btn-sm btn-primary" disabled={!center2 || searchWithin.isPending} onClick={() => searchWithin.mutate()}><Icon name="search" size={14} /> Tìm</button>
+              {(searchFC || center2) && <button className="btn btn-sm" onClick={clearSearch}>Xóa</button>}
+            </div>
+            {searchError && <div style={{ color: 'var(--danger-fg)', fontSize: 12, marginTop: 6, display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={13} /> {searchError}</div>}
           </div>
           {q.isLoading ? (
             <Skeleton rows={8} />
