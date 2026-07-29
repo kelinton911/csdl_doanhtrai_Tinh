@@ -10,10 +10,29 @@ import { ImportBatch } from './entities/import-batch.entity';
 import { SyncBatch } from './entities/sync-batch.entity';
 import { Material } from '../master-data/entities/material.entity';
 import { Barracks } from '../barracks/entities/barracks.entity';
-import { EDITABLE_STATUSES } from '../../common/workflow';
+import { StorageLocation } from '../inventory/entities/storage-location.entity';
+import { MapPoi } from '../gis/entities/map-poi.entity';
+import { EDITABLE_STATUSES, WorkflowStatus } from '../../common/workflow';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 
 interface UploadedFile { originalname: string; buffer: Buffer }
+
+// Cấu hình đích nhập: cột bắt buộc, cột toạ độ, có hình học hay không.
+interface TargetCfg {
+  required: string[];
+  optional: string[];
+  hasGeom: boolean; // nhận cột lat,lng → PostGIS Point
+}
+const TARGETS: Record<string, TargetCfg> = {
+  materials: { required: ['code', 'name'], optional: ['categoryCode', 'unitCode'], hasGeom: false },
+  barracks: { required: ['code', 'name'], optional: ['address', 'function', 'lat', 'lng'], hasGeom: true },
+  'storage-locations': { required: ['code', 'name'], optional: ['type', 'lat', 'lng'], hasGeom: true },
+  pois: { required: ['code', 'name'], optional: ['category', 'symbol_code', 'province_code', 'lat', 'lng'], hasGeom: true },
+};
+
+// Khung toạ độ Việt Nam (thô) để bắt lỗi lat/lng nhập nhầm.
+const VN_LAT = [8.0, 24.0];
+const VN_LNG = [102.0, 110.0];
 
 // Tách CSV đơn giản (không hỗ trợ dấu phẩy trong ô có ngoặc kép — dùng mẫu chuẩn của hệ thống).
 function parseCsv(text: string): { headers: string[]; rows: string[][] } {
@@ -24,6 +43,10 @@ function parseCsv(text: string): { headers: string[]; rows: string[][] } {
   return { headers, rows };
 }
 
+function geoPoint(lng: number, lat: number) {
+  return { type: 'Point' as const, coordinates: [lng, lat] };
+}
+
 // M14 — Integration & Sync. UC-21 (nhập hàng loạt), UC-22 (đồng bộ offline).
 @Injectable()
 export class IntegrationService {
@@ -32,23 +55,39 @@ export class IntegrationService {
     @InjectRepository(SyncBatch) private readonly syncs: Repository<SyncBatch>,
     @InjectRepository(Material) private readonly materials: Repository<Material>,
     @InjectRepository(Barracks) private readonly barracks: Repository<Barracks>,
+    @InjectRepository(StorageLocation) private readonly storage: Repository<StorageLocation>,
+    @InjectRepository(MapPoi) private readonly pois: Repository<MapPoi>,
     private readonly ds: DataSource,
   ) {}
 
+  private repoForCodes(target: string): Repository<{ code: string }> {
+    switch (target) {
+      case 'barracks':
+        return this.barracks as unknown as Repository<{ code: string }>;
+      case 'storage-locations':
+        return this.storage as unknown as Repository<{ code: string }>;
+      case 'pois':
+        return this.pois as unknown as Repository<{ code: string }>;
+      default:
+        return this.materials as unknown as Repository<{ code: string }>;
+    }
+  }
+
   // UC-21: tải tệp → parse vào staging → kiểm tra lỗi theo dòng (chưa ghi dữ liệu chính).
   async createImport(target: string, file: UploadedFile | undefined, user: AuthUser) {
-    if (target !== 'materials') {
-      throw new BadRequestException('VAL-001: Hiện hỗ trợ target=materials');
+    const cfg = TARGETS[target];
+    if (!cfg) {
+      throw new BadRequestException('VAL-001: target hỗ trợ: materials | barracks | storage-locations | pois');
     }
     if (!file) throw new BadRequestException('VAL-001: Thiếu tệp CSV');
     const { headers, rows } = parseCsv(file.buffer.toString('utf8'));
-    const required = ['code', 'name'];
-    for (const r of required) {
+    for (const r of cfg.required) {
       if (!headers.includes(r)) throw new BadRequestException(`VAL-001: Thiếu cột bắt buộc "${r}"`);
     }
     const idx = (h: string) => headers.indexOf(h);
+    const cell = (cells: string[], h: string) => (idx(h) >= 0 ? cells[idx(h)] : undefined);
     const existingCodes = new Set(
-      (await this.materials.find({ select: { code: true } })).map((m) => m.code),
+      (await this.repoForCodes(target).find({ select: { code: true } })).map((m) => m.code),
     );
     const seen = new Set<string>();
     const staging: Array<Record<string, unknown>> = [];
@@ -56,15 +95,12 @@ export class IntegrationService {
 
     rows.forEach((cells, i) => {
       const rowNo = i + 2; // dòng 1 là header
-      const code = cells[idx('code')] ?? '';
-      const name = cells[idx('name')] ?? '';
-      const rec: Record<string, unknown> = {
-        code,
-        name,
-        categoryCode: idx('categoryCode') >= 0 ? cells[idx('categoryCode')] : null,
-        unitCode: idx('unitCode') >= 0 ? cells[idx('unitCode')] : null,
-        __valid: true,
-      };
+      const code = (cell(cells, 'code') ?? '').trim();
+      const name = (cell(cells, 'name') ?? '').trim();
+      const rec: Record<string, unknown> = { code, name, __valid: true };
+      // các cột phụ theo đích
+      for (const col of cfg.optional) rec[col] = cell(cells, col) ?? null;
+
       if (!code) { errors.push({ row: rowNo, column: 'code', message: 'Thiếu mã' }); rec.__valid = false; }
       if (!name) { errors.push({ row: rowNo, column: 'name', message: 'Thiếu tên' }); rec.__valid = false; }
       if (code && (existingCodes.has(code) || seen.has(code))) {
@@ -72,6 +108,26 @@ export class IntegrationService {
         rec.__valid = false;
       }
       if (code) seen.add(code);
+
+      // Toạ độ (nếu đích có hình học): cả hai lat/lng phải cùng có/không, đúng khung VN.
+      if (cfg.hasGeom) {
+        const latRaw = (cell(cells, 'lat') ?? '').trim();
+        const lngRaw = (cell(cells, 'lng') ?? '').trim();
+        if (latRaw || lngRaw) {
+          const lat = Number(latRaw);
+          const lng = Number(lngRaw);
+          if (!latRaw || !lngRaw || Number.isNaN(lat) || Number.isNaN(lng)) {
+            errors.push({ row: rowNo, column: 'lat/lng', message: 'lat và lng phải cùng có và là số' });
+            rec.__valid = false;
+          } else if (lat < VN_LAT[0] || lat > VN_LAT[1] || lng < VN_LNG[0] || lng > VN_LNG[1]) {
+            errors.push({ row: rowNo, column: 'lat/lng', message: 'Toạ độ ngoài khung Việt Nam' });
+            rec.__valid = false;
+          } else {
+            rec.lat = lat;
+            rec.lng = lng;
+          }
+        }
+      }
       staging.push(rec);
     });
 
@@ -103,20 +159,63 @@ export class IntegrationService {
     if (!b) throw new NotFoundException('DATA-001: Không tìm thấy lô nhập');
     if (b.status === 'COMMITTED') throw new ConflictException('WF-001: Lô đã commit');
     const valid = b.staging.filter((s) => s.__valid);
+    const target = b.target;
+
     const committed = await this.ds.transaction(async (m) => {
       let n = 0;
       for (const r of valid) {
-        await m.getRepository(Material).save(
-          m.getRepository(Material).create({
-            code: r.code as string,
-            name: r.name as string,
-            categoryCode: (r.categoryCode as string) ?? null,
-            unitCode: (r.unitCode as string) ?? null,
-            status: 'DRAFT',
-            createdBy: user.sub,
-            updatedBy: user.sub,
-          }),
-        );
+        const loc = r.lat != null && r.lng != null ? geoPoint(r.lng as number, r.lat as number) : null;
+        if (target === 'materials') {
+          await m.getRepository(Material).save(
+            m.getRepository(Material).create({
+              code: r.code as string,
+              name: r.name as string,
+              categoryCode: (r.categoryCode as string) ?? null,
+              unitCode: (r.unitCode as string) ?? null,
+              status: 'DRAFT',
+              createdBy: user.sub,
+              updatedBy: user.sub,
+            }),
+          );
+        } else if (target === 'barracks') {
+          await m.getRepository(Barracks).save(
+            m.getRepository(Barracks).create({
+              code: r.code as string,
+              name: r.name as string,
+              address: (r.address as string) ?? null,
+              function: (r.function as string) ?? null,
+              location: loc,
+              workflowStatus: WorkflowStatus.DRAFT,
+              createdBy: user.sub,
+              updatedBy: user.sub,
+            }),
+          );
+        } else if (target === 'storage-locations') {
+          await m.getRepository(StorageLocation).save(
+            m.getRepository(StorageLocation).create({
+              code: r.code as string,
+              name: r.name as string,
+              type: (r.type as string) ?? null,
+              location: loc,
+              status: 'ACTIVE',
+              createdBy: user.sub,
+            }),
+          );
+        } else if (target === 'pois') {
+          await m.getRepository(MapPoi).save(
+            m.getRepository(MapPoi).create({
+              code: r.code as string,
+              name: r.name as string,
+              category: (r.category as string) ?? 'DIA_DANH',
+              symbolCode: (r.symbol_code as string) ?? null,
+              provinceCode: (r.province_code as string) ?? null,
+              location: loc,
+              source: 'import',
+              status: 'ACTIVE',
+              createdBy: user.sub,
+            }),
+          );
+        }
         n++;
       }
       return n;

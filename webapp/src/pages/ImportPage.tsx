@@ -35,18 +35,28 @@ export function ImportPage() {
   );
 }
 
+// Các đích nhập được hỗ trợ + gợi ý cột + mẫu CSV tải về.
+const IMPORT_TARGETS = [
+  { key: 'materials', label: 'Vật chất', cols: 'code, name, categoryCode?, unitCode?', invalidate: ['materials'], tmpl: 'code,name,categoryCode,unitCode\nVC-XXX,Tên vật chất,LUONG-THUC,KG' },
+  { key: 'barracks', label: 'Doanh trại', cols: 'code, name, address?, function?, lat?, lng?', invalidate: ['barracks-all', 'gis'], tmpl: 'code,name,address,function,lat,lng\nDT-XXX,Doanh trại mẫu,Khu vực 1,Đơn vị bộ binh,16.05,108.20' },
+  { key: 'storage-locations', label: 'Kho', cols: 'code, name, type?, lat?, lng?', invalidate: ['gis'], tmpl: 'code,name,type,lat,lng\nKHO-XXX,Kho mẫu,KHO-TONG,16.05,108.20' },
+  { key: 'pois', label: 'Trạm/Địa danh', cols: 'code, name, category?, symbol_code?, province_code?, lat?, lng?', invalidate: ['gis'], tmpl: 'code,name,category,province_code,lat,lng\nTRAM-XXX,Trạm mẫu,TRAM,48,16.05,108.20' },
+];
+
 function ImportCsvSection() {
   const qc = useQueryClient();
+  const [target, setTarget] = useState('materials');
   const [file, setFile] = useState<File | null>(null);
   const [batch, setBatch] = useState<ImportBatch | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [committed, setCommitted] = useState<number | null>(null);
+  const cfg = IMPORT_TARGETS.find((t) => t.key === target) ?? IMPORT_TARGETS[0];
 
   const upload = useMutation({
     mutationFn: async () => {
       const fd = new FormData();
       fd.append('file', file as File);
-      return (await api.post('/imports', fd, { params: { target: 'materials' } })).data as ImportBatch;
+      return (await api.post('/imports', fd, { params: { target } })).data as ImportBatch;
     },
     onSuccess: (b) => { setBatch(b); setCommitted(null); setError(null); toast.info(`Đã kiểm tra: ${b.validRows} hợp lệ, ${b.errorRows} lỗi.`); },
     onError: (e) => { setError(toProblem(e).title); setBatch(null); toast.problem(e, 'Tải tệp thất bại'); },
@@ -54,9 +64,18 @@ function ImportCsvSection() {
 
   const commit = useMutation({
     mutationFn: async () => (await api.post(`/imports/${batch!.id}/commit`)).data as ImportBatch,
-    onSuccess: (b) => { const n = b.committedCount ?? b.validRows; setCommitted(n); setBatch(b); qc.invalidateQueries({ queryKey: ['materials'] }); toast.success(`Đã commit ${n} dòng vào danh mục vật chất.`); },
+    onSuccess: (b) => { const n = b.committedCount ?? b.validRows; setCommitted(n); setBatch(b); cfg.invalidate.forEach((k) => qc.invalidateQueries({ queryKey: [k] })); toast.success(`Đã commit ${n} dòng vào "${cfg.label}".`); },
     onError: (e) => { setError(toProblem(e).title); toast.problem(e, 'Commit thất bại'); },
   });
+
+  const downloadTemplate = () => {
+    const blob = new Blob(['﻿' + cfg.tmpl], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `mau-nhap-${cfg.key}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
 
   const errCols: Column<ValidationError>[] = [
     { key: 'row', header: 'Dòng', render: (e) => e.row, mono: true, align: 'right', width: 80 },
@@ -66,12 +85,17 @@ function ImportCsvSection() {
 
   return (
     <section className="card" style={{ padding: 20 }}>
-      <div className="eyebrow" style={{ marginBottom: 10 }}>Nhập vật chất từ CSV (UC-21)</div>
+      <div className="eyebrow" style={{ marginBottom: 10 }}>Nhập dữ liệu từ CSV (UC-21)</div>
       <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>
-        Cột bắt buộc: <span className="num">code, name</span>. Cột tùy chọn: <span className="num">categoryCode, unitCode</span>. Dòng trùng mã hoặc thiếu bắt buộc sẽ bị đánh dấu lỗi và không được commit.
+        Chọn đối tượng cần nhập. Cột bắt buộc: <span className="num">code, name</span>. Cột hiện tại: <span className="num">{cfg.cols}</span>.
+        Với đối tượng có toạ độ, dùng cột <span className="num">lat, lng</span> (khung Việt Nam). Dòng trùng mã / thiếu bắt buộc / toạ độ sai sẽ bị đánh dấu lỗi và không được commit.
       </p>
 
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginBottom: 14 }}>
+        <select className="input" style={{ width: 170 }} value={target} onChange={(e) => { setTarget(e.target.value); setBatch(null); setCommitted(null); setError(null); }}>
+          {IMPORT_TARGETS.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+        </select>
+        <button className="btn btn-sm" onClick={downloadTemplate}><Icon name="download" size={14} /> Tải mẫu CSV</button>
         <input type="file" accept=".csv,text/csv" onChange={(e) => { setFile(e.target.files?.[0] ?? null); setBatch(null); setCommitted(null); }} />
         <button className="btn btn-primary" disabled={!file || upload.isPending} onClick={() => upload.mutate()}>
           <Icon name="upload" size={16} /> {upload.isPending ? 'Đang tải…' : 'Tải & kiểm tra'}
@@ -86,7 +110,7 @@ function ImportCsvSection() {
 
       {committed !== null && (
         <div style={{ marginBottom: 12, padding: '8px 10px', borderRadius: 8, background: 'var(--ok-bg)', color: 'var(--ok-fg)', display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
-          <Icon name="check" size={15} /> Đã commit {committed} dòng vào danh mục vật chất (trạng thái nháp).
+          <Icon name="check" size={15} /> Đã commit {committed} dòng vào "{cfg.label}".
         </div>
       )}
 

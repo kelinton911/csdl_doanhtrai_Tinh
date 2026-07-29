@@ -4,12 +4,14 @@ import { ImportBatch } from './entities/import-batch.entity';
 import { SyncBatch } from './entities/sync-batch.entity';
 import { Material } from '../master-data/entities/material.entity';
 import { Barracks } from '../barracks/entities/barracks.entity';
+import { StorageLocation } from '../inventory/entities/storage-location.entity';
+import { MapPoi } from '../gis/entities/map-poi.entity';
 import { IntegrationService } from './integration.service';
 import { IntegrationController } from './integration.controller';
 
-// M14 — Integration & Sync: nhập CSV hàng loạt + đồng bộ offline.
+// M14 — Integration & Sync: nhập CSV hàng loạt (vật chất/doanh trại/kho/POI) + đồng bộ offline.
 @Module({
-  imports: [TypeOrmModule.forFeature([ImportBatch, SyncBatch, Material, Barracks])],
+  imports: [TypeOrmModule.forFeature([ImportBatch, SyncBatch, Material, Barracks, StorageLocation, MapPoi])],
   controllers: [IntegrationController],
   providers: [IntegrationService],
   exports: [IntegrationService],

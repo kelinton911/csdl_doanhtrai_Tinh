@@ -28,7 +28,7 @@ async function run() {
   const orgRepo = dataSource.getRepository(Organization);
   const areaRepo = dataSource.getRepository(AdministrativeArea);
 
-  // 1) Đơn vị cấp tỉnh (PROVINCE) — idempotent theo code.
+  // 1) Đơn vị cấp tỉnh (PROVINCE) — idempotent theo code. Ghi cả vào đơn vị (org) lẫn địa bàn hành chính.
   let province = await orgRepo.findOne({ where: { code: REAL_PROVINCE.code } });
   if (!province) {
     province = await orgRepo.save(
@@ -38,13 +38,37 @@ async function run() {
   } else {
     console.log('  = Tỉnh đã có:', province.code);
   }
+  if (!(await areaRepo.findOne({ where: { code: REAL_PROVINCE.code } }))) {
+    await areaRepo.save(
+      areaRepo.create({
+        code: REAL_PROVINCE.code,
+        name: REAL_PROVINCE.name,
+        level: 'PROVINCE',
+        type: 'TINH',
+        provinceCode: REAL_PROVINCE.code,
+        source: 'real-areas.data.ts',
+        status: 'ACTIVE',
+      }),
+    );
+  }
 
   // 2) Địa bàn (xã/phường/đặc khu) + (tùy chọn) đơn vị Ban CHQS tương ứng.
   let added = 0;
   let addedUnits = 0;
   for (const a of REAL_AREAS) {
     if (!(await areaRepo.findOne({ where: { code: a.code } }))) {
-      await areaRepo.save(areaRepo.create({ code: a.code, name: a.name, type: a.type, status: 'ACTIVE' }));
+      await areaRepo.save(
+        areaRepo.create({
+          code: a.code,
+          name: a.name,
+          level: 'COMMUNE',
+          type: a.type,
+          parentCode: REAL_PROVINCE.code,
+          provinceCode: REAL_PROVINCE.code,
+          source: 'real-areas.data.ts',
+          status: 'ACTIVE',
+        }),
+      );
       added++;
     }
     if (createUnitPerArea) {

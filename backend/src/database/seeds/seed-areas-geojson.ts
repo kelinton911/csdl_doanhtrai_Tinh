@@ -1,116 +1,180 @@
-// Nạp ĐỊA GIỚI HÀNH CHÍNH THẬT (GIS) cho MỘT tỉnh từ file GeoJSON (EPSG:4326).
-// - Khai báo Tỉnh: qua env PROVINCE_CODE/PROVINCE_NAME, hoặc REAL_PROVINCE trong real-areas.data.ts.
-// - Mỗi feature = 1 địa bàn cấp xã; properties: { code, name, type } (type: COMMUNE|WARD|SPECIAL_ZONE).
-// - geometry (Polygon/MultiPolygon) nạp vào cột administrative_areas.geometry (MultiPolygon, SRID 4326)
-//   qua PostGIS ST_GeomFromGeoJSON — KHÔNG cần thư viện GIS bên ngoài.
+// Nạp ĐỊA GIỚI HÀNH CHÍNH THẬT (GIS) từ GeoJSON (EPSG:4326) vào bảng administrative_areas.
+// Hỗ trợ TOÀN QUỐC: cả cấp Tỉnh (level=PROVINCE) lẫn cấp Xã/Phường/Đặc khu (level=COMMUNE), nhiều file.
+// TỰ NHẬN DIỆN bộ dữ liệu "vietnam_gis_admin_2026" (province_code/commune_code/unit_type...) và cả
+// định dạng rút gọn (code/name/type). KHÔNG bịa dữ liệu — chỉ nạp đúng những gì có trong file.
+//
+// geometry: Polygon|MultiPolygon → cột geometry (MultiPolygon,4326); feature geometry=null vẫn nạp thuộc tính.
+// centroid tự tính bằng ST_PointOnSurface khi có geometry (điểm chắc chắn nằm trong ranh giới) để đặt nhãn.
 // Idempotent: upsert theo `code`; chạy lại an toàn. KHÔNG động dữ liệu nghiệp vụ.
 //
-// Chạy:  npm run seed:geojson -- <đường-dẫn.geojson>
-//   hoặc: PROVINCE_CODE=TINH-XX PROVINCE_NAME='Tỉnh ...' AREAS_GEOJSON=path npm run seed:geojson
+// Chạy (bộ dữ liệu người dùng cung cấp trong docs/):
+//   npm run seed:geojson -- \
+//     ../docs/vietnam_gis_admin_2026_geojson/vietnam_provinces_2026.geojson \
+//     ../docs/vietnam_gis_admin_2026_geojson/vietnam_communes_2026_attributes.geojson
+//   (xã sẽ có tên/loại/tỉnh nhưng chưa có ranh giới — chạy scripts/build_full_commune_boundaries.py
+//    để tạo vietnam_communes_2026_polygons.geojson rồi nạp file đó để có ranh giới xã.)
 import 'reflect-metadata';
 import * as fs from 'fs';
-import { join } from 'path';
+import { basename, isAbsolute, join } from 'path';
 import dataSource from '../data-source';
-import { Organization } from '../../modules/identity/entities/organization.entity';
 import { AdministrativeArea } from '../../modules/organization/entities/administrative-area.entity';
-import { REAL_PROVINCE, createUnitPerArea } from './real-areas.data';
 
-const VALID_TYPES = ['COMMUNE', 'WARD', 'SPECIAL_ZONE'];
+const PROVINCE_TYPES = ['TINH', 'THANH_PHO'];
+const COMMUNE_TYPES = ['COMMUNE', 'WARD', 'SPECIAL_ZONE'];
 
-async function run() {
-  const provinceCode = (process.env.PROVINCE_CODE || REAL_PROVINCE.code).trim();
-  const provinceName = (process.env.PROVINCE_NAME || REAL_PROVINCE.name).trim();
-  const geojsonPath =
-    process.env.AREAS_GEOJSON || process.argv[2] || join(__dirname, 'data', 'areas.geojson');
+// Chuẩn hoá loại đơn vị (nhận cả tiếng Việt có dấu lẫn mã enum).
+const TYPE_MAP: Record<string, string> = {
+  'TỈNH': 'TINH', TINH: 'TINH', PROVINCE: 'TINH',
+  'THÀNH PHỐ': 'THANH_PHO', 'THANH PHO': 'THANH_PHO', THANH_PHO: 'THANH_PHO', MUNICIPALITY: 'THANH_PHO', CITY: 'THANH_PHO',
+  'PHƯỜNG': 'WARD', PHUONG: 'WARD', WARD: 'WARD',
+  'XÃ': 'COMMUNE', XA: 'COMMUNE', COMMUNE: 'COMMUNE',
+  'ĐẶC KHU': 'SPECIAL_ZONE', 'DAC KHU': 'SPECIAL_ZONE', SPECIAL_ZONE: 'SPECIAL_ZONE', 'SPECIAL ZONE': 'SPECIAL_ZONE',
+};
+function normType(raw: string): string {
+  const k = String(raw ?? '').trim().toUpperCase();
+  return TYPE_MAP[k] ?? k;
+}
 
-  if (!provinceCode || !provinceName) {
-    throw new Error(
-      'Chưa khai báo Tỉnh. Đặt env PROVINCE_CODE + PROVINCE_NAME, hoặc điền REAL_PROVINCE trong real-areas.data.ts.',
-    );
+interface AreaRow {
+  code: string;
+  name: string;
+  type: string;
+  level: 'PROVINCE' | 'COMMUNE';
+  provinceCode: string | null;
+  parentCode: string | null;
+}
+
+// Rút thuộc tính từ mọi biến thể schema đã biết.
+function readProps(p: any): AreaRow | null {
+  const communeCode = String(p.commune_code ?? '').trim();
+  const provinceCode0 = String(p.province_code ?? '').trim();
+  const isCommune = !!communeCode || String(p.admin_level ?? '') === '2';
+
+  const code = String(p.code ?? (communeCode || provinceCode0)).trim();
+  const name = String(
+    p.name ?? p.commune_full_name ?? p.province_full_name ?? p.commune_name ?? p.province_name ?? '',
+  ).trim();
+  const type = normType(p.type ?? p.unit_type ?? '') || (isCommune ? 'COMMUNE' : 'TINH');
+
+  const explicitLevel = String(p.level ?? '').trim().toUpperCase();
+  const level: 'PROVINCE' | 'COMMUNE' =
+    explicitLevel === 'PROVINCE' || explicitLevel === 'COMMUNE'
+      ? (explicitLevel as 'PROVINCE' | 'COMMUNE')
+      : isCommune
+        ? 'COMMUNE'
+        : PROVINCE_TYPES.includes(type)
+          ? 'PROVINCE'
+          : provinceCode0 && !communeCode
+            ? 'PROVINCE'
+            : 'COMMUNE';
+
+  const provinceCode = level === 'PROVINCE' ? code || provinceCode0 || null : provinceCode0 || null;
+  const parentCode =
+    level === 'PROVINCE' ? null : provinceCode0 || String(p.parent_code ?? '').trim() || null;
+
+  if (!code || !name) return null;
+  return { code, name, type, level, provinceCode, parentCode };
+}
+
+function resolveFiles(): string[] {
+  const dataDir = join(__dirname, 'data');
+  const argv = process.argv.slice(2).filter((a) => !a.startsWith('-'));
+  const fromEnv = (process.env.AREAS_GEOJSON || '').split(',').map((s) => s.trim()).filter(Boolean);
+  let list = argv.length ? argv : fromEnv;
+  if (!list.length) {
+    const defaults = ['provinces.geojson', 'wards.geojson']
+      .map((f) => join(dataDir, f))
+      .filter((f) => fs.existsSync(f));
+    list = defaults.length ? defaults : [join(dataDir, 'areas.geojson')];
   }
-  if (!fs.existsSync(geojsonPath)) {
-    throw new Error(
-      `Không thấy file GeoJSON: ${geojsonPath}. Truyền đường dẫn: npm run seed:geojson -- <path>, hoặc đặt AREAS_GEOJSON.`,
-    );
-  }
+  return list.map((f) => (isAbsolute(f) ? f : join(process.cwd(), f)));
+}
 
-  const raw = JSON.parse(fs.readFileSync(geojsonPath, 'utf8'));
+async function loadFile(path: string, areaRepo: any) {
+  const raw = JSON.parse(fs.readFileSync(path, 'utf8'));
   const features: any[] | null =
     raw?.type === 'FeatureCollection' ? raw.features : Array.isArray(raw?.features) ? raw.features : null;
+  const source = basename(path);
+  const errors: string[] = [];
   if (!features || features.length === 0) {
-    throw new Error('GeoJSON không hợp lệ hoặc rỗng: cần FeatureCollection có mảng features.');
+    throw new Error(`GeoJSON không hợp lệ hoặc rỗng (${source}): cần FeatureCollection có mảng features.`);
   }
 
-  await dataSource.initialize();
-  const orgRepo = dataSource.getRepository(Organization);
-  const areaRepo = dataSource.getRepository(AdministrativeArea);
-
-  // 1) Khai báo Tỉnh (PROVINCE) — idempotent theo code.
-  let province = await orgRepo.findOne({ where: { code: provinceCode } });
-  if (!province) {
-    province = await orgRepo.save(
-      orgRepo.create({ code: provinceCode, name: provinceName, type: 'PROVINCE', status: 'ACTIVE' }),
-    );
-    console.log('  + Tỉnh:', provinceCode, '-', provinceName);
-  } else {
-    console.log('  = Tỉnh đã có:', provinceCode);
-  }
-
-  // 2) Nạp từng địa bàn + geometry.
   let upserted = 0;
   let withGeom = 0;
-  let addedUnits = 0;
-  const errors: string[] = [];
   for (let i = 0; i < features.length; i++) {
     const f = features[i];
-    const p = f?.properties ?? {};
-    const code = String(p.code ?? '').trim();
-    const name = String(p.name ?? '').trim();
-    const type = String(p.type ?? 'COMMUNE').trim().toUpperCase();
-    if (!code || !name) {
-      errors.push(`Feature #${i}: thiếu properties.code/name`);
+    const row = readProps(f?.properties ?? {});
+    if (!row) {
+      errors.push(`${source} #${i}: thiếu code/name`);
       continue;
     }
-    if (!VALID_TYPES.includes(type)) {
-      errors.push(`Feature #${i} (${code}): type không hợp lệ '${type}' (COMMUNE|WARD|SPECIAL_ZONE)`);
+    if (![...PROVINCE_TYPES, ...COMMUNE_TYPES].includes(row.type)) {
+      errors.push(`${source} #${i} (${row.code}): type không hợp lệ '${row.type}'`);
       continue;
     }
 
-    let area = await areaRepo.findOne({ where: { code } });
-    if (!area) area = areaRepo.create({ code, name, type, status: 'ACTIVE' });
-    else {
-      area.name = name;
-      area.type = type;
-    }
+    let area = await areaRepo.findOne({ where: { code: row.code } });
+    if (!area) area = areaRepo.create({ code: row.code });
+    area.name = row.name;
+    area.type = row.type;
+    area.level = row.level;
+    area.parentCode = row.parentCode;
+    area.provinceCode = row.provinceCode;
+    area.source = source;
+    area.status = 'ACTIVE';
     await areaRepo.save(area);
     upserted++;
 
     if (f.geometry) {
-      // ST_Multi để chấp nhận cả Polygon lẫn MultiPolygon (cột là MultiPolygon).
-      await dataSource.query(
+      await areaRepo.query(
         `UPDATE administrative_areas
-         SET geometry = ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1), 4326)), updated_at = now()
+         SET geometry = ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1), 4326)),
+             centroid = ST_PointOnSurface(ST_SetSRID(ST_GeomFromGeoJSON($1), 4326)),
+             updated_at = now()
          WHERE code = $2`,
-        [JSON.stringify(f.geometry), code],
+        [JSON.stringify(f.geometry), row.code],
       );
       withGeom++;
     }
+  }
+  return { upserted, withGeom, errors };
+}
 
-    if (createUnitPerArea) {
-      const orgCode = `DV-${code}`;
-      if (!(await orgRepo.findOne({ where: { code: orgCode } }))) {
-        await orgRepo.save(
-          orgRepo.create({ code: orgCode, name: `Ban CHQS ${name}`, type: 'COMMUNE', parentId: province.id, status: 'ACTIVE' }),
-        );
-        addedUnits++;
-      }
-    }
+async function run() {
+  const files = resolveFiles();
+  const missing = files.filter((f) => !fs.existsSync(f));
+  if (missing.length) {
+    throw new Error(
+      `Không thấy file GeoJSON: ${missing.join(', ')}. ` +
+        `Truyền đường dẫn: npm run seed:geojson -- <path...>, hoặc đặt AREAS_GEOJSON. ` +
+        `Xem backend/src/database/seeds/data/README.md.`,
+    );
   }
 
-  console.log(`  + Địa bàn upsert: ${upserted}/${features.length} · có geometry: ${withGeom} · đơn vị mới: ${addedUnits}`);
-  if (errors.length) {
-    console.warn(`  ! ${errors.length} feature bị bỏ qua do lỗi:`);
-    errors.slice(0, 20).forEach((e) => console.warn('    - ' + e));
+  await dataSource.initialize();
+  const areaRepo = dataSource.getRepository(AdministrativeArea);
+
+  let totUpsert = 0;
+  let totGeom = 0;
+  const allErrors: string[] = [];
+  for (const f of files) {
+    console.log(`  → Nạp ${basename(f)} ...`);
+    const r = await loadFile(f, areaRepo);
+    totUpsert += r.upserted;
+    totGeom += r.withGeom;
+    allErrors.push(...r.errors);
+    console.log(`     upsert: ${r.upserted} · có geometry: ${r.withGeom}`);
+  }
+
+  const provinces = await areaRepo.count({ where: { level: 'PROVINCE' } });
+  const communes = await areaRepo.count({ where: { level: 'COMMUNE' } });
+  console.log(
+    `\n  Tổng: upsert ${totUpsert} · geometry ${totGeom}. Trong DB: ${provinces} tỉnh · ${communes} xã/phường/đặc khu.`,
+  );
+  if (allErrors.length) {
+    console.warn(`  ! ${allErrors.length} feature bị bỏ qua do lỗi:`);
+    allErrors.slice(0, 20).forEach((e) => console.warn('    - ' + e));
   }
 
   await dataSource.destroy();

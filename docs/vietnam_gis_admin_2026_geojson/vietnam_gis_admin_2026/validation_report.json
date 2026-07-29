@@ -1,0 +1,64 @@
+{
+  "generated_at": "2026-07-29T17:06:00+07:00",
+  "status": "PASS",
+  "checks": {
+    "province_feature_count": 34,
+    "expected_province_count": 34,
+    "commune_feature_count": 3321,
+    "expected_commune_count": 3321,
+    "unique_province_codes": 34,
+    "unique_commune_codes": 3321,
+    "commune_parent_codes_valid": true,
+    "province_geometries_non_null": true,
+    "province_geometries_valid_after_repair": true,
+    "province_geometry_types": {
+      "MultiPolygon": 34
+    },
+    "province_geometry_repaired_codes": [
+      "91"
+    ],
+    "commune_geometry_mode": "null geometry catalog; source URL supplied for every feature",
+    "boundary_urls_present": 3321,
+    "unit_type_counts": {
+      "Phường": 697,
+      "Xã": 2611,
+      "Đặc khu": 13
+    }
+  },
+  "province_commune_counts": {
+    "01": 126,
+    "04": 56,
+    "08": 124,
+    "11": 45,
+    "12": 38,
+    "14": 75,
+    "15": 99,
+    "19": 92,
+    "20": 65,
+    "22": 54,
+    "24": 99,
+    "25": 148,
+    "31": 114,
+    "33": 104,
+    "37": 129,
+    "38": 166,
+    "40": 130,
+    "42": 69,
+    "44": 78,
+    "46": 40,
+    "48": 94,
+    "51": 96,
+    "52": 135,
+    "56": 65,
+    "66": 102,
+    "68": 124,
+    "75": 95,
+    "79": 168,
+    "80": 96,
+    "82": 102,
+    "86": 124,
+    "91": 102,
+    "92": 103,
+    "96": 64
+  }
+}

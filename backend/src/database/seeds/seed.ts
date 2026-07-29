@@ -1,6 +1,7 @@
-// Seed dữ liệu GIẢ LẬP đầy đủ để mọi màn hình có nội dung (KHÔNG dùng ở PROD).
-// Theo Frontend §12: 1 tỉnh, 12 xã/phường, 30 doanh trại, ~180 công trình, danh mục,
-// vật chất. Toạ độ là giả lập (dịch chuyển), không phải vị trí thật.
+// Seed dữ liệu DEMO để mọi màn hình có nội dung (KHÔNG dùng ở PROD).
+// Doanh trại/công trình/kho/POI đặt quanh ĐỊA BÀN THẬT đã nạp (seed:geojson/seed:real) nếu có;
+// nếu chưa có địa bàn thật thì tạo bộ DEMO tối thiểu (rõ ràng là demo, source='DEMO').
+// Chọn tỉnh nghiệp vụ demo qua env DEMO_PROVINCE_CODE. Dọn sạch các tên "(giả lập)" cũ.
 import 'reflect-metadata';
 import * as bcrypt from 'bcryptjs';
 import dataSource from '../data-source';
@@ -12,6 +13,7 @@ import { Catalog } from '../../modules/master-data/entities/catalog.entity';
 import { Material } from '../../modules/master-data/entities/material.entity';
 import { Barracks } from '../../modules/barracks/entities/barracks.entity';
 import { Facility } from '../../modules/facilities/entities/facility.entity';
+import { MapPoi } from '../../modules/gis/entities/map-poi.entity';
 import { StorageLocation } from '../../modules/inventory/entities/storage-location.entity';
 import { StockBalance } from '../../modules/inventory/entities/stock-balance.entity';
 import { InspectionCampaign } from '../../modules/inspection/entities/inspection-campaign.entity';
@@ -71,36 +73,79 @@ async function run() {
   const officer = await userRepo.findOne({ where: { username: 'hckt' } });
   const authorId = officer?.id ?? null;
 
-  // 3) 12 địa bàn cấp xã (8 xã + 3 phường + 1 đặc khu) + đơn vị Ban CHQS tương ứng.
-  // Sau sáp nhập 2025: cấp xã gồm Xã (COMMUNE) / Phường (WARD) / Đặc khu (SPECIAL_ZONE).
-  const areaDefs = [
-    ...Array.from({ length: 8 }, (_, i) => ({ code: `XA-A${String(i + 1).padStart(2, '0')}`, name: `Xã A${String(i + 1).padStart(2, '0')} (giả lập)`, type: 'COMMUNE' })),
-    ...Array.from({ length: 3 }, (_, i) => ({ code: `PHUONG-P${String(i + 1).padStart(2, '0')}`, name: `Phường P${String(i + 1).padStart(2, '0')} (giả lập)`, type: 'WARD' })),
-    { code: 'DACKHU-DK01', name: 'Đặc khu DK01 (giả lập)', type: 'SPECIAL_ZONE' },
-  ];
-  const areas: AdministrativeArea[] = [];
-  for (const a of areaDefs) {
-    let area = await areaRepo.findOne({ where: { code: a.code } });
-    if (!area) {
-      area = await areaRepo.save(areaRepo.create({ ...a, status: 'ACTIVE' }));
-    }
-    areas.push(area);
-    const orgCode = `DV-${a.code}`;
-    if (!(await orgRepo.findOne({ where: { code: orgCode } }))) {
-      await orgRepo.save(orgRepo.create({ code: orgCode, name: `Ban CHQS ${a.name}`, type: 'COMMUNE', parentId: province.id, status: 'ACTIVE' }));
+  // 3) Địa bàn dùng cho dữ liệu demo.
+  // 3a) DỌN các tên GIẢ LẬP cũ (nếu có) để không còn "tên sai" trên bản đồ/danh sách.
+  await dataSource.query(
+    `DELETE FROM administrative_areas WHERE name LIKE '%giả lập%' OR code LIKE 'XA-A%' OR code LIKE 'PHUONG-P%' OR code = 'DACKHU-DK01'`,
+  );
+  await dataSource.query(
+    `DELETE FROM organizations WHERE code LIKE 'DV-XA-A%' OR code LIKE 'DV-PHUONG-P%' OR code = 'DV-DACKHU-DK01' OR name LIKE '%giả lập%'`,
+  );
+
+  // 3b) Ưu tiên ĐỊA BÀN THẬT đã nạp (seed:geojson/seed:real). Chọn tỉnh demo qua DEMO_PROVINCE_CODE.
+  const DEMO_PROVINCE_CODE = process.env.DEMO_PROVINCE_CODE || null;
+  let areas: AdministrativeArea[] = await areaRepo.find({
+    where: { level: 'COMMUNE', ...(DEMO_PROVINCE_CODE ? { provinceCode: DEMO_PROVINCE_CODE } : {}) },
+    take: 24,
+  });
+  if (areas.length === 0 && DEMO_PROVINCE_CODE) {
+    areas = await areaRepo.find({ where: { level: 'COMMUNE' }, take: 24 }); // fallback: bất kỳ xã thật nào
+  }
+
+  // 3c) Chưa có địa bàn thật → tạo bộ DEMO tối thiểu (rõ ràng là demo, source='DEMO').
+  let demoMode = false;
+  if (areas.length === 0) {
+    demoMode = true;
+    const demoAreaDefs = [
+      ...Array.from({ length: 6 }, (_, i) => ({ code: `XA-DEMO-${String(i + 1).padStart(2, '0')}`, name: `Xã Demo ${i + 1}`, type: 'COMMUNE' })),
+      ...Array.from({ length: 2 }, (_, i) => ({ code: `PHUONG-DEMO-${String(i + 1).padStart(2, '0')}`, name: `Phường Demo ${i + 1}`, type: 'WARD' })),
+    ];
+    for (const a of demoAreaDefs) {
+      let area = await areaRepo.findOne({ where: { code: a.code } });
+      if (!area) {
+        area = await areaRepo.save(
+          areaRepo.create({ ...a, level: 'COMMUNE', provinceCode: 'TINH-DEMO', parentCode: 'TINH-DEMO', source: 'DEMO', status: 'ACTIVE' }),
+        );
+      }
+      areas.push(area);
     }
   }
-  console.log(`  + Xã/phường: ${areas.length}`);
 
-  // Gắn phạm vi dữ liệu cho tài khoản cấp xã xa01: thuộc đơn vị DV-XA-A01, scope địa bàn XA-A01.
+  // 3d) Đơn vị Ban CHQS cho mỗi địa bàn demo (idempotent) — để gắn phạm vi dữ liệu người dùng xã.
+  for (const area of areas) {
+    const orgCode = `DV-${area.code}`;
+    if (!(await orgRepo.findOne({ where: { code: orgCode } }))) {
+      await orgRepo.save(orgRepo.create({ code: orgCode, name: `Ban CHQS ${area.name}`, type: 'COMMUNE', parentId: province.id, status: 'ACTIVE' }));
+    }
+  }
+  console.log(`  + Địa bàn cho demo: ${areas.length}${demoMode ? ' (bộ DEMO)' : ' (địa bàn thật)'}`);
+
+  // 3e) Toạ độ tâm mỗi địa bàn (từ centroid ranh giới thật nếu có) để đặt doanh trại/kho/POI đúng chỗ.
+  const areaCoord = new Map<string, { lng: number; lat: number }>();
+  for (const area of areas) {
+    // Ưu tiên centroid xã; nếu chưa có ranh giới xã, lùi về centroid tỉnh; cuối cùng mới về tâm giả lập.
+    const r = await dataSource.query(
+      `SELECT ST_X(COALESCE(a.centroid, ST_PointOnSurface(prov.geometry))) AS lng,
+              ST_Y(COALESCE(a.centroid, ST_PointOnSurface(prov.geometry))) AS lat
+       FROM administrative_areas a
+       LEFT JOIN administrative_areas prov ON prov.code = a.province_code AND prov.level = 'PROVINCE'
+       WHERE a.id = $1`,
+      [area.id],
+    );
+    const lng = r[0]?.lng != null ? Number(r[0].lng) : BASE.lng + between(-0.3, 0.3);
+    const lat = r[0]?.lat != null ? Number(r[0].lat) : BASE.lat + between(-0.25, 0.25);
+    areaCoord.set(area.id, { lng, lat });
+  }
+
+  // Gắn phạm vi dữ liệu cho tài khoản cấp xã xa01 → địa bàn đầu tiên.
   const xa01 = await userRepo.findOne({ where: { username: 'xa01' } });
-  const areaA01 = areas.find((a) => a.code === 'XA-A01');
-  const orgA01 = await orgRepo.findOne({ where: { code: 'DV-XA-A01' } });
-  if (xa01 && areaA01 && orgA01) {
-    xa01.organizationId = orgA01.id;
-    xa01.dataScopes = [{ type: 'AREA', refId: areaA01.id }];
+  const firstArea = areas[0];
+  const orgFirst = firstArea ? await orgRepo.findOne({ where: { code: `DV-${firstArea.code}` } }) : null;
+  if (xa01 && firstArea && orgFirst) {
+    xa01.organizationId = orgFirst.id;
+    xa01.dataScopes = [{ type: 'AREA', refId: firstArea.id }];
     await userRepo.save(xa01);
-    console.log('  + Phạm vi dữ liệu xa01 → xã A01');
+    console.log(`  + Phạm vi dữ liệu xa01 → ${firstArea.name}`);
   }
 
   // 4) Danh mục dùng chung (phát hành sẵn)
@@ -162,12 +207,13 @@ async function run() {
       if (await barracksRepo.findOne({ where: { code } })) continue;
       const area = pick(areas);
       const org = await orgRepo.findOne({ where: { code: `DV-${area.code}` } });
-      const lng = BASE.lng + between(-0.35, 0.35);
-      const lat = BASE.lat + between(-0.3, 0.3);
+      const c = areaCoord.get(area.id) ?? BASE;
+      const lng = c.lng + between(-0.02, 0.02);
+      const lat = c.lat + between(-0.02, 0.02);
       const b = await barracksRepo.save(
         barracksRepo.create({
           code,
-          name: `Doanh trại ${area.name.split(' ')[1]}-${String(i + 1).padStart(2, '0')} (giả lập)`,
+          name: `Doanh trại ${String(i + 1).padStart(2, '0')} - ${area.name}`,
           areaId: area.id,
           organizationId: org?.id ?? province.id,
           declaredCapacity: Math.round(between(80, 600)),
@@ -215,12 +261,14 @@ async function run() {
     const locTypes = ['KHO-TONG', 'KHO-LUONG', 'KHO-NHIEN', 'KHO-KT'];
     const locs: StorageLocation[] = [];
     for (let i = 0; i < 12; i++) {
+      const c = areaCoord.get(pick(areas).id) ?? BASE;
       locs.push(
         await locationRepo.save(
           locationRepo.create({
             code: `KHO-${String(i + 1).padStart(3, '0')}`,
-            name: `Kho ${pick(['Hậu cần', 'Kỹ thuật', 'Dự trữ', 'Trung tâm'])} ${i + 1} (giả lập)`,
+            name: `Kho ${pick(['Hậu cần', 'Kỹ thuật', 'Dự trữ', 'Trung tâm'])} ${i + 1}`,
             type: pick(locTypes),
+            location: point(c.lng + between(-0.02, 0.02), c.lat + between(-0.02, 0.02)),
             status: 'ACTIVE',
             createdBy: authorId,
           }),
@@ -247,6 +295,37 @@ async function run() {
       }
     }
     console.log(`  + Kho: ${locs.length} · Dòng tồn kho: ${balCount}`);
+  }
+
+  // 7b) Điểm quan tâm (POI): trạm/địa danh/sở chỉ huy — để lớp POI trên bản đồ có nội dung.
+  const poiRepo = dataSource.getRepository(MapPoi);
+  if ((await poiRepo.count()) === 0 && areas.length) {
+    const poiDefs: Array<{ code: string; name: string; category: string }> = [
+      { code: 'SCH-TINH', name: 'Sở chỉ huy Bộ CHQS tỉnh', category: 'SO_CHI_HUY' },
+      { code: 'TRAM-01', name: 'Trạm kiểm soát quân sự số 1', category: 'TRAM' },
+      { code: 'TRAM-02', name: 'Trạm quân y khu vực', category: 'TRAM' },
+      { code: 'TRAM-03', name: 'Trạm xăng dầu hậu cần', category: 'TRAM' },
+      { code: 'DD-01', name: 'Kho K80', category: 'DIA_DANH' },
+      { code: 'DD-02', name: 'Thao trường huấn luyện', category: 'DIA_DANH' },
+    ];
+    for (const d of poiDefs) {
+      const area = pick(areas);
+      const c = areaCoord.get(area.id) ?? BASE;
+      await poiRepo.save(
+        poiRepo.create({
+          code: d.code,
+          name: d.name,
+          category: d.category,
+          areaId: area.id,
+          provinceCode: area.provinceCode ?? null,
+          location: point(c.lng + between(-0.03, 0.03), c.lat + between(-0.03, 0.03)),
+          source: 'seed',
+          status: 'ACTIVE',
+          createdBy: authorId,
+        }),
+      );
+    }
+    console.log(`  + POI (trạm/địa danh): ${poiDefs.length}`);
   }
 
   // 8) Đợt kiểm kê mẫu (đã phát hành OPEN) để dựng phiếu kiểm kê
