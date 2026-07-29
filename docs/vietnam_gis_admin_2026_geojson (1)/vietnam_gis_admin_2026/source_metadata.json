@@ -1,0 +1,14 @@
+{
+  "dataset_effective_date": "2026-04-30",
+  "catalog_version": "2026-07-12",
+  "generated_at": "2026-07-29T17:06:00+07:00",
+  "catalog_source": "https://github.com/thanglequoc/vietnamese-provinces-database",
+  "catalog_source_archive_page": "https://github.com/thanglequoc/vietnamese-provinces-database/blob/master/json/vn_provinces_wards_geojson_2026-07-12__19_50_51.zip",
+  "catalog_source_archive_raw": "https://raw.githubusercontent.com/thanglequoc/vietnamese-provinces-database/master/json/vn_provinces_wards_geojson_2026-07-12__19_50_51.zip",
+  "province_geometry_source": "https://huggingface.co/datasets/tmquan/sapnhap-bando-vn",
+  "province_geometry_license": "CC BY-NC 4.0",
+  "catalog_repository_license": "MIT",
+  "crs": "EPSG:4326",
+  "coordinate_order": "longitude,latitude",
+  "legal_reference_note": "Catalog reflects 30/2026/QH16 and 237/NQ-UBTVQH16 changes effective 2026-04-30 as represented by the source release."
+}
