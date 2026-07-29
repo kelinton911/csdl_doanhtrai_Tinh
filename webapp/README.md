@@ -17,6 +17,12 @@ Vite proxy `/api` → backend. Đổi cổng backend qua env khi chạy:
 
 Tài khoản demo (chỉ DEV): `admin` · `chihuy` · `hckt` · `xa01` · `kiemduyet` — mật khẩu `admin@123`.
 
+### Cấu hình (env)
+
+Sao chép `.env.example` → `.env` khi cần ghi đè. Biến `VITE_*` được nhúng vào bundle client
+(không đặt bí mật). Lớp nền bản đồ mặc định là OpenStreetMap; trên hạ tầng nội bộ đặt
+`VITE_TILE_URL` / `VITE_TILE_ATTRIBUTION` trỏ tile server nội bộ (ROADMAP §5.2) — không cần sửa mã.
+
 ## Kiến trúc
 
 - `src/lib/` — `api.ts` (axios + problem+json + correlation id + Bearer), `auth.tsx` (JWT trong

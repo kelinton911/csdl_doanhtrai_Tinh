@@ -63,4 +63,13 @@ Nâng FE lên chuẩn production theo hồ sơ thiết kế trên 4 nhóm. Trạ
 - [x] T4 — Thêm/sửa/decommission công trình; tạo kho + xem sổ kho sau nhập/xuất
 - [x] T5 — Tạo & mở đợt kiểm kê; so sánh phương án; search-within; chi tiết audit
 - [x] T6 — Không hồi quy nghiệp vụ bất biến: no-edit-approved (409), tách nhiệm vụ (403), tồn âm (INV-001)
-- [~] T7 — Backend Jest 8/8 PASS (data-scope + no-edit-approved/self-approve). Playwright UI e2e CHƯA chạy; thay bằng e2e mức API-contract (curl khớp body FE) đã đạt.
+- [x] T7 — Backend Jest 8/8 PASS (data-scope + no-edit-approved/self-approve). **Playwright UI e2e 5/5 PASS** — quan sát qua stack sống trong container (`npm run verify:e2e`: db ephemeral + minio + backend migrate+seed + Playwright). Log: "5 passed (7.0s)" · "E2E PASS (5 luồng nghiệp vụ)". Đã thay thế e2e mức API-contract tạm thời.
+
+## Đợt hoàn thiện tiếp Frontend (2026-07-29, WS1–WS4)
+Sau khi xác nhận độ phủ FE↔BE gần trọn vẹn, đợt này đóng khoảng trống chất lượng/kiểm chứng/PROD. Trạng thái: `[x]` = đã code + tsc/build PASS + (WS1) quan sát e2e xanh.
+- [x] WS1 — Kiểm chứng E2E xanh: chạy `npm run verify:e2e`, quan sát **5/5 luồng PASS** qua stack sống (đóng T7). Chạy lại sau các sửa đổi WS2–WS4 để chống hồi quy.
+- [x] WS2 — Vá lỗi FE: thay bộ chọn "Phạm vi dữ liệu" ở topbar (control trang trí, không handler) bằng **chip read-only** hiển thị phạm vi thật của tài khoản (`lib/scope.ts` mirror `common/data-scope.ts`; BE bổ sung `dataScopes` vào profile login/refresh). Xóa dead code `pages/Placeholder.tsx`.
+- [x] WS3 — PROD-readiness FE: tách lớp nền bản đồ ra `lib/mapConfig.ts` đọc `VITE_TILE_URL`/`VITE_TILE_ATTRIBUTION` (mặc định OSM; PROD trỏ tile nội bộ — ROADMAP §5.2); thêm `webapp/.env.example` + ghi chú README; hardening Vite build (`sourcemap:false`, `manualChunks` tách leaflet/charts → bundle chính 310KB, leaflet 289KB, charts 182KB).
+- [x] WS4 — Độ sâu UX: modal chi tiết sửa chữa lấy bản mới nhất `GET /maintenance-requests/:id` khi mở (query cache là nguồn duy nhất, action ghi thẳng vào cache); tiện ích `lib/csv.ts` + nút **Xuất CSV** (BOM UTF-8) trên Vật chất/Doanh trại/Tồn kho, xuất toàn bộ kết quả đang lọc.
+
+> Kiểm chứng: `cd webapp && npx tsc --noEmit` PASS · `npm run build` PASS (221 modules) · `cd backend && npx tsc --noEmit` PASS.

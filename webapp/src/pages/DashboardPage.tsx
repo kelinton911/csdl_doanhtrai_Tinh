@@ -5,6 +5,7 @@ import { Doughnut, Bar } from 'react-chartjs-2';
 import { MapContainer, TileLayer, CircleMarker, Tooltip, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { api } from '../lib/api';
+import { TILE_URL, TILE_ATTRIBUTION } from '../lib/mapConfig';
 import { toast } from '../lib/toast';
 import { useAuth, ROLE_LABEL } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
@@ -134,7 +135,7 @@ export function DashboardPage() {
             </div>
             <div style={{ height: '42vh', minHeight: 300 }}>
               <MapContainer center={mapCenter} zoom={9} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
-                <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TileLayer attribution={TILE_ATTRIBUTION} url={TILE_URL} />
                 {points.map((f) => {
                   const [lng, lat] = f.geometry!.coordinates;
                   return (

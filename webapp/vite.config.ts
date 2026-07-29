@@ -12,6 +12,19 @@ export default defineConfig({
   // Tránh nạp React trùng lặp (react-chartjs-2 báo lỗi useRef null nếu không dedupe).
   resolve: { dedupe: ['react', 'react-dom'] },
   optimizeDeps: { include: ['react', 'react-dom', 'chart.js', 'react-chartjs-2'] },
+  build: {
+    // PROD nội bộ: không phát hành source map (giảm lộ mã nguồn + kích thước).
+    sourcemap: false,
+    // Tách thư viện nặng khỏi bundle chính để tải nhanh và cache tốt hơn.
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          leaflet: ['leaflet', 'react-leaflet'],
+          charts: ['chart.js', 'react-chartjs-2'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     // host để container publish được ra ngoài (0.0.0.0). Vô hại khi chạy local.

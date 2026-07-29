@@ -14,6 +14,9 @@ export interface Profile {
   fullName: string;
   roles: string[];
   organizationId: string | null;
+  // Phạm vi dữ liệu được gán (type: 'AREA' | 'ORGANIZATION'). Chỉ để hiển thị chỉ báo;
+  // việc lọc dữ liệu thực thi ở tầng server (backend common/data-scope.ts).
+  dataScopes?: Array<{ type: string; refId: string }>;
 }
 
 export const ROLE_LABEL: Record<string, string> = {

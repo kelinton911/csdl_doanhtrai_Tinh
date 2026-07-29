@@ -35,3 +35,26 @@ Cả 8 mục đã hiện thực ở BE (migration `FeatureUnlock1753000012000`: 
 - `cd webapp && npx tsc --noEmit` → PASS.
 - `cd webapp && npm run build` (tsc + vite build) → PASS (217 modules).
 - Kiểm thử chạy thật (đăng nhập, các luồng mới) — xem mục "Kiểm thử end-to-end" trong checklist.
+
+## Bổ sung 2026-07-29 — Hoàn thiện tiếp (WS1–WS4)
+
+Sau khi đối chiếu 1-1 xác nhận độ phủ FE↔BE gần trọn vẹn (mọi module có UI thật, không còn màn `Placeholder`,
+không TODO/mock; các endpoint "chưa gọi" chỉ là GET chi tiết đơn lẻ FE thay bằng dữ liệu list), đợt này đóng
+khoảng trống chất lượng/kiểm chứng/PROD:
+
+- **WS1 — Kiểm chứng E2E xanh:** chạy `npm run verify:e2e` (stack sống trong container: db ephemeral + minio +
+  backend migrate+seed + Playwright). Quan sát **5/5 luồng PASS** ("5 passed", "E2E PASS") → cập nhật T7 `[~]`→`[x]`.
+  Chạy lại sau WS2–WS4 để chống hồi quy.
+- **WS2 — Vá lỗi FE:** bộ chọn "Phạm vi dữ liệu" ở topbar vốn là control trang trí (không `onChange`) → thay bằng
+  **chip read-only** phản ánh phạm vi thật của tài khoản. Thêm `webapp/src/lib/scope.ts` (mirror hằng
+  `PROVINCE_WIDE` của `backend/src/common/data-scope.ts`); BE bổ sung `dataScopes` vào profile login/refresh
+  (additive, không đổi nghiệp vụ — lọc vẫn thực thi ở server). Xóa dead code `pages/Placeholder.tsx`.
+- **WS3 — PROD-readiness FE:** `lib/mapConfig.ts` đọc `VITE_TILE_URL`/`VITE_TILE_ATTRIBUTION` (mặc định OSM cho
+  DEV; PROD trỏ tile server nội bộ — ROADMAP §5.2), thay 2 `TileLayer` (Map + Dashboard); thêm `webapp/.env.example`
+  + ghi chú README; hardening Vite build: `sourcemap:false`, `manualChunks` tách leaflet/charts.
+- **WS4 — Độ sâu UX:** modal chi tiết sửa chữa dùng `GET /maintenance-requests/:id` khi mở (query cache là nguồn
+  duy nhất; action ghi thẳng vào cache → luôn hiển thị trạng thái mới nhất); tiện ích `lib/csv.ts` (BOM UTF-8) +
+  nút **Xuất CSV** trên Vật chất/Doanh trại/Tồn kho (xuất toàn bộ kết quả đang lọc; không thay module Báo cáo snapshot).
+
+**Kiểm chứng bổ sung:** `webapp tsc --noEmit` PASS · `webapp npm run build` PASS (**221 modules**; chia chunk
+leaflet 289KB / charts 182KB / index 310KB) · `backend tsc --noEmit` PASS · e2e 5/5 PASS (WS1).

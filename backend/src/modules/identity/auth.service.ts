@@ -124,6 +124,8 @@ export class AuthService {
         fullName: user.fullName,
         roles: user.roles,
         organizationId: user.organizationId,
+        // Phạm vi dữ liệu đã gán — để FE hiển thị chỉ báo read-only (lọc vẫn thực thi ở server).
+        dataScopes: user.dataScopes ?? [],
       },
     };
   }

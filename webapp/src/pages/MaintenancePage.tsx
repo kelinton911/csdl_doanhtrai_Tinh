@@ -80,16 +80,25 @@ const ACT_LABEL: Record<string, string> = { submit: 'Đã trình thẩm định.
 
 function ReqDetailModal({ req, onClose, onChanged }: { req: Req; onClose: () => void; onChanged: () => void }) {
   const { profile, hasRole } = useAuth();
+  const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-  const [cur, setCur] = useState(req);
   const [evidence, setEvidence] = useState(false);
   const [assignee, setAssignee] = useState(req.assigneeName ?? '');
+  // Lấy bản chi tiết mới nhất từ server (GET /maintenance-requests/:id) khi mở modal — phản ánh
+  // đúng trạng thái/assignee/nghiệm thu hiện tại, kể cả khi người khác vừa thay đổi. Hiển thị ngay
+  // dữ liệu dòng list (initialData) rồi làm mới. Các hành động ghi thẳng kết quả vào cache.
+  const detailQ = useQuery({
+    queryKey: ['maint-request', req.id],
+    queryFn: async () => (await api.get(`/maintenance-requests/${req.id}`)).data as Req,
+    initialData: req,
+  });
+  const cur = detailQ.data ?? req;
   const act = useMutation({
     mutationFn: async (action: string) => {
       const body = action === 'accept' ? { note: 'Nghiệm thu đạt yêu cầu' } : action === 'start' ? { assigneeName: assignee || undefined } : {};
       return (await api.post(`/maintenance-requests/${req.id}/${action}`, body)).data as Req;
     },
-    onSuccess: (d, action) => { setCur(d); setError(null); onChanged(); toast.success(ACT_LABEL[action] ?? 'Đã cập nhật yêu cầu.'); },
+    onSuccess: (d, action) => { qc.setQueryData(['maint-request', req.id], d); setError(null); onChanged(); toast.success(ACT_LABEL[action] ?? 'Đã cập nhật yêu cầu.'); },
     onError: (e) => { setError(toProblem(e).title); toast.problem(e); },
   });
   const isCreator = profile?.id === cur.createdBy;

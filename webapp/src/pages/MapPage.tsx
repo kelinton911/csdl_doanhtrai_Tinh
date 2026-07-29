@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Tooltip, useMapEv
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import { api, toProblem } from '../lib/api';
+import { TILE_URL, TILE_ATTRIBUTION } from '../lib/mapConfig';
 import { PageHeader } from '../components/PageHeader';
 import { Skeleton, ErrorState } from '../components/States';
 import { StatusBadge } from '../components/StatusBadge';
@@ -92,10 +93,7 @@ export function MapPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 16, height: '72vh' }}>
         <div className="panel" style={{ overflow: 'hidden', position: 'relative' }}>
           <MapContainer center={center} zoom={9} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
-            <TileLayer
-              attribution="&copy; OpenStreetMap"
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            <TileLayer attribution={TILE_ATTRIBUTION} url={TILE_URL} />
             <ClickCapture onPick={(lat, lng) => { setCenter2([lat, lng]); setSearchFC(null); }} />
             {center2 && (
               <>

@@ -8,6 +8,7 @@ import { api } from '../lib/api';
 import { toast } from '../lib/toast';
 import { visibleNav } from '../lib/nav';
 import { ROLE_LABEL, useAuth } from '../lib/auth';
+import { scopeLabel } from '../lib/scope';
 import { useTheme } from '../lib/theme';
 import { dateTime } from '../lib/format';
 
@@ -242,12 +243,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div style={{ flex: 1 }} />
 
-          {/* Chọn phạm vi dữ liệu */}
-          <select className="input hide-sm" style={{ width: 'auto', maxWidth: 200 }} defaultValue="all" title="Phạm vi dữ liệu" aria-label="Phạm vi dữ liệu">
-            <option value="all">Phạm vi: Toàn tỉnh</option>
-            <option value="unit">Đơn vị trực thuộc</option>
-            <option value="commune">Xã/phường</option>
-          </select>
+          {/* Phạm vi dữ liệu THẬT của tài khoản (read-only). Việc lọc thực thi ở tầng server. */}
+          <span
+            className="hide-sm"
+            title="Phạm vi dữ liệu được gán cho tài khoản (thực thi ở máy chủ)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 12,
+              color: 'var(--color-neutral-700)',
+              background: 'var(--surface-1)',
+              border: '1px solid var(--color-neutral-300)',
+              padding: '4px 8px',
+              borderRadius: 6,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <Icon name="shield" size={13} /> Phạm vi: {scopeLabel(profile)}
+          </span>
 
           {/* Trạng thái kết nối */}
           <span

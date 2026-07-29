@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useMutation, useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { toast } from '../lib/toast';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, type Column } from '../components/DataTable';
 import { Pagination } from '../components/Pagination';
@@ -9,6 +10,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { ErrorState } from '../components/States';
 import { Icon } from '../components/Icon';
 import { num } from '../lib/format';
+import { downloadCsv, type CsvColumn } from '../lib/csv';
 
 interface Row {
   id: string;
@@ -50,6 +52,28 @@ export function BarracksListPage() {
   });
 
   const rows = (q.data?.data ?? []).filter((r) => !status || r.workflowStatus === status);
+
+  // Xuất kết quả đang lọc (theo từ khóa + trạng thái) ra CSV.
+  const exporting = useMutation({
+    mutationFn: async () => {
+      const all = (await api.get('/barracks', { params: { page: 1, size: 1000, search: search || undefined } })).data.data as Row[];
+      const filtered = all.filter((r) => !status || r.workflowStatus === status);
+      const cols: CsvColumn<Row>[] = [
+        { header: 'Mã', value: (r) => r.code },
+        { header: 'Tên doanh trại', value: (r) => r.name },
+        { header: 'Xã/phường', value: (r) => r.areaName ?? '' },
+        { header: 'Đơn vị quản lý', value: (r) => r.orgName ?? '' },
+        { header: 'Diện tích (m2)', value: (r) => r.landArea },
+        { header: 'Số công trình', value: (r) => r.facilityCount },
+        { header: 'Tiếp nhận', value: (r) => r.declaredCapacity },
+        { header: 'Trạng thái', value: (r) => r.workflowStatus },
+      ];
+      downloadCsv(`doanh-trai-${new Date().toISOString().slice(0, 10)}`, filtered, cols);
+      return filtered.length;
+    },
+    onSuccess: (n) => toast.success(`Đã xuất ${n} dòng ra CSV.`),
+    onError: (e) => toast.problem(e, 'Không xuất được CSV'),
+  });
 
   const columns: Column<Row>[] = [
     { key: 'code', header: 'Mã', render: (r) => r.code, mono: true, width: 90 },
@@ -103,6 +127,10 @@ export function BarracksListPage() {
             </button>
           ))}
         </div>
+        <div style={{ flex: 1 }} />
+        <button className="btn btn-sm" disabled={exporting.isPending} onClick={() => exporting.mutate()} title="Xuất kết quả đang lọc ra CSV">
+          <Icon name="download" size={14} /> {exporting.isPending ? 'Đang xuất…' : 'Xuất CSV'}
+        </button>
       </div>
 
       {q.isError ? (

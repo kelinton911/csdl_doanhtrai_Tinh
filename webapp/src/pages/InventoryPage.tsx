@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { api, toProblem } from '../lib/api';
+import { toast } from '../lib/toast';
 import { useAuth } from '../lib/auth';
 import { useCatalog } from '../lib/catalogs';
 import { PageHeader } from '../components/PageHeader';
@@ -10,6 +11,7 @@ import { Modal } from '../components/Modal';
 import { Icon } from '../components/Icon';
 import { ErrorState } from '../components/States';
 import { num, dateTime } from '../lib/format';
+import { downloadCsv, type CsvColumn } from '../lib/csv';
 
 interface Txn { id: string; type: string; quantity: string; balanceAfter: string; documentRef: string | null; note: string | null; occurredAt: string }
 
@@ -46,6 +48,26 @@ export function InventoryPage() {
     queryKey: ['balances', page, loc],
     queryFn: async () => (await api.get('/inventory/balances', { params: { page, size, storageLocationId: loc || undefined } })).data as { data: Balance[]; meta: { total: number } },
     placeholderData: keepPreviousData,
+  });
+
+  // Xuất tồn kho đang lọc (theo kho) ra CSV.
+  const exporting = useMutation({
+    mutationFn: async () => {
+      const rows = (await api.get('/inventory/balances', { params: { page: 1, size: 1000, storageLocationId: loc || undefined } })).data.data as Balance[];
+      const cols: CsvColumn<Balance>[] = [
+        { header: 'Mã VC', value: (r) => r.materialCode },
+        { header: 'Vật chất', value: (r) => r.materialName },
+        { header: 'Kho', value: (r) => r.locationName },
+        { header: 'ĐVT', value: (r) => r.unitCode ?? '' },
+        { header: 'Tồn sổ', value: (r) => r.onHand },
+        { header: 'Kiểm kê', value: (r) => r.lastCounted ?? '' },
+        { header: 'Chênh lệch', value: (r) => r.variance ?? '' },
+      ];
+      downloadCsv(`ton-kho-${new Date().toISOString().slice(0, 10)}`, rows, cols);
+      return rows.length;
+    },
+    onSuccess: (n) => toast.success(`Đã xuất ${n} dòng ra CSV.`),
+    onError: (e) => toast.problem(e, 'Không xuất được CSV'),
   });
 
   const columns: Column<Balance>[] = [
@@ -85,6 +107,10 @@ export function InventoryPage() {
         <span className="muted" style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
           <Icon name="alert" size={14} /> Dòng có chênh lệch được tô màu để dễ phát hiện bất thường.
         </span>
+        <div style={{ flex: 1 }} />
+        <button className="btn" disabled={exporting.isPending} onClick={() => exporting.mutate()} title="Xuất tồn kho đang lọc ra CSV">
+          <Icon name="download" size={15} /> {exporting.isPending ? 'Đang xuất…' : 'Xuất CSV'}
+        </button>
       </div>
 
       {q.isError ? <ErrorState error={q.error} /> : (

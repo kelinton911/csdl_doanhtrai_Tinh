@@ -11,6 +11,7 @@ import { Modal } from '../components/Modal';
 import { Icon } from '../components/Icon';
 import { ErrorState, Skeleton, EmptyState } from '../components/States';
 import { dateTime } from '../lib/format';
+import { downloadCsv, type CsvColumn } from '../lib/csv';
 
 // M03 — Danh mục vật chất (UC-07): tạo (nháp) → sửa khi chưa phát hành → phát hành (bất biến).
 interface Material {
@@ -44,6 +45,26 @@ export function MaterialsPage() {
   });
   const publish = useMutation({ mutationFn: async (id: string) => api.post(`/materials/${id}/publish`), onSuccess: () => { qc.invalidateQueries({ queryKey: ['materials'] }); toast.success('Đã phát hành vật chất.'); }, onError: (e) => toast.problem(e, 'Không phát hành được') });
 
+  // Xuất toàn bộ kết quả đang lọc ra CSV (tiện ích xem nhanh; báo cáo chính thức dùng module Báo cáo).
+  const exporting = useMutation({
+    mutationFn: async () => {
+      const rows = (await api.get('/materials', { params: { page: 1, size: 1000, search: search || undefined, category: category || undefined } })).data.data as Material[];
+      const cols: CsvColumn<Material>[] = [
+        { header: 'Mã VC', value: (m) => m.code },
+        { header: 'Tên vật chất', value: (m) => m.name },
+        { header: 'Nhóm', value: (m) => cat.label(m.categoryCode) },
+        { header: 'ĐVT', value: (m) => unit.label(m.unitCode) },
+        { header: 'Quy cách', value: (m) => m.spec ?? '' },
+        { header: 'Phiên bản', value: (m) => m.version },
+        { header: 'Trạng thái', value: (m) => m.status },
+      ];
+      downloadCsv(`vat-chat-${new Date().toISOString().slice(0, 10)}`, rows, cols);
+      return rows.length;
+    },
+    onSuccess: (n) => toast.success(`Đã xuất ${n} dòng ra CSV.`),
+    onError: (e) => toast.problem(e, 'Không xuất được CSV'),
+  });
+
   const columns: Column<Material>[] = [
     { key: 'code', header: 'Mã VC', render: (m) => m.code, mono: true, width: 110 },
     { key: 'name', header: 'Tên vật chất', render: (m) => <span style={{ fontWeight: 600 }}>{m.name}</span> },
@@ -76,6 +97,10 @@ export function MaterialsPage() {
           <option value="">Tất cả nhóm</option>
           {cat.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
         </select>
+        <div style={{ flex: 1 }} />
+        <button className="btn" disabled={exporting.isPending} onClick={() => exporting.mutate()} title="Xuất kết quả đang lọc ra CSV">
+          <Icon name="download" size={15} /> {exporting.isPending ? 'Đang xuất…' : 'Xuất CSV'}
+        </button>
       </div>
 
       {q.isError ? <ErrorState error={q.error} /> : (
