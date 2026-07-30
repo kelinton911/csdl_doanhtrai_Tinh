@@ -6,23 +6,37 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { StorageLocation } from './entities/storage-location.entity';
+import { StorageLocationRevision } from './entities/storage-location-revision.entity';
 import { InventoryTransaction, TxType } from './entities/inventory-transaction.entity';
 import { StockBalance } from './entities/stock-balance.entity';
 import {
   AdjustmentDto,
   CreateStorageLocationDto,
   CreateTransactionDto,
+  ListStorageLocationsQuery,
+  StorageReviewDto,
+  UpdateStorageLocationDto,
 } from './dto/inventory.dto';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { barracksScope } from '../../common/data-scope';
+import { WorkflowStatus } from '../../common/workflow';
+import {
+  assertEditable,
+  assertNotSelfApprove,
+  assertPendingReview,
+  transitionWithRevision,
+} from '../../common/workflow-transition';
 
 // M06 — Inventory. UC-08: tồn kho và vị trí lưu giữ. Sổ kho bất biến; điều chỉnh bằng
-// bút toán mới; không cho tồn âm nếu không có quyền ngoại lệ.
+// bút toán mới; không cho tồn âm nếu không có quyền ngoại lệ. Kho có workflow duyệt.
 @Injectable()
 export class InventoryService {
   constructor(
     @InjectRepository(StorageLocation)
     private readonly locations: Repository<StorageLocation>,
+    @InjectRepository(StorageLocationRevision)
+    private readonly locationRevisions: Repository<StorageLocationRevision>,
     @InjectRepository(InventoryTransaction)
     private readonly txns: Repository<InventoryTransaction>,
     @InjectRepository(StockBalance)
@@ -31,13 +45,53 @@ export class InventoryService {
   ) {}
 
   // ------- Kho -------
-  async listLocations(q: PaginationQuery) {
-    const [data, total] = await this.locations.findAndCount({
-      order: { code: 'ASC' },
-      skip: q.skip,
-      take: q.size,
-    });
+  // Danh sách kho kèm tên xã + trạng thái workflow, lọc theo phạm vi dữ liệu (server-side).
+  async listLocations(q: ListStorageLocationsQuery, user?: AuthUser) {
+    const scope = barracksScope(user);
+    const qb = this.locations
+      .createQueryBuilder('l')
+      .leftJoin('administrative_areas', 'a', 'a.id = l.area_id')
+      .leftJoin('barracks', 'b', 'b.id = l.barracks_id')
+      .select('l.id', 'id')
+      .addSelect('l.code', 'code')
+      .addSelect('l.name', 'name')
+      .addSelect('l.type', 'type')
+      .addSelect('l.barracks_id', 'barracksId')
+      .addSelect('l.area_id', 'areaId')
+      .addSelect('l.workflow_status', 'workflowStatus')
+      .addSelect('l.status', 'status')
+      .addSelect('l.updated_at', 'updatedAt')
+      .addSelect('a.name', 'areaName')
+      .addSelect('b.name', 'barracksName')
+      .orderBy('l.code', 'ASC')
+      .offset(q.skip)
+      .limit(q.size);
+    const countQb = this.locations.createQueryBuilder('l');
+
+    if (q.search) {
+      qb.andWhere('(l.code ILIKE :s OR l.name ILIKE :s)', { s: `%${q.search}%` });
+      countQb.andWhere('(l.code ILIKE :s OR l.name ILIKE :s)', { s: `%${q.search}%` });
+    }
+    if (q.status) {
+      qb.andWhere('l.workflow_status = :st', { st: q.status });
+      countQb.andWhere('l.workflow_status = :st', { st: q.status });
+    }
+    if (scope) {
+      const cond = '(l.area_id = ANY(:areaIds::uuid[]) OR l.organization_id = :orgId)';
+      const params = { areaIds: scope.areaIds, orgId: scope.organizationId };
+      qb.andWhere(cond, params);
+      countQb.andWhere(cond, params);
+    }
+
+    const data = await qb.getRawMany();
+    const total = await countQb.getCount();
     return paginated(data, total, q);
+  }
+
+  async getLocation(id: string): Promise<StorageLocation> {
+    const found = await this.locations.findOne({ where: { id } });
+    if (!found) throw new NotFoundException('DATA-001: Không tìm thấy kho');
+    return found;
   }
 
   async createLocation(dto: CreateStorageLocationDto, user: AuthUser) {
@@ -49,9 +103,76 @@ export class InventoryService {
         name: dto.name,
         type: dto.type ?? null,
         barracksId: dto.barracksId ?? null,
+        areaId: dto.areaId ?? null,
+        organizationId: dto.organizationId ?? user.organizationId ?? null,
         status: 'ACTIVE',
+        workflowStatus: WorkflowStatus.DRAFT,
         createdBy: user.sub,
+        updatedBy: user.sub,
       }),
+    );
+  }
+
+  async updateLocation(id: string, dto: UpdateStorageLocationDto, user: AuthUser) {
+    const l = await this.getLocation(id);
+    assertEditable(l.workflowStatus);
+    if (dto.name !== undefined) l.name = dto.name;
+    if (dto.type !== undefined) l.type = dto.type;
+    if (dto.barracksId !== undefined) l.barracksId = dto.barracksId;
+    if (dto.areaId !== undefined) l.areaId = dto.areaId;
+    if (dto.organizationId !== undefined) l.organizationId = dto.organizationId;
+    l.updatedBy = user.sub;
+    return this.locations.save(l);
+  }
+
+  // Xã gửi duyệt hồ sơ kho — DRAFT/CHANGES_REQUESTED → PENDING_REVIEW.
+  async submitLocation(id: string, user: AuthUser) {
+    const l = await this.getLocation(id);
+    assertEditable(l.workflowStatus, 'gửi duyệt');
+    return this.transitionLocation(l, WorkflowStatus.PENDING_REVIEW, user);
+  }
+
+  // Chỉ huy xã duyệt — PENDING_REVIEW → APPROVED (người lập không tự duyệt).
+  async approveLocation(id: string, user: AuthUser) {
+    const l = await this.getLocation(id);
+    assertPendingReview(l.workflowStatus);
+    assertNotSelfApprove(l.createdBy, user.sub);
+    return this.transitionLocation(l, WorkflowStatus.APPROVED, user);
+  }
+
+  async requestLocationChanges(id: string, _dto: StorageReviewDto, user: AuthUser) {
+    const l = await this.getLocation(id);
+    assertPendingReview(l.workflowStatus, 'yêu cầu bổ sung');
+    return this.transitionLocation(l, WorkflowStatus.CHANGES_REQUESTED, user);
+  }
+
+  async listLocationRevisions(id: string) {
+    await this.getLocation(id);
+    return this.locationRevisions.find({
+      where: { storageLocationId: id },
+      order: { revisionNo: 'DESC' },
+    });
+  }
+
+  private async transitionLocation(l: StorageLocation, to: WorkflowStatus, user: AuthUser) {
+    return transitionWithRevision(
+      {
+        dataSource: this.dataSource,
+        entityTarget: StorageLocation,
+        revisionTarget: StorageLocationRevision,
+        fkColumn: 'storageLocationId',
+        buildPayload: (saved) => ({
+          code: saved.code,
+          name: saved.name,
+          type: saved.type,
+          barracksId: saved.barracksId,
+          areaId: saved.areaId,
+          organizationId: saved.organizationId,
+        }),
+      },
+      l,
+      to,
+      user.sub,
     );
   }
 

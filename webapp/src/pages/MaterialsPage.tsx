@@ -8,6 +8,9 @@ import { DataTable, type Column } from '../components/DataTable';
 import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
+import { AssetCatalogPicker } from '../components/AssetCatalogPicker';
+import type { AssetNode } from '../lib/assetCatalog';
+import { displayName, shortPath } from '../lib/assetCatalog';
 import { Icon } from '../components/Icon';
 import { ErrorState, Skeleton, EmptyState } from '../components/States';
 import { dateTime } from '../lib/format';
@@ -200,6 +203,8 @@ function VersionsModal({ material, onClose }: { material: Material; onClose: () 
 }
 
 // Tạo mới (không có id) hoặc sửa (có id → nạp chi tiết GET /materials/:id).
+// Tạo mới: BẮT BUỘC chọn từ danh mục chuẩn BQP (chế độ 'catalog'); ngoại lệ vật chất
+// ngành khác thì chuyển 'out-of-scope' để nhập tay (đánh dấu OUT_OF_SCOPE).
 function MaterialModal({ id, onClose, onDone }: { id?: string; onClose: () => void; onDone: () => void }) {
   const editing = !!id;
   const cat = useCatalog('material-category');
@@ -207,6 +212,9 @@ function MaterialModal({ id, onClose, onDone }: { id?: string; onClose: () => vo
   const grade = useCatalog('quality-grade');
   const [error, setError] = useState<string | null>(null);
   const [seeded, setSeeded] = useState(!editing);
+  const [mode, setMode] = useState<'catalog' | 'out-of-scope'>('catalog');
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [picked, setPicked] = useState<AssetNode | null>(null);
   const [f, setF] = useState({ code: '', name: '', categoryCode: '', unitCode: '', spec: '', qualityGrade: '' });
 
   const detail = useQuery({ queryKey: ['material', id], queryFn: async () => (await api.get(`/materials/${id}`)).data as Material, enabled: editing });
@@ -218,29 +226,94 @@ function MaterialModal({ id, onClose, onDone }: { id?: string; onClose: () => vo
 
   const save = useMutation({
     mutationFn: async () => {
-      const body = { name: f.name, categoryCode: f.categoryCode || undefined, unitCode: f.unitCode || undefined, spec: f.spec || undefined, qualityGrade: f.qualityGrade || undefined };
-      return editing ? api.put(`/materials/${id}`, body) : api.post('/materials', { code: f.code, ...body });
+      if (editing) {
+        const body = { name: f.name, categoryCode: f.categoryCode || undefined, unitCode: f.unitCode || undefined, spec: f.spec || undefined, qualityGrade: f.qualityGrade || undefined };
+        return api.put(`/materials/${id}`, body);
+      }
+      if (mode === 'catalog') {
+        if (!picked) throw new Error('Chưa chọn vật chất từ danh mục chuẩn');
+        return api.post('/materials', {
+          code: picked.code,
+          name: displayName(picked.name),
+          assetCode: picked.code,
+          unitCode: picked.unitCode || undefined,
+          categoryCode: f.categoryCode || undefined,
+          spec: f.spec || undefined,
+          qualityGrade: f.qualityGrade || undefined,
+        });
+      }
+      // Ngoài phạm vi ngành Doanh trại — nhập tay, đánh dấu OUT_OF_SCOPE.
+      return api.post('/materials', {
+        code: f.code,
+        name: f.name,
+        outOfScope: true,
+        categoryCode: f.categoryCode || undefined,
+        unitCode: f.unitCode || undefined,
+        spec: f.spec || undefined,
+        qualityGrade: f.qualityGrade || undefined,
+      });
     },
     onSuccess: () => { toast.success(editing ? 'Đã lưu vật chất.' : 'Đã tạo vật chất (nháp).'); onDone(); },
-    onError: (e) => setError(toProblem(e).title),
+    onError: (e) => setError(toProblem(e).title ?? (e as Error).message),
   });
+
+  // Điều kiện bật nút lưu theo chế độ.
+  const canSave = editing
+    ? f.name.length >= 2
+    : mode === 'catalog'
+      ? !!picked
+      : f.code.length >= 2 && f.name.length >= 2;
 
   return (
     <Modal open title={editing ? `Sửa vật chất · ${f.code}` : 'Thêm vật chất'} onClose={onClose} width={560}>
       {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {!editing && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className={`btn btn-sm${mode === 'catalog' ? ' btn-primary' : ''}`} onClick={() => setMode('catalog')}>Từ danh mục chuẩn BQP</button>
+            <button className={`btn btn-sm${mode === 'out-of-scope' ? ' btn-primary' : ''}`} onClick={() => setMode('out-of-scope')}>Ngoài phạm vi ngành</button>
+          </div>
+        )}
+
+        {!editing && mode === 'catalog' ? (
+          <div style={{ border: '1px solid var(--color-neutral-300)', borderRadius: 8, padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {picked ? (
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700 }}>{displayName(picked.name)}</div>
+                  <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{shortPath(picked.pathNames)}</div>
+                  <div className="num muted" style={{ fontSize: 12, marginTop: 2 }}>{picked.code}{picked.unitRaw ? ` · ĐVT: ${picked.unitRaw}` : ''}</div>
+                </div>
+                <button className="btn btn-sm" onClick={() => setPickerOpen(true)}><Icon name="edit" size={13} /> Đổi</button>
+              </div>
+            ) : (
+              <button className="btn btn-primary" onClick={() => setPickerOpen(true)}><Icon name="search" size={15} /> Chọn vật chất từ danh mục chuẩn</button>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ flex: 1 }}><label className="field-label">Mã vật chất</label><input className="input" value={f.code} disabled={editing} onChange={(e) => setF((s) => ({ ...s, code: e.target.value }))} /></div>
+            <div style={{ flex: 2 }}><label className="field-label">Tên</label><input className="input" value={f.name} onChange={(e) => setF((s) => ({ ...s, name: e.target.value }))} /></div>
+          </div>
+        )}
+
         <div style={{ display: 'flex', gap: 10 }}>
-          <div style={{ flex: 1 }}><label className="field-label">Mã vật chất</label><input className="input" value={f.code} disabled={editing} onChange={(e) => setF((s) => ({ ...s, code: e.target.value }))} /></div>
-          <div style={{ flex: 2 }}><label className="field-label">Tên</label><input className="input" value={f.name} onChange={(e) => setF((s) => ({ ...s, name: e.target.value }))} /></div>
-        </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <div style={{ flex: 1 }}><label className="field-label">Nhóm</label><select className="input" value={f.categoryCode} onChange={(e) => setF((s) => ({ ...s, categoryCode: e.target.value }))}><option value="">—</option>{cat.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
-          <div style={{ flex: 1 }}><label className="field-label">Đơn vị tính</label><select className="input" value={f.unitCode} onChange={(e) => setF((s) => ({ ...s, unitCode: e.target.value }))}><option value="">—</option>{unit.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
+          <div style={{ flex: 1 }}><label className="field-label">Nhóm ngành</label><select className="input" value={f.categoryCode} onChange={(e) => setF((s) => ({ ...s, categoryCode: e.target.value }))}><option value="">—</option>{cat.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
+          {/* ĐVT chỉ nhập tay ở chế độ ngoài phạm vi/sửa; chế độ danh mục lấy ĐVT từ mã chuẩn. */}
+          {!(mode === 'catalog' && !editing) && (
+            <div style={{ flex: 1 }}><label className="field-label">Đơn vị tính</label><select className="input" value={f.unitCode} onChange={(e) => setF((s) => ({ ...s, unitCode: e.target.value }))}><option value="">—</option>{unit.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
+          )}
           <div style={{ flex: 1 }}><label className="field-label">Cấp chất lượng</label><select className="input" value={f.qualityGrade} onChange={(e) => setF((s) => ({ ...s, qualityGrade: e.target.value }))}><option value="">—</option>{grade.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
         </div>
         <div><label className="field-label">Quy cách kỹ thuật</label><input className="input" value={f.spec} onChange={(e) => setF((s) => ({ ...s, spec: e.target.value }))} /></div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={(!editing && f.code.length < 2) || f.name.length < 2 || save.isPending} onClick={() => save.mutate()}>{editing ? 'Lưu thay đổi' : 'Tạo (nháp)'}</button></div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={!canSave || save.isPending} onClick={() => save.mutate()}>{editing ? 'Lưu thay đổi' : 'Tạo (nháp)'}</button></div>
       </div>
+
+      <AssetCatalogPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(n) => { setPicked(n); setPickerOpen(false); }}
+      />
     </Modal>
   );
 }

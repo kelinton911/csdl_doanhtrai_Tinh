@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsInt,
   IsObject,
   IsOptional,
@@ -119,6 +120,19 @@ export class CreateMaterialDto {
   @IsInt()
   @Min(0)
   defaultScale?: number;
+
+  // Mã trong danh mục chuẩn BQP (asset_catalog_items.code, miền MATERIAL).
+  // Có mã này = vật chất được chọn từ danh mục gốc (assetCodeStatus='MAPPED').
+  @ApiPropertyOptional({ example: 'R05.01.01.00.00.001' })
+  @IsOptional()
+  @IsString()
+  assetCode?: string;
+
+  // Đánh dấu vật chất ngành khác (không có trong phụ lục ngành Doanh trại) — cho nhập tay.
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  outOfScope?: boolean;
 
   @ApiPropertyOptional({ type: Object })
   @IsOptional()

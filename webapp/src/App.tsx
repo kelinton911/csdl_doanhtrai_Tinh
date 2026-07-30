@@ -8,7 +8,10 @@ import { BarracksListPage } from './pages/BarracksListPage';
 import { BarracksFormPage } from './pages/BarracksFormPage';
 import { BarracksDetailPage } from './pages/BarracksDetailPage';
 import { InventoryPage } from './pages/InventoryPage';
+import { StoragePage } from './pages/StoragePage';
+import { ApprovalQueuePage } from './pages/ApprovalQueuePage';
 import { MaterialsPage } from './pages/MaterialsPage';
+import { MaterialGroupsPage } from './pages/MaterialGroupsPage';
 import { AssetCatalogPage } from './pages/AssetCatalogPage';
 import { ImportPage } from './pages/ImportPage';
 import { InspectionPage } from './pages/InspectionPage';
@@ -48,7 +51,10 @@ export default function App() {
       <Route path="/barracks/:id/edit" element={<Protected><BarracksFormPage /></Protected>} />
       <Route path="/barracks/:id" element={<Protected><BarracksDetailPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
+      <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
+      <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />
       <Route path="/materials" element={<Protected><MaterialsPage /></Protected>} />
+      <Route path="/material-groups" element={<Protected><MaterialGroupsPage /></Protected>} />
       <Route path="/asset-catalog" element={<Protected><AssetCatalogPage /></Protected>} />
       <Route path="/import" element={<Protected><ImportPage /></Protected>} />
       <Route path="/inspection" element={<Protected><InspectionPage /></Protected>} />

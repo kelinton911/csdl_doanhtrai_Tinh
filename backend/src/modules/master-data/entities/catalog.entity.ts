@@ -35,6 +35,18 @@ export class Catalog {
   @Column({ name: 'parent_code', type: 'varchar', nullable: true })
   parentCode!: string | null;
 
+  // Số thứ tự phụ lục tách khỏi tên ("V", "1", "12") — để hiển thị/sắp xếp.
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  ordinal!: string | null;
+
+  // Nguồn gốc: BQP (dẫn xuất Phụ lục) | STANDARD (ngành chuẩn) | LOCAL (đơn vị tạo).
+  @Column({ default: 'BQP' })
+  origin!: string;
+
+  // True khi người dùng đã sửa tay tên/mô tả — seeder BQP không ghi đè.
+  @Column({ name: 'user_edited', default: false })
+  userEdited!: boolean;
+
   @Column({ name: 'sort_order', type: 'int', default: 0 })
   sortOrder!: number;
 

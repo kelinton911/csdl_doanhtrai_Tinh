@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -8,6 +9,7 @@ import { Repository } from 'typeorm';
 import { Catalog } from './entities/catalog.entity';
 import { Material } from './entities/material.entity';
 import { MaterialVersion } from './entities/material-version.entity';
+import { AssetCatalogItem } from '../asset-catalog/entities/asset-catalog-item.entity';
 import {
   CreateCatalogDto,
   CreateMaterialDto,
@@ -17,6 +19,10 @@ import {
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 
+// Loại danh mục do module Nhóm ngành vật chất (/material-groups) sở hữu — chặn
+// ghi qua đường danh mục chung để tránh 2 nguồn CRUD trên cùng bảng catalogs.
+const MATERIAL_GROUP_TYPE = 'material-category';
+
 // M03 — Master Data. UC-03 (danh mục chung) + UC-07 (danh mục vật chất).
 @Injectable()
 export class MasterDataService {
@@ -24,7 +30,17 @@ export class MasterDataService {
     @InjectRepository(Catalog) private readonly catalogs: Repository<Catalog>,
     @InjectRepository(Material) private readonly materials: Repository<Material>,
     @InjectRepository(MaterialVersion) private readonly versions: Repository<MaterialVersion>,
+    @InjectRepository(AssetCatalogItem) private readonly assetItems: Repository<AssetCatalogItem>,
   ) {}
+
+  // Nhóm ngành vật chất chỉ được quản lý ở module riêng (material-group) — một nguồn CRUD.
+  private ensureCatalogWritable(type: string) {
+    if (type === MATERIAL_GROUP_TYPE) {
+      throw new ConflictException(
+        'DATA-004: Nhóm ngành vật chất được quản lý tại module "Nhóm ngành vật chất" (/material-groups), không tạo/sửa qua danh mục chung.',
+      );
+    }
+  }
 
   // Ghi snapshot bất biến vào lịch sử phiên bản vật chất (M03) để đối chiếu/diff.
   private async snapshotMaterial(m: Material, changeType: string, userId: string) {
@@ -67,6 +83,7 @@ export class MasterDataService {
   }
 
   async createCatalog(type: string, dto: CreateCatalogDto, user: AuthUser) {
+    this.ensureCatalogWritable(type);
     const dup = await this.catalogs.findOne({ where: { type, code: dto.code } });
     if (dup) throw new ConflictException(`DATA-003: Trùng mã "${dto.code}" trong loại ${type}`);
     return this.catalogs.save(
@@ -85,6 +102,7 @@ export class MasterDataService {
   }
 
   async updateCatalog(type: string, id: string, dto: UpdateCatalogDto, user: AuthUser) {
+    this.ensureCatalogWritable(type);
     const c = await this.catalogs.findOne({ where: { id, type } });
     if (!c) throw new NotFoundException('DATA-001: Không tìm thấy mục danh mục');
     if (c.status === 'PUBLISHED') {
@@ -99,6 +117,7 @@ export class MasterDataService {
   }
 
   async publishCatalog(type: string, id: string, user: AuthUser) {
+    this.ensureCatalogWritable(type);
     const c = await this.catalogs.findOne({ where: { id, type } });
     if (!c) throw new NotFoundException('DATA-001: Không tìm thấy mục danh mục');
     if (c.status === 'PUBLISHED') {
@@ -133,16 +152,55 @@ export class MasterDataService {
   async createMaterial(dto: CreateMaterialDto, user: AuthUser) {
     const dup = await this.materials.findOne({ where: { code: dto.code } });
     if (dup) throw new ConflictException(`DATA-003: Trùng mã vật chất ${dto.code}`);
+
+    // Quyết định C: định danh vật chất PHẢI lấy từ danh mục chuẩn BQP (asset_catalog_items).
+    // Ngoại lệ: vật chất ngành khác không có trong phụ lục ngành Doanh trại → OUT_OF_SCOPE.
+    let assetCode: string | null = dto.assetCode ?? null;
+    let assetCodeStatus = 'UNMAPPED';
+    let name = dto.name;
+    let unitCode: string | null = dto.unitCode ?? null;
+    const attributes: Record<string, unknown> = { ...(dto.attributes ?? {}) };
+
+    if (assetCode) {
+      const item = await this.assetItems.findOne({ where: { code: assetCode, status: 'ACTIVE' } });
+      if (!item) {
+        throw new BadRequestException(
+          `DATA-002: Mã "${assetCode}" không có trong danh mục chuẩn BQP (Phụ lục CV 2837).`,
+        );
+      }
+      if (item.domain !== 'MATERIAL') {
+        throw new BadRequestException(
+          `DATA-002: Mã "${assetCode}" thuộc miền ${item.domain}, không phải vật chất (MATERIAL).`,
+        );
+      }
+      assetCodeStatus = 'MAPPED';
+      // Dẫn xuất tên/ĐVT/ngữ cảnh cây từ danh mục chuẩn (không phụ thuộc frontend gửi đủ).
+      if (!name) name = item.name;
+      if (!unitCode) unitCode = item.unitCode;
+      attributes.assetPathNames = item.pathNames;
+      attributes.chapter = item.chapter;
+      attributes.chapterName = item.chapterName;
+      attributes.unitRaw = item.unitRaw;
+    } else if (dto.outOfScope) {
+      assetCodeStatus = 'OUT_OF_SCOPE';
+    } else {
+      throw new BadRequestException(
+        'DATA-002: Vật chất phải chọn từ danh mục chuẩn BQP. Nếu thuộc ngành khác, đánh dấu "Ngoài phạm vi ngành Doanh trại".',
+      );
+    }
+
     const saved = await this.materials.save(
       this.materials.create({
         code: dto.code,
-        name: dto.name,
+        name,
         categoryCode: dto.categoryCode ?? null,
-        unitCode: dto.unitCode ?? null,
+        unitCode,
         spec: dto.spec ?? null,
         qualityGrade: dto.qualityGrade ?? null,
         defaultScale: dto.defaultScale ?? 0,
-        attributes: dto.attributes ?? {},
+        attributes,
+        assetCode,
+        assetCodeStatus,
         status: 'DRAFT',
         createdBy: user.sub,
         updatedBy: user.sub,

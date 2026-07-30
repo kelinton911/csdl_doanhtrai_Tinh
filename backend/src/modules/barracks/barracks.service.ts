@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,7 +12,13 @@ import {
   ReviewDecisionDto,
   UpdateBarracksDto,
 } from './dto/barracks.dto';
-import { EDITABLE_STATUSES, WorkflowStatus } from '../../common/workflow';
+import { WorkflowStatus } from '../../common/workflow';
+import {
+  assertEditable,
+  assertNotSelfApprove,
+  assertPendingReview,
+  transitionWithRevision,
+} from '../../common/workflow-transition';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 import { barracksScope } from '../../common/data-scope';
@@ -146,11 +151,7 @@ export class BarracksService {
   ): Promise<Barracks> {
     const b = await this.get(id);
     // Không cho sửa trực tiếp bản đã chốt/khóa (No silent overwrite).
-    if (!EDITABLE_STATUSES.includes(b.workflowStatus)) {
-      throw new ConflictException(
-        `WF-001: Hồ sơ ở trạng thái ${b.workflowStatus}, không thể sửa trực tiếp`,
-      );
-    }
+    assertEditable(b.workflowStatus);
     if (dto.name !== undefined) b.name = dto.name;
     if (dto.areaId !== undefined) b.areaId = dto.areaId;
     if (dto.organizationId !== undefined) b.organizationId = dto.organizationId;
@@ -166,23 +167,15 @@ export class BarracksService {
   // UC-05: gửi duyệt — DRAFT/CHANGES_REQUESTED → PENDING_REVIEW, chụp revision.
   async submit(id: string, user: AuthUser): Promise<Barracks> {
     const b = await this.get(id);
-    if (!EDITABLE_STATUSES.includes(b.workflowStatus)) {
-      throw new ConflictException(
-        `WF-001: Chỉ gửi duyệt hồ sơ ở trạng thái DRAFT/CHANGES_REQUESTED`,
-      );
-    }
+    assertEditable(b.workflowStatus, 'gửi duyệt');
     return this.transition(b, WorkflowStatus.PENDING_REVIEW, user);
   }
 
   // UC-06: phê duyệt — PENDING_REVIEW → APPROVED. Người lập không tự duyệt.
   async approve(id: string, user: AuthUser): Promise<Barracks> {
     const b = await this.get(id);
-    if (b.workflowStatus !== WorkflowStatus.PENDING_REVIEW) {
-      throw new ConflictException('WF-001: Chỉ duyệt hồ sơ đang chờ duyệt');
-    }
-    if (b.createdBy && b.createdBy === user.sub) {
-      throw new ForbiddenException('AUTH-003: Người lập không được tự duyệt hồ sơ');
-    }
+    assertPendingReview(b.workflowStatus);
+    assertNotSelfApprove(b.createdBy, user.sub);
     return this.transition(b, WorkflowStatus.APPROVED, user);
   }
 
@@ -193,9 +186,7 @@ export class BarracksService {
     user: AuthUser,
   ): Promise<Barracks> {
     const b = await this.get(id);
-    if (b.workflowStatus !== WorkflowStatus.PENDING_REVIEW) {
-      throw new ConflictException('WF-001: Chỉ yêu cầu bổ sung khi đang chờ duyệt');
-    }
+    assertPendingReview(b.workflowStatus, 'yêu cầu bổ sung');
     return this.transition(b, WorkflowStatus.CHANGES_REQUESTED, user);
   }
 
@@ -207,37 +198,29 @@ export class BarracksService {
     });
   }
 
-  // Chuyển trạng thái + tạo revision bất biến trong cùng transaction.
+  // Chuyển trạng thái + tạo revision bất biến (helper dùng chung workflow-transition).
   private async transition(
     b: Barracks,
     to: WorkflowStatus,
     user: AuthUser,
   ): Promise<Barracks> {
-    return this.dataSource.transaction(async (m) => {
-      b.workflowStatus = to;
-      b.updatedBy = user.sub;
-      const saved = await m.getRepository(Barracks).save(b);
-
-      const last = await m
-        .getRepository(BarracksRevision)
-        .findOne({ where: { barracksId: b.id }, order: { revisionNo: 'DESC' } });
-      const nextNo = (last?.revisionNo ?? 0) + 1;
-      await m.getRepository(BarracksRevision).save(
-        m.getRepository(BarracksRevision).create({
-          barracksId: b.id,
-          revisionNo: nextNo,
-          workflowStatus: to,
-          createdBy: user.sub,
-          payload: {
-            code: saved.code,
-            name: saved.name,
-            areaId: saved.areaId,
-            organizationId: saved.organizationId,
-            declaredCapacity: saved.declaredCapacity,
-          },
+    return transitionWithRevision(
+      {
+        dataSource: this.dataSource,
+        entityTarget: Barracks,
+        revisionTarget: BarracksRevision,
+        fkColumn: 'barracksId',
+        buildPayload: (saved) => ({
+          code: saved.code,
+          name: saved.name,
+          areaId: saved.areaId,
+          organizationId: saved.organizationId,
+          declaredCapacity: saved.declaredCapacity,
         }),
-      );
-      return saved;
-    });
+      },
+      b,
+      to,
+      user.sub,
+    );
   }
 }

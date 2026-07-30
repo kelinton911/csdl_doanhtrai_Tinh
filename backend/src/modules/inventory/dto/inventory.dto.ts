@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsIn,
@@ -9,7 +9,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { PaginationQuery } from '../../../common/dto/pagination.dto';
+import { PaginationQuery, SearchQuery } from '../../../common/dto/pagination.dto';
 
 export class InventoryFilterQuery extends PaginationQuery {
   @ApiPropertyOptional()
@@ -21,6 +21,14 @@ export class InventoryFilterQuery extends PaginationQuery {
   @IsOptional()
   @IsUUID()
   materialId?: string;
+}
+
+// Lọc danh sách kho (kèm tìm kiếm mã/tên + trạng thái workflow).
+export class ListStorageLocationsQuery extends SearchQuery {
+  @ApiPropertyOptional({ description: 'Lọc theo trạng thái workflow (vd PENDING_REVIEW)' })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }
 
 export class CreateStorageLocationDto {
@@ -43,6 +51,26 @@ export class CreateStorageLocationDto {
   @IsOptional()
   @IsUUID()
   barracksId?: string;
+
+  @ApiPropertyOptional({ description: 'UUID xã/phường (địa bàn kho)' })
+  @IsOptional()
+  @IsUUID()
+  areaId?: string;
+
+  @ApiPropertyOptional({ description: 'UUID đơn vị quản lý' })
+  @IsOptional()
+  @IsUUID()
+  organizationId?: string;
+}
+
+// Cập nhật kho: chỉ trường cho phép; mã kho cố định sau khi tạo.
+export class UpdateStorageLocationDto extends PartialType(CreateStorageLocationDto) {}
+
+export class StorageReviewDto {
+  @ApiPropertyOptional({ example: 'Thiếu toạ độ/loại kho.' })
+  @IsOptional()
+  @IsString()
+  note?: string;
 }
 
 export class CreateTransactionDto {

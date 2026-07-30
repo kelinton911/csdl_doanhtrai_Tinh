@@ -19,6 +19,7 @@ import { AlertsModule } from './modules/alerts/alerts.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { IntegrationModule } from './modules/integration/integration.module';
 import { BarracksModule } from './modules/barracks/barracks.module';
+import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { GisModule } from './modules/gis/gis.module';
@@ -54,6 +55,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     ReportingModule, // M12 — Reporting & Search + Export (UC-19/20)
     IntegrationModule, // M14 — Integration & Sync (UC-21/22)
     BarracksModule, // M04 — Barracks (workflow UC-05/06)
+    ApprovalsModule, // Hàng chờ duyệt gộp (doanh trại + kho trạm)
     FacilitiesModule, // M05 — Facilities (công trình thuộc doanh trại, UC-07)
     GisModule, // M11 — GIS (UC-17)
     DashboardModule, // M12 — Dashboard tổng hợp

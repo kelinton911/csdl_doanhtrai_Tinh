@@ -6,7 +6,7 @@ import { AlertCloseModal } from './AlertCloseModal';
 import { MfaEnrollModal } from './MfaEnrollModal';
 import { api } from '../lib/api';
 import { toast } from '../lib/toast';
-import { visibleNav } from '../lib/nav';
+import { visibleNav, groupedNav } from '../lib/nav';
 import { ROLE_LABEL, useAuth } from '../lib/auth';
 import { scopeLabel } from '../lib/scope';
 import { useTheme } from '../lib/theme';
@@ -46,6 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [closing, setClosing] = useState<{ id: string; title: string } | null>(null);
   const [mfaOpen, setMfaOpen] = useState(false);
   const nav = visibleNav(profile?.roles ?? []);
+  const navGroups = groupedNav(profile?.roles ?? []);
   const primaryRole = profile?.roles?.[0] ?? '';
   const canAct = hasRole('BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND');
 
@@ -135,32 +136,51 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="scrl" style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 2, flex: 1, overflowY: 'auto' }}>
-          {nav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className="navitem"
-              onClick={() => setMobileOpen(false)}
-              style={({ isActive }) => ({
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: collapsed ? '10px 0' : '10px 12px',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                borderRadius: 8,
-                color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-dim)',
-                background: isActive ? 'var(--nav-active)' : 'transparent',
-                borderLeft: isActive ? `3px solid var(--dom-${item.dom})` : '3px solid transparent',
-                fontSize: 13.5,
-                fontWeight: isActive ? 700 : 500,
-              })}
-              title={item.label}
-            >
-              <span style={{ color: `var(--dom-${item.dom})`, display: 'inline-flex' }}>
-                <Icon name={item.icon} size={18} />
-              </span>
-              {!collapsed && item.label}
-            </NavLink>
+          {navGroups.map((grp, gi) => (
+            <div key={grp.group} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {!collapsed ? (
+                <div
+                  className="eyebrow"
+                  style={{
+                    padding: gi === 0 ? '4px 12px 4px' : '14px 12px 4px',
+                    color: 'var(--nav-muted)',
+                    fontSize: 10.5,
+                    letterSpacing: '0.12em',
+                  }}
+                >
+                  {grp.label}
+                </div>
+              ) : (
+                gi > 0 && <div style={{ height: 1, background: 'var(--nav-rule)', margin: '8px 8px' }} />
+              )}
+              {grp.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className="navitem"
+                  onClick={() => setMobileOpen(false)}
+                  style={({ isActive }) => ({
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: collapsed ? '10px 0' : '10px 12px',
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    borderRadius: 8,
+                    color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-dim)',
+                    background: isActive ? 'var(--nav-active)' : 'transparent',
+                    borderLeft: isActive ? `3px solid var(--dom-${item.dom})` : '3px solid transparent',
+                    fontSize: 13.5,
+                    fontWeight: isActive ? 700 : 500,
+                  })}
+                  title={item.label}
+                >
+                  <span style={{ color: `var(--dom-${item.dom})`, display: 'inline-flex' }}>
+                    <Icon name={item.icon} size={18} />
+                  </span>
+                  {!collapsed && item.label}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
 

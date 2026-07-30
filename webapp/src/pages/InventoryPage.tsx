@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { api, toProblem } from '../lib/api';
 import { toast } from '../lib/toast';
-import { useAuth } from '../lib/auth';
-import { useCatalog } from '../lib/catalogs';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, type Column } from '../components/DataTable';
 import { Pagination } from '../components/Pagination';
@@ -34,14 +32,11 @@ interface Loc { id: string; code: string; name: string }
 // Vật chất và tồn kho — số sổ sách, kiểm kê, chênh lệch; ghi nhập/xuất/điều chỉnh.
 export function InventoryPage() {
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
   const [page, setPage] = useState(1);
   const [loc, setLoc] = useState('');
   const [viewMode, setViewMode] = useState<'NORMAL' | 'SSCD'>('NORMAL');
   const [txn, setTxn] = useState<{ balance: Balance; mode: 'IN' | 'OUT' | 'ADJUST' } | null>(null);
   const [ledger, setLedger] = useState<Balance | null>(null);
-  const [creatingLoc, setCreatingLoc] = useState(false);
-  const canManage = hasRole('BARRACKS_OFFICER', 'COMMUNE_USER', 'SYS_ADMIN');
   const size = 15;
 
   const currentOpMode = window.localStorage.getItem('CSDL_OP_MODE') || 'NORMAL';
@@ -146,12 +141,12 @@ export function InventoryPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Vật chất và vật tư"
-        title={activeView === 'SSCD' ? 'Đối soát Định mức Sẵn sàng chiến đấu (SSCĐ)' : 'Tồn kho theo địa điểm'}
+        eyebrow="Vật chất trên địa bàn"
+        title={activeView === 'SSCD' ? 'Đối soát Định mức Sẵn sàng chiến đấu (SSCĐ)' : 'Vật chất tồn kho theo địa điểm'}
         description={
           activeView === 'SSCD'
             ? 'Bảng so sánh số lượng tồn kho thực tế so với định mức trang bị SSCĐ bắt buộc của Bộ CHQS Tỉnh.'
-            : 'Số sổ sách, số kiểm kê và chênh lệch. Sổ kho bất biến — điều chỉnh bằng bút toán mới, không cho tồn âm.'
+            : 'Số sổ sách, số kiểm kê và chênh lệch. Sổ kho bất biến — điều chỉnh bằng bút toán mới, không cho tồn âm. Kho khai báo tại mục "Kho trạm".'
         }
       />
 
@@ -177,7 +172,6 @@ export function InventoryPage() {
           <option value="">Tất cả kho</option>
           {(locations.data?.data ?? []).map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
-        {canManage && <button className="btn" onClick={() => setCreatingLoc(true)}><Icon name="plus" size={15} /> Tạo kho</button>}
         <div style={{ flex: 1 }} />
         <button className="btn" disabled={exporting.isPending} onClick={() => exporting.mutate()} title="Xuất tồn kho đang lọc ra CSV">
           <Icon name="download" size={15} /> {exporting.isPending ? 'Đang xuất…' : 'Xuất CSV'}
@@ -200,7 +194,6 @@ export function InventoryPage() {
         />
       )}
       {ledger && <LedgerModal balance={ledger} onClose={() => setLedger(null)} />}
-      {creatingLoc && <CreateLocationModal onClose={() => setCreatingLoc(false)} onDone={() => { setCreatingLoc(false); qc.invalidateQueries({ queryKey: ['storage-locations'] }); }} />}
     </>
   );
 }
@@ -234,24 +227,6 @@ function TxnType({ type }: { type: string }) {
   };
   const m = map[type] ?? { label: type, color: 'var(--color-text)' };
   return <span style={{ color: m.color, fontWeight: 600 }}>{m.label}</span>;
-}
-
-function CreateLocationModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
-  const type = useCatalog('storage-location-type');
-  const [f, setF] = useState({ code: '', name: '', type: '' });
-  const [error, setError] = useState<string | null>(null);
-  const create = useMutation({ mutationFn: async () => api.post('/inventory/storage-locations', { code: f.code, name: f.name, type: f.type || undefined }), onSuccess: onDone, onError: (e) => setError(toProblem(e).title) });
-  return (
-    <Modal open title="Tạo kho / địa điểm lưu giữ" onClose={onClose}>
-      {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div><label className="field-label">Mã kho</label><input className="input" value={f.code} onChange={(e) => setF((s) => ({ ...s, code: e.target.value }))} placeholder="KHO-A01" /></div>
-        <div><label className="field-label">Tên kho</label><input className="input" value={f.name} onChange={(e) => setF((s) => ({ ...s, name: e.target.value }))} /></div>
-        <div><label className="field-label">Loại kho</label><select className="input" value={f.type} onChange={(e) => setF((s) => ({ ...s, type: e.target.value }))}><option value="">—</option>{type.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={f.code.length < 2 || f.name.length < 2 || create.isPending} onClick={() => create.mutate()}>Tạo kho</button></div>
-      </div>
-    </Modal>
-  );
 }
 
 function Variance({ v }: { v: number | null }) {

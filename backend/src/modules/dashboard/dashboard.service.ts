@@ -121,33 +121,38 @@ export class DashboardService {
 
   // Tổng hợp TIỀM LỰC hậu cần - kỹ thuật theo địa bàn (xã/phường/đặc khu): gom doanh trại,
   // công trình, sức chứa, diện tích, tồn kho về từng administrative_area. Dùng subquery theo
-  // area để tránh nhân dòng khi join nhiều bảng. Tồn kho gắn địa bàn qua kho → doanh trại.
+  // area để tránh nhân dòng khi join nhiều bảng.
+  //
+  // CHỈ tính DỮ LIỆU ĐÃ DUYỆT (workflow_status='APPROVED') vì tiềm lực là CƠ SỞ để cấp Tỉnh
+  // quản lý/báo cáo/xây dựng kế hoạch bảo đảm — phải dùng dữ liệu sạch chỉ huy xã đã duyệt,
+  // không lẫn hồ sơ nháp/chờ duyệt. Kho gắn địa bàn trực tiếp (area_id) HOẶC qua doanh trại.
   async potentialByArea() {
     const rows = await this.ds.query(`
       SELECT
         a.id, a.code, a.name, a.type,
-        (SELECT COUNT(*) FROM barracks b WHERE b.area_id = a.id)::int AS barracks_count,
-        (SELECT COALESCE(SUM(b.declared_capacity), 0) FROM barracks b WHERE b.area_id = a.id)::int AS capacity,
-        (SELECT COALESCE(SUM(b.land_area), 0) FROM barracks b WHERE b.area_id = a.id)::numeric AS land_area,
+        (SELECT COUNT(*) FROM barracks b WHERE b.area_id = a.id AND b.workflow_status = 'APPROVED')::int AS barracks_count,
+        (SELECT COALESCE(SUM(b.declared_capacity), 0) FROM barracks b WHERE b.area_id = a.id AND b.workflow_status = 'APPROVED')::int AS capacity,
+        (SELECT COALESCE(SUM(b.land_area), 0) FROM barracks b WHERE b.area_id = a.id AND b.workflow_status = 'APPROVED')::numeric AS land_area,
         (SELECT COUNT(*) FROM facilities f JOIN barracks b ON b.id = f.barracks_id
-           WHERE b.area_id = a.id)::int AS facility_count,
+           WHERE b.area_id = a.id AND b.workflow_status = 'APPROVED')::int AS facility_count,
         (SELECT COUNT(*) FROM facilities f JOIN barracks b ON b.id = f.barracks_id
-           WHERE b.area_id = a.id AND f.condition = 'KEM' AND f.status = 'IN_USE')::int AS poor_facilities,
+           WHERE b.area_id = a.id AND b.workflow_status = 'APPROVED' AND f.condition = 'KEM' AND f.status = 'IN_USE')::int AS poor_facilities,
         (SELECT COALESCE(SUM(sb.on_hand), 0) FROM stock_balances sb
            JOIN storage_locations sl ON sl.id = sb.storage_location_id
-           JOIN barracks b ON b.id = sl.barracks_id
-           WHERE b.area_id = a.id)::numeric AS stock_on_hand
+           LEFT JOIN barracks b2 ON b2.id = sl.barracks_id
+           WHERE sl.workflow_status = 'APPROVED'
+             AND (sl.area_id = a.id OR b2.area_id = a.id))::numeric AS stock_on_hand
       FROM administrative_areas a
       WHERE a.status = 'ACTIVE'
       ORDER BY a.code ASC
     `);
 
-    // Tồn kho ở kho KHÔNG gắn doanh trại (barracks_id NULL) → không quy được về địa bàn.
+    // Tồn kho ở kho đã duyệt nhưng KHÔNG gắn địa bàn/doanh trại → không quy được về địa bàn.
     const [unallocated] = await this.ds.query(`
       SELECT COALESCE(SUM(sb.on_hand), 0)::numeric AS stock_on_hand
       FROM stock_balances sb
       JOIN storage_locations sl ON sl.id = sb.storage_location_id
-      WHERE sl.barracks_id IS NULL
+      WHERE sl.workflow_status = 'APPROVED' AND sl.barracks_id IS NULL AND sl.area_id IS NULL
     `);
 
     return {

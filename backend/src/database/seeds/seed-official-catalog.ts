@@ -33,6 +33,36 @@ const DEMO_FACILITY_TYPE_CODES = [
 
 const EXPECT = { materials: 788, materialCategories: 96, facilityTypes: 385 };
 
+// Tách SỐ THỨ TỰ phụ lục khỏi tên nhóm: "V/ Cấp nước" → { ordinal: "V", name: "Cấp nước" }.
+// Nhận số La Mã (I,V,X,L,C,D,M) hoặc số Ả Rập, theo sau bởi "/" rồi khoảng trắng.
+// Yêu cầu có dấu "/" nên tên thường ("Máy bơm nước") KHÔNG bị cắt nhầm.
+function splitOrdinal(raw: string): { ordinal: string | null; name: string } {
+  const m = /^([0-9IVXLCDM]+)\/\s*(.+)$/.exec(raw.trim());
+  return m ? { ordinal: m[1], name: m[2].trim() } : { ordinal: null, name: raw.trim() };
+}
+
+// NGÀNH cấp cao (nhóm vật chất theo tổ chức hậu cần-kỹ thuật quân đội). Cấp 1 của cây
+// nhóm vật chất. "Doanh trại" DÙNG LẠI mã gốc Phụ lục (R00...000) nên tự thành cha của
+// 4 chương vật chất hiện có; 5 ngành còn lại là nhánh trống, đơn vị bổ sung dần qua công cụ.
+const STANDARD_BRANCHES: Array<{
+  code: string;
+  name: string;
+  sortOrder: number;
+  description?: string;
+}> = [
+  { code: 'NGANH-QUAN-NHU', name: 'Quân nhu', sortOrder: 10 },
+  { code: 'NGANH-QUAN-Y', name: 'Quân y', sortOrder: 20 },
+  { code: 'NGANH-XANG-DAU', name: 'Xăng dầu', sortOrder: 30 },
+  { code: 'NGANH-VAT-TU', name: 'Vật tư', sortOrder: 40 },
+  { code: 'NGANH-KY-THUAT', name: 'Kỹ thuật', sortOrder: 50 },
+  {
+    code: 'R00.00.00.00.00.000',
+    name: 'Doanh trại',
+    sortOrder: 60,
+    description: 'Ngành Doanh trại — chứa toàn bộ danh mục Phụ lục 2837/DT-QLDT',
+  },
+];
+
 async function run(): Promise<void> {
   const force = process.argv.slice(2).includes('--force');
 
@@ -140,17 +170,30 @@ async function run(): Promise<void> {
       );
 
       // ---- 2) Nhóm vật chất = nút nhóm miền MATERIAL ----
+      // Tên bỏ số thứ tự phụ lục ("V/ Cấp nước" → "Cấp nước"), số TT tách sang `ordinal`.
+      // GIỮ chỉnh sửa tay: nếu người dùng đã sửa (user_edited=true) thì KHÔNG ghi đè
+      // tên/mô tả/số TT; cấu trúc cây (parent/sort) vẫn đồng bộ theo BQP.
       for (const node of materialGroups) {
         const existing = await catalogRepo.findOne({
           where: { type: 'material-category', code: node.code },
         });
-        const row = existing ?? catalogRepo.create({ type: 'material-category', code: node.code });
-        row.name = node.name;
-        row.description = node.pathNames;
+        const row =
+          existing ??
+          catalogRepo.create({
+            type: 'material-category',
+            code: node.code,
+            origin: 'BQP',
+            status: 'PUBLISHED',
+            effectiveFrom: new Date(),
+          });
+        if (!row.userEdited) {
+          const { ordinal, name } = splitOrdinal(node.name);
+          row.name = name;
+          row.ordinal = ordinal;
+          row.description = node.pathNames;
+        }
         row.parentCode = node.parentCode;
         row.sortOrder = node.sourceRow ?? 0;
-        row.status = 'PUBLISHED';
-        row.effectiveFrom = row.effectiveFrom ?? new Date();
         await catalogRepo.save(row);
       }
 
@@ -160,15 +203,52 @@ async function run(): Promise<void> {
         const existing = await catalogRepo.findOne({
           where: { type: 'facility-type', code: node.code },
         });
-        const row = existing ?? catalogRepo.create({ type: 'facility-type', code: node.code });
-        row.name = node.name;
-        row.description = node.pathNames;
+        const row =
+          existing ??
+          catalogRepo.create({
+            type: 'facility-type',
+            code: node.code,
+            origin: 'BQP',
+            status: 'PUBLISHED',
+            effectiveFrom: new Date(),
+          });
+        if (!row.userEdited) {
+          const { ordinal, name } = splitOrdinal(node.name);
+          row.name = name;
+          row.ordinal = ordinal;
+          row.description = node.pathNames;
+        }
         row.parentCode = node.parentCode;
         row.sortOrder = node.sourceRow ?? 0;
-        row.status = 'PUBLISHED';
-        row.effectiveFrom = row.effectiveFrom ?? new Date();
         await catalogRepo.save(row);
       }
+
+      // ---- 3b) NGÀNH cấp cao (Quân nhu, Quân y, Xăng dầu, Vật tư, Kỹ thuật, Doanh trại) ----
+      // Tạo NẾU CHƯA CÓ; không ghi đè để chỉnh sửa tay sống sót. "Doanh trại" mang mã gốc
+      // Phụ lục (R00...000) nên tự trở thành cha của các chương vật chất ở mục (2).
+      let branchCreated = 0;
+      for (const b of STANDARD_BRANCHES) {
+        const existing = await catalogRepo.findOne({
+          where: { type: 'material-category', code: b.code },
+        });
+        if (existing) continue;
+        await catalogRepo.save(
+          catalogRepo.create({
+            type: 'material-category',
+            code: b.code,
+            name: b.name,
+            description: b.description ?? null,
+            parentCode: null,
+            ordinal: null,
+            sortOrder: b.sortOrder,
+            origin: 'STANDARD',
+            status: 'PUBLISHED',
+            effectiveFrom: new Date(),
+          }),
+        );
+        branchCreated += 1;
+      }
+      if (branchCreated) console.log(`    + Ngành cấp cao mới tạo: ${branchCreated}`);
 
       // ---- 4) Vật chất = nút lá miền MATERIAL, mã R là mã chính thức ----
       for (const node of materialLeaves) {
@@ -207,7 +287,10 @@ async function run(): Promise<void> {
         (SELECT count(*)::int FROM materials)                                        AS materials,
         (SELECT count(*)::int FROM materials WHERE code LIKE 'VC-%')                 AS demo_left,
         (SELECT count(*)::int FROM materials WHERE asset_code IS NULL)               AS unmapped,
-        (SELECT count(*)::int FROM catalogs WHERE type='material-category')          AS categories,
+        (SELECT count(*)::int FROM catalogs
+           WHERE type='material-category' AND origin='BQP')                         AS categories,
+        (SELECT count(*)::int FROM catalogs
+           WHERE type='material-category' AND origin='STANDARD')                    AS branches,
         (SELECT count(*)::int FROM catalogs WHERE type='facility-type')              AS fac_types,
         (SELECT count(*)::int FROM stock_balances sb
            LEFT JOIN materials m ON m.id = sb.material_id WHERE m.id IS NULL)        AS orphan_stock
@@ -232,7 +315,8 @@ async function run(): Promise<void> {
     console.log('\n  Hậu kiểm CSDL:');
     console.log(
       `    vật chất ${chk.materials} (demo còn lại ${chk.demo_left}, chưa gắn mã ${chk.unmapped}) · ` +
-        `nhóm ${chk.categories} · loại công trình ${chk.fac_types} · tồn mồ côi ${chk.orphan_stock}`,
+        `nhóm BQP ${chk.categories} + ngành ${chk.branches} · ` +
+        `loại công trình ${chk.fac_types} · tồn mồ côi ${chk.orphan_stock}`,
     );
     console.log(
       '\n  LƯU Ý: tồn kho demo đã xoá cùng vật chất demo. Để tạo lại dữ liệu tồn kho mô phỏng\n' +

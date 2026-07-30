@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import {
@@ -6,8 +6,10 @@ import {
   CreateStorageLocationDto,
   CreateTransactionDto,
   InventoryFilterQuery,
+  ListStorageLocationsQuery,
+  StorageReviewDto,
+  UpdateStorageLocationDto,
 } from './dto/inventory.dto';
-import { PaginationQuery } from '../../common/dto/pagination.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../identity/roles';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
@@ -21,16 +23,64 @@ export class InventoryController {
   constructor(private readonly service: InventoryService) {}
 
   @Get('storage-locations')
-  @ApiOperation({ summary: 'Danh sách kho/địa điểm lưu giữ' })
-  listLocations(@Query() q: PaginationQuery) {
-    return this.service.listLocations(q);
+  @ApiOperation({ summary: 'Danh sách kho (lọc theo phạm vi dữ liệu, tìm kiếm, trạng thái)' })
+  listLocations(@Query() q: ListStorageLocationsQuery, @CurrentUser() user: AuthUser) {
+    return this.service.listLocations(q, user);
   }
 
   @Post('storage-locations')
   @Roles(Role.BARRACKS_OFFICER, Role.COMMUNE_USER, Role.SYS_ADMIN)
-  @ApiOperation({ summary: 'Tạo kho/địa điểm lưu giữ' })
+  @ApiOperation({ summary: 'Xã khai báo kho (DRAFT)' })
   createLocation(@Body() dto: CreateStorageLocationDto, @CurrentUser() user: AuthUser) {
     return this.service.createLocation(dto, user);
+  }
+
+  @Get('storage-locations/:id/revisions')
+  @ApiOperation({ summary: 'Lịch sử phiên bản hồ sơ kho' })
+  locationRevisions(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.listLocationRevisions(id);
+  }
+
+  @Get('storage-locations/:id')
+  @ApiOperation({ summary: 'Chi tiết kho' })
+  getLocation(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.getLocation(id);
+  }
+
+  @Put('storage-locations/:id')
+  @Roles(Role.BARRACKS_OFFICER, Role.COMMUNE_USER, Role.SYS_ADMIN)
+  @ApiOperation({ summary: 'Cập nhật hồ sơ kho (chưa chốt)' })
+  updateLocation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateStorageLocationDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.updateLocation(id, dto, user);
+  }
+
+  @Post('storage-locations/:id/submit')
+  @Roles(Role.BARRACKS_OFFICER, Role.COMMUNE_USER, Role.SYS_ADMIN)
+  @ApiOperation({ summary: 'Gửi hồ sơ kho vào luồng kiểm duyệt' })
+  submitLocation(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
+    return this.service.submitLocation(id, user);
+  }
+
+  @Post('storage-locations/:id/approve')
+  @Roles(Role.REVIEWER, Role.BARRACKS_OFFICER, Role.PROVINCIAL_COMMAND)
+  @ApiOperation({ summary: 'Chỉ huy xã duyệt hồ sơ kho (người lập không tự duyệt)' })
+  approveLocation(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
+    return this.service.approveLocation(id, user);
+  }
+
+  @Post('storage-locations/:id/request-changes')
+  @Roles(Role.REVIEWER, Role.BARRACKS_OFFICER, Role.PROVINCIAL_COMMAND)
+  @ApiOperation({ summary: 'Yêu cầu bổ sung hồ sơ kho' })
+  requestLocationChanges(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: StorageReviewDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.requestLocationChanges(id, dto, user);
   }
 
   @Get('balances')
