@@ -226,4 +226,104 @@ export class DashboardService {
       })),
     };
   }
+
+  // M23 — Toàn cảnh chỉ huy cấp tỉnh: tổng hợp trực quan mọi trụ cột (đất, công trình, điện/nước,
+  // vật chất, đầu tư, ngân sách, cấp xã, nguồn lực, nhiệm vụ, kiểm tra, văn bản, cảnh báo).
+  // Mỗi truy vấn bọc an toàn để bảng chưa tồn tại (deploy dở dang) không làm hỏng cả dashboard.
+  async commandOverview() {
+    const one = async (sql: string, params: unknown[] = []): Promise<Record<string, unknown>> => {
+      try {
+        const r = await this.ds.query(sql, params);
+        return r?.[0] ?? {};
+      } catch {
+        return {};
+      }
+    };
+    const many = async (sql: string): Promise<Array<Record<string, unknown>>> => {
+      try {
+        return await this.ds.query(sql);
+      } catch {
+        return [];
+      }
+    };
+    const n = (v: unknown) => Number(v ?? 0);
+
+    const [land, fac, barr, gen, mat, proj, disb, budY, res, tasks, insp, legal, al] = await Promise.all([
+      one(`SELECT COUNT(*)::int total, COALESCE(SUM(land_area),0)::numeric area,
+             COUNT(*) FILTER (WHERE dispute_status='DISPUTED')::int disputed,
+             COUNT(*) FILTER (WHERE dispute_status='ENCROACHED')::int encroached FROM land_parcels`),
+      one(`SELECT COUNT(*)::int total,
+             COUNT(*) FILTER (WHERE condition IN ('GOOD','TOT') AND status='IN_USE')::int good,
+             COUNT(*) FILTER (WHERE condition IN ('FAIR','KHA','TRUNG_BINH') AND status='IN_USE')::int fair,
+             COUNT(*) FILTER (WHERE condition IN ('POOR','KEM') AND status='IN_USE')::int poor,
+             COUNT(*) FILTER (WHERE status='DECOMMISSIONED')::int decommissioned FROM facilities`),
+      one(`SELECT COUNT(*)::int total, COALESCE(SUM(declared_capacity),0)::int capacity,
+             COUNT(*) FILTER (WHERE workflow_status='APPROVED')::int approved FROM barracks`),
+      one(`SELECT COUNT(*) FILTER (WHERE kind='GENERATOR' AND status<>'DECOMMISSIONED')::int generators,
+             COUNT(*) FILTER (WHERE kind='GENERATOR' AND status='FAULT')::int generators_fault,
+             COUNT(*) FILTER (WHERE category='ELECTRICITY' AND status='FAULT')::int elec_fault,
+             COUNT(*) FILTER (WHERE category='WATER' AND status='FAULT')::int water_fault,
+             COUNT(*) FILTER (WHERE status<>'DECOMMISSIONED' AND next_maintenance_at IS NOT NULL AND next_maintenance_at<now())::int maintenance_due,
+             COUNT(*) FILTER (WHERE category='ELECTRICITY' AND status<>'DECOMMISSIONED')::int elec_total,
+             COUNT(*) FILTER (WHERE category='WATER' AND status<>'DECOMMISSIONED')::int water_total FROM utility_systems`),
+      one(`SELECT COALESCE(SUM(sb.on_hand),0)::numeric on_hand FROM stock_balances sb
+             JOIN storage_locations sl ON sl.id=sb.storage_location_id WHERE sl.workflow_status='APPROVED'`),
+      one(`SELECT COUNT(*) FILTER (WHERE phase='IN_PROGRESS')::int in_progress,
+             COUNT(*) FILTER (WHERE phase NOT IN ('HANDED_OVER','WARRANTY','CLOSED','CANCELLED') AND planned_end_date IS NOT NULL AND planned_end_date<now())::int delayed,
+             COALESCE(SUM(total_estimate),0)::numeric total_estimate FROM projects`),
+      one(`SELECT COALESCE(SUM(amount),0)::numeric disbursed FROM project_milestones WHERE kind='PAYMENT'`),
+      one(`SELECT COALESCE(MAX(fiscal_year),0)::int AS y FROM budget_plans`),
+      one(`SELECT COUNT(*) FILTER (WHERE status='ACTIVE')::int total,
+             COUNT(*) FILTER (WHERE status='ACTIVE' AND agreement_status='SIGNED' AND agreement_valid_until IS NOT NULL AND agreement_valid_until<(now()+interval '30 days'))::int agreements_expiring FROM local_resources`),
+      one(`SELECT COUNT(*) FILTER (WHERE status='IN_PROGRESS')::int in_progress,
+             COUNT(*) FILTER (WHERE status NOT IN ('COMPLETED','CANCELLED') AND due_date IS NOT NULL AND due_date<now())::int overdue FROM tasks`),
+      one(`SELECT (SELECT COUNT(*) FROM inspection_findings WHERE status NOT IN ('RESOLVED','ACCEPTED'))::int open_findings,
+             (SELECT COUNT(*) FROM inspection_findings WHERE status NOT IN ('RESOLVED','ACCEPTED') AND due_date IS NOT NULL AND due_date<now())::int overdue_findings,
+             (SELECT COUNT(*) FROM inspections WHERE status='IN_PROGRESS')::int in_progress`),
+      one(`SELECT COUNT(*) FILTER (WHERE effective_status='EFFECTIVE')::int effective,
+             COUNT(*) FILTER (WHERE effective_status='EFFECTIVE' AND expiry_date IS NOT NULL AND expiry_date<(now()+interval '60 days') AND expiry_date>=now())::int expiring_soon FROM legal_documents`),
+      one(`SELECT COUNT(*) FILTER (WHERE status<>'CLOSED')::int open,
+             COUNT(*) FILTER (WHERE status<>'CLOSED' AND severity IN ('HIGH','CRITICAL'))::int critical FROM alerts`),
+    ]);
+
+    const fyear = n(budY.y);
+    const budPlanned = await one(`SELECT COALESCE(SUM(planned_amount),0)::numeric planned FROM budget_plans WHERE fiscal_year=$1`, [fyear]);
+    const budSpent = await one(
+      `SELECT COALESCE(SUM(e.amount),0)::numeric spent FROM budget_expenses e
+       JOIN budget_plans p ON p.id=e.budget_plan_id WHERE p.fiscal_year=$1`,
+      [fyear],
+    );
+    const communes = await one(
+      `SELECT COUNT(*)::int total,
+              COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM barracks b WHERE b.area_id=a.id))::int with_data
+       FROM administrative_areas a WHERE a.status='ACTIVE' AND a.type IN ('COMMUNE','WARD','SPECIAL_ZONE')`,
+    );
+    const alByType = await many(
+      `SELECT alert_type AS type, COUNT(*)::int count FROM alerts WHERE status<>'CLOSED' GROUP BY alert_type ORDER BY count DESC LIMIT 12`,
+    );
+
+    const communeTotal = n(communes.total);
+    const communeWith = n(communes.with_data);
+    return {
+      generatedAt: new Date().toISOString(),
+      land: { total: n(land.total), totalArea: n(land.area), disputed: n(land.disputed), encroached: n(land.encroached) },
+      facilities: { total: n(fac.total), good: n(fac.good), fair: n(fac.fair), poor: n(fac.poor), decommissioned: n(fac.decommissioned) },
+      capacity: { barracks: n(barr.total), approved: n(barr.approved), totalCapacity: n(barr.capacity) },
+      utilities: {
+        electricity: { total: n(gen.elec_total), fault: n(gen.elec_fault) },
+        water: { total: n(gen.water_total), fault: n(gen.water_fault) },
+        generators: { total: n(gen.generators), fault: n(gen.generators_fault) },
+        maintenanceDue: n(gen.maintenance_due),
+      },
+      materials: { onHand: n(mat.on_hand) },
+      projects: { inProgress: n(proj.in_progress), delayed: n(proj.delayed), totalEstimate: n(proj.total_estimate), disbursed: n(disb.disbursed) },
+      budget: { year: fyear, planned: n(budPlanned.planned), spent: n(budSpent.spent) },
+      communes: { total: communeTotal, withData: communeWith, noData: Math.max(communeTotal - communeWith, 0) },
+      localResources: { total: n(res.total), agreementsExpiring: n(res.agreements_expiring) },
+      tasks: { inProgress: n(tasks.in_progress), overdue: n(tasks.overdue) },
+      inspections: { inProgress: n(insp.in_progress), openFindings: n(insp.open_findings), overdueFindings: n(insp.overdue_findings) },
+      legalDocs: { effective: n(legal.effective), expiringSoon: n(legal.expiring_soon) },
+      alerts: { open: n(al.open), critical: n(al.critical), byType: alByType.map((r) => ({ type: r.type, count: n(r.count) })) },
+    };
+  }
 }

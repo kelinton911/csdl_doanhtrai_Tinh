@@ -39,6 +39,12 @@ import { BudgetDetailPage } from './pages/BudgetDetailPage';
 import { TasksListPage } from './pages/TasksListPage';
 import { TaskFormPage } from './pages/TaskFormPage';
 import { TaskDetailPage } from './pages/TaskDetailPage';
+import { InspectionsListPage } from './pages/InspectionsListPage';
+import { InspectionFormPage } from './pages/InspectionFormPage';
+import { InspectionDetailPage } from './pages/InspectionDetailPage';
+import { LegalDocsListPage } from './pages/LegalDocsListPage';
+import { LegalDocFormPage } from './pages/LegalDocFormPage';
+import { LegalDocDetailPage } from './pages/LegalDocDetailPage';
 import { CommuneReadinessPage } from './pages/CommuneReadinessPage';
 import { FieldSurveyPage } from './pages/FieldSurveyPage';
 import { ScanPage } from './pages/ScanPage';
@@ -95,6 +101,14 @@ export default function App() {
       <Route path="/tasks/new" element={<Protected><TaskFormPage /></Protected>} />
       <Route path="/tasks/:id/edit" element={<Protected><TaskFormPage /></Protected>} />
       <Route path="/tasks/:id" element={<Protected><TaskDetailPage /></Protected>} />
+      <Route path="/audits" element={<Protected><InspectionsListPage /></Protected>} />
+      <Route path="/audits/new" element={<Protected><InspectionFormPage /></Protected>} />
+      <Route path="/audits/:id/edit" element={<Protected><InspectionFormPage /></Protected>} />
+      <Route path="/audits/:id" element={<Protected><InspectionDetailPage /></Protected>} />
+      <Route path="/legal-documents" element={<Protected><LegalDocsListPage /></Protected>} />
+      <Route path="/legal-documents/new" element={<Protected><LegalDocFormPage /></Protected>} />
+      <Route path="/legal-documents/:id/edit" element={<Protected><LegalDocFormPage /></Protected>} />
+      <Route path="/legal-documents/:id" element={<Protected><LegalDocDetailPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
       <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />

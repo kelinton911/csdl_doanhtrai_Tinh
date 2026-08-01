@@ -27,4 +27,10 @@ export class DashboardController {
   communeReadiness(@Query('staleDays') staleDays?: string) {
     return this.service.communeReadiness(staleDays);
   }
+
+  @Get('command')
+  @ApiOperation({ summary: 'M23: Toàn cảnh chỉ huy cấp tỉnh — tổng hợp mọi trụ cột dữ liệu' })
+  commandOverview() {
+    return this.service.commandOverview();
+  }
 }

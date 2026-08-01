@@ -14,6 +14,7 @@ import { Skeleton, ErrorState } from '../components/States';
 import { Icon } from '../components/Icon';
 import { num } from '../lib/format';
 import { PrintPreviewModal } from '../components/PrintPreviewModal';
+import { CommandOverview } from '../components/CommandOverview';
 import {
   CONDITION_COLOR,
   CONDITION_LABEL,
@@ -162,6 +163,9 @@ export function DashboardPage() {
               <KpiCard label="Đợt kiểm kê cần duyệt" value="3 đợt" icon="file" dom="cmd" onClick={() => nav('/inspections')} />
             </div>
           )}
+
+          {/* M23 — Toàn cảnh điều hành toàn tỉnh (tổng hợp mọi trụ cột) */}
+          {(isCmd || isOfficer || isReviewer) && <CommandOverview />}
 
           {/* Bản đồ tổng thể vật chất */}
           <div className="card" style={{ padding: 0, marginTop: 20, overflow: 'hidden' }}>

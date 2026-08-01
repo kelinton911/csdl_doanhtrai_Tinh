@@ -227,6 +227,50 @@ export class AlertsService {
       /* bảng chưa tồn tại — bỏ qua an toàn */
     }
 
+    // M22 — Kiến nghị khắc phục quá hạn (chưa RESOLVED/ACCEPTED, đã quá hạn).
+    try {
+      const fnd = await this.ds.query(
+        `SELECT f.id, f.title, f.severity, f.due_date, i.title AS inspection
+         FROM inspection_findings f JOIN inspections i ON i.id = f.inspection_id
+         WHERE f.status NOT IN ('RESOLVED','ACCEPTED') AND f.due_date IS NOT NULL AND f.due_date < now()
+         LIMIT 60`,
+      );
+      for (const r of fnd) {
+        found.push({
+          alertType: 'FINDING_OVERDUE',
+          severity: r.severity === 'CRITICAL' || r.severity === 'HIGH' ? 'HIGH' : 'MEDIUM',
+          title: `Kiến nghị khắc phục quá hạn: ${r.title}`,
+          description: [r.inspection, `Hạn ${String(r.due_date).slice(0, 10)}`].filter(Boolean).join(' · '),
+          entityType: 'inspection_finding',
+          entityId: r.id,
+        });
+      }
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
+
+    // M20 — Văn bản đang hiệu lực nhưng đã/sắp hết hiệu lực (trong 60 ngày).
+    try {
+      const docs = await this.ds.query(
+        `SELECT id, doc_number, title, expiry_date FROM legal_documents
+         WHERE effective_status = 'EFFECTIVE' AND expiry_date IS NOT NULL
+           AND expiry_date < (now() + interval '60 days') LIMIT 40`,
+      );
+      for (const r of docs) {
+        const expired = new Date(r.expiry_date) < new Date();
+        found.push({
+          alertType: 'LEGALDOC_EXPIRING',
+          severity: expired ? 'HIGH' : 'LOW',
+          title: `${expired ? 'Văn bản hết hiệu lực' : 'Văn bản sắp hết hiệu lực'}: ${r.doc_number}`,
+          description: [r.title, `Hết hiệu lực ${String(r.expiry_date).slice(0, 10)}`].filter(Boolean).join(' · '),
+          entityType: 'legal_document',
+          entityId: r.id,
+        });
+      }
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
+
     let created = 0;
     for (const a of found) {
       const dup = await this.repo.findOne({ where: { alertType: a.alertType!, entityId: a.entityId ?? undefined, status: AlertStatus.OPEN } as never });

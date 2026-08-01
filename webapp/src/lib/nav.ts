@@ -68,11 +68,13 @@ export const NAV: NavItem[] = [
   { to: '/approvals', label: 'Hàng chờ duyệt', icon: 'check', dom: 'audit', group: 'review', roles: REVIEW_ROLES },
   { to: '/inspection', label: 'Kiểm kê - biến động', icon: 'clipboard', dom: 'audit', group: 'review', roles: ['BARRACKS_OFFICER', 'COMMUNE_USER', 'REVIEWER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND'] },
   { to: '/maintenance', label: 'Sửa chữa - khôi phục', icon: 'wrench', dom: 'repair', group: 'review', roles: ['BARRACKS_OFFICER', 'COMMUNE_USER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND'] },
+  { to: '/audits', label: 'Kiểm tra - thanh tra', icon: 'shield', dom: 'audit', group: 'review', roles: ['AUDITOR', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REVIEWER', 'COMMUNE_USER'] },
 
   // ── Lớp Danh mục dùng chung (tra cứu; GỐC là danh mục BQP) ────
   { to: '/asset-catalog', label: 'Danh mục tài sản BQP', icon: 'clipboard', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
   { to: '/material-groups', label: 'Nhóm ngành vật chất', icon: 'box', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
   { to: '/materials', label: 'Danh mục vật chất', icon: 'clipboard', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
+  { to: '/legal-documents', label: 'Văn bản - tiêu chuẩn - định mức', icon: 'file', dom: 'audit', group: 'catalog' },
 
   // ── Lớp Kế hoạch & báo cáo ───────────────────────────────────
   { to: '/projects', label: 'Xây dựng & dự án đầu tư', icon: 'building', dom: 'repair', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'REVIEWER', 'REPORT_VIEWER'] },
