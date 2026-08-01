@@ -8,6 +8,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { EvidenceDrawer } from '../components/EvidenceDrawer';
 import { Skeleton, ErrorState } from '../components/States';
 import { Icon } from '../components/Icon';
+import { QrScanner, parseScanPayload } from '../components/QrScanner';
 import { num } from '../lib/format';
 
 interface Line {
@@ -39,6 +40,7 @@ export function InspectionWizardPage() {
   const [lines, setLines] = useState<Line[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [evidence, setEvidence] = useState(false);
+  const [scanning, setScanning] = useState(false);
 
   const sheet = useQuery({
     queryKey: ['sheet', id],
@@ -100,6 +102,35 @@ export function InspectionWizardPage() {
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
 
+  // M10 — Quét tem QR để thêm nhanh dòng số liệu (tra cứu tên theo mã đã in trên tem).
+  async function onScan(text: string) {
+    setScanning(false);
+    const parsed = parseScanPayload(text);
+    if (!parsed) {
+      toast.error('Mã QR không thuộc hệ thống.');
+      return;
+    }
+    try {
+      const r = (await api.get(`/scan/${parsed.type}/${encodeURIComponent(parsed.code)}`)).data as {
+        found: boolean;
+        name: string | null;
+        code: string;
+      };
+      if (!r.found) {
+        toast.warn(`Không tìm thấy mã ${parsed.code}.`);
+        return;
+      }
+      setLines((ls) => [
+        ...ls,
+        { itemType: parsed.type === 'asset' ? 'ASSET' : 'MATERIAL', label: `${r.name} (${r.code})`, unitCode: '', expectedQuantity: null, countedQuantity: null },
+      ]);
+      toast.success(`Đã thêm dòng: ${r.name}`);
+      setStep(1);
+    } catch (e) {
+      toast.problem(e, 'Không tra cứu được mã');
+    }
+  }
+
   return (
     <>
       <button className="btn btn-ghost btn-sm" onClick={() => nav('/inspection')} style={{ marginBottom: 8 }}>
@@ -152,7 +183,12 @@ export function InspectionWizardPage() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
               <div className="eyebrow">Dòng số liệu ({lines.length})</div>
-              {editable && <button className="btn btn-sm btn-primary" onClick={addLine}><Icon name="plus" size={14} /> Thêm dòng</button>}
+              {editable && (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-sm" onClick={() => setScanning(true)}><Icon name="search" size={14} /> Quét QR</button>
+                  <button className="btn btn-sm btn-primary" onClick={addLine}><Icon name="plus" size={14} /> Thêm dòng</button>
+                </div>
+              )}
             </div>
             <div className="panel scrl" style={{ overflow: 'auto' }}>
               <table className="data">
@@ -231,6 +267,7 @@ export function InspectionWizardPage() {
       </div>
 
       {evidence && <EvidenceDrawer entityType="inspection-sheet" entityId={id!} title="Ảnh & minh chứng kiểm kê" onClose={() => setEvidence(false)} />}
+      {scanning && <QrScanner title="Quét tem để thêm dòng" onResult={onScan} onClose={() => setScanning(false)} />}
     </>
   );
 }

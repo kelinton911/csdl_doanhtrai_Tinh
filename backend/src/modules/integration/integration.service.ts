@@ -10,10 +10,21 @@ import { ImportBatch } from './entities/import-batch.entity';
 import { SyncBatch } from './entities/sync-batch.entity';
 import { Material } from '../master-data/entities/material.entity';
 import { Barracks } from '../barracks/entities/barracks.entity';
+import { Facility } from '../facilities/entities/facility.entity';
+import { FacilityStatus } from '../facilities/facility-status';
 import { StorageLocation } from '../inventory/entities/storage-location.entity';
 import { MapPoi } from '../gis/entities/map-poi.entity';
 import { EDITABLE_STATUSES, WorkflowStatus } from '../../common/workflow';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+
+// Một mục trong lô đồng bộ offline (M26).
+interface SyncItem {
+  localId: string;
+  entityType: string;
+  targetId: string;
+  baseVersion: number;
+  payload: Record<string, unknown>;
+}
 
 interface UploadedFile { originalname: string; buffer: Buffer }
 
@@ -55,6 +66,7 @@ export class IntegrationService {
     @InjectRepository(SyncBatch) private readonly syncs: Repository<SyncBatch>,
     @InjectRepository(Material) private readonly materials: Repository<Material>,
     @InjectRepository(Barracks) private readonly barracks: Repository<Barracks>,
+    @InjectRepository(Facility) private readonly facilities: Repository<Facility>,
     @InjectRepository(StorageLocation) private readonly storage: Repository<StorageLocation>,
     @InjectRepository(MapPoi) private readonly pois: Repository<MapPoi>,
     private readonly ds: DataSource,
@@ -225,9 +237,11 @@ export class IntegrationService {
     return this.imports.save(b);
   }
 
-  // UC-22: nhận lô đồng bộ, idempotent theo batchKey; xung đột phiên bản không ghi đè.
+  // UC-22 / M26: nhận lô đồng bộ offline, idempotent theo batchKey; xung đột phiên bản
+  // KHÔNG ghi đè (server time là chuẩn) mà trả dữ liệu server để client hòa giải.
+  // Hỗ trợ entityType: barracks | facility (đối tượng tổ khảo sát sửa ngoài hiện trường).
   async syncBatch(
-    body: { batchKey: string; clientId?: string; items: Array<{ localId: string; entityType: string; targetId: string; baseVersion: number; payload: Record<string, unknown> }> },
+    body: { batchKey: string; clientId?: string; items: SyncItem[] },
     user: AuthUser,
   ) {
     if (!body.batchKey) throw new BadRequestException('VAL-001: Thiếu batchKey');
@@ -236,41 +250,68 @@ export class IntegrationService {
 
     const results: Array<Record<string, unknown>> = [];
     for (const it of body.items ?? []) {
-      if (it.entityType !== 'barracks') {
-        results.push({ localId: it.localId, status: 'failed', message: 'Chỉ hỗ trợ entityType=barracks' });
-        continue;
+      try {
+        if (it.entityType === 'barracks') results.push(await this.applyBarracksSync(it, user));
+        else if (it.entityType === 'facility') results.push(await this.applyFacilitySync(it, user));
+        else results.push({ localId: it.localId, status: 'failed', message: `entityType không hỗ trợ: ${it.entityType}` });
+      } catch (e) {
+        results.push({ localId: it.localId, status: 'failed', message: (e as Error).message });
       }
-      const b = await this.barracks.findOne({ where: { id: it.targetId } });
-      if (!b) {
-        results.push({ localId: it.localId, status: 'failed', message: 'Không tìm thấy đối tượng' });
-        continue;
-      }
-      if (b.rowVersion !== it.baseVersion) {
-        // Server time là chuẩn; xung đột trả dữ liệu server để client hòa giải.
-        results.push({ localId: it.localId, status: 'conflict', serverVersion: b.rowVersion, server: { name: b.name, address: b.address } });
-        continue;
-      }
-      if (!EDITABLE_STATUSES.includes(b.workflowStatus)) {
-        results.push({ localId: it.localId, status: 'failed', message: `Trạng thái ${b.workflowStatus} không cho sửa` });
-        continue;
-      }
-      if (typeof it.payload.name === 'string') b.name = it.payload.name;
-      if (typeof it.payload.address === 'string') b.address = it.payload.address as string;
-      b.updatedBy = user.sub;
-      const saved = await this.barracks.save(b);
-      results.push({ localId: it.localId, status: 'applied', serverVersion: saved.rowVersion });
     }
 
     return this.syncs.save(
       this.syncs.create({
         batchKey: body.batchKey,
         clientId: body.clientId ?? null,
-        items: body.items ?? [],
+        items: (body.items ?? []) as unknown as Array<Record<string, unknown>>,
         results,
         status: 'PROCESSED',
         createdBy: user.sub,
       }),
     );
+  }
+
+  private async applyBarracksSync(it: SyncItem, user: AuthUser): Promise<Record<string, unknown>> {
+    const b = await this.barracks.findOne({ where: { id: it.targetId } });
+    if (!b) return { localId: it.localId, status: 'failed', message: 'Không tìm thấy doanh trại' };
+    if (b.rowVersion !== it.baseVersion) {
+      return { localId: it.localId, status: 'conflict', serverVersion: b.rowVersion, server: { name: b.name, address: b.address, function: b.function } };
+    }
+    if (!EDITABLE_STATUSES.includes(b.workflowStatus)) {
+      return { localId: it.localId, status: 'failed', message: `Trạng thái ${b.workflowStatus} không cho sửa` };
+    }
+    const p = it.payload;
+    if (typeof p.name === 'string') b.name = p.name;
+    if (typeof p.address === 'string') b.address = p.address;
+    if (typeof p.function === 'string') b.function = p.function;
+    if (typeof p.declaredCapacity === 'number') b.declaredCapacity = p.declaredCapacity;
+    if (p.landArea != null && !Number.isNaN(Number(p.landArea))) b.landArea = String(p.landArea);
+    b.updatedBy = user.sub;
+    const saved = await this.barracks.save(b);
+    return { localId: it.localId, status: 'applied', serverVersion: saved.rowVersion };
+  }
+
+  private async applyFacilitySync(it: SyncItem, user: AuthUser): Promise<Record<string, unknown>> {
+    const f = await this.facilities.findOne({ where: { id: it.targetId } });
+    if (!f) return { localId: it.localId, status: 'failed', message: 'Không tìm thấy công trình' };
+    if (f.rowVersion !== it.baseVersion) {
+      return { localId: it.localId, status: 'conflict', serverVersion: f.rowVersion, server: { name: f.name, condition: f.condition, status: f.status } };
+    }
+    if (f.status === FacilityStatus.DECOMMISSIONED) {
+      return { localId: it.localId, status: 'failed', message: 'Công trình đã thanh lý, không cho sửa' };
+    }
+    const p = it.payload;
+    if (typeof p.name === 'string') f.name = p.name;
+    if (typeof p.condition === 'string') f.condition = p.condition;
+    if (typeof p.status === 'string' && (Object.values(FacilityStatus) as string[]).includes(p.status)) {
+      f.status = p.status as FacilityStatus;
+    }
+    if (typeof p.declaredCapacity === 'number') f.declaredCapacity = p.declaredCapacity;
+    if (typeof p.buildYear === 'number') f.buildYear = p.buildYear;
+    if (p.area != null && !Number.isNaN(Number(p.area))) f.area = String(p.area);
+    f.updatedBy = user.sub;
+    const saved = await this.facilities.save(f);
+    return { localId: it.localId, status: 'applied', serverVersion: saved.rowVersion };
   }
 
   async getSyncBatch(id: string) {

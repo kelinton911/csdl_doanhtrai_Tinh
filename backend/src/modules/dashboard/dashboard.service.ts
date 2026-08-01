@@ -172,4 +172,58 @@ export class DashboardService {
       unallocatedStockOnHand: Number(unallocated?.stock_on_hand ?? 0),
     };
   }
+
+  // M15 — So sánh mức độ hoàn chỉnh & độ tươi hồ sơ doanh trại giữa các địa bàn cấp xã.
+  // Điểm hoàn chỉnh mỗi hồ sơ = tỉ lệ 10 tiêu chí (tên/địa chỉ/địa bàn/đơn vị/sức chứa/
+  // diện tích/công năng/toạ độ/có công trình/có ảnh). "Chưa cập nhật" = updated_at quá staleDays.
+  async communeReadiness(staleDaysRaw?: string) {
+    const staleDays = Math.min(Math.max(parseInt(staleDaysRaw ?? '90', 10) || 90, 1), 3650);
+    const rows = await this.ds.query(
+      `
+      SELECT a.id, a.code, a.name, a.type,
+        COUNT(b.id)::int AS barracks_count,
+        COALESCE(ROUND(AVG(b.completeness))::int, 0) AS avg_completeness,
+        COUNT(b.id) FILTER (WHERE b.completeness < 100)::int AS incomplete_count,
+        COUNT(b.id) FILTER (WHERE b.updated_at < now() - make_interval(days => $1))::int AS stale_count,
+        MAX(b.updated_at) AS last_updated
+      FROM administrative_areas a
+      LEFT JOIN (
+        SELECT bx.id, bx.area_id, bx.updated_at,
+          (
+            ((bx.name IS NOT NULL AND bx.name <> ''))::int
+            + ((bx.address IS NOT NULL AND bx.address <> ''))::int
+            + (bx.area_id IS NOT NULL)::int
+            + (bx.organization_id IS NOT NULL)::int
+            + (bx.declared_capacity > 0)::int
+            + (bx.land_area > 0)::int
+            + ((bx.function IS NOT NULL AND bx.function <> ''))::int
+            + (bx.location IS NOT NULL)::int
+            + (EXISTS (SELECT 1 FROM facilities f WHERE f.barracks_id = bx.id))::int
+            + (EXISTS (SELECT 1 FROM documents d WHERE d.entity_type = 'barracks' AND d.entity_id = bx.id::text))::int
+          ) * 10 AS completeness
+        FROM barracks bx
+      ) b ON b.area_id = a.id
+      WHERE a.status = 'ACTIVE' AND a.type IN ('COMMUNE', 'WARD', 'SPECIAL_ZONE')
+      GROUP BY a.id, a.code, a.name, a.type
+      ORDER BY (COUNT(b.id) = 0), avg_completeness ASC, stale_count DESC, a.code ASC
+    `,
+      [staleDays],
+    );
+
+    return {
+      generatedAt: new Date().toISOString(),
+      staleDays,
+      areas: rows.map((r: Record<string, unknown>) => ({
+        id: r.id,
+        code: r.code,
+        name: r.name,
+        type: r.type,
+        barracksCount: Number(r.barracks_count),
+        avgCompleteness: Number(r.avg_completeness),
+        incompleteCount: Number(r.incomplete_count),
+        staleCount: Number(r.stale_count),
+        lastUpdated: r.last_updated ?? null,
+      })),
+    };
+  }
 }

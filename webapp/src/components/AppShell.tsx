@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Icon } from './Icon';
 import { AlertCloseModal } from './AlertCloseModal';
 import { MfaEnrollModal } from './MfaEnrollModal';
+import { OfflineIndicator } from './OfflineIndicator';
 import { api } from '../lib/api';
 import { toast } from '../lib/toast';
 import { visibleNav, groupedNav } from '../lib/nav';
@@ -301,25 +302,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Icon name="shield" size={13} /> Phạm vi: {scopeLabel(profile)}
           </span>
 
-          {/* Trạng thái kết nối */}
-          <span
-            className="hide-sm"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12,
-              color: 'var(--ok-fg)',
-              background: 'var(--ok-bg)',
-              border: '1px solid var(--ok-bd)',
-              padding: '4px 8px',
-              borderRadius: 6,
-            }}
-            title="Kết nối máy chủ nội bộ ổn định"
-          >
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--ok-fg)' }} />
-            Trực tuyến
-          </span>
+          {/* Trạng thái kết nối + hàng đợi đồng bộ ngoại tuyến (M26) */}
+          <OfflineIndicator />
 
           {/* Trung tâm cảnh báo */}
           <div style={{ position: 'relative' }}>

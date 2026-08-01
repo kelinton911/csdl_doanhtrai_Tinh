@@ -51,7 +51,7 @@ export class IntegrationController {
 
   @Post('sync/batches')
   @Roles(Role.COMMUNE_USER, Role.BARRACKS_OFFICER, Role.INTEGRATION_CLIENT, Role.SYS_ADMIN)
-  @ApiOperation({ summary: 'UC-22: Nhận lô đồng bộ offline (idempotent, phát hiện xung đột)' })
+  @ApiOperation({ summary: 'UC-22/M26: Nhận lô đồng bộ offline (barracks|facility; idempotent, phát hiện xung đột)' })
   sync(
     @Body() body: { batchKey: string; clientId?: string; items: Array<{ localId: string; entityType: string; targetId: string; baseVersion: number; payload: Record<string, unknown> }> },
     @CurrentUser() user: AuthUser,

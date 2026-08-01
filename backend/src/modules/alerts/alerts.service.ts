@@ -10,6 +10,9 @@ import { AlertStatus } from '../../common/workflow';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 
+// Ngưỡng "chưa cập nhật" cho hồ sơ doanh trại (M15): mặc định 90 ngày.
+const STALE_BARRACKS_DAYS = Number(process.env.BARRACKS_STALE_DAYS ?? 90);
+
 // M13 — Alert & Notification. UC-18: phát hiện, gom trùng, giao việc, đóng cảnh báo.
 @Injectable()
 export class AlertsService {
@@ -86,6 +89,59 @@ export class AlertsService {
        WHERE sb.last_counted IS NOT NULL AND ABS(sb.last_counted - sb.on_hand) > 40 LIMIT 40`,
     );
     for (const r of variance) found.push({ alertType: 'INVENTORY_VARIANCE', severity: 'MEDIUM', title: `Chênh lệch kiểm kê lớn: ${r.name}`, entityType: 'stock_balance', entityId: r.id });
+
+    // M15 — Hồ sơ doanh trại (đặc biệt cấp xã) chưa cập nhật quá STALE_DAYS ngày.
+    const stale = await this.ds.query(
+      `SELECT b.id, b.name, a.name AS area FROM barracks b
+       LEFT JOIN administrative_areas a ON a.id=b.area_id
+       WHERE b.updated_at < now() - make_interval(days => $1) LIMIT 40`,
+      [STALE_BARRACKS_DAYS],
+    );
+    for (const r of stale) found.push({ alertType: 'BARRACKS_STALE', severity: 'MEDIUM', title: `Hồ sơ chưa cập nhật > ${STALE_BARRACKS_DAYS} ngày: ${r.name}`, description: r.area ? `Địa bàn ${r.area}` : undefined, entityType: 'barracks', entityId: r.id });
+
+    // M04 — Khu đất quốc phòng có tranh chấp/lấn chiếm (bảng có thể chưa tồn tại lần chạy đầu).
+    try {
+      const land = await this.ds.query(
+        `SELECT p.id, p.name, p.dispute_status, a.name AS area FROM land_parcels p
+         LEFT JOIN administrative_areas a ON a.id = p.area_id
+         WHERE p.dispute_status IN ('DISPUTED','ENCROACHED') LIMIT 40`,
+      );
+      for (const r of land)
+        found.push({
+          alertType: 'LAND_DISPUTE',
+          severity: 'HIGH',
+          title: `Khu đất ${r.dispute_status === 'ENCROACHED' ? 'bị lấn chiếm' : 'có tranh chấp'}: ${r.name}`,
+          description: r.area ? `Địa bàn ${r.area}` : undefined,
+          entityType: 'land_parcel',
+          entityId: r.id,
+        });
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
+
+    // M11 — Hạ tầng kỹ thuật: hỏng hóc (FAULT) hoặc quá hạn bảo dưỡng.
+    try {
+      const util = await this.ds.query(
+        `SELECT u.id, u.name, u.category, u.status, u.next_maintenance_at, b.name AS barracks
+         FROM utility_systems u LEFT JOIN barracks b ON b.id = u.barracks_id
+         WHERE u.status = 'FAULT'
+            OR (u.status <> 'DECOMMISSIONED' AND u.next_maintenance_at IS NOT NULL AND u.next_maintenance_at < now())
+         LIMIT 40`,
+      );
+      for (const r of util) {
+        const overdue = r.status !== 'FAULT';
+        found.push({
+          alertType: overdue ? 'UTILITY_MAINTENANCE_DUE' : 'UTILITY_FAULT',
+          severity: overdue ? 'MEDIUM' : 'HIGH',
+          title: overdue ? `Hạ tầng quá hạn bảo dưỡng: ${r.name}` : `Hạ tầng kỹ thuật hỏng: ${r.name}`,
+          description: r.barracks ? `Thuộc ${r.barracks}` : undefined,
+          entityType: 'utility_system',
+          entityId: r.id,
+        });
+      }
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
 
     let created = 0;
     for (const a of found) {

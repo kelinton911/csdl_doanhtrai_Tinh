@@ -29,6 +29,26 @@ interface UploadedFile {
   buffer: Buffer;
 }
 
+// Khung toạ độ Việt Nam (thô) để bắt lỗi lat/lng nhập nhầm (đồng bộ với Integration).
+const VN_LAT = [8.0, 24.0];
+const VN_LNG = [102.0, 110.0];
+
+// Parse & kiểm tra cặp toạ độ hiện trường; trả null nếu không nhập, ném lỗi nếu sai khung.
+function parseGeo(latRaw?: string, lngRaw?: string): { lat: number; lng: number } | null {
+  const a = (latRaw ?? '').trim();
+  const b = (lngRaw ?? '').trim();
+  if (!a && !b) return null;
+  const lat = Number(a);
+  const lng = Number(b);
+  if (!a || !b || Number.isNaN(lat) || Number.isNaN(lng)) {
+    throw new BadRequestException('VAL-001: lat và lng phải cùng có và là số');
+  }
+  if (lat < VN_LAT[0] || lat > VN_LAT[1] || lng < VN_LNG[0] || lng > VN_LNG[1]) {
+    throw new BadRequestException('VAL-001: Toạ độ ngoài khung Việt Nam');
+  }
+  return { lat, lng };
+}
+
 // M08 — Documents. UC-12: lưu chứng cứ số an toàn, có truy nguyên.
 @Injectable()
 export class DocumentsService {
@@ -39,7 +59,14 @@ export class DocumentsService {
 
   async upload(
     file: UploadedFile | undefined,
-    meta: { entityType?: string; entityId?: string; classification?: string },
+    meta: {
+      entityType?: string;
+      entityId?: string;
+      classification?: string;
+      lat?: string;
+      lng?: string;
+      capturedAt?: string;
+    },
     user: AuthUser,
   ) {
     if (!file) throw new BadRequestException('VAL-001: Thiếu tệp tải lên');
@@ -48,6 +75,11 @@ export class DocumentsService {
     }
     if (!ALLOWED.includes(file.mimetype)) {
       throw new BadRequestException(`VAL-001: Loại tệp không hỗ trợ (${file.mimetype})`);
+    }
+    const geo = parseGeo(meta.lat, meta.lng);
+    const captured = meta.capturedAt ? new Date(meta.capturedAt) : null;
+    if (captured && Number.isNaN(captured.getTime())) {
+      throw new BadRequestException('VAL-001: capturedAt không hợp lệ');
     }
     const stored = await this.storage.putObject(file.buffer, file.mimetype, 'documents');
     return this.repo.save(
@@ -60,6 +92,9 @@ export class DocumentsService {
         classification: meta.classification ?? null,
         entityType: meta.entityType ?? null,
         entityId: meta.entityId ?? null,
+        lat: geo ? String(geo.lat) : null,
+        lng: geo ? String(geo.lng) : null,
+        capturedAt: captured,
         uploadedBy: user.sub,
       }),
     );

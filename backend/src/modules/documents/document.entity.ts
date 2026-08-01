@@ -44,6 +44,17 @@ export class Document {
   @Column({ type: 'int', default: 1 })
   version!: number;
 
+  // M25 — Ảnh hiện trường: toạ độ (lấy từ navigator.geolocation lúc chụp, không đọc EXIF
+  // vì trình duyệt có thể strip) và thời điểm chụp. numeric → TypeORM trả chuỗi.
+  @Column({ type: 'numeric', precision: 9, scale: 6, nullable: true })
+  lat!: string | null;
+
+  @Column({ type: 'numeric', precision: 9, scale: 6, nullable: true })
+  lng!: string | null;
+
+  @Column({ name: 'captured_at', type: 'timestamptz', nullable: true })
+  capturedAt!: Date | null;
+
   @Column({ name: 'uploaded_by', type: 'uuid', nullable: true })
   uploadedBy!: string | null;
 

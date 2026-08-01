@@ -49,6 +49,22 @@ class UploadMetaDto {
   @IsOptional()
   @IsString()
   classification?: string;
+
+  // M25 — ảnh hiện trường: toạ độ & thời điểm chụp (multipart gửi dạng chuỗi).
+  @ApiPropertyOptional({ description: 'Vĩ độ nơi chụp (navigator.geolocation)' })
+  @IsOptional()
+  @IsString()
+  lat?: string;
+
+  @ApiPropertyOptional({ description: 'Kinh độ nơi chụp (navigator.geolocation)' })
+  @IsOptional()
+  @IsString()
+  lng?: string;
+
+  @ApiPropertyOptional({ description: 'Thời điểm chụp (ISO 8601)' })
+  @IsOptional()
+  @IsString()
+  capturedAt?: string;
 }
 
 // M08 — Documents & Media. Tải trực tiếp qua backend rồi lưu MinIO (tránh CORS MinIO).

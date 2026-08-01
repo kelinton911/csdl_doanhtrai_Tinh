@@ -20,4 +20,11 @@ export class DashboardController {
   potentialByArea() {
     return this.service.potentialByArea();
   }
+
+  @Get('commune-readiness')
+  @ApiOperation({ summary: 'M15: So sánh mức hoàn chỉnh & độ tươi hồ sơ doanh trại giữa các xã' })
+  @ApiQuery({ name: 'staleDays', required: false, description: 'Ngưỡng chưa cập nhật (mặc định 90)' })
+  communeReadiness(@Query('staleDays') staleDays?: string) {
+    return this.service.communeReadiness(staleDays);
+  }
 }

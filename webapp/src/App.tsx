@@ -21,6 +21,15 @@ import { ScenarioPage } from './pages/ScenarioPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { PotentialPage } from './pages/PotentialPage';
+import { LandParcelsListPage } from './pages/LandParcelsListPage';
+import { LandParcelFormPage } from './pages/LandParcelFormPage';
+import { LandParcelDetailPage } from './pages/LandParcelDetailPage';
+import { UtilitiesListPage } from './pages/UtilitiesListPage';
+import { UtilityFormPage } from './pages/UtilityFormPage';
+import { UtilityDetailPage } from './pages/UtilityDetailPage';
+import { CommuneReadinessPage } from './pages/CommuneReadinessPage';
+import { FieldSurveyPage } from './pages/FieldSurveyPage';
+import { ScanPage } from './pages/ScanPage';
 import { AdminPage } from './pages/AdminPage';
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -50,6 +59,14 @@ export default function App() {
       <Route path="/barracks/new" element={<Protected><BarracksFormPage /></Protected>} />
       <Route path="/barracks/:id/edit" element={<Protected><BarracksFormPage /></Protected>} />
       <Route path="/barracks/:id" element={<Protected><BarracksDetailPage /></Protected>} />
+      <Route path="/land-parcels" element={<Protected><LandParcelsListPage /></Protected>} />
+      <Route path="/land-parcels/new" element={<Protected><LandParcelFormPage /></Protected>} />
+      <Route path="/land-parcels/:id/edit" element={<Protected><LandParcelFormPage /></Protected>} />
+      <Route path="/land-parcels/:id" element={<Protected><LandParcelDetailPage /></Protected>} />
+      <Route path="/utilities" element={<Protected><UtilitiesListPage /></Protected>} />
+      <Route path="/utilities/new" element={<Protected><UtilityFormPage /></Protected>} />
+      <Route path="/utilities/:id/edit" element={<Protected><UtilityFormPage /></Protected>} />
+      <Route path="/utilities/:id" element={<Protected><UtilityDetailPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
       <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />
@@ -59,6 +76,10 @@ export default function App() {
       <Route path="/import" element={<Protected><ImportPage /></Protected>} />
       <Route path="/inspection" element={<Protected><InspectionPage /></Protected>} />
       <Route path="/inspection/sheet/:id" element={<Protected><InspectionWizardPage /></Protected>} />
+      <Route path="/field" element={<Protected><FieldSurveyPage /></Protected>} />
+      <Route path="/scan" element={<Protected><ScanPage /></Protected>} />
+      <Route path="/scan/:type/:code" element={<Protected><ScanPage /></Protected>} />
+      <Route path="/commune-readiness" element={<Protected><CommuneReadinessPage /></Protected>} />
       <Route path="/maintenance" element={<Protected><MaintenancePage /></Protected>} />
       <Route path="/scenarios" element={<Protected><ScenarioPage /></Protected>} />
       <Route path="/potential" element={<Protected><PotentialPage /></Protected>} />

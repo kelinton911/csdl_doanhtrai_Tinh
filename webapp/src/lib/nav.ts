@@ -55,9 +55,13 @@ export const NAV: NavItem[] = [
   { to: '/map', label: 'Bản đồ doanh trại', icon: 'map', dom: 'geo', group: 'command' },
 
   // ── Lớp Khai báo thực địa (việc hằng ngày của xã) ────────────
+  { to: '/land-parcels', label: 'Khu đất quốc phòng', icon: 'map', dom: 'geo', group: 'declare' },
   { to: '/barracks', label: 'Doanh trại và công trình', icon: 'building', dom: 'asset', group: 'declare' },
+  { to: '/field', label: 'Khảo sát hiện trường', icon: 'map', dom: 'asset', group: 'declare', roles: FIELD_ROLES },
+  { to: '/scan', label: 'Quét & tra cứu QR', icon: 'search', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
   { to: '/storage', label: 'Kho trạm', icon: 'box', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
   { to: '/inventory', label: 'Vật chất trên địa bàn', icon: 'box', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
+  { to: '/utilities', label: 'Điện · nước · năng lượng', icon: 'wrench', dom: 'repair', group: 'declare' },
 
   // ── Lớp Duyệt & kiểm tra ─────────────────────────────────────
   { to: '/approvals', label: 'Hàng chờ duyệt', icon: 'check', dom: 'audit', group: 'review', roles: REVIEW_ROLES },
@@ -72,6 +76,7 @@ export const NAV: NavItem[] = [
   // ── Lớp Kế hoạch & báo cáo ───────────────────────────────────
   { to: '/scenarios', label: 'Kế hoạch và tình huống', icon: 'target', dom: 'plan', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN'] },
   { to: '/potential', label: 'Tiềm lực HC-KT', icon: 'target', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
+  { to: '/commune-readiness', label: 'Mức hoàn chỉnh hồ sơ xã', icon: 'chart', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/reports', label: 'Báo cáo - phân tích', icon: 'chart', dom: 'report', group: 'plan' },
 
   // ── Lớp Quản trị ─────────────────────────────────────────────

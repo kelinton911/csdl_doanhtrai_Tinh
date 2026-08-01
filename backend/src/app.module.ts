@@ -23,6 +23,9 @@ import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { FacilitiesModule } from './modules/facilities/facilities.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { GisModule } from './modules/gis/gis.module';
+import { LabelsModule } from './modules/labels/labels.module';
+import { LandParcelsModule } from './modules/land-parcels/land-parcels.module';
+import { UtilitiesModule } from './modules/utilities/utilities.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/identity/guards/roles.guard';
@@ -58,6 +61,9 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     ApprovalsModule, // Hàng chờ duyệt gộp (doanh trại + kho trạm)
     FacilitiesModule, // M05 — Facilities (công trình thuộc doanh trại, UC-07)
     GisModule, // M11 — GIS (UC-17)
+    LabelsModule, // M10 (khảo sát) — Tem QR & tra cứu khi quét
+    LandParcelsModule, // M04 (khảo sát) — Hồ sơ khu đất quốc phòng
+    UtilitiesModule, // M11 (khảo sát) — Điện/Nước/Năng lượng
     DashboardModule, // M12 — Dashboard tổng hợp
     HealthModule,
     // Roadmap còn lại: Inventory(M06), Inspection(M07), Documents(M08),

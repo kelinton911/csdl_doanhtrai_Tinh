@@ -16,6 +16,8 @@ import { Skeleton, ErrorState, EmptyState } from '../components/States';
 import { Icon } from '../components/Icon';
 import { num, dateTime, currency } from '../lib/format';
 import { TILE_URL, TILE_ATTRIBUTION } from '../lib/mapConfig';
+import { CategoryChip, StatusChip } from './UtilitiesListPage';
+import { KIND_LABEL, CATEGORY_LABEL } from '../lib/utility';
 
 const CONDITION_OPTIONS = [
   { code: 'GOOD', label: 'Tốt' },
@@ -138,6 +140,13 @@ export function BarracksDetailPage() {
     queryKey: ['maint-requests', 'barracks', id],
     queryFn: async () => (await api.get('/maintenance-requests', { params: { barracksId: id, size: 100 } })).data as { data: MaintReq[] },
     enabled: tab === 'Sửa chữa & Khôi phục',
+  });
+
+  // M11 — Hạ tầng kỹ thuật THẬT của doanh trại (thay dữ liệu cứng trước đây).
+  const utilities = useQuery({
+    queryKey: ['utilities', 'barracks', id],
+    queryFn: async () => (await api.get('/utilities', { params: { barracksId: id, size: 100 } })).data as { data: UtilRow[] },
+    enabled: tab === 'Hạ tầng kỹ thuật',
   });
 
   const uploadMutation = useMutation({

@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
 
 interface ImportMetaEnv {
   // Lớp nền bản đồ nội bộ (PROD). Bỏ trống = dùng OpenStreetMap công cộng (DEV).
