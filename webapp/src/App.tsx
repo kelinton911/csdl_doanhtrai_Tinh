@@ -14,6 +14,9 @@ const BarracksFormPage = lazy(() => import('./pages/BarracksFormPage').then((m) 
 const BarracksDetailPage = lazy(() => import('./pages/BarracksDetailPage').then((m) => ({ default: m.BarracksDetailPage })));
 const InventoryPage = lazy(() => import('./pages/InventoryPage').then((m) => ({ default: m.InventoryPage })));
 const CommuneMaterialsPage = lazy(() => import('./pages/CommuneMaterialsPage').then((m) => ({ default: m.CommuneMaterialsPage })));
+const SscdMaterialsPage = lazy(() => import('./pages/SscdMaterialsPage').then((m) => ({ default: m.SscdMaterialsPage })));
+const SscdMaterialDetailPage = lazy(() => import('./pages/SscdMaterialDetailPage').then((m) => ({ default: m.SscdMaterialDetailPage })));
+const LogisticsNormsPage = lazy(() => import('./pages/LogisticsNormsPage').then((m) => ({ default: m.LogisticsNormsPage })));
 const StoragePage = lazy(() => import('./pages/StoragePage').then((m) => ({ default: m.StoragePage })));
 const ApprovalQueuePage = lazy(() => import('./pages/ApprovalQueuePage').then((m) => ({ default: m.ApprovalQueuePage })));
 const MaterialsPage = lazy(() => import('./pages/MaterialsPage').then((m) => ({ default: m.MaterialsPage })));
@@ -138,6 +141,9 @@ export default function App() {
       <Route path="/analytics" element={<Protected><AnalyticsPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/commune-materials" element={<Protected><CommuneMaterialsPage /></Protected>} />
+      <Route path="/sscd-materials" element={<Protected><SscdMaterialsPage /></Protected>} />
+      <Route path="/sscd-materials/:id" element={<Protected><SscdMaterialDetailPage /></Protected>} />
+      <Route path="/logistics-norms" element={<Protected><LogisticsNormsPage /></Protected>} />
       <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
       <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />
       <Route path="/materials" element={<Protected><MaterialsPage /></Protected>} />

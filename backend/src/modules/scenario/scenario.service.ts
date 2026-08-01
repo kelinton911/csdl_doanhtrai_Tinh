@@ -17,11 +17,13 @@ import { ScenarioStatus } from '../../common/workflow';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 
-// Định mức bảo đảm/người/ngày (giả lập) — cơ sở của engine tính toán.
+// Định mức tiêu thụ/người/ngày — căn cứ THẬT: docs/Quiuoctinhtoan.pdf (LTTP-gạo tẻ 0,75;
+// chất đốt 0,7 kg; nước 5 lít). Dùng để đối chiếu nhanh tồn kho trong tình huống.
+// Engine tính toán HC-KT đầy đủ 6 ngành ở module logistics-norms (/logistics-norms/compute).
 const NORMS = [
-  { code: 'VC-GAO', name: 'Gạo tẻ', unit: 'KG', perDay: 0.6 },
-  { code: 'VC-DAU-DO', name: 'Dầu diesel', unit: 'LIT', perDay: 0.2 },
-  { code: 'VC-MUOI', name: 'Muối', unit: 'KG', perDay: 0.02 },
+  { code: 'VC-GAO', name: 'Gạo tẻ', unit: 'KG', perDay: 0.75 },
+  { code: 'VC-CHATDOT', name: 'Chất đốt', unit: 'KG', perDay: 0.7 },
+  { code: 'VC-NUOC', name: 'Nước sinh hoạt', unit: 'LIT', perDay: 5 },
 ];
 
 // M10 — Scenario & Planning. UC-15 (tính toán), UC-16 (so sánh, chốt phương án).

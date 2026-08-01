@@ -63,6 +63,7 @@ export const NAV: NavItem[] = [
   { to: '/scan', label: 'Quét & tra cứu QR', icon: 'search', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
   { to: '/storage', label: 'Kho trạm', icon: 'box', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
   { to: '/inventory', label: 'Vật chất trên địa bàn', icon: 'box', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
+  { to: '/sscd-materials', label: 'Vật chất SSCĐ (theo mức)', icon: 'shield', dom: 'plan', group: 'declare', roles: ['BARRACKS_OFFICER', 'COMMUNE_USER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND', 'REVIEWER'] },
   { to: '/utilities', label: 'Điện · nước · năng lượng', icon: 'wrench', dom: 'repair', group: 'declare' },
 
   // ── Lớp Duyệt & kiểm tra ─────────────────────────────────────
@@ -83,6 +84,7 @@ export const NAV: NavItem[] = [
   { to: '/readiness/sites', label: 'Địa điểm sơ tán/bố trí', icon: 'map', dom: 'plan', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'REVIEWER'] },
   { to: '/readiness/recovery', label: 'Thiệt hại & khắc phục', icon: 'wrench', dom: 'repair', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'COMMUNE_USER'] },
   { to: '/potential', label: 'Tiềm lực HC-KT', icon: 'target', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
+  { to: '/logistics-norms', label: 'Định mức & bảo đảm HC-KT', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
   { to: '/local-resources', label: 'Nguồn lực huy động', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/commune-readiness', label: 'Mức hoàn chỉnh hồ sơ xã', icon: 'chart', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/budgets', label: 'Kế hoạch & ngân sách', icon: 'chart', dom: 'report', group: 'plan', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REPORT_VIEWER', 'AUDITOR'] },

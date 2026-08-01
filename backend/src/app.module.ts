@@ -34,6 +34,7 @@ import { OversightModule } from './modules/oversight/oversight.module';
 import { LegalDocsModule } from './modules/legal-docs/legal-docs.module';
 import { ReadinessModule } from './modules/readiness/readiness.module';
 import { ReadinessMaterialsModule } from './modules/readiness-materials/readiness-materials.module';
+import { LogisticsNormsModule } from './modules/logistics-norms/logistics-norms.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
@@ -81,6 +82,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     LegalDocsModule, // M20 (khảo sát) — Văn bản, tiêu chuẩn, định mức
     ReadinessModule, // M18/M19 (khảo sát) — Sẵn sàng chiến đấu, bảo đảm tác chiến & khắc phục
     ReadinessMaterialsModule, // Trục B — Khai báo vật chất SSCĐ theo 4 mức (copy-forward + duyệt)
+    LogisticsNormsModule, // Khâu 4 — Định mức HC-KT + engine tính bảo đảm chiến đấu
     AnalyticsModule, // M28 (khảo sát) — Phân tích, dự báo & phát hiện bất thường
     DashboardModule, // M12 — Dashboard tổng hợp
     HealthModule,
