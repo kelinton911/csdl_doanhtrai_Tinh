@@ -46,6 +46,20 @@ export class Material {
   @Column({ type: 'jsonb', default: () => "'{}'" })
   attributes!: Record<string, unknown>;
 
+  // Đơn giá theo biểu KK (mặc định đơn vị 1000đ). Nullable — chỉ có khi đã định giá.
+  @Column({ name: 'unit_price', type: 'numeric', precision: 18, scale: 3, nullable: true })
+  unitPrice!: string | null;
+
+  // Đơn vị tiền tệ/quy ước giá: VND_1000 (1000đ) | VND.
+  @Column({ name: 'price_currency', default: 'VND_1000' })
+  priceCurrency!: string;
+
+  @Column({ name: 'price_effective_from', type: 'date', nullable: true })
+  priceEffectiveFrom!: string | null;
+
+  @Column({ name: 'price_note', type: 'varchar', nullable: true })
+  priceNote!: string | null;
+
   // Mã trong TỔNG DANH MỤC TÀI SẢN NGÀNH DOANH TRẠI (Phụ lục CV 2837/DT-QLDT).
   // Tham chiếu MỀM tới asset_catalog_items.code — cùng quy ước với categoryCode/unitCode,
   // để nạp lại phụ lục bản mới không vướng ràng buộc.

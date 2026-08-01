@@ -59,6 +59,7 @@ interface StorageLoc { id: string; code: string; name: string; barracksId?: stri
 interface Balance { materialId: string; storageLocationId: string; materialCode: string; materialName: string; unitCode: string | null; onHand: string; locationName: string; variance: number | null }
 interface MaintReq { id: string; code: string; title: string; priority: string; estimatedCost: string; status: string }
 interface Doc { id: string; name: string; classification: string | null; contentType: string; size: string; createdAt: string }
+interface UtilRow { id: string; code: string; name: string; category: string; kind: string; capacity: number; capacityUnit: string | null; status: string; autonomyHours: number }
 
 const TABS = [
   'Tổng quan & Đất đai',
@@ -365,24 +366,43 @@ export function BarracksDetailPage() {
         </>
       )}
 
-      {/* Tab 3: Hạ tầng Kỹ thuật */}
+      {/* Tab 3: Hạ tầng Kỹ thuật (M11 — dữ liệu thật) */}
       {tab === 'Hạ tầng kỹ thuật' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          <div className="card" style={{ padding: 18 }}>
-            <div className="eyebrow" style={{ marginBottom: 12 }}>Hệ thống Cấp điện & Máy phát</div>
-            <Field label="Trạm biến áp nội bộ" value="250 kVA (Hoạt động tốt)" />
-            <Field label="Máy phát điện dự phòng" value="150 kW (Sẵn sàng 100%)" />
-            <Field label="Nguồn điện quốc gia" value="Lưới điện 3 pha 380V" />
-            <Field label="Tình trạng hệ thống chiếu sáng" value="Đạt chuẩn SSCĐ" />
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div className="eyebrow">Hệ thống điện · nước · năng lượng của doanh trại</div>
+            <button className="btn btn-sm" onClick={() => nav('/utilities')}><Icon name="wrench" size={14} /> Quản lý hạ tầng</button>
           </div>
-          <div className="card" style={{ padding: 18 }}>
-            <div className="eyebrow" style={{ marginBottom: 12 }}>Hệ thống Cấp nước & PCCC</div>
-            <Field label="Nguồn cấp nước chính" value="Nước sạch thành phố + Giếng khoan" />
-            <Field label="Dung tích bể chứa nước" value="500 m³" mono />
-            <Field label="Hệ thống PCCC" value="Bể nước PCCC 100m³ + Máy bơm tự động" />
-            <Field label="Xử lý nước thải" value="Hệ thống sinh học đạt chuẩn QCVN" />
-          </div>
-        </div>
+          {utilities.isLoading ? (
+            <Skeleton rows={5} />
+          ) : (utilities.data?.data ?? []).length === 0 ? (
+            <EmptyState icon="wrench" title="Chưa khai báo hạ tầng kỹ thuật" hint="Thêm trạm biến áp, máy phát, nguồn/bể nước… ở mục Điện · nước · năng lượng và gắn cho doanh trại này." />
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+              {['ELECTRICITY', 'WATER', 'FUEL'].map((cat) => {
+                const items = (utilities.data?.data ?? []).filter((u) => u.category === cat);
+                if (items.length === 0) return null;
+                return (
+                  <div key={cat} className="card" style={{ padding: 16 }}>
+                    <div style={{ marginBottom: 10 }}><CategoryChip category={cat} /></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {items.map((u) => (
+                        <button key={u.id} className="rowh" onClick={() => nav(`/utilities/${u.id}`)}
+                          style={{ all: 'unset', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--color-neutral-200)' }}>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, fontSize: 13 }}>{u.name}</div>
+                            <div className="muted num" style={{ fontSize: 11 }}>{KIND_LABEL[u.kind] ?? u.kind} · {num(u.capacity)} {u.capacityUnit ?? ''}{u.autonomyHours > 0 ? ` · tự bảo đảm ${num(u.autonomyHours)}h` : ''}</div>
+                          </div>
+                          <StatusChip status={u.status} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       {/* Tab 4: Trang bị & Vật chất */}

@@ -58,6 +58,44 @@ export class Facility {
   @Column({ type: 'varchar', default: FacilityStatus.IN_USE })
   status!: FacilityStatus;
 
+  // ---- Thuộc tính nhà theo biểu 02/KK-NHA (bổ sung; đều nullable/có default) ----
+
+  // Cấp nhà: I | II | III | IV.
+  @Column({ name: 'house_class', type: 'varchar', nullable: true })
+  houseClass!: string | null;
+
+  // Số tầng nhà.
+  @Column({ name: 'floors', type: 'int', nullable: true })
+  floors!: number | null;
+
+  // Diện tích sàn xây dựng (m2).
+  @Column({ name: 'floor_area', type: 'numeric', precision: 12, scale: 2, nullable: true })
+  floorArea!: string | null;
+
+  // Diện tích sử dụng (m2).
+  @Column({ name: 'use_area', type: 'numeric', precision: 12, scale: 2, nullable: true })
+  useArea!: string | null;
+
+  // Tính chất sử dụng: SHLV | KHO | XUONG | GIANG_DUONG | BENH_XA | ...
+  @Column({ name: 'usage_nature', type: 'varchar', nullable: true })
+  usageNature!: string | null;
+
+  // Thu sét (có/không).
+  @Column({ name: 'lightning_protection', type: 'boolean', default: false })
+  lightningProtection!: boolean;
+
+  // Kết cấu chính: móng/nền/tường/cột/sàn/kèo/mái.
+  @Column({ type: 'jsonb', default: () => "'{}'" })
+  structure!: Record<string, unknown>;
+
+  // Hạ tầng: nguồn điện/nước, tường rào, đường giao thông.
+  @Column({ type: 'jsonb', default: () => "'{}'" })
+  utilities!: Record<string, unknown>;
+
+  // Nhu cầu sửa chữa: Lớn | Vừa | Nhỏ.
+  @Column({ name: 'repair_need', type: 'varchar', nullable: true })
+  repairNeed!: string | null;
+
   // Vị trí/hình công trình (PostGIS Point 4326), nullable ở giai đoạn giả lập.
   @Column({
     type: 'geometry',

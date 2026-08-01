@@ -33,12 +33,26 @@ interface TargetCfg {
   required: string[];
   optional: string[];
   hasGeom: boolean; // nhận cột lat,lng → PostGIS Point
+  // keyless: đích không định danh bằng code/name (không kiểm trùng mã) — vd chi tiết kiểm kê.
+  keyless?: boolean;
+  // numeric: các cột phải là số (validate ở staging).
+  numeric?: string[];
 }
+// Cột phân cấp chất lượng của bộ biểu KKDT/03-KK.
+const QUALITY_GRADE_COLS = ['grade1', 'grade2', 'grade3', 'grade4', 'grade5'];
 const TARGETS: Record<string, TargetCfg> = {
   materials: { required: ['code', 'name'], optional: ['categoryCode', 'unitCode'], hasGeom: false },
   barracks: { required: ['code', 'name'], optional: ['address', 'function', 'lat', 'lng'], hasGeom: true },
   'storage-locations': { required: ['code', 'name'], optional: ['type', 'lat', 'lng'], hasGeom: true },
   pois: { required: ['code', 'name'], optional: ['category', 'symbol_code', 'province_code', 'lat', 'lng'], hasGeom: true },
+  // Chi tiết kiểm kê chất lượng (gap 1+3): materialCode/storageCode → stock_quality_details.
+  'stock-quality': {
+    required: ['materialCode', 'storageCode'],
+    optional: ['reservePurpose', 'locationClass', ...QUALITY_GRADE_COLS, 'unitPrice', 'note'],
+    hasGeom: false,
+    keyless: true,
+    numeric: [...QUALITY_GRADE_COLS, 'unitPrice'],
+  },
 };
 
 // Khung toạ độ Việt Nam (thô) để bắt lỗi lat/lng nhập nhầm.
@@ -89,7 +103,9 @@ export class IntegrationService {
   async createImport(target: string, file: UploadedFile | undefined, user: AuthUser) {
     const cfg = TARGETS[target];
     if (!cfg) {
-      throw new BadRequestException('VAL-001: target hỗ trợ: materials | barracks | storage-locations | pois');
+      throw new BadRequestException(
+        'VAL-001: target hỗ trợ: materials | barracks | storage-locations | pois | stock-quality',
+      );
     }
     if (!file) throw new BadRequestException('VAL-001: Thiếu tệp CSV');
     const { headers, rows } = parseCsv(file.buffer.toString('utf8'));
@@ -98,9 +114,21 @@ export class IntegrationService {
     }
     const idx = (h: string) => headers.indexOf(h);
     const cell = (cells: string[], h: string) => (idx(h) >= 0 ? cells[idx(h)] : undefined);
-    const existingCodes = new Set(
-      (await this.repoForCodes(target).find({ select: { code: true } })).map((m) => m.code),
-    );
+    // Đích có định danh code (materials/barracks/...): nạp mã đã có để bắt trùng.
+    const existingCodes = cfg.keyless
+      ? new Set<string>()
+      : new Set(
+          (await this.repoForCodes(target).find({ select: { code: true } })).map((m) => m.code),
+        );
+    // Đích stock-quality: nạp mã vật chất/kho hợp lệ để kiểm tra tham chiếu ngay ở staging.
+    const materialCodes =
+      target === 'stock-quality'
+        ? new Set((await this.materials.find({ select: { code: true } })).map((x) => x.code))
+        : new Set<string>();
+    const storageCodes =
+      target === 'stock-quality'
+        ? new Set((await this.storage.find({ select: { code: true } })).map((x) => x.code))
+        : new Set<string>();
     const seen = new Set<string>();
     const staging: Array<Record<string, unknown>> = [];
     const errors: Array<{ row: number; column?: string; message: string }> = [];
@@ -113,13 +141,41 @@ export class IntegrationService {
       // các cột phụ theo đích
       for (const col of cfg.optional) rec[col] = cell(cells, col) ?? null;
 
-      if (!code) { errors.push({ row: rowNo, column: 'code', message: 'Thiếu mã' }); rec.__valid = false; }
-      if (!name) { errors.push({ row: rowNo, column: 'name', message: 'Thiếu tên' }); rec.__valid = false; }
-      if (code && (existingCodes.has(code) || seen.has(code))) {
-        errors.push({ row: rowNo, column: 'code', message: `Trùng mã ${code}` });
-        rec.__valid = false;
+      if (cfg.keyless) {
+        // Đích không định danh code/name: kiểm cột bắt buộc + cột số.
+        for (const col of cfg.required) {
+          const v = (cell(cells, col) ?? '').trim();
+          rec[col] = v || null;
+          if (!v) { errors.push({ row: rowNo, column: col, message: `Thiếu ${col}` }); rec.__valid = false; }
+        }
+        for (const col of cfg.numeric ?? []) {
+          const raw = (cell(cells, col) ?? '').trim();
+          if (raw && Number.isNaN(Number(raw))) {
+            errors.push({ row: rowNo, column: col, message: `${col} phải là số` });
+            rec.__valid = false;
+          }
+        }
+        if (target === 'stock-quality') {
+          const mc = (rec.materialCode as string) ?? '';
+          const sc = (rec.storageCode as string) ?? '';
+          if (mc && !materialCodes.has(mc)) {
+            errors.push({ row: rowNo, column: 'materialCode', message: `Không có mã vật chất ${mc}` });
+            rec.__valid = false;
+          }
+          if (sc && !storageCodes.has(sc)) {
+            errors.push({ row: rowNo, column: 'storageCode', message: `Không có mã kho ${sc}` });
+            rec.__valid = false;
+          }
+        }
+      } else {
+        if (!code) { errors.push({ row: rowNo, column: 'code', message: 'Thiếu mã' }); rec.__valid = false; }
+        if (!name) { errors.push({ row: rowNo, column: 'name', message: 'Thiếu tên' }); rec.__valid = false; }
+        if (code && (existingCodes.has(code) || seen.has(code))) {
+          errors.push({ row: rowNo, column: 'code', message: `Trùng mã ${code}` });
+          rec.__valid = false;
+        }
+        if (code) seen.add(code);
       }
-      if (code) seen.add(code);
 
       // Toạ độ (nếu đích có hình học): cả hai lat/lng phải cùng có/không, đúng khung VN.
       if (cfg.hasGeom) {
@@ -173,11 +229,47 @@ export class IntegrationService {
     const valid = b.staging.filter((s) => s.__valid);
     const target = b.target;
 
+    // stock-quality: dựng sẵn ánh xạ mã → id (vật chất, kho) để commit nhanh.
+    const matIdByCode = new Map<string, string>();
+    const locIdByCode = new Map<string, string>();
+    if (target === 'stock-quality') {
+      for (const x of await this.materials.find({ select: { id: true, code: true } })) matIdByCode.set(x.code, x.id);
+      for (const x of await this.storage.find({ select: { id: true, code: true } })) locIdByCode.set(x.code, x.id);
+    }
+
     const committed = await this.ds.transaction(async (m) => {
       let n = 0;
       for (const r of valid) {
         const loc = r.lat != null && r.lng != null ? geoPoint(r.lng as number, r.lat as number) : null;
-        if (target === 'materials') {
+        if (target === 'stock-quality') {
+          const materialId = matIdByCode.get(r.materialCode as string);
+          const storageLocationId = locIdByCode.get(r.storageCode as string);
+          if (!materialId || !storageLocationId) continue; // đã chặn ở staging; phòng thủ
+          const num = (v: unknown) => (v == null || v === '' ? 0 : Number(v)).toFixed(3);
+          const price = r.unitPrice == null || r.unitPrice === '' ? null : Number(r.unitPrice).toFixed(3);
+          // Upsert theo (vật chất × kho × mục đích × vị trí) — cập nhật nếu đã có.
+          await m.query(
+            `INSERT INTO stock_quality_details
+               (material_id, storage_location_id, reserve_purpose, location_class,
+                qty_grade_1, qty_grade_2, qty_grade_3, qty_grade_4, qty_grade_5,
+                unit_price, note, created_by, updated_by)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$12)
+             ON CONFLICT (material_id, storage_location_id, reserve_purpose, location_class)
+             DO UPDATE SET
+               qty_grade_1 = EXCLUDED.qty_grade_1, qty_grade_2 = EXCLUDED.qty_grade_2,
+               qty_grade_3 = EXCLUDED.qty_grade_3, qty_grade_4 = EXCLUDED.qty_grade_4,
+               qty_grade_5 = EXCLUDED.qty_grade_5, unit_price = EXCLUDED.unit_price,
+               note = EXCLUDED.note, updated_by = EXCLUDED.updated_by, updated_at = now(),
+               row_version = stock_quality_details.row_version + 1`,
+            [
+              materialId, storageLocationId,
+              (r.reservePurpose as string) || 'THUONG_XUYEN',
+              (r.locationClass as string) || 'DANG_SU_DUNG',
+              num(r.grade1), num(r.grade2), num(r.grade3), num(r.grade4), num(r.grade5),
+              price, (r.note as string) ?? null, user.sub,
+            ],
+          );
+        } else if (target === 'materials') {
           await m.getRepository(Material).save(
             m.getRepository(Material).create({
               code: r.code as string,

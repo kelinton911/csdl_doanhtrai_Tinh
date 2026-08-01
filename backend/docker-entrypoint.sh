@@ -36,6 +36,8 @@ if [ "${SEED_ON_START:-false}" = "true" ]; then
   npm run seed:asset-catalog
   echo "[entrypoint] Dựng danh mục chính thức (vật chất/nhóm/loại công trình)..."
   npm run seed:official-catalog
+  echo "[entrypoint] Nạp danh mục kiểm kê bổ sung (mục đích dự trữ/vị trí/phân cấp Cấp 1–5)..."
+  npm run seed:inventory-catalogs
   echo "[entrypoint] Seed dữ liệu giả lập..."
   npm run seed
 fi

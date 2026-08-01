@@ -27,6 +27,12 @@ import { LandParcelDetailPage } from './pages/LandParcelDetailPage';
 import { UtilitiesListPage } from './pages/UtilitiesListPage';
 import { UtilityFormPage } from './pages/UtilityFormPage';
 import { UtilityDetailPage } from './pages/UtilityDetailPage';
+import { LocalResourcesListPage } from './pages/LocalResourcesListPage';
+import { LocalResourceFormPage } from './pages/LocalResourceFormPage';
+import { LocalResourceDetailPage } from './pages/LocalResourceDetailPage';
+import { ProjectsListPage } from './pages/ProjectsListPage';
+import { ProjectFormPage } from './pages/ProjectFormPage';
+import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { CommuneReadinessPage } from './pages/CommuneReadinessPage';
 import { FieldSurveyPage } from './pages/FieldSurveyPage';
 import { ScanPage } from './pages/ScanPage';
@@ -67,6 +73,14 @@ export default function App() {
       <Route path="/utilities/new" element={<Protected><UtilityFormPage /></Protected>} />
       <Route path="/utilities/:id/edit" element={<Protected><UtilityFormPage /></Protected>} />
       <Route path="/utilities/:id" element={<Protected><UtilityDetailPage /></Protected>} />
+      <Route path="/local-resources" element={<Protected><LocalResourcesListPage /></Protected>} />
+      <Route path="/local-resources/new" element={<Protected><LocalResourceFormPage /></Protected>} />
+      <Route path="/local-resources/:id/edit" element={<Protected><LocalResourceFormPage /></Protected>} />
+      <Route path="/local-resources/:id" element={<Protected><LocalResourceDetailPage /></Protected>} />
+      <Route path="/projects" element={<Protected><ProjectsListPage /></Protected>} />
+      <Route path="/projects/new" element={<Protected><ProjectFormPage /></Protected>} />
+      <Route path="/projects/:id/edit" element={<Protected><ProjectFormPage /></Protected>} />
+      <Route path="/projects/:id" element={<Protected><ProjectDetailPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
       <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />

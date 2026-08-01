@@ -62,6 +62,70 @@ const TEMPLATES: Record<string, TemplateDef> = {
     query: `SELECT COALESCE(condition,'CHUA_DANH_GIA') AS condition, COUNT(*) AS count
             FROM facilities GROUP BY 1 ORDER BY 2 DESC`,
   },
+  // ---- Biểu kiểm kê ngành Doanh trại (mô phỏng bộ biểu KK Hải Phòng 2026) ----
+  // Biểu 02/KK — Số lượng & giá trị VTHH (đơn vị giá trị: 1000đ).
+  'bieu-02kk-so-luong-gia-tri': {
+    title: 'Biểu 02/KK — Số lượng và giá trị vật tư hàng hóa',
+    columns: [
+      { key: 'material', header: 'Danh mục' },
+      { key: 'unit', header: 'ĐVT' },
+      { key: 'unit_price', header: 'Đơn giá (1000đ)' },
+      { key: 'qty', header: 'Số lượng tồn' },
+      { key: 'value', header: 'Giá trị (1000đ)' },
+    ],
+    query: `SELECT m.name AS material, m.unit_code AS unit,
+                   m.unit_price AS unit_price,
+                   COALESCE(SUM(sb.on_hand),0) AS qty,
+                   ROUND(COALESCE(SUM(sb.on_hand),0) * COALESCE(m.unit_price,0), 3) AS value
+            FROM materials m
+            LEFT JOIN stock_balances sb ON sb.material_id = m.id
+            GROUP BY m.id, m.name, m.unit_code, m.unit_price
+            HAVING COALESCE(SUM(sb.on_hand),0) > 0
+            ORDER BY m.code`,
+  },
+  // Biểu 03/KK — Chất lượng VTHH: phân cấp Cấp 1–5 (từ stock_quality_details).
+  'bieu-03kk-chat-luong': {
+    title: 'Biểu 03/KK — Chất lượng vật tư hàng hóa (phân cấp 1–5)',
+    columns: [
+      { key: 'material', header: 'Danh mục' },
+      { key: 'unit', header: 'ĐVT' },
+      { key: 'total', header: 'Tổng số' },
+      { key: 'c1', header: 'Cấp 1' },
+      { key: 'c2', header: 'Cấp 2' },
+      { key: 'c3', header: 'Cấp 3' },
+      { key: 'c4', header: 'Cấp 4' },
+      { key: 'c5', header: 'Cấp 5' },
+    ],
+    query: `SELECT m.name AS material, m.unit_code AS unit,
+                   SUM(q.qty_grade_1+q.qty_grade_2+q.qty_grade_3+q.qty_grade_4+q.qty_grade_5) AS total,
+                   SUM(q.qty_grade_1) AS c1, SUM(q.qty_grade_2) AS c2, SUM(q.qty_grade_3) AS c3,
+                   SUM(q.qty_grade_4) AS c4, SUM(q.qty_grade_5) AS c5
+            FROM stock_quality_details q
+            JOIN materials m ON m.id = q.material_id
+            GROUP BY m.id, m.name, m.unit_code
+            ORDER BY m.code`,
+  },
+  // Biểu 01/KKDT — Biến động tồn theo kỳ kiểm kê (kỳ trước / tăng / giảm / kỳ này).
+  'bieu-01kkdt-bien-dong': {
+    title: 'Biểu 01/KKDT — Biến động vật chất theo kỳ kiểm kê',
+    columns: [
+      { key: 'campaign', header: 'Kỳ kiểm kê' },
+      { key: 'material', header: 'Danh mục' },
+      { key: 'opening', header: 'Kỳ trước' },
+      { key: 'increase', header: 'Tăng' },
+      { key: 'decrease', header: 'Giảm' },
+      { key: 'closing', header: 'Kỳ này' },
+      { key: 'closing_value', header: 'Giá trị kỳ này (1000đ)' },
+    ],
+    query: `SELECT c.name AS campaign, m.name AS material,
+                   s.opening_qty AS opening, s.increase_qty AS increase,
+                   s.decrease_qty AS decrease, s.closing_qty AS closing,
+                   s.closing_value AS closing_value
+            FROM inventory_period_snapshots s
+            JOIN materials m ON m.id = s.material_id
+            LEFT JOIN inspection_campaigns c ON c.id = s.campaign_id
+            ORDER BY c.created_at DESC NULLS LAST, m.code`,
+  },
 };
 
 // M12 — Reporting & Analytics. UC-19 (tìm kiếm), UC-20 (xuất báo cáo).
@@ -72,6 +136,15 @@ export class ReportingService {
     private readonly storage: StorageService,
     private readonly ds: DataSource,
   ) {}
+
+  // Liệt kê mẫu báo cáo khả dụng cho FE (không lộ câu truy vấn nội bộ).
+  listTemplates() {
+    return Object.entries(TEMPLATES).map(([key, def]) => ({
+      key,
+      title: def.title,
+      columns: def.columns.map((c) => c.header),
+    }));
+  }
 
   // UC-19: tìm kiếm toàn cục (chỉ trong phạm vi cho phép — data-scope là lộ trình).
   async search(q: string) {

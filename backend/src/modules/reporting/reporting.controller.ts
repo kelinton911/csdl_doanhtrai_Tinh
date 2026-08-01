@@ -35,6 +35,12 @@ export class ReportingController {
     return this.service.search(q ?? '');
   }
 
+  @Get('reports/templates')
+  @ApiOperation({ summary: 'UC-20: Danh sách mẫu báo cáo khả dụng (key, tiêu đề, cột)' })
+  listTemplates() {
+    return this.service.listTemplates();
+  }
+
   @Get('reports/jobs')
   @ApiOperation({ summary: 'UC-20: Danh sách tác vụ xuất báo cáo' })
   listJobs() {

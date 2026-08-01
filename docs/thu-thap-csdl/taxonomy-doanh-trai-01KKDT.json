@@ -1,0 +1,1005 @@
+[
+  {
+    "level": 2,
+    "ten": "NGÀNH DOANH TRẠI",
+    "gia_tri": "24745087.74",
+    "con": []
+  },
+  {
+    "level": 1,
+    "so": "I",
+    "ten": "DOANH CỤ",
+    "gia_tri": "16963089",
+    "con": [
+      {
+        "level": 2,
+        "ten": "Doanh cụ theo thiết kế mẫu",
+        "gia_tri": "1036860",
+        "con": [
+          {
+            "level": 3,
+            "so": "1",
+            "ten": "Tủ áo gỗ 3 buồng",
+            "ma": "TA3B-Go-2016-TCHC",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "2",
+            "ten": "Tủ áo gỗ 2 buồng",
+            "ma": "TA2B-Go-2016-TCHC",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "3",
+            "ten": "Bàn làm việc cấp chỉ huy cấp Tiểu đoàn",
+            "ma": "BLVCHd-Go-2016-TCHC",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "4",
+            "ten": "Bàn làm việc trợ lý",
+            "ma": "BTL-Go-2016-TCHC",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "5",
+            "ten": "Bàn họp giao ban cấp Đại đội, Tiểu đoàn",
+            "ma": "BGBcd-Go-2016-TCHC",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "6",
+            "ten": "Bàn hội trường",
+            "ma": "BHT-Go-2016-TCHC",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "7",
+            "ten": "Ghế trợ lý",
+            "ma": "GTL-Go-2016-TCHC",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "8",
+            "ten": "Giường gỗ cán bộ 1,2 m",
+            "ma": "GCB-Go-2016-TCHC",
+            "gia_tri": "617500"
+          },
+          {
+            "level": 3,
+            "so": "9",
+            "ten": "Giường sắt 1 tầng",
+            "ma": "GCS1T-Sa-2016-TCHC",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "10",
+            "ten": "Giường sắt 2 tầng",
+            "ma": "GCS2T-Sa-2016-TCHC",
+            "gia_tri": "419360"
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "ten": "Doanh cụ khác (Thường xuyên)",
+        "gia_tri": "15926229",
+        "con": [
+          {
+            "level": 3,
+            "so": "1",
+            "ten": "Giường - phản",
+            "gia_tri": "6222457"
+          },
+          {
+            "level": 3,
+            "so": "1",
+            "ten": "Phản nằm",
+            "gia_tri": "720600"
+          },
+          {
+            "level": 3,
+            "so": "2",
+            "ten": "Giường ván (Ván +mễ)",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "3",
+            "ten": "Giường sắt 1 tầng",
+            "gia_tri": "160050"
+          },
+          {
+            "level": 3,
+            "so": "4",
+            "ten": "Giường sắt 2 tầng",
+            "gia_tri": "1686300"
+          },
+          {
+            "level": 3,
+            "so": "5",
+            "ten": "Giường gỗ 1 tầng (1m)",
+            "gia_tri": "1889107"
+          },
+          {
+            "level": 3,
+            "so": "6",
+            "ten": "Giường gỗ 1 tầng (1,2 m)",
+            "gia_tri": "1669800"
+          },
+          {
+            "level": 3,
+            "so": "7",
+            "ten": "Giường gỗ 2 tầng",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "8",
+            "ten": "Giường mô đéc đơn 1m",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "9",
+            "ten": "Giường mô đéc đôi",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "10",
+            "ten": "Giường đôi thường",
+            "gia_tri": "22500"
+          },
+          {
+            "level": 3,
+            "so": "11",
+            "ten": "Giường bệnh viện",
+            "gia_tri": "74100"
+          },
+          {
+            "level": 3,
+            "so": "12",
+            "ten": "Giường gấp xếp",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "13",
+            "ten": "Giường khác",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "2",
+            "ten": "Bàn",
+            "gia_tri": "3579406"
+          },
+          {
+            "level": 3,
+            "so": "1",
+            "ten": "Bàn l.việc cấp b, c, T.lý, N.viên",
+            "gia_tri": "594000"
+          },
+          {
+            "level": 3,
+            "so": "2",
+            "ten": "Bàn L. việc cấp Chỉ huy d trở lên",
+            "gia_tri": "214200"
+          },
+          {
+            "level": 3,
+            "so": "3",
+            "ten": "Bàn họp, giao ban các loại",
+            "gia_tri": "843600"
+          },
+          {
+            "level": 3,
+            "so": "4",
+            "ten": "Bàn nghiệp vụ",
+            "gia_tri": "462726"
+          },
+          {
+            "level": 3,
+            "so": "5",
+            "ten": "Bàn hội trường",
+            "gia_tri": "1078000"
+          },
+          {
+            "level": 3,
+            "so": "6",
+            "ten": "Bàn uống nước các loại",
+            "gia_tri": "302080"
+          },
+          {
+            "level": 3,
+            "so": "7",
+            "ten": "Bàn gấp xếp",
+            "gia_tri": "3200"
+          },
+          {
+            "level": 3,
+            "so": "8",
+            "ten": "Bàn khác",
+            "gia_tri": "81600"
+          },
+          {
+            "level": 3,
+            "so": "3",
+            "ten": "Ghế",
+            "gia_tri": "3344960"
+          },
+          {
+            "level": 3,
+            "so": "1",
+            "ten": "Ghế tựa gỗ",
+            "gia_tri": "1187166"
+          },
+          {
+            "level": 3,
+            "so": "2",
+            "ten": "Ghế tựa gỗ có đệm",
+            "gia_tri": "462649"
+          },
+          {
+            "level": 3,
+            "so": "3",
+            "ten": "Ghế tựa sắt có đệm",
+            "gia_tri": "888800"
+          },
+          {
+            "level": 3,
+            "so": "4",
+            "ten": "Ghế đẩu",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "5",
+            "ten": "Ghế băng",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "6",
+            "ten": "Ghế băng tựa",
+            "gia_tri": "10560"
+          },
+          {
+            "level": 3,
+            "so": "7",
+            "ten": "Ghế hội trường",
+            "gia_tri": "311945"
+          },
+          {
+            "level": 3,
+            "so": "8",
+            "ten": "Xalon đệm",
+            "gia_tri": "37440"
+          },
+          {
+            "level": 3,
+            "so": "9",
+            "ten": "Xalon gỗ",
+            "gia_tri": "251600"
+          },
+          {
+            "level": 3,
+            "so": "10",
+            "ten": "Xalon mây",
+            "gia_tri": "0"
+          },
+          {
+            "level": 3,
+            "so": "11",
+            "ten": "Ghế khác",
+            "gia_tri": "194800"
+          },
+          {
+            "level": 3,
+            "so": "4",
+            "ten": "Tủ - hòm",
+            "gia_tri": "2779406"
+          },
+          {
+            "level": 3,
+            "so": "1",
+            "ten": "Tủ quần, áo gỗ các loại",
+            "gia_tri": "255246"
+          },
+          {
+            "level": 3,
+            "so": "2",
+            "ten": "Tủ tài liệu gỗ",
+            "gia_tri": "896800"
+          },
+          {
+            "level": 3,
+            "so": "3",
+            "ten": "Tủ tài liệu sắt",
+            "gia_tri": "736560"
+          },
+          {
+            "level": 3,
+            "so": "4",
+            "ten": "Tủ đầu giường (Tủ cá nhân)",
+            "gia_tri": "514800"
+          },
+          {
+            "level": 3,
+            "so": "5",
+            "ten": "Tủ thuốc quân y",
+            "gia_tri": "16000"
+          },
+          {
+            "level": 3,
+            "so": "6",
+            "ten": "Tủ sách",
+            "gia_tri": "23200"
+          },
+          {
+            "level": 3,
+            "so": "7",
+            "ten": "Két sắt",
+            "gia_tri": "60800"
+          },
+          {
+            "level": 3,
+            "so": "8",
+            "ten": "Hòm tài liệu",
+            "gia_tri": "3000"
+          },
+          {
+            "level": 3,
+            "so": "9",
+            "ten": "Tủ hòm khác (tủ hòm gỗ 2 buồng)",
+            "gia_tri": "273000"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "level": 1,
+    "so": "II",
+    "ten": "DỤNG CỤ SINH HOẠT",
+    "gia_tri": "518104",
+    "con": [
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Dụng cụ sinh hoạt theo thiết kế mẫu",
+        "gia_tri": "518104"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Chậu giặt fi 450-600 (Bằng nhôm)",
+        "gia_tri": "27625"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Chậu rửa mặt fi 370 (Bằng nhôm)",
+        "gia_tri": "16352"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Xô tôn 4L",
+        "gia_tri": "14269"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Chậu nhựa 34,5 lít",
+        "gia_tri": "202560"
+      },
+      {
+        "level": 3,
+        "so": "5",
+        "ten": "Chậu rửa mặt 8,2 lít",
+        "gia_tri": "125250"
+      },
+      {
+        "level": 3,
+        "so": "6",
+        "ten": "Xô múc nước 5 lít",
+        "gia_tri": "132048"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Dụng cụ sinh hoạt khác",
+        "gia_tri": ""
+      }
+    ]
+  },
+  {
+    "level": 1,
+    "so": "III",
+    "ten": "PHƯƠNG TIỆN, THIẾT BỊ",
+    "gia_tri": "5229460",
+    "con": [
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Phòng, chống, cháy",
+        "gia_tri": "45140"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Bơm nước chữa cháy các loại",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Bình CO2 các loại",
+        "gia_tri": "16640"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Bình bọt các loại",
+        "gia_tri": "28500"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Các loại bình khí khác",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Phương tiện chống mối mọt",
+        "gia_tri": "750"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Bơm tay các loại",
+        "gia_tri": "750"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Máy phun thuốc trừ sâu",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Phương tiện chống mối mọt khác",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Thiết bị dùng điện-dẫn",
+        "gia_tri": "4228150"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Tủ lạnh các loại",
+        "gia_tri": "214600"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Máy điều hoà nhiệt độ các loại",
+        "gia_tri": "2302500"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Quạt bàn các loại",
+        "gia_tri": "86450"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Quạt trần các loại",
+        "gia_tri": "1009200"
+      },
+      {
+        "level": 3,
+        "so": "5",
+        "ten": "Quạt đảo trần",
+        "gia_tri": "141600"
+      },
+      {
+        "level": 3,
+        "so": "6",
+        "ten": "Quạt đứng các loại",
+        "gia_tri": "154000"
+      },
+      {
+        "level": 3,
+        "so": "7",
+        "ten": "Quạt treo tường các loại",
+        "gia_tri": "289800"
+      },
+      {
+        "level": 3,
+        "so": "8",
+        "ten": "Quạt thông gió các loại",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "9",
+        "ten": "Bình đun nước bằng điện các loại",
+        "gia_tri": "30000"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Vật chứa đựng dầu",
+        "gia_tri": "71100"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Phuy các loại",
+        "gia_tri": "1250"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Can sắt các loại",
+        "gia_tri": "200"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Can nhựa các loại",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Stéccác (3 m3 - 5 m3)",
+        "gia_tri": "69650"
+      },
+      {
+        "level": 3,
+        "so": "5",
+        "ten": "Vật chứa nước",
+        "gia_tri": "463770"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Đài nước kim loại",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Đài nước bằng bê tông",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Đài nước bằng gạch",
+        "gia_tri": "75000"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Bể chứa kim loại",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "5",
+        "ten": "Bể chứa bằng bê tông",
+        "gia_tri": "60000"
+      },
+      {
+        "level": 3,
+        "so": "6",
+        "ten": "Bể chứa bằng gạch",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "7",
+        "ten": "Phuy các loại",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "8",
+        "ten": "Can sắt các loại",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "9",
+        "ten": "Can nhựa các loại",
+        "gia_tri": "420"
+      },
+      {
+        "level": 3,
+        "so": "10",
+        "ten": "Stéc 3 - 5 m3",
+        "gia_tri": "328350"
+      },
+      {
+        "level": 3,
+        "so": "6",
+        "ten": "Trạm xử lý nước",
+        "gia_tri": ""
+      },
+      {
+        "level": 3,
+        "so": "7",
+        "ten": "Thiết bị vệ sinh",
+        "gia_tri": "175550"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Chậu rửa (lavabô)",
+        "gia_tri": "143650"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Bình nóng lạnh các loại",
+        "gia_tri": "31900"
+      },
+      {
+        "level": 3,
+        "so": "8",
+        "ten": "Giếng nước",
+        "gia_tri": "245000"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Giếng xây bằng gạch đá",
+        "gia_tri": "95000"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Giếng khoan",
+        "gia_tri": "150000"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Giếng đóng",
+        "gia_tri": "0"
+      }
+    ]
+  },
+  {
+    "level": 1,
+    "so": "IV",
+    "ten": "VẬT CHẤT SSCĐ",
+    "gia_tri": "441739.74",
+    "con": [
+      {
+        "level": 2,
+        "ten": "THEO CHỈ THỊ 15",
+        "gia_tri": "441739.74",
+        "con": [
+          {
+            "level": 3,
+            "so": "1",
+            "ten": "Nhà bạt Chỉ huy (nhà Tiểu đội)",
+            "gia_tri": "9880"
+          },
+          {
+            "level": 3,
+            "so": "2",
+            "ten": "Nhà bạt Quân y-S16A",
+            "gia_tri": "8500"
+          },
+          {
+            "level": 3,
+            "so": "3",
+            "ten": "Bể mềm 2 m3",
+            "gia_tri": "34750"
+          },
+          {
+            "level": 3,
+            "so": "4",
+            "ten": "Bể mềm 5 m3",
+            "gia_tri": "138381"
+          },
+          {
+            "level": 3,
+            "so": "5",
+            "ten": "Bể mềm 10 m3",
+            "gia_tri": "203019"
+          },
+          {
+            "level": 3,
+            "so": "6",
+            "ten": "Đèn bão",
+            "gia_tri": "42140"
+          },
+          {
+            "level": 3,
+            "so": "7",
+            "ten": "Dầu thắp",
+            "gia_tri": "5069.740000000001"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "level": 1,
+    "so": "V",
+    "ten": "VẬT CHẤT HL, DT",
+    "gia_tri": "966397",
+    "con": [
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Nhà bạt",
+        "gia_tri": "512946"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Nhà bạt chỉ huy",
+        "gia_tri": "21000"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Nhà bạt tiểu đội + khẩu đội",
+        "gia_tri": "167960"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Nhà bạt trung đội + diễn tập",
+        "gia_tri": "205200"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Nhà bạt quân y",
+        "gia_tri": "99000"
+      },
+      {
+        "level": 3,
+        "so": "5",
+        "ten": "Nhà bạt diễn tập 96 m2",
+        "gia_tri": "19786"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Bàn ghế gấp xếp",
+        "gia_tri": ""
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Đèn bão",
+        "gia_tri": ""
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "P. tiện chở nước các loại",
+        "gia_tri": ""
+      },
+      {
+        "level": 3,
+        "so": "5",
+        "ten": "P. tiện lọc nước tại chỗ các loại",
+        "gia_tri": ""
+      },
+      {
+        "level": 3,
+        "so": "6",
+        "ten": "P. tiện chứa nước",
+        "gia_tri": "1285"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Can nhựa 5 lít",
+        "gia_tri": "140"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Can nhựa 10 lít",
+        "gia_tri": "250"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Can nhựa gùi 17 lít",
+        "gia_tri": "595"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Can nhựa 20 lít",
+        "gia_tri": "300"
+      },
+      {
+        "level": 3,
+        "so": "5",
+        "ten": "Sitéc 1,3 m 3",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "6",
+        "ten": "Sitéc 3,0 m 3",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "7",
+        "ten": "Sitéc 4,0 m 3",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "7",
+        "ten": "Dầu thắp",
+        "gia_tri": ""
+      },
+      {
+        "level": 3,
+        "so": "8",
+        "ten": "Ni lon dày",
+        "gia_tri": ""
+      },
+      {
+        "level": 3,
+        "so": "9",
+        "ten": "Máy phát điện",
+        "gia_tri": "452166"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Công suất 3KW - 10KW",
+        "gia_tri": "452166"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Công suất 5KW",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Công suất 10KW",
+        "gia_tri": "0"
+      }
+    ]
+  },
+  {
+    "level": 1,
+    "so": "VI",
+    "ten": "MÁY CÁC LOẠI",
+    "gia_tri": "626298",
+    "con": [
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Máy biến áp",
+        "gia_tri": "27800"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Dưới 50 KVA",
+        "gia_tri": "27800"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Trên 50 đến 100 KVA",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Trên 100 đến 250 KVA",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Trên 250 đến 400 KVA",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "5",
+        "ten": "Trên 400 đến 1000 KVA",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "6",
+        "ten": "Trên 1000 KVA",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Máy phát điện",
+        "gia_tri": "572598"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Dưới 20 KW (Máy phát10KVA)",
+        "gia_tri": "546000"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Từ 20 KW trở lên",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Khác (máy phát 5KVA)",
+        "gia_tri": "26598"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Máy bơm nước",
+        "gia_tri": "25900"
+      },
+      {
+        "level": 3,
+        "so": "1",
+        "ten": "Dưới 20 m3/giờ",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "2",
+        "ten": "Từ 20 m3/giờ trở lên",
+        "gia_tri": "0"
+      },
+      {
+        "level": 3,
+        "so": "3",
+        "ten": "Máy bơm nước các loại",
+        "gia_tri": "25900"
+      },
+      {
+        "level": 3,
+        "so": "4",
+        "ten": "Máy khác do ngành doanh trại quản lý",
+        "gia_tri": "0"
+      }
+    ]
+  }
+]

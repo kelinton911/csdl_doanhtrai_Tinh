@@ -74,8 +74,10 @@ export const NAV: NavItem[] = [
   { to: '/materials', label: 'Danh mục vật chất', icon: 'clipboard', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
 
   // ── Lớp Kế hoạch & báo cáo ───────────────────────────────────
+  { to: '/projects', label: 'Xây dựng & dự án đầu tư', icon: 'building', dom: 'repair', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/scenarios', label: 'Kế hoạch và tình huống', icon: 'target', dom: 'plan', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN'] },
   { to: '/potential', label: 'Tiềm lực HC-KT', icon: 'target', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
+  { to: '/local-resources', label: 'Nguồn lực huy động', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/commune-readiness', label: 'Mức hoàn chỉnh hồ sơ xã', icon: 'chart', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/reports', label: 'Báo cáo - phân tích', icon: 'chart', dom: 'report', group: 'plan' },
 

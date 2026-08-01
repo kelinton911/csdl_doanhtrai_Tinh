@@ -143,6 +143,49 @@ export class AlertsService {
       /* bảng chưa tồn tại — bỏ qua an toàn */
     }
 
+    // M16 — Nguồn lực huy động: biên bản hiệp đồng hết/sắp hết hiệu lực (trong 30 ngày).
+    try {
+      const res = await this.ds.query(
+        `SELECT r.id, r.name, r.agreement_valid_until, a.name AS area FROM local_resources r
+         LEFT JOIN administrative_areas a ON a.id = r.area_id
+         WHERE r.status = 'ACTIVE' AND r.agreement_status = 'SIGNED'
+           AND r.agreement_valid_until IS NOT NULL
+           AND r.agreement_valid_until < (now() + interval '30 days') LIMIT 40`,
+      );
+      for (const r of res) {
+        const expired = new Date(r.agreement_valid_until) < new Date();
+        found.push({
+          alertType: 'RESOURCE_AGREEMENT_EXPIRING',
+          severity: expired ? 'HIGH' : 'MEDIUM',
+          title: `${expired ? 'Hiệp đồng hết hiệu lực' : 'Hiệp đồng sắp hết hiệu lực'}: ${r.name}`,
+          description: [r.area ? `Địa bàn ${r.area}` : null, `Hạn ${String(r.agreement_valid_until).slice(0, 10)}`].filter(Boolean).join(' · '),
+          entityType: 'local_resource',
+          entityId: r.id,
+        });
+      }
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
+
+    // M13 — Dự án XDCB: chậm tiến độ (quá hạn kế hoạch, chưa bàn giao) hoặc vượt dự toán/vốn.
+    try {
+      const proj = await this.ds.query(
+        `SELECT p.id, p.name, p.planned_end_date, p.approved_capital, p.phase,
+                (SELECT COALESCE(SUM(m.amount),0) FROM project_milestones m WHERE m.project_id = p.id AND m.kind='PAYMENT') AS disbursed
+         FROM projects p
+         WHERE p.phase NOT IN ('HANDED_OVER','WARRANTY','CLOSED','CANCELLED')
+         LIMIT 60`,
+      );
+      for (const r of proj) {
+        const delayed = r.planned_end_date && new Date(r.planned_end_date) < new Date();
+        const overBudget = Number(r.approved_capital) > 0 && Number(r.disbursed) > Number(r.approved_capital);
+        if (delayed) found.push({ alertType: 'PROJECT_DELAYED', severity: 'HIGH', title: `Dự án chậm tiến độ: ${r.name}`, description: `Hạn kế hoạch ${String(r.planned_end_date).slice(0, 10)}`, entityType: 'project', entityId: r.id });
+        if (overBudget) found.push({ alertType: 'PROJECT_OVER_BUDGET', severity: 'HIGH', title: `Dự án vượt vốn được duyệt: ${r.name}`, entityType: 'project', entityId: r.id });
+      }
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
+
     let created = 0;
     for (const a of found) {
       const dup = await this.repo.findOne({ where: { alertType: a.alertType!, entityId: a.entityId ?? undefined, status: AlertStatus.OPEN } as never });

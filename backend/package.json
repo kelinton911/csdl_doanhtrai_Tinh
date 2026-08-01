@@ -22,7 +22,10 @@
     "seed:asset-catalog": "ts-node -r tsconfig-paths/register src/database/seeds/seed-asset-catalog.ts",
     "seed:official-catalog": "ts-node -r tsconfig-paths/register src/database/seeds/seed-official-catalog.ts",
     "seed:land-parcels": "ts-node -r tsconfig-paths/register src/database/seeds/seed-land-parcels.ts",
-    "seed:utilities": "ts-node -r tsconfig-paths/register src/database/seeds/seed-utilities.ts"
+    "seed:utilities": "ts-node -r tsconfig-paths/register src/database/seeds/seed-utilities.ts",
+    "seed:inventory-catalogs": "ts-node -r tsconfig-paths/register src/database/seeds/seed-inventory-catalogs.ts",
+    "seed:local-resources": "ts-node -r tsconfig-paths/register src/database/seeds/seed-local-resources.ts",
+    "seed:projects": "ts-node -r tsconfig-paths/register src/database/seeds/seed-projects.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1096.0",

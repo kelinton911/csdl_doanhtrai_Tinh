@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { InspectionCampaign } from './entities/inspection-campaign.entity';
 import { InspectionSheet } from './entities/inspection-sheet.entity';
 import { InspectionLine } from './entities/inspection-line.entity';
@@ -258,6 +258,12 @@ export class InspectionService {
         s.status = sheetStatus;
         s.updatedBy = user.sub;
         await m.getRepository(InspectionSheet).save(s);
+        // Khi phiếu được DUYỆT: chốt số liệu kiểm kê thành ảnh chụp biến động theo kỳ
+        // (kỳ trước = tồn kiểm kê / kỳ này = số đếm), phục vụ Biểu KK. Recompute toàn kỳ
+        // để idempotent khi nhiều phiếu cùng vật chất được duyệt lần lượt.
+        if (sheetStatus === SheetStatus.APPROVED) {
+          await this.rebuildCampaignSnapshots(m, s.campaignId, user.sub);
+        }
       }
       await this.audit.record({
         actorId: user.sub,
@@ -269,5 +275,47 @@ export class InspectionService {
       });
       return savedTask;
     });
+  }
+
+  // Dựng lại ảnh chụp biến động của cả kỳ kiểm kê từ TẤT CẢ phiếu đã DUYỆT (idempotent).
+  // opening = Σ tồn kiểm kê (expected), closing = Σ số đếm (counted); tăng/giảm suy ra.
+  // Giá trị (1000đ) chỉ tính khi vật chất đã có đơn giá. storage_location_id = NULL vì
+  // phiếu kiểm kê theo doanh trại (không theo kho) — đây là roll-up cấp kỳ.
+  private async rebuildCampaignSnapshots(
+    m: EntityManager,
+    campaignId: string,
+    userSub: string,
+  ): Promise<void> {
+    await m.query(
+      `DELETE FROM inventory_period_snapshots
+         WHERE campaign_id = $1 AND storage_location_id IS NULL AND reserve_purpose = 'THUONG_XUYEN'`,
+      [campaignId],
+    );
+    await m.query(
+      `INSERT INTO inventory_period_snapshots
+         (campaign_id, material_id, storage_location_id, reserve_purpose,
+          opening_qty, increase_qty, decrease_qty, closing_qty,
+          opening_value, closing_value, note, created_by)
+       SELECT $1, agg.material_id, NULL, 'THUONG_XUYEN',
+              agg.opening,
+              GREATEST(agg.closing - agg.opening, 0),
+              GREATEST(agg.opening - agg.closing, 0),
+              agg.closing,
+              CASE WHEN mt.unit_price IS NULL THEN NULL ELSE agg.opening * mt.unit_price END,
+              CASE WHEN mt.unit_price IS NULL THEN NULL ELSE agg.closing * mt.unit_price END,
+              'Tự sinh khi duyệt phiếu kiểm kê', $2
+       FROM (
+         SELECT il.item_ref AS material_id,
+                COALESCE(SUM(il.expected_quantity), 0) AS opening,
+                COALESCE(SUM(il.counted_quantity), 0)  AS closing
+         FROM inspection_lines il
+         JOIN inspection_sheets s ON s.id = il.sheet_id
+         WHERE s.campaign_id = $1 AND s.status = 'APPROVED'
+           AND il.item_type = 'MATERIAL' AND il.item_ref IS NOT NULL
+         GROUP BY il.item_ref
+       ) agg
+       LEFT JOIN materials mt ON mt.id = agg.material_id`,
+      [campaignId, userSub],
+    );
   }
 }
