@@ -6,6 +6,7 @@ import {
   CreateStorageLocationDto,
   CreateTransactionDto,
   InventoryFilterQuery,
+  InventorySummaryQuery,
   ListStorageLocationsQuery,
   StorageReviewDto,
   UpdateStorageLocationDto,
@@ -84,9 +85,19 @@ export class InventoryController {
   }
 
   @Get('balances')
-  @ApiOperation({ summary: 'UC-08: Số dư tồn (kèm chênh lệch kiểm kê)' })
-  balances(@Query() q: InventoryFilterQuery) {
-    return this.service.listBalances(q, { storageLocationId: q.storageLocationId, materialId: q.materialId });
+  @ApiOperation({ summary: 'UC-08: Số dư tồn (kèm chênh lệch kiểm kê, lọc theo phạm vi dữ liệu)' })
+  balances(@Query() q: InventoryFilterQuery, @CurrentUser() user: AuthUser) {
+    return this.service.listBalances(
+      q,
+      { storageLocationId: q.storageLocationId, materialId: q.materialId, areaId: q.areaId },
+      user,
+    );
+  }
+
+  @Get('summary-by-area')
+  @ApiOperation({ summary: 'Vật chất chung của xã: tổng hợp tồn theo xã (lọc 1 xã hoặc tổng toàn tỉnh)' })
+  summaryByArea(@Query() q: InventorySummaryQuery, @CurrentUser() user: AuthUser) {
+    return this.service.summaryByArea({ areaId: q.areaId, categoryCode: q.categoryCode }, user);
   }
 
   @Get('transactions')

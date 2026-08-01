@@ -6,12 +6,14 @@ import { LoginPage } from './pages/LoginPage';
 
 // Tách mã theo route (code-splitting): mỗi trang là một chunk tải khi cần → bundle chính nhỏ,
 // tải nhanh. Trang dùng named export nên bọc về default cho React.lazy.
+const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
 const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })));
 const BarracksListPage = lazy(() => import('./pages/BarracksListPage').then((m) => ({ default: m.BarracksListPage })));
 const BarracksFormPage = lazy(() => import('./pages/BarracksFormPage').then((m) => ({ default: m.BarracksFormPage })));
 const BarracksDetailPage = lazy(() => import('./pages/BarracksDetailPage').then((m) => ({ default: m.BarracksDetailPage })));
 const InventoryPage = lazy(() => import('./pages/InventoryPage').then((m) => ({ default: m.InventoryPage })));
+const CommuneMaterialsPage = lazy(() => import('./pages/CommuneMaterialsPage').then((m) => ({ default: m.CommuneMaterialsPage })));
 const StoragePage = lazy(() => import('./pages/StoragePage').then((m) => ({ default: m.StoragePage })));
 const ApprovalQueuePage = lazy(() => import('./pages/ApprovalQueuePage').then((m) => ({ default: m.ApprovalQueuePage })));
 const MaterialsPage = lazy(() => import('./pages/MaterialsPage').then((m) => ({ default: m.MaterialsPage })));
@@ -84,6 +86,8 @@ export default function App() {
   const { profile, ready } = useAuth();
   return (
     <Routes>
+      <Route path="/" element={<Suspense fallback={<Centered text="Đang tải…" />}><LandingPage /></Suspense>} />
+      <Route path="/landing" element={<Suspense fallback={<Centered text="Đang tải…" />}><LandingPage /></Suspense>} />
       <Route
         path="/login"
         element={ready && profile ? <Navigate to="/dashboard" replace /> : <LoginPage />}
@@ -133,6 +137,7 @@ export default function App() {
       <Route path="/readiness/recovery" element={<Protected><RecoveryPage /></Protected>} />
       <Route path="/analytics" element={<Protected><AnalyticsPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
+      <Route path="/commune-materials" element={<Protected><CommuneMaterialsPage /></Protected>} />
       <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
       <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />
       <Route path="/materials" element={<Protected><MaterialsPage /></Protected>} />

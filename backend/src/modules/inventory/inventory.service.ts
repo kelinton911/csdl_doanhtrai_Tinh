@@ -177,10 +177,14 @@ export class InventoryService {
   }
 
   // ------- Số dư tồn -------
+  // Lọc theo phạm vi dữ liệu (server-side): người dùng cấp xã chỉ thấy tồn của địa bàn mình;
+  // vai trò toàn tỉnh thấy tất cả. Hỗ trợ lọc theo 1 xã (areaId) cho màn "Vật chất chung của xã".
   async listBalances(
     q: PaginationQuery,
-    filters: { storageLocationId?: string; materialId?: string },
+    filters: { storageLocationId?: string; materialId?: string; areaId?: string },
+    user?: AuthUser,
   ) {
+    const scope = barracksScope(user);
     const qb = this.dataSource
       .createQueryBuilder()
       .select('sb.id', 'id')
@@ -195,23 +199,37 @@ export class InventoryService {
       .addSelect('m.category_code', 'categoryCode')
       .addSelect('l.code', 'locationCode')
       .addSelect('l.name', 'locationName')
+      .addSelect('l.area_id', 'areaId')
+      .addSelect('a.name', 'areaName')
       .from(StockBalance, 'sb')
       .leftJoin('materials', 'm', 'm.id = sb.material_id')
       .leftJoin('storage_locations', 'l', 'l.id = sb.storage_location_id')
+      .leftJoin('administrative_areas', 'a', 'a.id = l.area_id')
       .orderBy('m.code', 'ASC')
       .offset(q.skip)
       .limit(q.size);
-    if (filters.storageLocationId)
-      qb.andWhere('sb.storage_location_id = :loc', { loc: filters.storageLocationId });
-    if (filters.materialId)
-      qb.andWhere('sb.material_id = :mat', { mat: filters.materialId });
+    // Query đếm dùng cùng join kho để áp được điều kiện phạm vi/địa bàn.
+    const countQb = this.dataSource
+      .createQueryBuilder()
+      .select('COUNT(*)', 'cnt')
+      .from(StockBalance, 'sb')
+      .leftJoin('storage_locations', 'l', 'l.id = sb.storage_location_id');
+
+    for (const b of [qb, countQb]) {
+      if (filters.storageLocationId)
+        b.andWhere('sb.storage_location_id = :loc', { loc: filters.storageLocationId });
+      if (filters.materialId) b.andWhere('sb.material_id = :mat', { mat: filters.materialId });
+      if (filters.areaId) b.andWhere('l.area_id = :area', { area: filters.areaId });
+      if (scope)
+        b.andWhere('(l.area_id = ANY(:areaIds::uuid[]) OR l.organization_id = :orgId)', {
+          areaIds: scope.areaIds,
+          orgId: scope.organizationId,
+        });
+    }
 
     const rows = await qb.getRawMany();
-    const countQb = this.balances.createQueryBuilder('sb');
-    if (filters.storageLocationId)
-      countQb.andWhere('sb.storage_location_id = :loc', { loc: filters.storageLocationId });
-    if (filters.materialId) countQb.andWhere('sb.material_id = :mat', { mat: filters.materialId });
-    const total = await countQb.getCount();
+    const countRow = await countQb.getRawOne<{ cnt: string }>();
+    const total = Number(countRow?.cnt ?? 0);
 
     const data = rows.map((r) => ({
       ...r,
@@ -220,6 +238,54 @@ export class InventoryService {
       variance: r.lastCounted !== null ? Number(r.lastCounted) - Number(r.onHand) : null,
     }));
     return paginated(data, total, q);
+  }
+
+  // Tổng hợp tồn theo xã × nhóm ngành — "vật chất chung của xã" (Khâu 1). Bỏ trống areaId
+  // = tổng toàn tỉnh (theo phạm vi dữ liệu của người dùng). Đọc từ tồn thực đã ghi sổ.
+  async summaryByArea(filters: { areaId?: string; categoryCode?: string }, user?: AuthUser) {
+    const scope = barracksScope(user);
+    const qb = this.dataSource
+      .createQueryBuilder()
+      .select('a.id', 'areaId')
+      .addSelect('a.name', 'areaName')
+      .addSelect('m.category_code', 'categoryCode')
+      .addSelect('cat.name', 'categoryName')
+      .addSelect('COUNT(DISTINCT sb.material_id)', 'materialKinds')
+      .addSelect('COALESCE(SUM(sb.on_hand), 0)', 'totalOnHand')
+      .from(StockBalance, 'sb')
+      .leftJoin('storage_locations', 'l', 'l.id = sb.storage_location_id')
+      .leftJoin('administrative_areas', 'a', 'a.id = l.area_id')
+      .leftJoin('materials', 'm', 'm.id = sb.material_id')
+      .leftJoin('catalogs', 'cat', "cat.type = 'material-category' AND cat.code = m.category_code")
+      .groupBy('a.id')
+      .addGroupBy('a.name')
+      .addGroupBy('m.category_code')
+      .addGroupBy('cat.name')
+      .orderBy('a.name', 'ASC')
+      .addOrderBy('cat.name', 'ASC');
+    if (filters.areaId) qb.andWhere('l.area_id = :area', { area: filters.areaId });
+    if (filters.categoryCode) qb.andWhere('m.category_code = :cc', { cc: filters.categoryCode });
+    if (scope)
+      qb.andWhere('(l.area_id = ANY(:areaIds::uuid[]) OR l.organization_id = :orgId)', {
+        areaIds: scope.areaIds,
+        orgId: scope.organizationId,
+      });
+    const rows = await qb.getRawMany<{
+      areaId: string | null;
+      areaName: string | null;
+      categoryCode: string | null;
+      categoryName: string | null;
+      materialKinds: string;
+      totalOnHand: string;
+    }>();
+    return rows.map((r) => ({
+      areaId: r.areaId,
+      areaName: r.areaName,
+      categoryCode: r.categoryCode,
+      categoryName: r.categoryName,
+      materialKinds: Number(r.materialKinds),
+      totalOnHand: Number(r.totalOnHand),
+    }));
   }
 
   async listTransactions(

@@ -6,31 +6,150 @@ import { Icon } from '../components/Icon';
 import { useTheme } from '../lib/theme';
 
 // Màn đăng nhập split-view (Frontend §6.1) — panel định danh + panel xác thực.
-// Chỉ điền sẵn tài khoản demo ở môi trường phát triển; PROD để trống, không lộ thông tin.
-const IS_DEV = import.meta.env.DEV;
+// Hiển thị bộ tài khoản demo/kiểm thử để hỗ trợ test & phát triển (kể cả khi chạy container Docker).
+// Nếu muốn ẩn ở môi trường sản xuất thật (PROD), đặt VITE_HIDE_DEMO_ACCOUNTS=true trong .env.
+const SHOW_DEMO = import.meta.env.VITE_HIDE_DEMO_ACCOUNTS !== 'true';
 
-// Tài khoản demo (chỉ DEV) — mỗi vai trò một tài khoản để kiểm thử giao diện riêng.
-const DEMO_ACCOUNTS: Array<{ u: string; label: string }> = [
-  { u: 'admin', label: 'Quản trị' },
-  { u: 'chihuy', label: 'Chỉ huy tỉnh' },
-  { u: 'hckt', label: 'CB doanh trại' },
-  { u: 'xa01', label: 'CB xã' },
-  { u: 'kiemduyet', label: 'Kiểm duyệt' },
-  { u: 'kiemtra', label: 'Kiểm tra' },
-  { u: 'baocao', label: 'Xem báo cáo' },
+// Tài khoản demo — mỗi vai trò một tài khoản để kiểm thử giao diện riêng.
+interface DemoAccount {
+  u: string;
+  p: string;
+  label: string;
+  desc: string;
+  roleCode: string;
+  badgeBg: string;
+  badgeFg: string;
+}
+
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  {
+    u: 'admin',
+    p: 'admin@123',
+    label: 'Quản trị hệ thống',
+    desc: 'Quản trị toàn quyền, cấu hình hệ thống & phân quyền người dùng',
+    roleCode: 'SYS_ADMIN',
+    badgeBg: 'var(--role-sys-bg)',
+    badgeFg: 'var(--role-sys)',
+  },
+  {
+    u: 'chihuy',
+    p: 'admin@123',
+    label: 'Chỉ huy tỉnh',
+    desc: 'Lãnh đạo Bộ CHQS tỉnh, theo dõi bức tranh tổng thể & duyệt báo cáo',
+    roleCode: 'PROVINCIAL_COMMAND',
+    badgeBg: 'var(--role-cmd-bg)',
+    badgeFg: 'var(--role-cmd)',
+  },
+  {
+    u: 'hckt',
+    p: 'admin@123',
+    label: 'CB ngành doanh trại',
+    desc: 'Cán bộ quản lý doanh trại, công trình, dự án & theo dõi vật chất',
+    roleCode: 'BARRACKS_OFFICER',
+    badgeBg: 'var(--role-hckt-bg)',
+    badgeFg: 'var(--role-hckt)',
+  },
+  {
+    u: 'xa01',
+    p: 'admin@123',
+    label: 'CB Ban CHQS xã',
+    desc: 'Cán bộ quản lý dữ liệu Ban CHQS cấp xã / địa bàn cơ sở',
+    roleCode: 'COMMUNE_USER',
+    badgeBg: 'var(--role-ward-bg)',
+    badgeFg: 'var(--role-ward)',
+  },
+  {
+    u: 'kiemduyet',
+    p: 'admin@123',
+    label: 'Kiểm duyệt viên',
+    desc: 'Thẩm định, duyệt biến động doanh trại & phiếu kiểm kê tài sản',
+    roleCode: 'REVIEWER',
+    badgeBg: 'var(--info-bg)',
+    badgeFg: 'var(--info-fg)',
+  },
+  {
+    u: 'kiemtra',
+    p: 'admin@123',
+    label: 'CB kiểm tra - thanh tra',
+    desc: 'Kiểm tra, thanh tra chuyên ngành, phát hiện sai sót & chênh lệch',
+    roleCode: 'AUDITOR',
+    badgeBg: 'var(--role-audit-bg)',
+    badgeFg: 'var(--role-audit)',
+  },
+  {
+    u: 'baocao',
+    p: 'admin@123',
+    label: 'Xem báo cáo',
+    desc: 'Quyền tra cứu, xem báo cáo tổng hợp & xuất dữ liệu hệ thống',
+    roleCode: 'REPORT_VIEWER',
+    badgeBg: 'var(--color-accent-100)',
+    badgeFg: 'var(--color-accent-700)',
+  },
 ];
 
 export function LoginPage() {
   const { login } = useAuth();
   const { theme, toggle } = useTheme();
   const nav = useNavigate();
-  const [username, setUsername] = useState(IS_DEV ? 'admin' : '');
-  const [password, setPassword] = useState(IS_DEV ? 'admin@123' : '');
+  const [username, setUsername] = useState(SHOW_DEMO ? 'admin' : '');
+  const [password, setPassword] = useState(SHOW_DEMO ? 'admin@123' : '');
   const [otp, setOtp] = useState('');
   const [needOtp, setNeedOtp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  // State tiện ích kiểm thử demo
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [demoTab, setDemoTab] = useState<'chips' | 'list'>('chips');
+  const [filterQuery, setFilterQuery] = useState('');
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => {
+      setToastMsg((prev) => (prev === msg ? null : prev));
+    }, 3000);
+  };
+
+  const fillAccount = (acc: DemoAccount) => {
+    setUsername(acc.u);
+    setPassword(acc.p);
+    showToast(`✓ Đã tự điền tài khoản [${acc.u}] vào form đăng nhập!`);
+  };
+
+  const copyText = async (text: string, label: string, keyId: string) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopiedKey(keyId);
+      setTimeout(() => setCopiedKey(null), 2000);
+      showToast(`✓ Đã sao chép ${label}: "${text}"`);
+    } catch {
+      showToast(`Không thể sao chép tự động. Vui lòng chọn và copy thủ công.`);
+    }
+  };
+
+  const filteredAccounts = DEMO_ACCOUNTS.filter((a) => {
+    if (!filterQuery.trim()) return true;
+    const q = filterQuery.toLowerCase();
+    return (
+      a.u.toLowerCase().includes(q) ||
+      a.label.toLowerCase().includes(q) ||
+      a.desc.toLowerCase().includes(q) ||
+      a.roleCode.toLowerCase().includes(q)
+    );
+  });
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,13 +179,15 @@ export function LoginPage() {
 
   // Đăng nhập nhanh theo vai trò (chỉ DEV) để kiểm thử giao diện riêng của từng vai trò.
   async function loginAs(user: string) {
+    const acc = DEMO_ACCOUNTS.find((a) => a.u === user);
+    const pass = acc?.p || 'admin@123';
     setUsername(user);
-    setPassword('admin@123');
+    setPassword(pass);
     setBusy(true);
     setError(null);
     setLocked(false);
     try {
-      await login(user, 'admin@123');
+      await login(user, pass);
       nav('/dashboard', { replace: true });
     } catch (err) {
       setError(toProblem(err).title);
@@ -88,27 +209,38 @@ export function LoginPage() {
           justifyContent: 'space-between',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              background: 'var(--teal)',
-              display: 'grid',
-              placeItems: 'center',
-              fontWeight: 800,
-              fontFamily: 'var(--font-heading)',
-              fontSize: 18,
-            }}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                background: 'var(--teal)',
+                display: 'grid',
+                placeItems: 'center',
+                fontWeight: 800,
+                fontFamily: 'var(--font-heading)',
+                fontSize: 18,
+              }}
+            >
+              DT
+            </div>
+            <div style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1.5, color: 'var(--nav-fg-dim)' }}>
+              Bộ Chỉ huy Quân sự tỉnh
+              <br />
+              Cơ quan Hậu cần - Kỹ thuật
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => nav('/')}
+            className="btn btn-ghost btn-sm"
+            style={{ color: 'var(--teal)', border: '1px solid var(--teal)', padding: '6px 14px', fontSize: 12, fontWeight: 700 }}
           >
-            DT
-          </div>
-          <div style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1.5, color: 'var(--nav-fg-dim)' }}>
-            Bộ Chỉ huy Quân sự tỉnh
-            <br />
-            Cơ quan Hậu cần - Kỹ thuật
-          </div>
+            ← Trang giới thiệu GeoVR 3D
+          </button>
         </div>
         <div style={{ maxWidth: 620 }}>
           <div style={{ height: 2, background: 'var(--color-accent-400)', width: 96, marginBottom: 28 }} />
@@ -142,11 +274,12 @@ export function LoginPage() {
         style={{
           background: 'var(--surface-1)',
           borderLeft: '2px solid var(--color-text)',
-          padding: '56px 48px',
+          padding: '48px 40px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          gap: 20,
+          gap: 18,
+          overflowY: 'auto',
         }}
       >
         <div>
@@ -154,6 +287,29 @@ export function LoginPage() {
           <h2 style={{ fontWeight: 800, fontSize: 28, margin: 0 }}>XÁC THỰC NGƯỜI DÙNG</h2>
         </div>
         <div style={{ height: 2, background: 'var(--color-text)' }} />
+
+        {/* Notification Toast phản hồi các thao tác copy/tự điền */}
+        {toastMsg && (
+          <div
+            role="status"
+            style={{
+              background: 'var(--ok-bg)',
+              color: 'var(--ok-fg)',
+              border: '1px solid var(--ok-bd)',
+              padding: '8px 12px',
+              borderRadius: 6,
+              fontSize: 12.5,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            }}
+          >
+            <Icon name="check" size={16} />
+            <span>{toastMsg}</span>
+          </div>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label className="field-label" htmlFor="acc">Tài khoản (bắt buộc)</label>
@@ -182,24 +338,236 @@ export function LoginPage() {
           {busy ? 'Đang xác thực…' : 'Đăng nhập'}
         </button>
 
-        {IS_DEV && (
-          <div style={{ fontSize: 12, color: 'var(--color-neutral-600)', background: 'var(--color-accent-100)', border: '1px solid var(--color-accent-300)', padding: 10, borderRadius: 6 }}>
-            <div style={{ marginBottom: 8 }}>Đăng nhập nhanh theo vai trò (chỉ DEV) — mật khẩu <b>admin@123</b>:</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {DEMO_ACCOUNTS.map((a) => (
+        {/* Danh sách tài khoản demo và công cụ copy / tự điền nhanh (dùng cho dev & testing) */}
+        {SHOW_DEMO && (
+          <div
+            style={{
+              background: 'var(--color-accent-100)',
+              border: '1px solid var(--color-accent-300)',
+              borderRadius: 8,
+              padding: 12,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              fontSize: 12,
+            }}
+          >
+            {/* Header & Tabs */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Icon name="user" size={15} />
+                <span style={{ fontWeight: 700, fontSize: 12.5, color: 'var(--color-accent-800)' }}>
+                  Tài khoản Demo / Kiểm thử
+                </span>
+                <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 4, background: 'var(--color-accent-600)', color: '#fff', fontWeight: 700 }}>
+                  DEV
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: 4, background: 'var(--surface-1)', padding: 2, borderRadius: 6, border: '1px solid var(--color-neutral-300)' }}>
                 <button
-                  key={a.u}
                   type="button"
-                  className="btn btn-sm"
-                  disabled={busy}
-                  onClick={() => loginAs(a.u)}
-                  title={`Đăng nhập bằng ${a.u}`}
-                  style={{ fontSize: 11.5 }}
+                  className={`btn btn-sm ${demoTab === 'chips' ? 'btn-accent' : 'btn-ghost'}`}
+                  style={{ padding: '3px 8px', fontSize: 11 }}
+                  onClick={() => setDemoTab('chips')}
                 >
-                  <Icon name="user" size={12} /> {a.label}
+                  ⚡ Thẻ nhanh
                 </button>
-              ))}
+                <button
+                  type="button"
+                  className={`btn btn-sm ${demoTab === 'list' ? 'btn-accent' : 'btn-ghost'}`}
+                  style={{ padding: '3px 8px', fontSize: 11 }}
+                  onClick={() => setDemoTab('list')}
+                >
+                  📋 Chi tiết & Copy
+                </button>
+              </div>
             </div>
+
+            {demoTab === 'chips' ? (
+              <div>
+                <div style={{ fontSize: 11.5, color: 'var(--color-neutral-700)', marginBottom: 8 }}>
+                  Nhấp <b>Tự điền</b> hoặc <b>Đăng nhập</b> theo từng vai trò (mật khẩu <code>admin@123</code>):
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {DEMO_ACCOUNTS.map((a) => (
+                    <div
+                      key={a.u}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        background: 'var(--surface-1)',
+                        border: '1px solid var(--color-neutral-300)',
+                        borderRadius: 6,
+                        padding: '2px 4px 2px 8px',
+                      }}
+                    >
+                      <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--color-text)' }}>
+                        {a.label}
+                      </span>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        style={{ padding: '2px 5px', fontSize: 11, color: 'var(--color-accent-700)' }}
+                        onClick={() => fillAccount(a)}
+                        title={`Tự điền tài khoản ${a.u} vào form`}
+                      >
+                        <Icon name="edit" size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={busy}
+                        onClick={() => loginAs(a.u)}
+                        title={`Đăng nhập ngay bằng ${a.u}`}
+                        style={{ padding: '2px 8px', fontSize: 11 }}
+                      >
+                        Vào ngay
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {/* Thanh tìm kiếm & lọc */}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ position: 'relative', flex: 1 }}>
+                    <input
+                      className="input"
+                      style={{ padding: '4px 8px 4px 26px', fontSize: 11.5, height: 28 }}
+                      placeholder="Tìm theo tên, vai trò..."
+                      value={filterQuery}
+                      onChange={(e) => setFilterQuery(e.target.value)}
+                    />
+                    <span style={{ position: 'absolute', left: 7, top: 6, opacity: 0.6 }}>
+                      <Icon name="search" size={13} />
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-ghost"
+                    onClick={() => copyText('admin@123', 'Mật khẩu chung', 'pw-all')}
+                    title="Copy mật khẩu chung admin@123"
+                    style={{ fontSize: 11, padding: '3px 8px' }}
+                  >
+                    <Icon name="clipboard" size={12} /> Copy MK chung
+                  </button>
+                </div>
+
+                {/* Danh sách thẻ tài khoản */}
+                <div className="scrl" style={{ maxHeight: 250, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, paddingRight: 2 }}>
+                  {filteredAccounts.length === 0 ? (
+                    <div style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', textAlign: 'center', padding: 12 }}>
+                      Không tìm thấy tài khoản phù hợp với "{filterQuery}".
+                    </div>
+                  ) : (
+                    filteredAccounts.map((a) => (
+                      <div
+                        key={a.u}
+                        style={{
+                          background: 'var(--surface-1)',
+                          border: '1px solid var(--color-neutral-300)',
+                          borderRadius: 6,
+                          padding: 8,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 6,
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span style={{ fontWeight: 700, fontSize: 12.5 }}>{a.label}</span>
+                              <span
+                                style={{
+                                  fontSize: 10,
+                                  fontWeight: 700,
+                                  padding: '1px 5px',
+                                  borderRadius: 4,
+                                  background: a.badgeBg,
+                                  color: a.badgeFg,
+                                }}
+                              >
+                                {a.roleCode}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--color-neutral-600)', marginTop: 2 }}>
+                              {a.desc}
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-ghost"
+                              onClick={() => fillAccount(a)}
+                              title="Tự điền vào form đăng nhập"
+                              style={{ padding: '2px 6px', fontSize: 11 }}
+                            >
+                              <Icon name="edit" size={12} /> Điền
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-primary"
+                              disabled={busy}
+                              onClick={() => loginAs(a.u)}
+                              title="Đăng nhập ngay"
+                              style={{ padding: '2px 8px', fontSize: 11 }}
+                            >
+                              Vào ngay
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Hàng thông tin & nút Sao chép */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, paddingTop: 4, borderTop: '1px dashed var(--color-neutral-300)', fontSize: 11, alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ color: 'var(--color-neutral-600)' }}>Tên:</span>
+                            <code style={{ background: 'var(--color-neutral-200)', padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>{a.u}</code>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              style={{ padding: '1px 4px', height: 20, fontSize: 10.5 }}
+                              onClick={() => copyText(a.u, 'Tài khoản', `u-${a.u}`)}
+                              title="Sao chép tên tài khoản"
+                            >
+                              <Icon name={copiedKey === `u-${a.u}` ? 'check' : 'clipboard'} size={11} />
+                              {copiedKey === `u-${a.u}` ? 'Đã chép' : 'Copy TK'}
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ color: 'var(--color-neutral-600)' }}>Mật khẩu:</span>
+                            <code style={{ background: 'var(--color-neutral-200)', padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>{a.p}</code>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              style={{ padding: '1px 4px', height: 20, fontSize: 10.5 }}
+                              onClick={() => copyText(a.p, 'Mật khẩu', `p-${a.u}`)}
+                              title="Sao chép mật khẩu"
+                            >
+                              <Icon name={copiedKey === `p-${a.u}` ? 'check' : 'clipboard'} size={11} />
+                              {copiedKey === `p-${a.u}` ? 'Đã chép' : 'Copy MK'}
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            style={{ padding: '1px 4px', height: 20, fontSize: 10.5, color: 'var(--color-accent-700)', marginLeft: 'auto' }}
+                            onClick={() => copyText(`${a.u} / ${a.p}`, 'Tài khoản & Mật khẩu', `all-${a.u}`)}
+                            title="Sao chép cả tài khoản và mật khẩu"
+                          >
+                            <Icon name="clipboard" size={11} /> Copy cả 2
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -213,3 +581,4 @@ export function LoginPage() {
     </div>
   );
 }
+

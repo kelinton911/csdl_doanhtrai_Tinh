@@ -54,6 +54,7 @@ export const NAV: NavItem[] = [
   { to: '/dashboard', label: 'Tổng quan chỉ huy', icon: 'grid', dom: 'cmd', group: 'command' },
   { to: '/map', label: 'Bản đồ doanh trại', icon: 'map', dom: 'geo', group: 'command' },
   { to: '/tasks', label: 'Kế hoạch công tác & nhiệm vụ', icon: 'clipboard', dom: 'cmd', group: 'command', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'COMMUNE_USER', 'REVIEWER'] },
+  { to: '/commune-materials', label: 'Vật chất chung của xã', icon: 'box', dom: 'stock', group: 'command', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
 
   // ── Lớp Khai báo thực địa (việc hằng ngày của xã) ────────────
   { to: '/land-parcels', label: 'Khu đất quốc phòng', icon: 'map', dom: 'geo', group: 'declare' },

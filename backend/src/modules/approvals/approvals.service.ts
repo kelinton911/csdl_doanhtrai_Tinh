@@ -4,7 +4,7 @@ import { AuthUser } from '../../common/decorators/current-user.decorator';
 import { barracksScope } from '../../common/data-scope';
 
 export interface PendingApproval {
-  kind: 'barracks' | 'storage';
+  kind: 'barracks' | 'storage' | 'readiness-material';
   id: string;
   code: string;
   name: string;
@@ -24,10 +24,12 @@ export class ApprovalsService {
     const params: unknown[] = [];
     let barracksWhere = "b.workflow_status = 'PENDING_REVIEW'";
     let storageWhere = "l.workflow_status = 'PENDING_REVIEW'";
+    let readinessWhere = "p.workflow_status = 'PENDING_REVIEW'";
     if (scope) {
       params.push(scope.areaIds, scope.organizationId);
       barracksWhere += ' AND (b.area_id = ANY($1::uuid[]) OR b.organization_id = $2)';
       storageWhere += ' AND (l.area_id = ANY($1::uuid[]) OR l.organization_id = $2)';
+      readinessWhere += ' AND (p.area_id = ANY($1::uuid[]) OR p.organization_id = $2)';
     }
     const sql = `
       SELECT 'barracks' AS kind, b.id::text AS id, b.code AS code, b.name AS name,
@@ -43,6 +45,16 @@ export class ApprovalsService {
       FROM storage_locations l
       LEFT JOIN administrative_areas a ON a.id = l.area_id
       WHERE ${storageWhere}
+      UNION ALL
+      SELECT 'readiness-material' AS kind, p.id::text AS id, p.readiness_state AS code,
+             'Vật chất SSCĐ – ' || CASE p.readiness_state
+               WHEN 'THUONG_XUYEN' THEN 'Thường xuyên' WHEN 'TANG_CUONG' THEN 'Tăng cường'
+               WHEN 'CAO' THEN 'Cao' WHEN 'TOAN_BO' THEN 'Toàn bộ' ELSE p.readiness_state END AS name,
+             a.name AS "areaName", p.workflow_status AS "workflowStatus",
+             p.updated_at AS "updatedAt"
+      FROM readiness_material_plans p
+      LEFT JOIN administrative_areas a ON a.id = p.area_id
+      WHERE ${readinessWhere}
       ORDER BY "updatedAt" ASC
     `;
     return this.dataSource.query(sql, params);

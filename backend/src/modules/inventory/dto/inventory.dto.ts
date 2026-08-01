@@ -21,6 +21,24 @@ export class InventoryFilterQuery extends PaginationQuery {
   @IsOptional()
   @IsUUID()
   materialId?: string;
+
+  @ApiPropertyOptional({ description: 'Lọc tồn theo 1 xã/phường (địa bàn kho)' })
+  @IsOptional()
+  @IsUUID()
+  areaId?: string;
+}
+
+// Tổng hợp vật chất tồn theo xã ("Vật chất chung của xã"): bỏ trống areaId = tổng toàn tỉnh.
+export class InventorySummaryQuery {
+  @ApiPropertyOptional({ description: 'Lọc theo 1 xã/phường; bỏ trống = tổng toàn tỉnh' })
+  @IsOptional()
+  @IsUUID()
+  areaId?: string;
+
+  @ApiPropertyOptional({ description: 'Lọc theo mã nhóm ngành vật chất (category_code)' })
+  @IsOptional()
+  @IsString()
+  categoryCode?: string;
 }
 
 // Lọc danh sách kho (kèm tìm kiếm mã/tên + trạng thái workflow).
