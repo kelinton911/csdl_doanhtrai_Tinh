@@ -31,14 +31,14 @@ interface AreaOpt { id: string; name: string }
 
 export function StoragePage() {
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [creating, setCreating] = useState(false);
   const size = 15;
-  const canManage = hasRole('BARRACKS_OFFICER', 'COMMUNE_USER', 'SYS_ADMIN');
-  const canReview = hasRole('REVIEWER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
+  const canManage = can('BARRACKS_OFFICER', 'COMMUNE_USER', 'SYS_ADMIN');
+  const canReview = can('REVIEWER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
 
   const q = useQuery({
     queryKey: ['storage-list', page, search, status],

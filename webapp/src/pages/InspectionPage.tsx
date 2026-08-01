@@ -18,8 +18,8 @@ interface Task { id: string; sheetId: string; status: string; submittedBy: strin
 interface Barracks { id: string; name: string }
 
 export function InspectionPage() {
-  const { hasRole } = useAuth();
-  const canReview = hasRole('REVIEWER', 'BARRACKS_OFFICER', 'SYS_ADMIN');
+  const { can } = useAuth();
+  const canReview = can('REVIEWER', 'BARRACKS_OFFICER', 'SYS_ADMIN');
   const [tab, setTab] = useState<'sheets' | 'review'>('sheets');
 
   return (
@@ -47,8 +47,8 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
 function SheetsTab() {
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
-  const canManage = hasRole('BARRACKS_OFFICER', 'SYS_ADMIN');
+  const { can } = useAuth();
+  const canManage = can('BARRACKS_OFFICER', 'SYS_ADMIN');
   const [campaignId, setCampaignId] = useState('');
   const [creating, setCreating] = useState(false);
   const [creatingCampaign, setCreatingCampaign] = useState(false);

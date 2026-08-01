@@ -33,7 +33,7 @@ export function ProjectDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>('Tổng quan & vòng đời');
   const [docs, setDocs] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -45,7 +45,7 @@ export function ProjectDetailPage() {
     queryFn: async () => (await api.get<Milestone[]>(`/projects/${id}/milestones`)).data,
     enabled: tab === 'Nhật ký & giải ngân',
   });
-  const canManage = hasRole('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND');
+  const canManage = can('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND');
 
   const phaseMut = useMutation({
     mutationFn: async (phase: string) => (await api.post(`/projects/${id}/phase`, { phase })).data,

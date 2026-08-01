@@ -7,6 +7,9 @@ import {
   type ReactNode,
 } from 'react';
 import { api, setAccessToken, setUnauthorizedHandler } from './api';
+// ROLE_LABEL nay là nguồn tập trung trong lib/roles.ts; re-export để giữ tương thích
+// các import cũ (`import { ROLE_LABEL } from '../lib/auth'`).
+export { ROLE_LABEL } from './roles';
 
 export interface Profile {
   id: string;
@@ -19,25 +22,25 @@ export interface Profile {
   dataScopes?: Array<{ type: string; refId: string }>;
 }
 
-export const ROLE_LABEL: Record<string, string> = {
-  SYS_ADMIN: 'Quản trị hệ thống',
-  PROVINCIAL_COMMAND: 'Chỉ huy cấp tỉnh',
-  BARRACKS_OFFICER: 'Cán bộ ngành doanh trại',
-  COMMUNE_USER: 'Cán bộ Ban CHQS xã',
-  REVIEWER: 'Kiểm duyệt viên',
-  REPORT_VIEWER: 'Người xem báo cáo',
-  AUDITOR: 'Cán bộ kiểm tra',
-  INTEGRATION_CLIENT: 'Hệ thống tích hợp',
-};
-
 const REFRESH_KEY = 'csdl.refreshToken';
+const VIEW_AS_KEY = 'csdl.viewAsRole';
 
 interface AuthState {
   profile: Profile | null;
   ready: boolean;
   login: (username: string, password: string, otp?: string) => Promise<void>;
   logout: () => void;
+  // Kiểm tra vai trò THẬT của tài khoản (không đổi khi "xem như").
   hasRole: (...roles: string[]) => boolean;
+  // Tài khoản có phải quản trị (superuser) không.
+  isAdmin: boolean;
+  // Gating nút hành động: admin luôn được phép (để test toàn hệ thống), ngoài ra theo vai trò.
+  can: (...roles: string[]) => boolean;
+  // "Xem như vai trò" (chỉ admin): đổi HIỂN THỊ (nav/workspace/màu) mà không đổi quyền gọi API.
+  viewAsRole: string | null;
+  setViewAsRole: (role: string | null) => void;
+  // Vai trò hiệu lực cho hiển thị = [viewAsRole] nếu admin đang xem-như, ngược lại là roles thật.
+  effectiveRoles: string[];
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -45,6 +48,9 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [ready, setReady] = useState(false);
+  const [viewAsRole, setViewAsRoleState] = useState<string | null>(
+    () => sessionStorage.getItem(VIEW_AS_KEY),
+  );
 
   function applySession(data: {
     accessToken: string;
@@ -59,6 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function clear() {
     setAccessToken(null);
     localStorage.removeItem(REFRESH_KEY);
+    sessionStorage.removeItem(VIEW_AS_KEY);
+    setViewAsRoleState(null);
     setProfile(null);
   }
 
@@ -77,6 +85,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setReady(true));
   }, []);
 
+  const isAdmin = !!profile && profile.roles.includes('SYS_ADMIN');
+
+  // Chỉ admin mới được "xem như"; nếu tài khoản không phải admin thì luôn bỏ override.
+  const effectiveRoles =
+    isAdmin && viewAsRole ? [viewAsRole] : profile?.roles ?? [];
+
+  const setViewAsRole = (role: string | null) => {
+    if (role) sessionStorage.setItem(VIEW_AS_KEY, role);
+    else sessionStorage.removeItem(VIEW_AS_KEY);
+    setViewAsRoleState(role);
+  };
+
   const value = useMemo<AuthState>(
     () => ({
       profile,
@@ -91,8 +111,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       hasRole: (...roles) =>
         !!profile && roles.some((r) => profile.roles.includes(r)),
+      isAdmin,
+      can: (...roles) =>
+        !!profile && (isAdmin || roles.some((r) => profile.roles.includes(r))),
+      viewAsRole: isAdmin ? viewAsRole : null,
+      setViewAsRole,
+      effectiveRoles,
     }),
-    [profile, ready],
+    [profile, ready, isAdmin, viewAsRole, effectiveRoles],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

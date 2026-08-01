@@ -86,7 +86,7 @@ export function BarracksDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<(typeof TABS)[number]>('Tổng quan & Đất đai');
   const [actionError, setActionError] = useState<string | null>(null);
@@ -99,7 +99,7 @@ export function BarracksDetailPage() {
 
   const facType = useCatalog('facility-type');
   const grade = useCatalog('quality-grade');
-  const canManageFacility = hasRole('COMMUNE_USER', 'BARRACKS_OFFICER');
+  const canManageFacility = can('COMMUNE_USER', 'BARRACKS_OFFICER');
 
   const b = useQuery({
     queryKey: ['barracks', id],
@@ -191,8 +191,8 @@ export function BarracksDetailPage() {
   if (b.isError || !b.data) return <ErrorState error={b.error} />;
   const d = b.data;
   const status = d.workflowStatus;
-  const canSubmit = ['DRAFT', 'CHANGES_REQUESTED'].includes(status) && hasRole('COMMUNE_USER', 'BARRACKS_OFFICER');
-  const canReview = status === 'PENDING_REVIEW' && hasRole('REVIEWER', 'BARRACKS_OFFICER');
+  const canSubmit = ['DRAFT', 'CHANGES_REQUESTED'].includes(status) && can('COMMUNE_USER', 'BARRACKS_OFFICER');
+  const canReview = status === 'PENDING_REVIEW' && can('REVIEWER', 'BARRACKS_OFFICER');
 
   const facColumns: Column<Facility>[] = [
     { key: 'code', header: 'Mã', render: (f) => f.code, mono: true, width: 80 },

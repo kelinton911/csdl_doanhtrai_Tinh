@@ -40,8 +40,8 @@ export class LocalResourcesController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách nguồn lực huy động (lọc theo loại/thời gian/độ tin cậy/hiệp đồng)' })
-  list(@Query() q: ResourceQuery, @CurrentUser() _user: AuthUser) {
-    return this.service.list(q, q);
+  list(@Query() q: ResourceQuery, @CurrentUser() user: AuthUser) {
+    return this.service.list(q, q, user);
   }
 
   @Get('nearby')

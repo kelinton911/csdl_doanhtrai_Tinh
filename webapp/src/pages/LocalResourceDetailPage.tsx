@@ -29,12 +29,12 @@ export function LocalResourceDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [evidence, setEvidence] = useState(false);
   const [deactOpen, setDeactOpen] = useState(false);
 
   const r = useQuery({ queryKey: ['local-resource', id], queryFn: async () => (await api.get<Resource>(`/local-resources/${id}`)).data });
-  const canManage = hasRole('COMMUNE_USER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND');
+  const canManage = can('COMMUNE_USER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND');
 
   if (r.isLoading) return <Skeleton rows={6} />;
   if (r.isError || !r.data) return <ErrorState error={r.error} />;

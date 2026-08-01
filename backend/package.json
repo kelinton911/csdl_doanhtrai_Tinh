@@ -29,7 +29,8 @@
     "seed:budgets": "ts-node -r tsconfig-paths/register src/database/seeds/seed-budgets.ts",
     "seed:tasks": "ts-node -r tsconfig-paths/register src/database/seeds/seed-tasks.ts",
     "seed:oversight": "ts-node -r tsconfig-paths/register src/database/seeds/seed-oversight.ts",
-    "seed:legal-docs": "ts-node -r tsconfig-paths/register src/database/seeds/seed-legal-docs.ts"
+    "seed:legal-docs": "ts-node -r tsconfig-paths/register src/database/seeds/seed-legal-docs.ts",
+    "seed:readiness": "ts-node -r tsconfig-paths/register src/database/seeds/seed-readiness.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1096.0",

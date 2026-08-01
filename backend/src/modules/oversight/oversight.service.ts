@@ -17,6 +17,7 @@ import {
 } from './dto/oversight.dto';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { barracksScope } from '../../common/data-scope';
 
 export interface InspectionFilters {
   search?: string;
@@ -36,7 +37,8 @@ export class OversightService {
     private readonly ds: DataSource,
   ) {}
 
-  async list(q: PaginationQuery, filters: InspectionFilters) {
+  async list(q: PaginationQuery, filters: InspectionFilters, user?: AuthUser) {
+    const scope = barracksScope(user);
     const qb = this.repo
       .createQueryBuilder('i')
       .leftJoin('organizations', 'o', 'o.id = i.target_org_id')
@@ -55,6 +57,14 @@ export class OversightService {
       if (filters.search) b.andWhere('(i.code ILIKE :s OR i.title ILIKE :s)', { s: `%${filters.search}%` });
       if (filters.status) b.andWhere('i.status = :st', { st: filters.status });
       if (filters.inspectionType) b.andWhere('i.inspection_type = :it', { it: filters.inspectionType });
+      // Data-scope tầng service: giới hạn theo địa bàn/đơn vị mục tiêu của cuộc kiểm tra;
+      // null = xem toàn tỉnh (AUDITOR/PROVINCIAL_COMMAND…).
+      if (scope) {
+        b.andWhere('(i.target_area_id = ANY(:areaIds::uuid[]) OR i.target_org_id = :orgId)', {
+          areaIds: scope.areaIds,
+          orgId: scope.organizationId,
+        });
+      }
     };
     apply(qb);
     apply(countQb);

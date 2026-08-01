@@ -9,6 +9,7 @@ import { api } from '../lib/api';
 import { toast } from '../lib/toast';
 import { visibleNav, groupedNav } from '../lib/nav';
 import { ROLE_LABEL, useAuth } from '../lib/auth';
+import { primaryRole, ROLE_ACCENT, HUMAN_ROLES } from '../lib/roles';
 import { scopeLabel } from '../lib/scope';
 import { useTheme } from '../lib/theme';
 import { dateTime } from '../lib/format';
@@ -35,7 +36,7 @@ const SEV_COLOR: Record<string, string> = {
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { profile, logout, hasRole } = useAuth();
+  const { profile, logout, can, isAdmin, viewAsRole, setViewAsRole, effectiveRoles } = useAuth();
   const { theme, toggle } = useTheme();
   const qc = useQueryClient();
   const location = useLocation();
@@ -46,10 +47,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [search, setSearch] = useState('');
   const [closing, setClosing] = useState<{ id: string; title: string } | null>(null);
   const [mfaOpen, setMfaOpen] = useState(false);
-  const nav = visibleNav(profile?.roles ?? []);
-  const navGroups = groupedNav(profile?.roles ?? []);
-  const primaryRole = profile?.roles?.[0] ?? '';
-  const canAct = hasRole('BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND');
+  // Điều hướng + màu shell dựa trên VAI TRÒ HIỆU LỰC (đổi khi admin "xem như").
+  const nav = visibleNav(effectiveRoles);
+  const navGroups = groupedNav(effectiveRoles);
+  const activeRole = primaryRole(effectiveRoles);
+  const accent = ROLE_ACCENT[activeRole] ?? 'cmd';
+  const canAct = can('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND');
 
   const alertCount = useQuery({
     queryKey: ['alert-summary'],
@@ -86,7 +89,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={`app-shell${mobileOpen ? ' nav-open' : ''}`}
-      style={{ ['--sidebar-w' as string]: collapsed ? '72px' : '248px' }}
+      style={{
+        ['--sidebar-w' as string]: collapsed ? '72px' : '248px',
+        // Tông màu nhận diện của vai trò hiệu lực — cả vỏ giao diện đổi theo.
+        ['--role-accent' as string]: `var(--dom-${accent})`,
+        ['--role-accent-soft' as string]: `color-mix(in srgb, var(--dom-${accent}) 16%, transparent)`,
+      }}
     >
       <a href="#main-content" className="skip-link">Bỏ qua tới nội dung</a>
       <div className="app-backdrop" onClick={() => setMobileOpen(false)} />
@@ -115,7 +123,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               width: 34,
               height: 34,
               borderRadius: 8,
-              background: 'var(--teal)',
+              background: 'var(--role-accent)',
               color: '#fff',
               display: 'grid',
               placeItems: 'center',
@@ -130,7 +138,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div style={{ lineHeight: 1.3 }}>
               <div style={{ fontWeight: 800, fontSize: 13, letterSpacing: '0.02em' }}>CSDL DOANH TRẠI</div>
               <div style={{ fontSize: 10.5, color: 'var(--nav-muted)', letterSpacing: '0.14em' }}>
-                CẤP TỈNH
+                CẤP TỈNH · {ROLE_LABEL[activeRole] ?? 'HỆ THỐNG'}
               </div>
             </div>
           )}
@@ -214,6 +222,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             padding: '10px 20px',
             background: 'var(--surface-1)',
             borderBottom: '1px solid var(--color-neutral-300)',
+            borderTop: '3px solid var(--role-accent)',
             position: 'sticky',
             top: 0,
             zIndex: 10,
@@ -373,11 +382,35 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Icon name={theme === 'light' ? 'moon' : 'sun'} size={18} />
           </button>
 
+          {/* Xem như vai trò (chỉ admin) — đổi hiển thị, thao tác vẫn dùng quyền admin. */}
+          {isAdmin && (
+            <div
+              className="hide-sm"
+              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--role-accent-soft)', padding: '3px 8px', borderRadius: 8, border: '1px solid var(--role-accent)' }}
+              title="Xem thử giao diện của một vai trò để kiểm thử (mọi thao tác vẫn dùng quyền quản trị)"
+            >
+              <Icon name="user" size={13} />
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--color-neutral-700)', textTransform: 'uppercase' }}>Xem như:</span>
+              <select
+                className="input"
+                aria-label="Xem như vai trò"
+                style={{ padding: '2px 8px', fontSize: 12, fontWeight: 700, cursor: 'pointer', height: 28, maxWidth: 200 }}
+                value={viewAsRole ?? ''}
+                onChange={(e) => setViewAsRole(e.target.value || null)}
+              >
+                <option value="">Chính tôi (Quản trị)</option>
+                {HUMAN_ROLES.map((r) => (
+                  <option key={r} value={r}>{ROLE_LABEL[r]}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="hide-sm" style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 12, borderLeft: '1px solid var(--color-neutral-300)' }}>
             <div style={{ textAlign: 'right', lineHeight: 1.25 }}>
               <div style={{ fontSize: 13, fontWeight: 700 }}>{profile?.fullName}</div>
               <div style={{ fontSize: 11, color: 'var(--color-neutral-600)' }}>
-                {ROLE_LABEL[primaryRole] ?? primaryRole}
+                {ROLE_LABEL[primaryRole(profile?.roles ?? [])] ?? ''}
               </div>
             </div>
             <div
@@ -385,8 +418,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 width: 34,
                 height: 34,
                 borderRadius: 8,
-                background: 'var(--role-hckt-bg)',
-                color: 'var(--role-hckt)',
+                background: 'var(--role-accent-soft)',
+                color: 'var(--role-accent)',
                 display: 'grid',
                 placeItems: 'center',
               }}
@@ -400,6 +433,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main id="main-content" className="scrl app-main" style={{ padding: 24, flex: 1, overflow: 'auto', maxWidth: 1600, width: '100%', margin: '0 auto', position: 'relative' }}>
+          {isAdmin && viewAsRole && (
+            <div style={{ marginBottom: 16, padding: '10px 16px', borderRadius: 8, background: 'var(--role-accent-soft)', border: '1px solid var(--role-accent)', color: 'var(--color-text)', fontWeight: 600, display: 'flex', gap: 10, alignItems: 'center', fontSize: 13, flexWrap: 'wrap' }}>
+              <Icon name="user" size={18} /> Đang <b>XEM NHƯ</b> vai trò «{ROLE_LABEL[viewAsRole] ?? viewAsRole}» — giao diện & menu hiển thị theo vai trò này; mọi thao tác vẫn dùng quyền Quản trị.
+              <button className="btn btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setViewAsRole(null)}>
+                <Icon name="logout" size={13} /> Thoát xem như
+              </button>
+            </div>
+          )}
           {(window.localStorage.getItem('CSDL_OP_MODE') || 'NORMAL') === 'SSCD' && (
             <div style={{ marginBottom: 16, padding: '10px 16px', borderRadius: 8, background: '#fff7ed', border: '1px solid #fdba74', color: '#c2410c', fontWeight: 700, display: 'flex', gap: 10, alignItems: 'center', fontSize: 13 }}>
               <Icon name="target" size={18} /> 🚨 BỐI CẢNH SẴN SÀNG CHIẾN ĐẤU (SSCĐ) — ĐÁNH GIÁ ĐỘ ĐÁP ỨNG VÀ CHÊNH LỆCH ĐỊNH MỨC SSCĐ TOÀN TỈNH

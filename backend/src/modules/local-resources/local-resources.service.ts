@@ -14,6 +14,7 @@ import {
 } from './dto/local-resource.dto';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { barracksScope } from '../../common/data-scope';
 
 export interface ResourceFilters {
   search?: string;
@@ -41,7 +42,8 @@ export class LocalResourcesService {
     return c;
   }
 
-  async list(q: PaginationQuery, filters: ResourceFilters) {
+  async list(q: PaginationQuery, filters: ResourceFilters, user?: AuthUser) {
+    const scope = barracksScope(user);
     const qb = this.repo
       .createQueryBuilder('r')
       .leftJoin('administrative_areas', 'a', 'a.id = r.area_id')
@@ -75,6 +77,9 @@ export class LocalResourcesService {
       if (filters.agreementStatus) b.andWhere('r.agreement_status = :ag', { ag: filters.agreementStatus });
       if (filters.areaId) b.andWhere('r.area_id = :aid', { aid: filters.areaId });
       b.andWhere('r.status = :st', { st: filters.status || 'ACTIVE' });
+      // Data-scope tầng service: bảng chỉ mang area_id (không có organization_id) nên
+      // giới hạn theo địa bàn được giao; null = xem toàn tỉnh.
+      if (scope) b.andWhere('r.area_id = ANY(:areaIds::uuid[])', { areaIds: scope.areaIds });
     };
     apply(qb);
     apply(countQb);

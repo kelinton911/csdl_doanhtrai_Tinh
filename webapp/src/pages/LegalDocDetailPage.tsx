@@ -23,11 +23,11 @@ interface Doc {
 export function LegalDocDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [files, setFiles] = useState(false);
 
   const d = useQuery({ queryKey: ['legal-document', id], queryFn: async () => (await api.get<Doc>(`/legal-documents/${id}`)).data });
-  const canManage = hasRole('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
+  const canManage = can('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
 
   if (d.isLoading) return <Skeleton rows={6} />;
   if (d.isError || !d.data) return <ErrorState error={d.error} />;

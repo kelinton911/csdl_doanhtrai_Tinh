@@ -26,8 +26,8 @@ const STATUS_FILTER = [
 
 export function AlertsPage() {
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
-  const canAct = hasRole('BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND');
+  const { can } = useAuth();
+  const canAct = can('BARRACKS_OFFICER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND');
   const [status, setStatus] = useState('OPEN');
   const [closing, setClosing] = useState<{ id: string; title: string } | null>(null);
 

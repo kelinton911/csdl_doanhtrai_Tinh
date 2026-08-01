@@ -44,8 +44,8 @@ export class OversightController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách cuộc kiểm tra/thanh tra' })
-  list(@Query() q: InspectionQuery) {
-    return this.service.list(q, q);
+  list(@Query() q: InspectionQuery, @CurrentUser() user: AuthUser) {
+    return this.service.list(q, q, user);
   }
 
   @Get('summary')

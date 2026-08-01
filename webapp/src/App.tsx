@@ -1,54 +1,67 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './lib/auth';
 import { AppShell } from './components/AppShell';
 import { LoginPage } from './pages/LoginPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { MapPage } from './pages/MapPage';
-import { BarracksListPage } from './pages/BarracksListPage';
-import { BarracksFormPage } from './pages/BarracksFormPage';
-import { BarracksDetailPage } from './pages/BarracksDetailPage';
-import { InventoryPage } from './pages/InventoryPage';
-import { StoragePage } from './pages/StoragePage';
-import { ApprovalQueuePage } from './pages/ApprovalQueuePage';
-import { MaterialsPage } from './pages/MaterialsPage';
-import { MaterialGroupsPage } from './pages/MaterialGroupsPage';
-import { AssetCatalogPage } from './pages/AssetCatalogPage';
-import { ImportPage } from './pages/ImportPage';
-import { InspectionPage } from './pages/InspectionPage';
-import { InspectionWizardPage } from './pages/InspectionWizardPage';
-import { MaintenancePage } from './pages/MaintenancePage';
-import { ScenarioPage } from './pages/ScenarioPage';
-import { AlertsPage } from './pages/AlertsPage';
-import { ReportsPage } from './pages/ReportsPage';
-import { PotentialPage } from './pages/PotentialPage';
-import { LandParcelsListPage } from './pages/LandParcelsListPage';
-import { LandParcelFormPage } from './pages/LandParcelFormPage';
-import { LandParcelDetailPage } from './pages/LandParcelDetailPage';
-import { UtilitiesListPage } from './pages/UtilitiesListPage';
-import { UtilityFormPage } from './pages/UtilityFormPage';
-import { UtilityDetailPage } from './pages/UtilityDetailPage';
-import { LocalResourcesListPage } from './pages/LocalResourcesListPage';
-import { LocalResourceFormPage } from './pages/LocalResourceFormPage';
-import { LocalResourceDetailPage } from './pages/LocalResourceDetailPage';
-import { ProjectsListPage } from './pages/ProjectsListPage';
-import { ProjectFormPage } from './pages/ProjectFormPage';
-import { ProjectDetailPage } from './pages/ProjectDetailPage';
-import { BudgetsListPage } from './pages/BudgetsListPage';
-import { BudgetFormPage } from './pages/BudgetFormPage';
-import { BudgetDetailPage } from './pages/BudgetDetailPage';
-import { TasksListPage } from './pages/TasksListPage';
-import { TaskFormPage } from './pages/TaskFormPage';
-import { TaskDetailPage } from './pages/TaskDetailPage';
-import { InspectionsListPage } from './pages/InspectionsListPage';
-import { InspectionFormPage } from './pages/InspectionFormPage';
-import { InspectionDetailPage } from './pages/InspectionDetailPage';
-import { LegalDocsListPage } from './pages/LegalDocsListPage';
-import { LegalDocFormPage } from './pages/LegalDocFormPage';
-import { LegalDocDetailPage } from './pages/LegalDocDetailPage';
-import { CommuneReadinessPage } from './pages/CommuneReadinessPage';
-import { FieldSurveyPage } from './pages/FieldSurveyPage';
-import { ScanPage } from './pages/ScanPage';
-import { AdminPage } from './pages/AdminPage';
+
+// Tách mã theo route (code-splitting): mỗi trang là một chunk tải khi cần → bundle chính nhỏ,
+// tải nhanh. Trang dùng named export nên bọc về default cho React.lazy.
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
+const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })));
+const BarracksListPage = lazy(() => import('./pages/BarracksListPage').then((m) => ({ default: m.BarracksListPage })));
+const BarracksFormPage = lazy(() => import('./pages/BarracksFormPage').then((m) => ({ default: m.BarracksFormPage })));
+const BarracksDetailPage = lazy(() => import('./pages/BarracksDetailPage').then((m) => ({ default: m.BarracksDetailPage })));
+const InventoryPage = lazy(() => import('./pages/InventoryPage').then((m) => ({ default: m.InventoryPage })));
+const StoragePage = lazy(() => import('./pages/StoragePage').then((m) => ({ default: m.StoragePage })));
+const ApprovalQueuePage = lazy(() => import('./pages/ApprovalQueuePage').then((m) => ({ default: m.ApprovalQueuePage })));
+const MaterialsPage = lazy(() => import('./pages/MaterialsPage').then((m) => ({ default: m.MaterialsPage })));
+const MaterialGroupsPage = lazy(() => import('./pages/MaterialGroupsPage').then((m) => ({ default: m.MaterialGroupsPage })));
+const AssetCatalogPage = lazy(() => import('./pages/AssetCatalogPage').then((m) => ({ default: m.AssetCatalogPage })));
+const ImportPage = lazy(() => import('./pages/ImportPage').then((m) => ({ default: m.ImportPage })));
+const InspectionPage = lazy(() => import('./pages/InspectionPage').then((m) => ({ default: m.InspectionPage })));
+const InspectionWizardPage = lazy(() => import('./pages/InspectionWizardPage').then((m) => ({ default: m.InspectionWizardPage })));
+const MaintenancePage = lazy(() => import('./pages/MaintenancePage').then((m) => ({ default: m.MaintenancePage })));
+const ScenarioPage = lazy(() => import('./pages/ScenarioPage').then((m) => ({ default: m.ScenarioPage })));
+const AlertsPage = lazy(() => import('./pages/AlertsPage').then((m) => ({ default: m.AlertsPage })));
+const ReportsPage = lazy(() => import('./pages/ReportsPage').then((m) => ({ default: m.ReportsPage })));
+const PotentialPage = lazy(() => import('./pages/PotentialPage').then((m) => ({ default: m.PotentialPage })));
+const LandParcelsListPage = lazy(() => import('./pages/LandParcelsListPage').then((m) => ({ default: m.LandParcelsListPage })));
+const LandParcelFormPage = lazy(() => import('./pages/LandParcelFormPage').then((m) => ({ default: m.LandParcelFormPage })));
+const LandParcelDetailPage = lazy(() => import('./pages/LandParcelDetailPage').then((m) => ({ default: m.LandParcelDetailPage })));
+const UtilitiesListPage = lazy(() => import('./pages/UtilitiesListPage').then((m) => ({ default: m.UtilitiesListPage })));
+const UtilityFormPage = lazy(() => import('./pages/UtilityFormPage').then((m) => ({ default: m.UtilityFormPage })));
+const UtilityDetailPage = lazy(() => import('./pages/UtilityDetailPage').then((m) => ({ default: m.UtilityDetailPage })));
+const LocalResourcesListPage = lazy(() => import('./pages/LocalResourcesListPage').then((m) => ({ default: m.LocalResourcesListPage })));
+const LocalResourceFormPage = lazy(() => import('./pages/LocalResourceFormPage').then((m) => ({ default: m.LocalResourceFormPage })));
+const LocalResourceDetailPage = lazy(() => import('./pages/LocalResourceDetailPage').then((m) => ({ default: m.LocalResourceDetailPage })));
+const ProjectsListPage = lazy(() => import('./pages/ProjectsListPage').then((m) => ({ default: m.ProjectsListPage })));
+const ProjectFormPage = lazy(() => import('./pages/ProjectFormPage').then((m) => ({ default: m.ProjectFormPage })));
+const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage').then((m) => ({ default: m.ProjectDetailPage })));
+const BudgetsListPage = lazy(() => import('./pages/BudgetsListPage').then((m) => ({ default: m.BudgetsListPage })));
+const BudgetFormPage = lazy(() => import('./pages/BudgetFormPage').then((m) => ({ default: m.BudgetFormPage })));
+const BudgetDetailPage = lazy(() => import('./pages/BudgetDetailPage').then((m) => ({ default: m.BudgetDetailPage })));
+const TasksListPage = lazy(() => import('./pages/TasksListPage').then((m) => ({ default: m.TasksListPage })));
+const TaskFormPage = lazy(() => import('./pages/TaskFormPage').then((m) => ({ default: m.TaskFormPage })));
+const TaskDetailPage = lazy(() => import('./pages/TaskDetailPage').then((m) => ({ default: m.TaskDetailPage })));
+const InspectionsListPage = lazy(() => import('./pages/InspectionsListPage').then((m) => ({ default: m.InspectionsListPage })));
+const InspectionFormPage = lazy(() => import('./pages/InspectionFormPage').then((m) => ({ default: m.InspectionFormPage })));
+const InspectionDetailPage = lazy(() => import('./pages/InspectionDetailPage').then((m) => ({ default: m.InspectionDetailPage })));
+const LegalDocsListPage = lazy(() => import('./pages/LegalDocsListPage').then((m) => ({ default: m.LegalDocsListPage })));
+const LegalDocFormPage = lazy(() => import('./pages/LegalDocFormPage').then((m) => ({ default: m.LegalDocFormPage })));
+const LegalDocDetailPage = lazy(() => import('./pages/LegalDocDetailPage').then((m) => ({ default: m.LegalDocDetailPage })));
+const DeploymentSitesPage = lazy(() => import('./pages/DeploymentSitesPage').then((m) => ({ default: m.DeploymentSitesPage })));
+const DeploymentSiteFormPage = lazy(() => import('./pages/DeploymentSiteFormPage').then((m) => ({ default: m.DeploymentSiteFormPage })));
+const DeploymentSiteDetailPage = lazy(() => import('./pages/DeploymentSiteDetailPage').then((m) => ({ default: m.DeploymentSiteDetailPage })));
+const RecoveryPage = lazy(() => import('./pages/RecoveryPage').then((m) => ({ default: m.RecoveryPage })));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })));
+const CommuneReadinessPage = lazy(() => import('./pages/CommuneReadinessPage').then((m) => ({ default: m.CommuneReadinessPage })));
+const FieldSurveyPage = lazy(() => import('./pages/FieldSurveyPage').then((m) => ({ default: m.FieldSurveyPage })));
+const ScanPage = lazy(() => import('./pages/ScanPage').then((m) => ({ default: m.ScanPage })));
+const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
+
+function Centered({ text }: { text: string }) {
+  return <div style={{ height: '60vh', display: 'grid', placeItems: 'center', color: 'var(--color-neutral-600)' }}>{text}</div>;
+}
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { profile, ready } = useAuth();
@@ -60,7 +73,11 @@ function Protected({ children }: { children: React.ReactNode }) {
     );
   }
   if (!profile) return <Navigate to="/login" replace />;
-  return <AppShell>{children}</AppShell>;
+  return (
+    <AppShell>
+      <Suspense fallback={<Centered text="Đang tải…" />}>{children}</Suspense>
+    </AppShell>
+  );
 }
 
 export default function App() {
@@ -109,6 +126,12 @@ export default function App() {
       <Route path="/legal-documents/new" element={<Protected><LegalDocFormPage /></Protected>} />
       <Route path="/legal-documents/:id/edit" element={<Protected><LegalDocFormPage /></Protected>} />
       <Route path="/legal-documents/:id" element={<Protected><LegalDocDetailPage /></Protected>} />
+      <Route path="/readiness/sites" element={<Protected><DeploymentSitesPage /></Protected>} />
+      <Route path="/readiness/sites/new" element={<Protected><DeploymentSiteFormPage /></Protected>} />
+      <Route path="/readiness/sites/:id/edit" element={<Protected><DeploymentSiteFormPage /></Protected>} />
+      <Route path="/readiness/sites/:id" element={<Protected><DeploymentSiteDetailPage /></Protected>} />
+      <Route path="/readiness/recovery" element={<Protected><RecoveryPage /></Protected>} />
+      <Route path="/analytics" element={<Protected><AnalyticsPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
       <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />

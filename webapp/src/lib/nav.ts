@@ -79,10 +79,13 @@ export const NAV: NavItem[] = [
   // ── Lớp Kế hoạch & báo cáo ───────────────────────────────────
   { to: '/projects', label: 'Xây dựng & dự án đầu tư', icon: 'building', dom: 'repair', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/scenarios', label: 'Kế hoạch và tình huống', icon: 'target', dom: 'plan', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN'] },
+  { to: '/readiness/sites', label: 'Địa điểm sơ tán/bố trí', icon: 'map', dom: 'plan', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'REVIEWER'] },
+  { to: '/readiness/recovery', label: 'Thiệt hại & khắc phục', icon: 'wrench', dom: 'repair', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'COMMUNE_USER'] },
   { to: '/potential', label: 'Tiềm lực HC-KT', icon: 'target', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
   { to: '/local-resources', label: 'Nguồn lực huy động', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/commune-readiness', label: 'Mức hoàn chỉnh hồ sơ xã', icon: 'chart', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/budgets', label: 'Kế hoạch & ngân sách', icon: 'chart', dom: 'report', group: 'plan', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REPORT_VIEWER', 'AUDITOR'] },
+  { to: '/analytics', label: 'Dự báo & cảnh báo sớm', icon: 'chart', dom: 'report', group: 'plan', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/reports', label: 'Báo cáo - phân tích', icon: 'chart', dom: 'report', group: 'plan' },
 
   // ── Lớp Quản trị ─────────────────────────────────────────────
@@ -91,6 +94,10 @@ export const NAV: NavItem[] = [
 ];
 
 export function visibleNav(roles: string[]): NavItem[] {
+  // Superuser: SYS_ADMIN thấy TOÀN BỘ menu để quản trị & kiểm thử. Khi admin "xem như"
+  // một vai trò khác, AppShell truyền effectiveRoles (không còn SYS_ADMIN) nên menu lọc
+  // đúng theo vai trò đang xem.
+  if (roles.includes('SYS_ADMIN')) return NAV;
   return NAV.filter((n) => !n.roles || n.roles.some((r) => roles.includes(r)));
 }
 

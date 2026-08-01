@@ -79,7 +79,7 @@ const LIFECYCLE = ['DRAFT', 'PROPOSED', 'APPROVED', 'IN_PROGRESS', 'ACCEPTED', '
 const ACT_LABEL: Record<string, string> = { submit: 'Đã trình thẩm định.', approve: 'Đã phê duyệt yêu cầu.', start: 'Đã bắt đầu thực hiện.', accept: 'Đã nghiệm thu.', close: 'Đã đóng yêu cầu.' };
 
 function ReqDetailModal({ req, onClose, onChanged }: { req: Req; onClose: () => void; onChanged: () => void }) {
-  const { profile, hasRole } = useAuth();
+  const { profile, can } = useAuth();
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [evidence, setEvidence] = useState(false);
@@ -133,7 +133,7 @@ function ReqDetailModal({ req, onClose, onChanged }: { req: Req; onClose: () => 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
         <button className="btn" onClick={() => setEvidence(true)}><Icon name="file" size={15} /> Tài liệu/Ảnh</button>
         {cur.status === 'DRAFT' && <button className="btn btn-primary" onClick={() => act.mutate('submit')}>Trình thẩm định</button>}
-        {cur.status === 'PROPOSED' && hasRole('PROVINCIAL_COMMAND', 'BARRACKS_OFFICER') && !isCreator && <button className="btn btn-primary" onClick={() => act.mutate('approve')}>Phê duyệt</button>}
+        {cur.status === 'PROPOSED' && can('PROVINCIAL_COMMAND', 'BARRACKS_OFFICER') && !isCreator && <button className="btn btn-primary" onClick={() => act.mutate('approve')}>Phê duyệt</button>}
         {cur.status === 'PROPOSED' && isCreator && <span className="muted" style={{ fontSize: 12 }}>Người lập không tự duyệt</span>}
         {cur.status === 'APPROVED' && <button className="btn btn-primary" onClick={() => act.mutate('start')}>Bắt đầu thực hiện</button>}
         {cur.status === 'IN_PROGRESS' && <button className="btn btn-primary" onClick={() => act.mutate('accept')}>Nghiệm thu</button>}

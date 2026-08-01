@@ -72,6 +72,8 @@ async function run() {
     { username: 'hckt', fullName: 'Cán bộ ngành doanh trại', roles: [Role.BARRACKS_OFFICER] },
     { username: 'xa01', fullName: 'Cán bộ Ban CHQS xã A01', roles: [Role.COMMUNE_USER] },
     { username: 'kiemduyet', fullName: 'Kiểm duyệt viên', roles: [Role.REVIEWER] },
+    { username: 'kiemtra', fullName: 'Cán bộ kiểm tra - thanh tra', roles: [Role.AUDITOR] },
+    { username: 'baocao', fullName: 'Người xem báo cáo', roles: [Role.REPORT_VIEWER] },
   ];
   const passwordHash = await bcrypt.hash('admin@123', 10);
   for (const u of demoUsers) {

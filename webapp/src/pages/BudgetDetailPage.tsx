@@ -29,7 +29,7 @@ export function BudgetDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>('Phân bổ hạn mức');
   const [docs, setDocs] = useState(false);
   const [lineOpen, setLineOpen] = useState(false);
@@ -39,7 +39,7 @@ export function BudgetDetailPage() {
   const p = useQuery({ queryKey: ['budget', id], queryFn: async () => (await api.get<Plan>(`/budgets/${id}`)).data });
   const expenses = useQuery({ queryKey: ['budget', id, 'expenses'], queryFn: async () => (await api.get<Expense[]>(`/budgets/${id}/expenses`)).data, enabled: tab === 'Giải ngân & chứng từ' });
 
-  const canManage = hasRole('PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN');
+  const canManage = can('PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN');
   const refresh = () => { qc.invalidateQueries({ queryKey: ['budget', id] }); qc.invalidateQueries({ queryKey: ['budgets-summary'] }); };
 
   const act = useMutation({

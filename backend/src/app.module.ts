@@ -32,6 +32,8 @@ import { BudgetsModule } from './modules/budgets/budgets.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { OversightModule } from './modules/oversight/oversight.module';
 import { LegalDocsModule } from './modules/legal-docs/legal-docs.module';
+import { ReadinessModule } from './modules/readiness/readiness.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/identity/guards/roles.guard';
@@ -76,6 +78,8 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     TasksModule, // M21 (khảo sát) — Kế hoạch công tác & giao nhiệm vụ
     OversightModule, // M22 (khảo sát) — Kiểm tra, thanh tra & xử lý kiến nghị
     LegalDocsModule, // M20 (khảo sát) — Văn bản, tiêu chuẩn, định mức
+    ReadinessModule, // M18/M19 (khảo sát) — Sẵn sàng chiến đấu, bảo đảm tác chiến & khắc phục
+    AnalyticsModule, // M28 (khảo sát) — Phân tích, dự báo & phát hiện bất thường
     DashboardModule, // M12 — Dashboard tổng hợp
     HealthModule,
     // Roadmap còn lại: Inventory(M06), Inspection(M07), Documents(M08),

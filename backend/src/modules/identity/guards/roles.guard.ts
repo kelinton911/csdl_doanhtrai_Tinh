@@ -22,6 +22,9 @@ export class RolesGuard implements CanActivate {
 
     const req = ctx.switchToHttp().getRequest();
     const userRoles: string[] = req.user?.roles ?? [];
+    // Superuser: SYS_ADMIN đi qua mọi @Roles để quản trị & kiểm thử toàn hệ thống.
+    // Chấp nhận được vì đây là hệ nội bộ và data-scope đã cho SYS_ADMIN phạm vi toàn tỉnh.
+    if (userRoles.includes(Role.SYS_ADMIN)) return true;
     const ok = required.some((r) => userRoles.includes(r));
     if (!ok) {
       throw new ForbiddenException('AUTH-003: Ngoài phạm vi quyền');

@@ -39,7 +39,7 @@ export function InspectionDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [docs, setDocs] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [resolve, setResolve] = useState<{ finding: Finding; target: 'RESOLVED' | 'ACCEPTED' } | null>(null);
@@ -67,8 +67,8 @@ export function InspectionDetailPage() {
   if (i.isLoading) return <Skeleton rows={6} />;
   if (i.isError || !i.data) return <ErrorState error={i.error} />;
   const d = i.data;
-  const canManage = hasRole('AUDITOR', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN');
-  const canResolve = hasRole('AUDITOR', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'COMMUNE_USER');
+  const canManage = can('AUDITOR', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN');
+  const canResolve = can('AUDITOR', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'COMMUNE_USER');
   const terminal = ['CLOSED', 'CANCELLED'].includes(d.status);
   const nexts = NEXT[d.status] ?? [];
   const target = d.targetOrgName || d.targetBarracksName || d.targetAreaName || '—';

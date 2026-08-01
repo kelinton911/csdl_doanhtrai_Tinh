@@ -9,6 +9,17 @@ import { useTheme } from '../lib/theme';
 // Chỉ điền sẵn tài khoản demo ở môi trường phát triển; PROD để trống, không lộ thông tin.
 const IS_DEV = import.meta.env.DEV;
 
+// Tài khoản demo (chỉ DEV) — mỗi vai trò một tài khoản để kiểm thử giao diện riêng.
+const DEMO_ACCOUNTS: Array<{ u: string; label: string }> = [
+  { u: 'admin', label: 'Quản trị' },
+  { u: 'chihuy', label: 'Chỉ huy tỉnh' },
+  { u: 'hckt', label: 'CB doanh trại' },
+  { u: 'xa01', label: 'CB xã' },
+  { u: 'kiemduyet', label: 'Kiểm duyệt' },
+  { u: 'kiemtra', label: 'Kiểm tra' },
+  { u: 'baocao', label: 'Xem báo cáo' },
+];
+
 export function LoginPage() {
   const { login } = useAuth();
   const { theme, toggle } = useTheme();
@@ -42,6 +53,23 @@ export function LoginPage() {
       } else {
         setError(p.title);
       }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Đăng nhập nhanh theo vai trò (chỉ DEV) để kiểm thử giao diện riêng của từng vai trò.
+  async function loginAs(user: string) {
+    setUsername(user);
+    setPassword('admin@123');
+    setBusy(true);
+    setError(null);
+    setLocked(false);
+    try {
+      await login(user, 'admin@123');
+      nav('/dashboard', { replace: true });
+    } catch (err) {
+      setError(toProblem(err).title);
     } finally {
       setBusy(false);
     }
@@ -156,7 +184,22 @@ export function LoginPage() {
 
         {IS_DEV && (
           <div style={{ fontSize: 12, color: 'var(--color-neutral-600)', background: 'var(--color-accent-100)', border: '1px solid var(--color-accent-300)', padding: 10, borderRadius: 6 }}>
-            Tài khoản demo (chỉ DEV): admin · chihuy · hckt · xa01 · kiemduyet — mật khẩu <b>admin@123</b>.
+            <div style={{ marginBottom: 8 }}>Đăng nhập nhanh theo vai trò (chỉ DEV) — mật khẩu <b>admin@123</b>:</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {DEMO_ACCOUNTS.map((a) => (
+                <button
+                  key={a.u}
+                  type="button"
+                  className="btn btn-sm"
+                  disabled={busy}
+                  onClick={() => loginAs(a.u)}
+                  title={`Đăng nhập bằng ${a.u}`}
+                  style={{ fontSize: 11.5 }}
+                >
+                  <Icon name="user" size={12} /> {a.label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

@@ -28,7 +28,7 @@ export function TaskDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [docs, setDocs] = useState(false);
   const [progOpen, setProgOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
@@ -47,8 +47,8 @@ export function TaskDetailPage() {
   if (t.isLoading) return <Skeleton rows={6} />;
   if (t.isError || !t.data) return <ErrorState error={t.error} />;
   const d = t.data;
-  const canAssign = hasRole('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
-  const canExecute = hasRole('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'COMMUNE_USER', 'REVIEWER');
+  const canAssign = can('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
+  const canExecute = can('BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'COMMUNE_USER', 'REVIEWER');
   const terminal = ['COMPLETED', 'CANCELLED'].includes(d.status);
   const overdue = d.dueDate && !terminal && new Date(d.dueDate) < new Date();
   const assignee = d.assigneeUserName || d.assigneeOrgName || d.assigneeAreaName || '—';

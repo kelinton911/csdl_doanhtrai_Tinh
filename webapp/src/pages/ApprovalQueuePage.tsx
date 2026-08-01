@@ -35,8 +35,8 @@ function actionBase(kind: PendingRow['kind'], id: string): string {
 export function ApprovalQueuePage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { hasRole } = useAuth();
-  const canReview = hasRole('REVIEWER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
+  const { can } = useAuth();
+  const canReview = can('REVIEWER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
 
   const q = useQuery({
     queryKey: ['approvals'],

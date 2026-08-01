@@ -271,6 +271,22 @@ export class AlertsService {
       /* bảng chưa tồn tại — bỏ qua an toàn */
     }
 
+    // M18/M19 — Địa điểm sơ tán chính chưa sẵn sàng + nhiệm vụ khắc phục ở vùng nguy hiểm chưa xong.
+    try {
+      const sites = await this.ds.query(
+        `SELECT id, name FROM deployment_sites WHERE status='ACTIVE' AND role='PRIMARY' AND readiness='NOT_READY' LIMIT 30`,
+      );
+      for (const r of sites)
+        found.push({ alertType: 'SITE_NOT_READY', severity: 'MEDIUM', title: `Địa điểm sơ tán chính chưa sẵn sàng: ${r.name}`, entityType: 'deployment_site', entityId: r.id });
+      const rec = await this.ds.query(
+        `SELECT id, title FROM recovery_tasks WHERE status<>'RECOVERED' AND (danger_zone=true OR severity IN ('HEAVY','DESTROYED')) LIMIT 30`,
+      );
+      for (const r of rec)
+        found.push({ alertType: 'RECOVERY_URGENT', severity: 'HIGH', title: `Cần khắc phục khẩn: ${r.title}`, entityType: 'recovery_task', entityId: r.id });
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
+
     let created = 0;
     for (const a of found) {
       const dup = await this.repo.findOne({ where: { alertType: a.alertType!, entityId: a.entityId ?? undefined, status: AlertStatus.OPEN } as never });

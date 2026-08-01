@@ -76,6 +76,10 @@
   --dom-report: #4a6b8a;
   --dom-admin: #8a5a04;
 
+  /* Tông màu nhận diện theo vai trò (được AppShell ghi đè theo vai trò hiệu lực). */
+  --role-accent: var(--dom-cmd);
+  --role-accent-soft: color-mix(in srgb, var(--dom-cmd) 16%, transparent);
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

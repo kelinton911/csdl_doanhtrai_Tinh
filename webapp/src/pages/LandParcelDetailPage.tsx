@@ -38,7 +38,7 @@ export function LandParcelDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>('Tổng quan & pháp lý');
   const [actionError, setActionError] = useState<string | null>(null);
   const [evidence, setEvidence] = useState(false);
@@ -81,9 +81,9 @@ export function LandParcelDetailPage() {
   if (p.isError || !p.data) return <ErrorState error={p.error} />;
   const d = p.data;
   const status = d.workflowStatus;
-  const canSubmit = ['DRAFT', 'CHANGES_REQUESTED'].includes(status) && hasRole('COMMUNE_USER', 'BARRACKS_OFFICER');
-  const canReview = status === 'PENDING_REVIEW' && hasRole('REVIEWER', 'BARRACKS_OFFICER');
-  const canEditMarkers = hasRole('COMMUNE_USER', 'BARRACKS_OFFICER');
+  const canSubmit = ['DRAFT', 'CHANGES_REQUESTED'].includes(status) && can('COMMUNE_USER', 'BARRACKS_OFFICER');
+  const canReview = status === 'PENDING_REVIEW' && can('REVIEWER', 'BARRACKS_OFFICER');
+  const canEditMarkers = can('COMMUNE_USER', 'BARRACKS_OFFICER');
   const dc = disputeColor(d.disputeStatus);
 
   const center: [number, number] = d.location ? [d.location.coordinates[1], d.location.coordinates[0]] : [19.8069, 105.7772];

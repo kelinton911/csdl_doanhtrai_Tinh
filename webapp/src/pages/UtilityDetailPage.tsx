@@ -31,7 +31,7 @@ export function UtilityDetailPage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
+  const { can } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>('Thông tin');
   const [addOpen, setAddOpen] = useState(false);
   const [decomOpen, setDecomOpen] = useState(false);
@@ -43,7 +43,7 @@ export function UtilityDetailPage() {
     enabled: tab === 'Chỉ số & tiêu thụ',
   });
 
-  const canManage = hasRole('COMMUNE_USER', 'BARRACKS_OFFICER');
+  const canManage = can('COMMUNE_USER', 'BARRACKS_OFFICER');
 
   if (s.isLoading) return <Skeleton rows={6} />;
   if (s.isError || !s.data) return <ErrorState error={s.error} />;
