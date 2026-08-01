@@ -186,6 +186,47 @@ export class AlertsService {
       /* bảng chưa tồn tại — bỏ qua an toàn */
     }
 
+    // M14 — Ngân sách: dự toán đã chốt bị vượt chi (tổng thực chi > dự toán).
+    try {
+      const bud = await this.ds.query(
+        `SELECT p.id, p.name, p.planned_amount,
+                (SELECT COALESCE(SUM(e.amount),0) FROM budget_expenses e WHERE e.budget_plan_id = p.id) AS spent
+         FROM budget_plans p
+         WHERE p.status = 'APPROVED' AND p.planned_amount > 0 LIMIT 40`,
+      );
+      for (const r of bud) {
+        if (Number(r.spent) > Number(r.planned_amount)) {
+          found.push({ alertType: 'BUDGET_OVERSPENT', severity: 'HIGH', title: `Dự toán vượt chi: ${r.name}`, description: `Thực chi vượt dự toán ${Number(r.planned_amount).toLocaleString('vi-VN')}đ`, entityType: 'budget_plan', entityId: r.id });
+        }
+      }
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
+
+    // M21 — Nhiệm vụ quá hạn (chưa hoàn thành/hủy, đã quá hạn).
+    try {
+      const tasks = await this.ds.query(
+        `SELECT t.id, t.title, t.due_date, t.priority, ao.name AS org, aa.name AS area
+         FROM tasks t
+         LEFT JOIN organizations ao ON ao.id = t.assignee_org_id
+         LEFT JOIN administrative_areas aa ON aa.id = t.assignee_area_id
+         WHERE t.status NOT IN ('COMPLETED','CANCELLED') AND t.due_date IS NOT NULL AND t.due_date < now()
+         LIMIT 60`,
+      );
+      for (const r of tasks) {
+        found.push({
+          alertType: 'TASK_OVERDUE',
+          severity: r.priority === 'URGENT' || r.priority === 'HIGH' ? 'HIGH' : 'MEDIUM',
+          title: `Nhiệm vụ quá hạn: ${r.title}`,
+          description: [r.org || r.area, `Hạn ${String(r.due_date).slice(0, 10)}`].filter(Boolean).join(' · '),
+          entityType: 'task',
+          entityId: r.id,
+        });
+      }
+    } catch {
+      /* bảng chưa tồn tại — bỏ qua an toàn */
+    }
+
     let created = 0;
     for (const a of found) {
       const dup = await this.repo.findOne({ where: { alertType: a.alertType!, entityId: a.entityId ?? undefined, status: AlertStatus.OPEN } as never });

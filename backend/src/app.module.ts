@@ -28,6 +28,8 @@ import { LandParcelsModule } from './modules/land-parcels/land-parcels.module';
 import { UtilitiesModule } from './modules/utilities/utilities.module';
 import { LocalResourcesModule } from './modules/local-resources/local-resources.module';
 import { ProjectsModule } from './modules/projects/projects.module';
+import { BudgetsModule } from './modules/budgets/budgets.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/identity/guards/roles.guard';
@@ -68,6 +70,8 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     UtilitiesModule, // M11 (khảo sát) — Điện/Nước/Năng lượng
     LocalResourcesModule, // M16 (khảo sát) — Nguồn lực huy động tại địa phương
     ProjectsModule, // M13 (khảo sát) — Xây dựng cơ bản & dự án đầu tư
+    BudgetsModule, // M14 (khảo sát) — Kế hoạch & ngân sách doanh trại
+    TasksModule, // M21 (khảo sát) — Kế hoạch công tác & giao nhiệm vụ
     DashboardModule, // M12 — Dashboard tổng hợp
     HealthModule,
     // Roadmap còn lại: Inventory(M06), Inspection(M07), Documents(M08),

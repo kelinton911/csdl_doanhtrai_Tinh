@@ -33,6 +33,12 @@ import { LocalResourceDetailPage } from './pages/LocalResourceDetailPage';
 import { ProjectsListPage } from './pages/ProjectsListPage';
 import { ProjectFormPage } from './pages/ProjectFormPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
+import { BudgetsListPage } from './pages/BudgetsListPage';
+import { BudgetFormPage } from './pages/BudgetFormPage';
+import { BudgetDetailPage } from './pages/BudgetDetailPage';
+import { TasksListPage } from './pages/TasksListPage';
+import { TaskFormPage } from './pages/TaskFormPage';
+import { TaskDetailPage } from './pages/TaskDetailPage';
 import { CommuneReadinessPage } from './pages/CommuneReadinessPage';
 import { FieldSurveyPage } from './pages/FieldSurveyPage';
 import { ScanPage } from './pages/ScanPage';
@@ -81,6 +87,14 @@ export default function App() {
       <Route path="/projects/new" element={<Protected><ProjectFormPage /></Protected>} />
       <Route path="/projects/:id/edit" element={<Protected><ProjectFormPage /></Protected>} />
       <Route path="/projects/:id" element={<Protected><ProjectDetailPage /></Protected>} />
+      <Route path="/budgets" element={<Protected><BudgetsListPage /></Protected>} />
+      <Route path="/budgets/new" element={<Protected><BudgetFormPage /></Protected>} />
+      <Route path="/budgets/:id/edit" element={<Protected><BudgetFormPage /></Protected>} />
+      <Route path="/budgets/:id" element={<Protected><BudgetDetailPage /></Protected>} />
+      <Route path="/tasks" element={<Protected><TasksListPage /></Protected>} />
+      <Route path="/tasks/new" element={<Protected><TaskFormPage /></Protected>} />
+      <Route path="/tasks/:id/edit" element={<Protected><TaskFormPage /></Protected>} />
+      <Route path="/tasks/:id" element={<Protected><TaskDetailPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
       <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />

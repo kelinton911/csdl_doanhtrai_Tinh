@@ -25,7 +25,9 @@
     "seed:utilities": "ts-node -r tsconfig-paths/register src/database/seeds/seed-utilities.ts",
     "seed:inventory-catalogs": "ts-node -r tsconfig-paths/register src/database/seeds/seed-inventory-catalogs.ts",
     "seed:local-resources": "ts-node -r tsconfig-paths/register src/database/seeds/seed-local-resources.ts",
-    "seed:projects": "ts-node -r tsconfig-paths/register src/database/seeds/seed-projects.ts"
+    "seed:projects": "ts-node -r tsconfig-paths/register src/database/seeds/seed-projects.ts",
+    "seed:budgets": "ts-node -r tsconfig-paths/register src/database/seeds/seed-budgets.ts",
+    "seed:tasks": "ts-node -r tsconfig-paths/register src/database/seeds/seed-tasks.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1096.0",
