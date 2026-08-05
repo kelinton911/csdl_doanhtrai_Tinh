@@ -66,7 +66,10 @@ export class GisService {
         from: 'storage_locations s LEFT JOIN barracks b ON b.id = s.barracks_id',
         geom: 's.location',
         isPolygon: false,
-        columns: "s.id, s.code, s.name, s.type, s.status, 'KHO' AS category",
+        // nganh/cap/capacity_tons/workflow_status → FE dựng ký hiệu QS đúng điều lệ
+        // (chữ ngành + hình nền theo cấp + nét liền/đứt). 'KHO' AS category = fallback.
+        columns:
+          "s.id, s.code, s.name, s.type, s.nganh, s.cap, s.capacity_tons, s.workflow_status, s.status, 'KHO' AS category",
         scopeAreaCol: 'b.area_id',
         scopeOrgCol: 'b.organization_id',
         limit: 5000,

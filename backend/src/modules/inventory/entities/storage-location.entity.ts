@@ -26,6 +26,19 @@ export class StorageLocation {
   @Column({ name: 'type', type: 'varchar', nullable: true })
   type!: string | null;
 
+  // Ký hiệu quân sự (điều lệ 09-2011, Mục S — xem REF-2026-003):
+  //  - nganh: ngành hậu cần = chữ ghi TRONG ký hiệu (LT/XD/QN/QY/VT/DAN/TH/KT).
+  //  - cap:   cấp quản lý = quyết HÌNH NỀN (TINH/HUYEN/XA/DOANH_TRAI/QK/QD/F/E/D/C).
+  //  - capacityTons: khối lượng (tấn) ghi trong ký hiệu.
+  @Column({ name: 'nganh', type: 'varchar', nullable: true })
+  nganh!: string | null;
+
+  @Column({ name: 'cap', type: 'varchar', nullable: true })
+  cap!: string | null;
+
+  @Column({ name: 'capacity_tons', type: 'numeric', precision: 12, scale: 2, nullable: true })
+  capacityTons!: string | null;
+
   // Kho có thể thuộc một doanh trại.
   @Column({ name: 'barracks_id', type: 'uuid', nullable: true })
   barracksId!: string | null;

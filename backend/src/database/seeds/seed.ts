@@ -183,6 +183,19 @@ async function run() {
     console.log(`  + Danh mục: ${cats.length} mục`);
   }
 
+  // 4b) Danh mục phân loại kho theo KÝ HIỆU QUÂN SỰ (điều lệ 09-2011, Mục S; REF-2026-003).
+  // Idempotent (không bọc trong guard count===0) để tồn tại cả trên DB đã seed trước đó.
+  const ensureCat = async (type: string, code: string, name: string, sortOrder: number) => {
+    const ex = await catalogRepo.findOne({ where: { type, code } });
+    if (!ex) {
+      await catalogRepo.save(catalogRepo.create({ type, code, name, status: 'PUBLISHED', sortOrder, effectiveFrom: new Date(), createdBy: authorId, updatedBy: authorId }));
+    }
+  };
+  const nganhCats: [string, string][] = [['LT', 'Lương thực'], ['XD', 'Xăng dầu'], ['QN', 'Quân nhu'], ['QY', 'Quân y'], ['VT', 'Vật tư'], ['DAN', 'Đạn / Vũ khí'], ['TH', 'Tổng hợp'], ['KT', 'Kỹ thuật']];
+  const capCats: [string, string][] = [['TINH', 'Cấp tỉnh / thành'], ['HUYEN', 'Cấp huyện / quận'], ['XA', 'Cấp xã / phường'], ['DOANH_TRAI', 'Thuộc doanh trại'], ['QK', 'Quân khu'], ['QD', 'Quân đoàn / binh chủng'], ['F', 'Sư đoàn'], ['E', 'Trung / lữ đoàn'], ['D', 'Tiểu đoàn'], ['C', 'Đại đội']];
+  for (let i = 0; i < nganhCats.length; i++) await ensureCat('storage-location-nganh', nganhCats[i][0], nganhCats[i][1], i);
+  for (let i = 0; i < capCats.length; i++) await ensureCat('storage-location-cap', capCats[i][0], capCats[i][1], i);
+
   // 5) Vật chất — KHÔNG seed dữ liệu tự đặt ở đây nữa.
   // Danh mục vật chất chính thức là 788 nút lá miền MATERIAL của TỔNG DANH MỤC TÀI SẢN
   // NGÀNH DOANH TRẠI, dựng bằng:
@@ -278,16 +291,40 @@ async function run() {
   const balanceRepo = dataSource.getRepository(StockBalance);
   if ((await locationRepo.count()) === 0) {
     const mats = await materialRepo.find();
-    const locTypes = ['KHO-TONG', 'KHO-LUONG', 'KHO-NHIEN', 'KHO-KT'];
+    // Bộ kho phủ ĐỦ HỌ HẬU CẦN (điều lệ 09-2011, Mục S; REF-2026-003): mọi ngành × nhiều cấp,
+    // để bản đồ số hiển thị đủ chữ ngành + hình nền theo cấp. workflow_status → nét liền/đứt.
+    const nganhName: Record<string, string> = { LT: 'Lương thực', XD: 'Xăng dầu', QN: 'Quân nhu', QY: 'Quân y', VT: 'Vật tư', DAN: 'Đạn dược', TH: 'Tổng hợp', KT: 'Kỹ thuật' };
+    const symbolMix: Array<{ type: string; nganh: string; cap: string }> = [
+      { type: 'KHO-LUONG', nganh: 'LT', cap: 'TINH' },
+      { type: 'KHO-NHIEN', nganh: 'XD', cap: 'HUYEN' },
+      { type: 'KHO-TONG', nganh: 'QN', cap: 'XA' },
+      { type: 'KHO-TONG', nganh: 'QY', cap: 'HUYEN' },
+      { type: 'KHO-KT', nganh: 'VT', cap: 'DOANH_TRAI' },
+      { type: 'KHO-TONG', nganh: 'TH', cap: 'XA' },
+      { type: 'KHO-LUONG', nganh: 'LT', cap: 'XA' },
+      { type: 'KHO-NHIEN', nganh: 'XD', cap: 'TINH' },
+      { type: 'KHO-TONG', nganh: 'QY', cap: 'TINH' },
+      { type: 'KHO-KT', nganh: 'KT', cap: 'DOANH_TRAI' },
+      { type: 'KHO-TONG', nganh: 'DAN', cap: 'DOANH_TRAI' },
+      { type: 'KHO-TONG', nganh: 'TH', cap: 'HUYEN' },
+    ];
     const locs: StorageLocation[] = [];
-    for (let i = 0; i < 12; i++) {
-      const c = areaCoord.get(pick(areas).id) ?? BASE;
+    for (let i = 0; i < symbolMix.length; i++) {
+      const spec = symbolMix[i];
+      const area = pick(areas);
+      const c = areaCoord.get(area.id) ?? BASE;
       locs.push(
         await locationRepo.save(
           locationRepo.create({
             code: `KHO-${String(i + 1).padStart(3, '0')}`,
-            name: `Kho ${pick(['Hậu cần', 'Kỹ thuật', 'Dự trữ', 'Trung tâm'])} ${i + 1}`,
-            type: pick(locTypes),
+            name: `Kho ${nganhName[spec.nganh]} ${i + 1}`,
+            type: spec.type,
+            nganh: spec.nganh,
+            cap: spec.cap,
+            capacityTons: between(50, 2000).toFixed(2),
+            areaId: area.id,
+            // Xen kẽ DRAFT (dự kiến → nét đứt) với APPROVED (thực → nét liền) để minh hoạ.
+            workflowStatus: i % 4 === 0 ? WorkflowStatus.DRAFT : WorkflowStatus.APPROVED,
             location: point(c.lng + between(-0.02, 0.02), c.lat + between(-0.02, 0.02)),
             status: 'ACTIVE',
             createdBy: authorId,
@@ -323,8 +360,12 @@ async function run() {
     const poiDefs: Array<{ code: string; name: string; category: string }> = [
       { code: 'SCH-TINH', name: 'Sở chỉ huy Bộ CHQS tỉnh', category: 'SO_CHI_HUY' },
       { code: 'TRAM-01', name: 'Trạm kiểm soát quân sự số 1', category: 'TRAM' },
-      { code: 'TRAM-02', name: 'Trạm quân y khu vực', category: 'TRAM' },
-      { code: 'TRAM-03', name: 'Trạm xăng dầu hậu cần', category: 'TRAM' },
+      // Họ ký hiệu hậu cần phi-kho (điều lệ Mục S) — để lớp POI thể hiện đủ bộ ký hiệu.
+      { code: 'QY-01', name: 'Trạm quân y khu vực', category: 'TRAM_QUAN_Y' },
+      { code: 'CCHC-01', name: 'Căn cứ hậu cần tỉnh', category: 'CAN_CU_HC' },
+      { code: 'BEP-01', name: 'Bếp Hoàng Cầm khu tập trung', category: 'BEP_HOANG_CAM' },
+      { code: 'TGN-01', name: 'Trạm giao nhận hàng quân sự', category: 'TRAM_GIAO_NHAN' },
+      { code: 'CTHUONG-01', name: 'Tổ xe cứu thương', category: 'XE_CUU_THUONG' },
       { code: 'DD-01', name: 'Kho K80', category: 'DIA_DANH' },
       { code: 'DD-02', name: 'Thao trường huấn luyện', category: 'DIA_DANH' },
     ];

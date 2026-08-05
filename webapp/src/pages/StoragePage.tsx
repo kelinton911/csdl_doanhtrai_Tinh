@@ -12,6 +12,13 @@ import { Icon } from '../components/Icon';
 import { StatusBadge } from '../components/StatusBadge';
 import { ErrorState } from '../components/States';
 import { EDITABLE_STATUSES } from '../lib/workflow';
+import { buildKhoSymbol } from '../lib/milSymbols';
+
+// Ký hiệu quân sự thu nhỏ của một kho (điều lệ Mục S) — dùng trong bảng + xem trước.
+function KhoSymbol({ nganh, cap, tons, planned, size = 26 }: { nganh?: string | null; cap?: string | null; tons?: number | null; planned?: boolean; size?: number }) {
+  const svg = `<svg width="${size}" height="${size}" viewBox="0 0 24 24">${buildKhoSymbol({ nganh, cap, tons, planned })}</svg>`;
+  return <span style={{ display: 'inline-flex', verticalAlign: 'middle' }} dangerouslySetInnerHTML={{ __html: svg }} />;
+}
 
 // Kho trạm do xã khai báo. Cùng luồng duyệt như doanh trại:
 // DRAFT → (gửi duyệt) PENDING_REVIEW → (chỉ huy xã duyệt) APPROVED.
@@ -20,6 +27,9 @@ interface StorageRow {
   code: string;
   name: string;
   type: string | null;
+  nganh: string | null;
+  cap: string | null;
+  capacityTons: string | null;
   areaId: string | null;
   areaName: string | null;
   barracksName: string | null;
@@ -58,6 +68,14 @@ export function StoragePage() {
   });
 
   const columns: Column<StorageRow>[] = [
+    {
+      key: 'sym', header: 'Ký hiệu', width: 66, align: 'center',
+      render: (r) => (
+        <span title={`Ngành ${r.nganh ?? '—'} · Cấp ${r.cap ?? '—'}`}>
+          <KhoSymbol nganh={r.nganh} cap={r.cap} tons={r.capacityTons ? Number(r.capacityTons) : null} planned={EDITABLE_STATUSES.includes(r.workflowStatus)} />
+        </span>
+      ),
+    },
     { key: 'code', header: 'Mã kho', render: (r) => r.code, mono: true, width: 120 },
     { key: 'name', header: 'Tên kho', render: (r) => <span style={{ fontWeight: 600 }}>{r.name}</span> },
     { key: 'area', header: 'Địa bàn / Doanh trại', render: (r) => r.areaName ?? r.barracksName ?? '—' },
@@ -115,11 +133,21 @@ export function StoragePage() {
 
 function CreateStorageModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const type = useCatalog('storage-location-type');
+  const nganhCat = useCatalog('storage-location-nganh');
+  const capCat = useCatalog('storage-location-cap');
   const areas = useQuery({ queryKey: ['areas'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 200 } })).data as { data: AreaOpt[] } });
-  const [f, setF] = useState({ code: '', name: '', type: '', areaId: '' });
+  const [f, setF] = useState({ code: '', name: '', type: '', nganh: '', cap: '', capacityTons: '', areaId: '' });
   const [error, setError] = useState<string | null>(null);
   const create = useMutation({
-    mutationFn: async () => api.post('/inventory/storage-locations', { code: f.code, name: f.name, type: f.type || undefined, areaId: f.areaId || undefined }),
+    mutationFn: async () => api.post('/inventory/storage-locations', {
+      code: f.code,
+      name: f.name,
+      type: f.type || undefined,
+      nganh: f.nganh || undefined,
+      cap: f.cap || undefined,
+      capacityTons: f.capacityTons ? Number(f.capacityTons) : undefined,
+      areaId: f.areaId || undefined,
+    }),
     onSuccess: () => { toast.success('Đã khai báo kho (nháp).'); onDone(); },
     onError: (e) => setError(toProblem(e).title),
   });
@@ -134,6 +162,16 @@ function CreateStorageModal({ onClose, onDone }: { onClose: () => void; onDone: 
         <div style={{ display: 'flex', gap: 10 }}>
           <div style={{ flex: 1 }}><label className="field-label">Loại kho</label><select className="input" value={f.type} onChange={(e) => setF((s) => ({ ...s, type: e.target.value }))}><option value="">—</option>{type.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
           <div style={{ flex: 1 }}><label className="field-label">Địa bàn (xã/phường)</label><select className="input" value={f.areaId} onChange={(e) => setF((s) => ({ ...s, areaId: e.target.value }))}><option value="">—</option>{(areas.data?.data ?? []).map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+        </div>
+        {/* Ký hiệu quân sự (điều lệ Mục S): ngành = chữ trong ký hiệu, cấp = hình nền, tấn ghi trong ký hiệu. */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+          <div style={{ flex: 1 }}><label className="field-label">Ngành (ký hiệu)</label><select className="input" value={f.nganh} onChange={(e) => setF((s) => ({ ...s, nganh: e.target.value }))}><option value="">—</option>{nganhCat.items.map((c) => <option key={c.code} value={c.code}>{c.code} · {c.name}</option>)}</select></div>
+          <div style={{ flex: 1 }}><label className="field-label">Cấp (hình nền)</label><select className="input" value={f.cap} onChange={(e) => setF((s) => ({ ...s, cap: e.target.value }))}><option value="">—</option>{capCat.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
+          <div style={{ width: 96 }}><label className="field-label">Khối lượng (tấn)</label><input className="input" type="number" min={0} value={f.capacityTons} onChange={(e) => setF((s) => ({ ...s, capacityTons: e.target.value }))} /></div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <label className="field-label" style={{ whiteSpace: 'nowrap' }}>Xem trước</label>
+            <KhoSymbol nganh={f.nganh || 'TH'} cap={f.cap || 'TINH'} tons={f.capacityTons ? Number(f.capacityTons) : null} planned size={34} />
+          </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button className="btn" onClick={onClose}>Hủy</button><button className="btn btn-primary" disabled={f.code.length < 2 || f.name.length < 2 || create.isPending} onClick={() => create.mutate()}>Tạo (nháp)</button></div>
       </div>

@@ -11,6 +11,22 @@ import {
 } from 'class-validator';
 import { PaginationQuery, SearchQuery } from '../../../common/dto/pagination.dto';
 
+// Mã phân loại kho theo điều lệ ký hiệu quân sự (09-2011, Mục S — xem REF-2026-003).
+// Ngành = chữ TRONG ký hiệu; Cấp = HÌNH NỀN ký hiệu.
+export const STORAGE_NGANH_CODES: string[] = ['LT', 'XD', 'QN', 'QY', 'VT', 'DAN', 'TH', 'KT'];
+export const STORAGE_CAP_CODES: string[] = [
+  'TINH',
+  'HUYEN',
+  'XA',
+  'DOANH_TRAI',
+  'QK',
+  'QD',
+  'F',
+  'E',
+  'D',
+  'C',
+];
+
 export class InventoryFilterQuery extends PaginationQuery {
   @ApiPropertyOptional()
   @IsOptional()
@@ -64,6 +80,28 @@ export class CreateStorageLocationDto {
   @IsOptional()
   @IsString()
   type?: string;
+
+  @ApiPropertyOptional({
+    enum: STORAGE_NGANH_CODES,
+    description: 'Ngành hậu cần (chữ trong ký hiệu QS): LT/XD/QN/QY/VT/DAN/TH/KT',
+  })
+  @IsOptional()
+  @IsIn(STORAGE_NGANH_CODES)
+  nganh?: string;
+
+  @ApiPropertyOptional({
+    enum: STORAGE_CAP_CODES,
+    description: 'Cấp quản lý kho (hình nền ký hiệu QS): TINH/HUYEN/XA/DOANH_TRAI/QK/QD/F/E/D/C',
+  })
+  @IsOptional()
+  @IsIn(STORAGE_CAP_CODES)
+  cap?: string;
+
+  @ApiPropertyOptional({ description: 'Khối lượng (tấn) ghi trong ký hiệu', minimum: 0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  capacityTons?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

@@ -56,6 +56,9 @@ export class InventoryService {
       .addSelect('l.code', 'code')
       .addSelect('l.name', 'name')
       .addSelect('l.type', 'type')
+      .addSelect('l.nganh', 'nganh')
+      .addSelect('l.cap', 'cap')
+      .addSelect('l.capacity_tons', 'capacityTons')
       .addSelect('l.barracks_id', 'barracksId')
       .addSelect('l.area_id', 'areaId')
       .addSelect('l.workflow_status', 'workflowStatus')
@@ -102,6 +105,9 @@ export class InventoryService {
         code: dto.code,
         name: dto.name,
         type: dto.type ?? null,
+        nganh: dto.nganh ?? null,
+        cap: dto.cap ?? null,
+        capacityTons: dto.capacityTons != null ? String(dto.capacityTons) : null,
         barracksId: dto.barracksId ?? null,
         areaId: dto.areaId ?? null,
         organizationId: dto.organizationId ?? user.organizationId ?? null,
@@ -118,6 +124,10 @@ export class InventoryService {
     assertEditable(l.workflowStatus);
     if (dto.name !== undefined) l.name = dto.name;
     if (dto.type !== undefined) l.type = dto.type;
+    if (dto.nganh !== undefined) l.nganh = dto.nganh;
+    if (dto.cap !== undefined) l.cap = dto.cap;
+    if (dto.capacityTons !== undefined)
+      l.capacityTons = dto.capacityTons != null ? String(dto.capacityTons) : null;
     if (dto.barracksId !== undefined) l.barracksId = dto.barracksId;
     if (dto.areaId !== undefined) l.areaId = dto.areaId;
     if (dto.organizationId !== undefined) l.organizationId = dto.organizationId;
@@ -165,6 +175,9 @@ export class InventoryService {
           code: saved.code,
           name: saved.name,
           type: saved.type,
+          nganh: saved.nganh,
+          cap: saved.cap,
+          capacityTons: saved.capacityTons,
           barracksId: saved.barracksId,
           areaId: saved.areaId,
           organizationId: saved.organizationId,

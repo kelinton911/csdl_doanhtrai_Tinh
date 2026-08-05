@@ -318,6 +318,12 @@ export function MapPage() {
                     <div style={{ minWidth: 190 }}>
                       <div style={{ fontWeight: 700, fontSize: 13.5 }}>{String(f.properties.name)}</div>
                       <div className="num" style={{ fontSize: 12, color: '#627d98', marginTop: 2 }}>{String(f.properties.code)}</div>
+                      {f.__layer === 'storage-locations' && f.properties.nganh != null && (
+                        <div style={{ fontSize: 12, color: '#334e68', marginTop: 4 }}>
+                          Ngành <b>{String(f.properties.nganh)}</b> · Cấp <b>{String(f.properties.cap ?? '—')}</b>
+                          {f.properties.capacity_tons != null && f.properties.capacity_tons !== '' ? <> · {Math.round(Number(f.properties.capacity_tons))} tấn</> : null}
+                        </div>
+                      )}
                       {f.properties.status != null && (
                         <div style={{ margin: '6px 0' }}>
                           <StatusBadge status={String(f.properties.status)} />
@@ -335,17 +341,24 @@ export function MapPage() {
             })}
           </MapContainer>
 
-          {/* Chú giải ký hiệu quân sự nổi góc dưới */}
-          <div style={{ position: 'absolute', right: 12, bottom: 12, zIndex: 1000, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', border: '1px solid var(--color-neutral-300)', borderRadius: 8, padding: '8px 12px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-            <div className="eyebrow" style={{ marginBottom: 6 }}>Ký hiệu Quân sự</div>
-            <div style={{ display: 'grid', gap: 4 }}>
-              {LEGEND.map((st) => (
-                <div key={st.key} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12 }}>
-                  <span style={{ display: 'inline-flex' }} dangerouslySetInnerHTML={{ __html: legendSvg(st) }} />
-                  <span style={{ fontWeight: 500 }}>{st.label}</span>
+          {/* Chú giải ký hiệu quân sự nổi góc dưới (gộp nhóm + cuộn — điều lệ 09-2011) */}
+          <div style={{ position: 'absolute', right: 12, bottom: 12, zIndex: 1000, maxHeight: '48vh', overflowY: 'auto', background: 'rgba(255,255,255,0.93)', backdropFilter: 'blur(8px)', border: '1px solid var(--color-neutral-300)', borderRadius: 8, padding: '8px 12px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+            <div className="eyebrow" style={{ marginBottom: 6 }}>Ký hiệu Quân sự (điều lệ 09-2011)</div>
+            {Object.entries(
+              LEGEND.reduce((acc: Record<string, typeof LEGEND>, st) => { (acc[st.groupName] ??= []).push(st); return acc; }, {}),
+            ).map(([groupName, items]) => (
+              <div key={groupName}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.3, color: '#829ab1', textTransform: 'uppercase', margin: '7px 0 3px' }}>{groupName}</div>
+                <div style={{ display: 'grid', gap: 4 }}>
+                  {items.map((st) => (
+                    <div key={st.key} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12 }}>
+                      <span style={{ display: 'inline-flex' }} dangerouslySetInnerHTML={{ __html: legendSvg(st) }} />
+                      <span style={{ fontWeight: 500 }}>{st.label}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
 
