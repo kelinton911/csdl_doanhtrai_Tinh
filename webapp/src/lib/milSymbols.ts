@@ -29,21 +29,28 @@ const RED = MIL_COLORS.RED;
 
 // ── Bộ SINH KÝ HIỆU KHO theo điều lệ (Mục S) ────────────────────────────────
 // Cấp quản lý → HÌNH NỀN; ngành → CHỮ trong ký hiệu; trạng thái → nét liền/đứt.
-type KhoShape = 'nha' | 'chong' | 'chuNhat' | 'chuNhatNho' | 'tron' | 'tamGiac' | 'chuV';
+type KhoShape = 'nha' | 'chong' | 'chuNhat' | 'chuNhatNho' | 'vuong' | 'tron' | 'tamGiac' | 'chuV';
 
-// Ánh xạ cấp quản lý → hình nền (điều lệ Phần 4.1).
+// Ánh xạ cấp quản lý → hình nền.
+// Cấp ĐỊA PHƯƠNG có GẠCH CHÂN dưới ký hiệu (xem CAP_UNDERLINE) — quy ước phân biệt LLVTĐP.
 const CAP_SHAPE: Record<string, KhoShape> = {
-  TINH: 'nha', // tỉnh/thành, tổng cục = ngôi nhà kho
-  HUYEN: 'chuNhat', // huyện/quận, quân đoàn/binh chủng = chữ nhật
-  XA: 'chuV', // xã/phường, đại đội = chữ V
+  // — Địa phương (có gạch chân) —
+  XA: 'tamGiac', // xã/phường = tam giác + gạch chân
+  HUYEN: 'vuong', // huyện/quận = hình vuông + gạch chân
+  TINH: 'nha', // tỉnh/thành = ngôi nhà + gạch chân
+  QK: 'chong', // quân khu = nhà xếp chồng + gạch chân đôi
+  // — Đơn vị chủ lực (KHÔNG gạch chân) — điều lệ Mục S —
   DOANH_TRAI: 'tamGiac', // thuộc doanh trại ≈ cấp tiểu đoàn = tam giác
-  QK: 'chong', // quân khu/tổng kho = nhà xếp chồng
   QD: 'chuNhat', // quân đoàn/binh chủng = chữ nhật
   F: 'tron', // sư đoàn = tròn
   E: 'chuNhatNho', // trung/lữ đoàn = chữ nhật nhỏ
   D: 'tamGiac', // tiểu đoàn = tam giác
   C: 'chuV', // đại đội = chữ V
 };
+
+// Số GẠCH CHÂN dưới ký hiệu cho cấp ĐỊA PHƯƠNG (0 = chủ lực, không gạch chân).
+// Tăng theo cấp: xã/huyện/tỉnh = 1; quân khu = 2.
+const CAP_UNDERLINE: Record<string, number> = { XA: 1, HUYEN: 1, TINH: 1, QK: 2 };
 
 // Hình nền: trả body SVG + tâm đặt chữ (tx,ty). fill/stroke/dash lái theo trạng thái.
 function khoShapeGeom(
@@ -66,6 +73,8 @@ function khoShapeGeom(
       return { body: `<rect x="4" y="8" width="16" height="11" rx="1" fill="${fill}" ${sw}/>`, tx: 12, ty: 14 };
     case 'chuNhatNho':
       return { body: `<rect x="6" y="9" width="12" height="9" rx="1" fill="${fill}" ${sw}/>`, tx: 12, ty: 14 };
+    case 'vuong': // hình vuông (cấp huyện — địa phương)
+      return { body: `<rect x="6" y="5" width="12" height="12" rx="1" fill="${fill}" ${sw}/>`, tx: 12, ty: 11 };
     case 'tron':
       return { body: `<circle cx="12" cy="12" r="8" fill="${fill}" ${sw}/>`, tx: 12, ty: 13 };
     case 'tamGiac': // tam giác đỉnh trên (tiểu đoàn / thuộc doanh trại)
@@ -100,14 +109,22 @@ export function buildKhoSymbol(opts: {
   tons?: number | null;
   planned?: boolean;
 }): string {
-  const shape = CAP_SHAPE[String(opts.cap ?? '').toUpperCase()] ?? 'nha';
+  const capU = String(opts.cap ?? '').toUpperCase();
+  const shape = CAP_SHAPE[capU] ?? 'nha';
   const planned = !!opts.planned;
   const fill = planned ? '#ffffff' : RED;
   const dash = planned ? 'stroke-dasharray="2.4 1.7"' : '';
   const glyphColor = planned ? RED : '#ffffff';
   const g = khoShapeGeom(shape, fill, RED, dash);
   const nganh = String(opts.nganh ?? 'TH').toUpperCase();
-  return g.body + khoGlyph(nganh, opts.tons ?? null, glyphColor, g.tx, g.ty);
+  // Gạch chân dưới ký hiệu cho cấp ĐỊA PHƯƠNG (xã/huyện/tỉnh = 1 gạch; quân khu = 2 gạch).
+  let underline = '';
+  const nUnderline = CAP_UNDERLINE[capU] ?? 0;
+  for (let i = 0; i < nUnderline; i++) {
+    const y = 21 + i * 2;
+    underline += `<line x1="4.5" y1="${y}" x2="19.5" y2="${y}" stroke="${RED}" stroke-width="1.7" stroke-linecap="round"/>`;
+  }
+  return g.body + khoGlyph(nganh, opts.tons ?? null, glyphColor, g.tx, g.ty) + underline;
 }
 
 export const STYLES: Record<string, SymbolStyle> = {
@@ -366,11 +383,12 @@ export const LEGEND: SymbolStyle[] = [
   STYLES.barracks,
   STYLES.SO_CHI_HUY,
   STYLES.facility,
-  // Kho hậu cần — hình nền theo CẤP + chữ NGÀNH (điều lệ Mục S)
-  khoLegend('KHO_TINH', 'Kho cấp tỉnh (nhà)', 'TINH', 'LT'),
-  khoLegend('KHO_HUYEN', 'Kho cấp huyện (chữ nhật)', 'HUYEN', 'XD'),
-  khoLegend('KHO_XA', 'Kho cấp xã (chữ V)', 'XA', 'QN'),
-  khoLegend('KHO_DOANHTRAI', 'Kho thuộc doanh trại (tam giác)', 'DOANH_TRAI', 'VT'),
+  // Kho hậu cần — hình nền theo CẤP + chữ NGÀNH. Cấp ĐỊA PHƯƠNG có GẠCH CHÂN.
+  khoLegend('KHO_XA', 'Cấp xã (tam giác + gạch chân)', 'XA', 'QN'),
+  khoLegend('KHO_HUYEN', 'Cấp huyện (vuông + gạch chân)', 'HUYEN', 'XD'),
+  khoLegend('KHO_TINH', 'Cấp tỉnh (nhà + gạch chân)', 'TINH', 'LT'),
+  khoLegend('KHO_QK', 'Cấp quân khu (gạch chân đôi)', 'QK', 'TH'),
+  khoLegend('KHO_DOANHTRAI', 'Thuộc doanh trại (tam giác, chủ lực)', 'DOANH_TRAI', 'VT'),
   khoLegend('KHO_QY', 'Kho/trạm quân y (chữ thập)', 'HUYEN', 'QY'),
   buildKhoLegendPlanned(),
   // Ký hiệu hậu cần phi-kho
