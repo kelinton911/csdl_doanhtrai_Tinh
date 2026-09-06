@@ -363,6 +363,64 @@
     "/stock-periods/{id}/unlock": [
       "post"
     ],
+    "/allocation-types": [
+      "get",
+      "post"
+    ],
+    "/allocations/allocatable": [
+      "get"
+    ],
+    "/reserve/sscd": [
+      "get"
+    ],
+    "/allocations": [
+      "post"
+    ],
+    "/allocations/{id}": [
+      "get"
+    ],
+    "/allocations/{id}/lines": [
+      "post"
+    ],
+    "/allocations/{id}/submit": [
+      "post"
+    ],
+    "/allocations/{id}/approve": [
+      "post"
+    ],
+    "/allocations/{id}/holds": [
+      "post"
+    ],
+    "/allocations/{id}/reserve-links": [
+      "get"
+    ],
+    "/holds/{id}/release": [
+      "post"
+    ],
+    "/reserve-links": [
+      "post"
+    ],
+    "/allocation-change-requests": [
+      "post"
+    ],
+    "/allocation-change-requests/{id}/approve": [
+      "post"
+    ],
+    "/allocation-snapshots": [
+      "post"
+    ],
+    "/allocation-snapshots/{id}/lock": [
+      "post"
+    ],
+    "/allocation-snapshots/{id}/lines": [
+      "get"
+    ],
+    "/slow-moving/rules": [
+      "post"
+    ],
+    "/slow-moving/evaluate/{ruleId}": [
+      "post"
+    ],
     "/asset-catalog/proposals/batches": [
       "get",
       "post"
@@ -1052,6 +1110,26 @@
     "/stock-periods::post": "DocumentsController_createPeriod",
     "/stock-periods/{id}/lock::post": "DocumentsController_lockPeriod",
     "/stock-periods/{id}/unlock::post": "DocumentsController_unlockPeriod",
+    "/allocation-types::get": "AllocationController_listTypes",
+    "/allocation-types::post": "AllocationController_createType",
+    "/allocations/allocatable::get": "AllocationController_allocatable",
+    "/reserve/sscd::get": "AllocationController_reserveSscd",
+    "/allocations::post": "AllocationController_createAllocation",
+    "/allocations/{id}::get": "AllocationController_getAllocation",
+    "/allocations/{id}/lines::post": "AllocationController_addLine",
+    "/allocations/{id}/submit::post": "AllocationController_submit",
+    "/allocations/{id}/approve::post": "AllocationController_approve",
+    "/allocations/{id}/holds::post": "AllocationController_createHold",
+    "/allocations/{id}/reserve-links::get": "AllocationController_listReserveLinks",
+    "/holds/{id}/release::post": "AllocationController_releaseHold",
+    "/reserve-links::post": "AllocationController_createReserveLink",
+    "/allocation-change-requests::post": "AllocationController_createChangeRequest",
+    "/allocation-change-requests/{id}/approve::post": "AllocationController_approveChangeRequest",
+    "/allocation-snapshots::post": "AllocationController_createSnapshot",
+    "/allocation-snapshots/{id}/lock::post": "AllocationController_lockSnapshot",
+    "/allocation-snapshots/{id}/lines::get": "AllocationController_snapshotLines",
+    "/slow-moving/rules::post": "AllocationController_createSlowRule",
+    "/slow-moving/evaluate/{ruleId}::post": "AllocationController_evaluateSlow",
     "/asset-catalog/proposals/batches::get": "AssetProposalController_listBatches",
     "/asset-catalog/proposals/batches::post": "AssetProposalController_createBatch",
     "/asset-catalog/proposals/batches/{id}/export::post": "AssetProposalController_exportBatch",

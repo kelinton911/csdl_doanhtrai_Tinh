@@ -72,8 +72,11 @@ export const C3_CATALOG_SEED: C3SeedRow[] = [
 
   // ---- DT-06 Dự trữ & phân bổ ----
   { c3Code: 'DT-06.00', subsystem: 'DT-06', name: 'Dự trữ & phân bổ' },
-  { c3Code: 'DT-06.01', subsystem: 'DT-06', name: 'allocation_type EXCLUSIVE/OVERLAY + inventory_allocation' },
-  { c3Code: 'DT-06.02', subsystem: 'DT-06', name: 'allocation_hold: Σ exclusive ≤ HC_ALLOCATABLE', businessRule: 'BR-DT06-002' },
+  { c3Code: 'DT-06.01', subsystem: 'DT-06', name: 'allocation_type EXCLUSIVE/OVERLAY + inventory_allocation', api: '/allocation-types, /allocations' },
+  { c3Code: 'DT-06.02', subsystem: 'DT-06', name: 'allocation_hold: Σ exclusive ≤ HC_ALLOCATABLE', useCase: 'UC-DT06-04', businessRule: 'BR-DT06-002', api: 'POST /allocations/{id}/holds; GET /allocations/allocatable', test: 'TC-DT06-002/003' },
+  { c3Code: 'DT-06.03', subsystem: 'DT-06', name: 'reserve_requirement_link (đối chiếu định mức DT-07)', useCase: 'UC-DT06-08', businessRule: 'BR-DT06-008', api: 'POST /reserve-links; GET /reserve/sscd', test: 'TC-DT06-008' },
+  { c3Code: 'DT-06.05', subsystem: 'DT-06', name: 'allocation_snapshot cutoff (bất biến)', useCase: 'UC-DT06-14', businessRule: 'BR-DT06-023', api: 'POST /allocation-snapshots/{id}/lock', test: 'TC-DT06-023' },
+  { c3Code: 'DT-06.07', subsystem: 'DT-06', name: 'Chống DT-05 giảm HC dưới hold; chuyển loại workflow', businessRule: 'BR-DT06-006/020', api: 'POST /allocation-change-requests/{id}/approve', test: 'TC-DT06-006/020' },
 
   // ---- DT-07 Định mức & Chỉ lệnh ----
   { c3Code: 'DT-07.00', subsystem: 'DT-07', name: 'Định mức, quy định dự trữ & Chỉ lệnh', description: 'logistics-norms' },

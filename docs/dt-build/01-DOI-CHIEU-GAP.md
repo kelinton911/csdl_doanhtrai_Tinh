@@ -218,6 +218,17 @@ API `/inventory-documents/*`, `/transfer-orders/*`, `/stock-periods/*`.
 | 6 | Chuyển loại allocation qua workflow (SSCĐ cần phê duyệt), atomic, giữ HC | BR-DT06-006 | TB |
 | 7 | Không tự trừ HC; DT-05 giảm HC dưới allocation → chặn/exception | BR-DT06-020 | Cao |
 
+**Đã hiện thực (2026-09-06 — module `dt06-allocation`, code + unit test PASS):**
+10 bảng (migration `1753000040000`): `allocation_type` (EXCLUSIVE/OVERLAY + category), `inventory_allocation`/`_line`,
+`allocation_hold` (denormalized semantics/category), `reserve_requirement_link`, `allocation_snapshot`/`_line`,
+`allocation_change_request`, `slow_moving_rule`/`_evaluation`. Lớp phủ ngữ nghĩa trên HC (DT-04), **không tự trừ HC**.
+Domain rules `alloc-rules.ts` + **9 unit test**: `Σ EXCLUSIVE ≤ HC_ALLOCATABLE` → `OVER_ALLOCATED`
+(SYS-BR-05, TC-DT06-002/003 chống tính trùng), gap định mức thiếu/đủ/vượt (TC-DT06-008), chặn HC tụt dưới
+hold (TC-DT06-020), snapshot lock (TC-DT06-023). API `GET /allocations/allocatable` (HC khả dụng),
+`GET /reserve/sscd` (**PC_SSCĐ / SEM-RESERVE-SSCD cho DT-08**), holds, change-requests, snapshots, slow-moving.
+Dùng lại `materiel_movement` (DT-04) để tính HC. **Còn lại:** ràng buộc realtime khi DT-05 POST giảm HC dưới hold
+(hiện có helper `assertHcCoversHolds`), webapp SCR-DT06-01..09, E2E.
+
 ---
 
 ## DT-07 — Định mức, quy định dự trữ & Chỉ lệnh (Quyển VII) 🔴
@@ -380,7 +391,7 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | DT-03 | ◑ | 2026-09-06 | (chưa commit) | Backend 10 bảng + ~20 API + revision state machine + completeness (14 test) + **webapp** TechnicalModelsPage (thư viện mẫu/revision/publish/độ đầy đủ). Chờ: E2E 3 kiểu vật chất. |
 | DT-04 | ◑ | 2026-09-06 | (chưa commit) | Backend sổ cái (7 bảng + 19 API + HC(t) as-of + snapshot lock, 12 test) + **webapp** MaterielPage (tra HC theo thời điểm + sổ cái + workflow giao dịch). Chờ: import staging, tách/gộp lô, E2E. |
 | DT-05 | ◑ | 2026-09-06 | (chưa commit) | Backend chứng từ (5 bảng + 18 API + POST nguyên tử + transfer + khóa kỳ, 10 test) + **webapp** InventoryDocumentsPage (chứng từ/dòng/duyệt-POST/truy vết + điều chuyển + khóa kỳ). Chờ: recall/disposal, E2E. |
-| DT-06 | ☐ | | | |
+| DT-06 | ◑ | 2026-09-06 | (chưa commit) | Backend phân bổ: 10 bảng + 19 API + Σ exclusive ≤ HC_ALLOCATABLE + PC_SSCĐ cho DT-08 + snapshot lock; 9 unit test PASS. Chờ: ràng buộc realtime DT-05↔hold, webapp, E2E. |
 | DT-07 | ☐ | | | |
 | DT-08 | ☐ | | | |
 | DT-09 | ☐ | | | |

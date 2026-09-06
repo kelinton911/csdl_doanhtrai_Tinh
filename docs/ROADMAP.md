@@ -66,6 +66,8 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   (`GET /materiel/hc` cho DT-08) + lô/asset + snapshot lock + điều chỉnh (backend, 12 unit test).
 - **DT-05 Nhập–xuất–điều chuyển** ◑ (2026-09-06): `inventory_document` + POST nguyên tử → movement
   DT-04, reversal, điều chuyển 2 đầu (IN_TRANSIT), khóa kỳ cấm backdate (backend, 10 unit test).
+- **DT-06 Dự trữ & phân bổ** ◑ (2026-09-06): allocation_type/hold lớp phủ trên HC + ràng buộc
+  Σ exclusive ≤ HC_ALLOCATABLE + PC_SSCĐ (`/reserve/sscd`) cho DT-08 + snapshot (backend, 9 unit test).
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),
