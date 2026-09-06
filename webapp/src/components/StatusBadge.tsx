@@ -53,6 +53,12 @@ const MAP: Record<string, { label: string; tone: Tone; icon: IconName }> = {
   ACKNOWLEDGED: { label: 'Đã ghi nhận', tone: 'info', icon: 'check' },
   ASSIGNED: { label: 'Đã giao', tone: 'warn', icon: 'user' },
   SNOOZED: { label: 'Tạm hoãn', tone: 'neutral', icon: 'clock' },
+  // Danh mục chuẩn DT-01
+  VALIDATED: { label: 'Đã kiểm tra', tone: 'info', icon: 'check' },
+  VALIDATING: { label: 'Đang kiểm tra', tone: 'warn', icon: 'clock' },
+  FAILED: { label: 'Có lỗi', tone: 'danger', icon: 'alert' },
+  PENDING_MAPPING: { label: 'Chờ ánh xạ', tone: 'warn', icon: 'clock' },
+  MAPPED: { label: 'Đã ánh xạ', tone: 'ok', icon: 'check' },
   // Chung
   ACTIVE: { label: 'Hiệu lực', tone: 'ok', icon: 'check' },
   LOCKED_ACCOUNT: { label: 'Đã khóa', tone: 'danger', icon: 'lock' },

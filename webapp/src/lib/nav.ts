@@ -73,6 +73,7 @@ export const NAV: NavItem[] = [
   { to: '/audits', label: 'Kiểm tra - thanh tra', icon: 'shield', dom: 'audit', group: 'review', roles: ['AUDITOR', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REVIEWER', 'COMMUNE_USER'] },
 
   // ── Lớp Danh mục dùng chung (tra cứu; GỐC là danh mục BQP) ────
+  { to: '/catalog', label: 'Danh mục chuẩn R00 (DT-01)', icon: 'grid', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
   { to: '/asset-catalog', label: 'Danh mục tài sản BQP', icon: 'clipboard', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
   { to: '/material-groups', label: 'Nhóm ngành vật chất', icon: 'box', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
   { to: '/materials', label: 'Danh mục vật chất', icon: 'clipboard', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },

@@ -50,7 +50,13 @@ Tổng hợp từ ba tài liệu trong `docs/`:
 - **Pha 5 — Tình huống & phương án** ✅: engine tính toán (M10), so sánh/chốt phương án.
 - **Pha 6 — Tích hợp & tối ưu** ✅: Alert (M13), Audit (M15), Integration/Sync (M14),
   backup/restore (runbook + script), data-scope theo dataScopes, watermark báo cáo theo người dùng;
-  còn outbox, HA, performance/security hardening nâng cao (lộ trình).
+  còn HA, performance/security hardening nâng cao (lộ trình).
+- **Sprint 0 (DT-build) — Chuẩn hóa nền tảng** ◑ (2026-09-06): mã lỗi nghiệp vụ tập trung
+  (`BusinessException`), enum trạng thái chuẩn (§3), `DataScopeGuard` row-level toàn cục +
+  `@Scoped`, `AbstractEntity` + optimistic lock (STALE_WRITE), audit chuẩn hóa,
+  as-of helper + response wrapper (Asia/Ho_Chi_Minh), idempotency mở rộng POST/PUT/PATCH,
+  **outbox pattern** (`outbox_event` + dispatcher), **C3 catalog** (`/c3-catalog` + seed),
+  **OpenAPI contract test** (preview-mode + baseline). Chi tiết: `docs/dt-build/01-DOI-CHIEU-GAP.md`.
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),

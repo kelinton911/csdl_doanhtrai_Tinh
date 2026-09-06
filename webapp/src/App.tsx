@@ -63,6 +63,12 @@ const CommuneReadinessPage = lazy(() => import('./pages/CommuneReadinessPage').t
 const FieldSurveyPage = lazy(() => import('./pages/FieldSurveyPage').then((m) => ({ default: m.FieldSurveyPage })));
 const ScanPage = lazy(() => import('./pages/ScanPage').then((m) => ({ default: m.ScanPage })));
 const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
+// DT-01 — Danh mục chuẩn ngành (Quyển I).
+const CatalogPage = lazy(() => import('./pages/CatalogPage').then((m) => ({ default: m.CatalogPage })));
+const CatalogImportPage = lazy(() => import('./pages/CatalogImportPage').then((m) => ({ default: m.CatalogImportPage })));
+const CatalogComparePage = lazy(() => import('./pages/CatalogComparePage').then((m) => ({ default: m.CatalogComparePage })));
+const CatalogChangeRequestPage = lazy(() => import('./pages/CatalogChangeRequestPage').then((m) => ({ default: m.CatalogChangeRequestPage })));
+const CatalogQueuePage = lazy(() => import('./pages/CatalogQueuePage').then((m) => ({ default: m.CatalogQueuePage })));
 
 function Centered({ text }: { text: string }) {
   return <div style={{ height: '60vh', display: 'grid', placeItems: 'center', color: 'var(--color-neutral-600)' }}>{text}</div>;
@@ -162,6 +168,12 @@ export default function App() {
       <Route path="/reports" element={<Protected><ReportsPage /></Protected>} />
       <Route path="/alerts" element={<Protected><AlertsPage /></Protected>} />
       <Route path="/admin" element={<Protected><AdminPage /></Protected>} />
+      {/* DT-01 — Danh mục chuẩn ngành */}
+      <Route path="/catalog" element={<Protected><CatalogPage /></Protected>} />
+      <Route path="/catalog/import" element={<Protected><CatalogImportPage /></Protected>} />
+      <Route path="/catalog/compare" element={<Protected><CatalogComparePage /></Protected>} />
+      <Route path="/catalog/change-requests" element={<Protected><CatalogChangeRequestPage /></Protected>} />
+      <Route path="/catalog/queue" element={<Protected><CatalogQueuePage /></Protected>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

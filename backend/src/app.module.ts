@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { AuditModule } from './modules/audit/audit.module';
@@ -37,8 +37,13 @@ import { ReadinessMaterialsModule } from './modules/readiness-materials/readines
 import { LogisticsNormsModule } from './modules/logistics-norms/logistics-norms.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
+import { OutboxModule } from './common/outbox/outbox.module';
+import { C3CatalogModule } from './modules/c3-catalog/c3-catalog.module';
+import { CatalogModule } from './modules/catalog/catalog.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/identity/guards/roles.guard';
+import { DataScopeGuard } from './common/scope/data-scope.guard';
+import { OptimisticLockInterceptor } from './common/concurrency/optimistic-lock.interceptor';
 import { ProblemExceptionFilter } from './common/filters/problem-exception.filter';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 
@@ -54,10 +59,13 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     // Nền tảng xuyên suốt (Pha A): audit append-only, idempotency, object storage.
     AuditModule, // M15 — Audit & Operations (UC-23)
     IdempotencyModule, // Idempotency-Key cho POST quan trọng
+    OutboxModule, // Sprint 0 — Outbox pattern (domain event trong transaction)
+    C3CatalogModule, // Sprint 0 — C3 catalog & ma trận truy vết
     StorageModule, // Object storage MinIO (nền cho M08)
     IdentityModule, // M01 — Identity & Access
     OrganizationModule, // M02 — Organization & Area
     MasterDataModule, // M03 — Master Data (danh mục + vật chất)
+    CatalogModule, // DT-01 — Danh mục chuẩn R00 versioned (Quyển I)
     AssetCatalogModule, // Danh mục tài sản ngành Doanh trại (Phụ lục CV 2837/DT-QLDT)
     InventoryModule, // M06 — Inventory (tồn kho UC-08)
     InspectionModule, // M07 — Inspection & Review (UC-09/10/11)
@@ -94,6 +102,11 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     // Xác thực mặc định toàn hệ thống, endpoint công khai đánh dấu @Public().
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    // Row-level data-scope (SYS-BR-08): chạy SAU JwtAuthGuard để có req.user,
+    // gắn req.scope + cưỡng chế @Scoped(...).
+    { provide: APP_GUARD, useClass: DataScopeGuard },
+    // Dịch OptimisticLockVersionMismatchError → 409 STALE_WRITE nhất quán.
+    { provide: APP_INTERCEPTOR, useClass: OptimisticLockInterceptor },
     { provide: APP_FILTER, useClass: ProblemExceptionFilter },
   ],
 })

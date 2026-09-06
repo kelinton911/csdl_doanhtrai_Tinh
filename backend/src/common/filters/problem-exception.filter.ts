@@ -7,9 +7,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { BusinessException } from '../errors/business-error';
 
 // Chuẩn hóa lỗi theo application/problem+json với `code` ổn định
-// (Tài liệu mô tả Backend §8). Mọi lỗi đều có correlationId để truy nguyên.
+// (Tài liệu mô tả Backend §8 + Sprint 0 §1). Mọi lỗi đều có correlationId để truy nguyên.
 @Catch()
 export class ProblemExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger('Exception');
@@ -44,6 +45,12 @@ export class ProblemExceptionFilter implements ExceptionFilter {
     let message = 'Lỗi nội bộ';
     let errors: unknown[] | undefined;
     let explicitCode: string | undefined;
+
+    // BusinessException mang sẵn mã lỗi nghiệp vụ SCREAMING_SNAKE_CASE (§2) —
+    // ưu tiên dùng trực tiếp, không suy ra từ HTTP status.
+    if (exception instanceof BusinessException) {
+      explicitCode = exception.getCode();
+    }
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();

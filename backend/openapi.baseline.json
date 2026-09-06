@@ -1,0 +1,1011 @@
+{
+  "version": "1.0",
+  "paths": {
+    "/audit-logs": [
+      "get"
+    ],
+    "/audit-logs/{id}": [
+      "get"
+    ],
+    "/c3-catalog": [
+      "get"
+    ],
+    "/c3-catalog/{code}": [
+      "get"
+    ],
+    "/auth/login": [
+      "post"
+    ],
+    "/auth/mfa/enroll": [
+      "post"
+    ],
+    "/auth/mfa/disable": [
+      "post"
+    ],
+    "/auth/refresh": [
+      "post"
+    ],
+    "/auth/logout": [
+      "post"
+    ],
+    "/me": [
+      "get"
+    ],
+    "/users": [
+      "get",
+      "post"
+    ],
+    "/users/{id}": [
+      "get",
+      "put"
+    ],
+    "/users/{id}/roles": [
+      "post"
+    ],
+    "/users/{id}/scopes": [
+      "post"
+    ],
+    "/users/{id}/reset-password": [
+      "post"
+    ],
+    "/administrative-areas": [
+      "get",
+      "post"
+    ],
+    "/organizations": [
+      "get",
+      "post"
+    ],
+    "/organizations/{id}": [
+      "put"
+    ],
+    "/materials": [
+      "get",
+      "post"
+    ],
+    "/materials/{id}/versions": [
+      "get"
+    ],
+    "/materials/{id}": [
+      "get",
+      "put"
+    ],
+    "/materials/{id}/publish": [
+      "post"
+    ],
+    "/master-data/{type}": [
+      "get",
+      "post"
+    ],
+    "/master-data/{type}/{id}": [
+      "put"
+    ],
+    "/master-data/{type}/{id}/publish": [
+      "post"
+    ],
+    "/material-groups": [
+      "get",
+      "post"
+    ],
+    "/material-groups/move-material": [
+      "post"
+    ],
+    "/material-groups/{id}": [
+      "delete",
+      "get",
+      "put"
+    ],
+    "/material-groups/{id}/materials": [
+      "get"
+    ],
+    "/catalog/versions": [
+      "get",
+      "post"
+    ],
+    "/catalog/versions/compare": [
+      "get"
+    ],
+    "/catalog/versions/{id}/publish": [
+      "post"
+    ],
+    "/catalog/items": [
+      "get",
+      "post"
+    ],
+    "/catalog/search": [
+      "get"
+    ],
+    "/catalog/items/{id}": [
+      "get"
+    ],
+    "/catalog/items/{id}/children": [
+      "get"
+    ],
+    "/catalog/units": [
+      "get",
+      "post"
+    ],
+    "/catalog/aliases/resolve": [
+      "get"
+    ],
+    "/catalog/items/{id}/aliases": [
+      "get"
+    ],
+    "/catalog/aliases": [
+      "post"
+    ],
+    "/catalog/aliases/{id}": [
+      "put"
+    ],
+    "/catalog/replacements": [
+      "post"
+    ],
+    "/catalog/items/{id}/replacement": [
+      "get"
+    ],
+    "/catalog/change-requests": [
+      "get",
+      "post"
+    ],
+    "/catalog/change-requests/{id}/submit": [
+      "post"
+    ],
+    "/catalog/change-requests/{id}/review": [
+      "post"
+    ],
+    "/catalog/change-requests/{id}/map-existing": [
+      "post"
+    ],
+    "/catalog/temporary-materials": [
+      "get",
+      "post"
+    ],
+    "/catalog/temporary-materials/{id}/assign-official-code": [
+      "post"
+    ],
+    "/catalog/import-batches": [
+      "post"
+    ],
+    "/catalog/import-batches/{id}/validate": [
+      "post"
+    ],
+    "/catalog/import-batches/{id}/errors": [
+      "get"
+    ],
+    "/asset-catalog/proposals/batches": [
+      "get",
+      "post"
+    ],
+    "/asset-catalog/proposals/batches/{id}/export": [
+      "post"
+    ],
+    "/asset-catalog/proposals/batches/{id}/download": [
+      "get"
+    ],
+    "/asset-catalog/proposals/batches/{id}/csv": [
+      "get"
+    ],
+    "/asset-catalog/proposals": [
+      "get",
+      "post"
+    ],
+    "/asset-catalog/proposals/{id}/preview-code": [
+      "get"
+    ],
+    "/asset-catalog/proposals/{id}/allocate-code": [
+      "post"
+    ],
+    "/asset-catalog/proposals/{id}/submit": [
+      "post"
+    ],
+    "/asset-catalog/proposals/{id}": [
+      "delete"
+    ],
+    "/asset-catalog/meta": [
+      "get"
+    ],
+    "/asset-catalog/tree": [
+      "get"
+    ],
+    "/asset-catalog/search": [
+      "get"
+    ],
+    "/asset-catalog/gaps": [
+      "get"
+    ],
+    "/asset-catalog/{code}/subtree": [
+      "get"
+    ],
+    "/asset-catalog/{code}": [
+      "get"
+    ],
+    "/asset-catalog/materials/{id}/asset-code": [
+      "patch"
+    ],
+    "/asset-catalog/facilities/{id}/asset-code": [
+      "patch"
+    ],
+    "/inventory/storage-locations": [
+      "get",
+      "post"
+    ],
+    "/inventory/storage-locations/{id}/revisions": [
+      "get"
+    ],
+    "/inventory/storage-locations/{id}": [
+      "get",
+      "put"
+    ],
+    "/inventory/storage-locations/{id}/submit": [
+      "post"
+    ],
+    "/inventory/storage-locations/{id}/approve": [
+      "post"
+    ],
+    "/inventory/storage-locations/{id}/request-changes": [
+      "post"
+    ],
+    "/inventory/balances": [
+      "get"
+    ],
+    "/inventory/summary-by-area": [
+      "get"
+    ],
+    "/inventory/transactions": [
+      "get",
+      "post"
+    ],
+    "/inventory/adjustments": [
+      "post"
+    ],
+    "/inspection-campaigns": [
+      "get",
+      "post"
+    ],
+    "/inspection-campaigns/{id}/open": [
+      "post"
+    ],
+    "/inspection-campaigns/{id}/close": [
+      "post"
+    ],
+    "/inspection-campaigns/{id}/progress": [
+      "get"
+    ],
+    "/inspection-sheets": [
+      "get",
+      "post"
+    ],
+    "/inspection-sheets/{id}": [
+      "get",
+      "put"
+    ],
+    "/inspection-sheets/{id}/submit": [
+      "post"
+    ],
+    "/review-tasks": [
+      "get"
+    ],
+    "/review-tasks/{id}": [
+      "get"
+    ],
+    "/review-tasks/{id}/approve": [
+      "post"
+    ],
+    "/review-tasks/{id}/request-revision": [
+      "post"
+    ],
+    "/files": [
+      "post"
+    ],
+    "/documents": [
+      "get"
+    ],
+    "/files/{id}/download-url": [
+      "get"
+    ],
+    "/damage-events": [
+      "get",
+      "post"
+    ],
+    "/damage-events/{id}": [
+      "put"
+    ],
+    "/damage-events/{id}/verify": [
+      "post"
+    ],
+    "/maintenance-requests": [
+      "get",
+      "post"
+    ],
+    "/maintenance-requests/{id}": [
+      "get"
+    ],
+    "/maintenance-requests/{id}/submit": [
+      "post"
+    ],
+    "/maintenance-requests/{id}/approve": [
+      "post"
+    ],
+    "/maintenance-requests/{id}/start": [
+      "post"
+    ],
+    "/maintenance-requests/{id}/accept": [
+      "post"
+    ],
+    "/maintenance-requests/{id}/close": [
+      "post"
+    ],
+    "/scenarios": [
+      "get",
+      "post"
+    ],
+    "/scenarios/{id}": [
+      "get"
+    ],
+    "/scenarios/{id}/runs": [
+      "get",
+      "post"
+    ],
+    "/scenario-runs/{id}": [
+      "get"
+    ],
+    "/plans": [
+      "get",
+      "post"
+    ],
+    "/plans/compare": [
+      "post"
+    ],
+    "/plans/{id}/approve": [
+      "post"
+    ],
+    "/alerts": [
+      "get"
+    ],
+    "/alerts/summary": [
+      "get"
+    ],
+    "/alerts/generate": [
+      "post"
+    ],
+    "/alerts/{id}/assign": [
+      "post"
+    ],
+    "/alerts/{id}/close": [
+      "post"
+    ],
+    "/search": [
+      "get"
+    ],
+    "/reports/templates": [
+      "get"
+    ],
+    "/reports/jobs": [
+      "get",
+      "post"
+    ],
+    "/reports/jobs/{id}": [
+      "get"
+    ],
+    "/reports/{id}/download-url": [
+      "get"
+    ],
+    "/imports": [
+      "post"
+    ],
+    "/imports/{id}/validation": [
+      "get"
+    ],
+    "/imports/{id}/commit": [
+      "post"
+    ],
+    "/sync/batches": [
+      "post"
+    ],
+    "/sync/batches/{id}": [
+      "get"
+    ],
+    "/barracks": [
+      "get",
+      "post"
+    ],
+    "/barracks/{id}": [
+      "get",
+      "put"
+    ],
+    "/barracks/{id}/revisions": [
+      "get"
+    ],
+    "/barracks/{id}/submit": [
+      "post"
+    ],
+    "/barracks/{id}/approve": [
+      "post"
+    ],
+    "/barracks/{id}/request-changes": [
+      "post"
+    ],
+    "/approvals": [
+      "get"
+    ],
+    "/barracks/{barracksId}/facilities": [
+      "get",
+      "post"
+    ],
+    "/facilities": [
+      "get"
+    ],
+    "/facilities/{id}": [
+      "get",
+      "put"
+    ],
+    "/facilities/{id}/decommission": [
+      "post"
+    ],
+    "/gis/features": [
+      "get"
+    ],
+    "/gis/search-within": [
+      "post"
+    ],
+    "/scan/{type}/{code}": [
+      "get"
+    ],
+    "/labels/{type}/{code}/qr.png": [
+      "get"
+    ],
+    "/labels/{type}/sheet.pdf": [
+      "get"
+    ],
+    "/land-parcels": [
+      "get",
+      "post"
+    ],
+    "/land-parcels/{id}": [
+      "get",
+      "put"
+    ],
+    "/land-parcels/{id}/revisions": [
+      "get"
+    ],
+    "/land-parcels/{id}/submit": [
+      "post"
+    ],
+    "/land-parcels/{id}/approve": [
+      "post"
+    ],
+    "/land-parcels/{id}/request-changes": [
+      "post"
+    ],
+    "/land-parcels/{id}/markers": [
+      "get",
+      "post"
+    ],
+    "/land-parcels/{id}/markers/{markerId}": [
+      "delete"
+    ],
+    "/utilities": [
+      "get",
+      "post"
+    ],
+    "/utilities/summary": [
+      "get"
+    ],
+    "/utilities/{id}": [
+      "get",
+      "put"
+    ],
+    "/utilities/{id}/readings": [
+      "get",
+      "post"
+    ],
+    "/utilities/{id}/decommission": [
+      "post"
+    ],
+    "/local-resources": [
+      "get",
+      "post"
+    ],
+    "/local-resources/nearby": [
+      "get"
+    ],
+    "/local-resources/{id}": [
+      "get",
+      "put"
+    ],
+    "/local-resources/{id}/deactivate": [
+      "post"
+    ],
+    "/projects": [
+      "get",
+      "post"
+    ],
+    "/projects/summary": [
+      "get"
+    ],
+    "/projects/{id}": [
+      "get",
+      "put"
+    ],
+    "/projects/{id}/milestones": [
+      "get",
+      "post"
+    ],
+    "/projects/{id}/phase": [
+      "post"
+    ],
+    "/projects/{id}/milestones/{milestoneId}": [
+      "delete"
+    ],
+    "/budgets": [
+      "get",
+      "post"
+    ],
+    "/budgets/summary": [
+      "get"
+    ],
+    "/budgets/{id}": [
+      "get",
+      "put"
+    ],
+    "/budgets/{id}/expenses": [
+      "get",
+      "post"
+    ],
+    "/budgets/{id}/approve": [
+      "post"
+    ],
+    "/budgets/{id}/close": [
+      "post"
+    ],
+    "/budgets/{id}/lines": [
+      "post"
+    ],
+    "/budgets/{id}/lines/{lineId}": [
+      "delete",
+      "put"
+    ],
+    "/budgets/{id}/expenses/{expenseId}": [
+      "delete"
+    ],
+    "/tasks": [
+      "get",
+      "post"
+    ],
+    "/tasks/summary": [
+      "get"
+    ],
+    "/tasks/{id}": [
+      "get",
+      "put"
+    ],
+    "/tasks/{id}/updates": [
+      "get",
+      "post"
+    ],
+    "/tasks/{id}/start": [
+      "post"
+    ],
+    "/tasks/{id}/submit": [
+      "post"
+    ],
+    "/tasks/{id}/accept": [
+      "post"
+    ],
+    "/tasks/{id}/reject": [
+      "post"
+    ],
+    "/tasks/{id}/cancel": [
+      "post"
+    ],
+    "/inspections": [
+      "get",
+      "post"
+    ],
+    "/inspections/summary": [
+      "get"
+    ],
+    "/inspections/{id}": [
+      "get",
+      "put"
+    ],
+    "/inspections/{id}/status": [
+      "post"
+    ],
+    "/inspections/{id}/findings": [
+      "post"
+    ],
+    "/inspections/{id}/findings/{findingId}": [
+      "delete",
+      "put"
+    ],
+    "/inspections/{id}/findings/{findingId}/status/{status}": [
+      "post"
+    ],
+    "/legal-documents": [
+      "get",
+      "post"
+    ],
+    "/legal-documents/summary": [
+      "get"
+    ],
+    "/legal-documents/{id}": [
+      "get",
+      "put"
+    ],
+    "/readiness/summary": [
+      "get"
+    ],
+    "/readiness/assurance-by-area": [
+      "get"
+    ],
+    "/readiness/sites": [
+      "get",
+      "post"
+    ],
+    "/readiness/sites/{id}": [
+      "get",
+      "put"
+    ],
+    "/readiness/sites/{id}/deactivate": [
+      "post"
+    ],
+    "/readiness/recovery": [
+      "get",
+      "post"
+    ],
+    "/readiness/recovery/{id}": [
+      "get",
+      "put"
+    ],
+    "/readiness/recovery/{id}/status": [
+      "post"
+    ],
+    "/readiness-materials": [
+      "get",
+      "post"
+    ],
+    "/readiness-materials/copy-from-previous": [
+      "post"
+    ],
+    "/readiness-materials/{id}/revisions": [
+      "get"
+    ],
+    "/readiness-materials/{id}": [
+      "get",
+      "put"
+    ],
+    "/readiness-materials/{id}/lines": [
+      "put"
+    ],
+    "/readiness-materials/{id}/submit": [
+      "post"
+    ],
+    "/readiness-materials/{id}/approve": [
+      "post"
+    ],
+    "/readiness-materials/{id}/request-changes": [
+      "post"
+    ],
+    "/logistics-norms": [
+      "get"
+    ],
+    "/logistics-norms/compute": [
+      "post"
+    ],
+    "/analytics/overview": [
+      "get"
+    ],
+    "/analytics/degradation": [
+      "get"
+    ],
+    "/analytics/consumption-anomalies": [
+      "get"
+    ],
+    "/analytics/priorities": [
+      "get"
+    ],
+    "/analytics/data-quality": [
+      "get"
+    ],
+    "/dashboard/summary": [
+      "get"
+    ],
+    "/dashboard/potential-by-area": [
+      "get"
+    ],
+    "/dashboard/commune-readiness": [
+      "get"
+    ],
+    "/dashboard/command": [
+      "get"
+    ],
+    "/health": [
+      "get"
+    ]
+  },
+  "operations": {
+    "/audit-logs::get": "AuditController_list",
+    "/audit-logs/{id}::get": "AuditController_get",
+    "/c3-catalog::get": "C3CatalogController_list",
+    "/c3-catalog/{code}::get": "C3CatalogController_get",
+    "/auth/login::post": "AuthController_login",
+    "/auth/mfa/enroll::post": "AuthController_enrollMfa",
+    "/auth/mfa/disable::post": "AuthController_disableMfa",
+    "/auth/refresh::post": "AuthController_refresh",
+    "/auth/logout::post": "AuthController_logout",
+    "/me::get": "AuthController_me",
+    "/users::get": "UsersController_list",
+    "/users::post": "UsersController_create",
+    "/users/{id}::get": "UsersController_get",
+    "/users/{id}::put": "UsersController_update",
+    "/users/{id}/roles::post": "UsersController_roles",
+    "/users/{id}/scopes::post": "UsersController_scopes",
+    "/users/{id}/reset-password::post": "UsersController_resetPassword",
+    "/administrative-areas::get": "OrganizationController_listAreas",
+    "/administrative-areas::post": "OrganizationController_createArea",
+    "/organizations::get": "OrganizationController_listOrgs",
+    "/organizations::post": "OrganizationController_createOrg",
+    "/organizations/{id}::put": "OrganizationController_updateOrg",
+    "/materials::get": "MasterDataController_listMaterials",
+    "/materials::post": "MasterDataController_createMaterial",
+    "/materials/{id}/versions::get": "MasterDataController_getMaterialVersions",
+    "/materials/{id}::get": "MasterDataController_getMaterial",
+    "/materials/{id}::put": "MasterDataController_updateMaterial",
+    "/materials/{id}/publish::post": "MasterDataController_publishMaterial",
+    "/master-data/{type}::get": "MasterDataController_listCatalog",
+    "/master-data/{type}::post": "MasterDataController_createCatalog",
+    "/master-data/{type}/{id}::put": "MasterDataController_updateCatalog",
+    "/master-data/{type}/{id}/publish::post": "MasterDataController_publishCatalog",
+    "/material-groups::get": "MaterialGroupController_tree",
+    "/material-groups::post": "MaterialGroupController_create",
+    "/material-groups/move-material::post": "MaterialGroupController_moveMaterial",
+    "/material-groups/{id}::delete": "MaterialGroupController_remove",
+    "/material-groups/{id}::get": "MaterialGroupController_detail",
+    "/material-groups/{id}::put": "MaterialGroupController_update",
+    "/material-groups/{id}/materials::get": "MaterialGroupController_materials",
+    "/catalog/versions::get": "CatalogController_listVersions",
+    "/catalog/versions::post": "CatalogController_createVersion",
+    "/catalog/versions/compare::get": "CatalogController_compare",
+    "/catalog/versions/{id}/publish::post": "CatalogController_publish",
+    "/catalog/items::get": "CatalogController_listItems",
+    "/catalog/items::post": "CatalogController_createItem",
+    "/catalog/search::get": "CatalogController_search",
+    "/catalog/items/{id}::get": "CatalogController_getItem",
+    "/catalog/items/{id}/children::get": "CatalogController_getChildren",
+    "/catalog/units::get": "CatalogRegistryController_listUnits",
+    "/catalog/units::post": "CatalogRegistryController_createUnit",
+    "/catalog/aliases/resolve::get": "CatalogRegistryController_resolveAlias",
+    "/catalog/items/{id}/aliases::get": "CatalogRegistryController_listAliasesForItem",
+    "/catalog/aliases::post": "CatalogRegistryController_createAlias",
+    "/catalog/aliases/{id}::put": "CatalogRegistryController_updateAlias",
+    "/catalog/replacements::post": "CatalogRegistryController_createReplacement",
+    "/catalog/items/{id}/replacement::get": "CatalogRegistryController_replacementWarning",
+    "/catalog/change-requests::get": "CatalogRegistryController_listChangeRequests",
+    "/catalog/change-requests::post": "CatalogRegistryController_createChangeRequest",
+    "/catalog/change-requests/{id}/submit::post": "CatalogRegistryController_submitChangeRequest",
+    "/catalog/change-requests/{id}/review::post": "CatalogRegistryController_reviewChangeRequest",
+    "/catalog/change-requests/{id}/map-existing::post": "CatalogRegistryController_mapExisting",
+    "/catalog/temporary-materials::get": "CatalogRegistryController_listTemporaries",
+    "/catalog/temporary-materials::post": "CatalogRegistryController_createTemporary",
+    "/catalog/temporary-materials/{id}/assign-official-code::post": "CatalogRegistryController_assignOfficialCode",
+    "/catalog/import-batches::post": "CatalogRegistryController_createImportBatch",
+    "/catalog/import-batches/{id}/validate::post": "CatalogRegistryController_validateImportBatch",
+    "/catalog/import-batches/{id}/errors::get": "CatalogRegistryController_getImportErrors",
+    "/asset-catalog/proposals/batches::get": "AssetProposalController_listBatches",
+    "/asset-catalog/proposals/batches::post": "AssetProposalController_createBatch",
+    "/asset-catalog/proposals/batches/{id}/export::post": "AssetProposalController_exportBatch",
+    "/asset-catalog/proposals/batches/{id}/download::get": "AssetProposalController_download",
+    "/asset-catalog/proposals/batches/{id}/csv::get": "AssetProposalController_csv",
+    "/asset-catalog/proposals::get": "AssetProposalController_list",
+    "/asset-catalog/proposals::post": "AssetProposalController_create",
+    "/asset-catalog/proposals/{id}/preview-code::get": "AssetProposalController_previewCode",
+    "/asset-catalog/proposals/{id}/allocate-code::post": "AssetProposalController_allocate",
+    "/asset-catalog/proposals/{id}/submit::post": "AssetProposalController_submit",
+    "/asset-catalog/proposals/{id}::delete": "AssetProposalController_remove",
+    "/asset-catalog/meta::get": "AssetCatalogController_getMeta",
+    "/asset-catalog/tree::get": "AssetCatalogController_getTree",
+    "/asset-catalog/search::get": "AssetCatalogController_search",
+    "/asset-catalog/gaps::get": "AssetCatalogController_getGaps",
+    "/asset-catalog/{code}/subtree::get": "AssetCatalogController_getSubtree",
+    "/asset-catalog/{code}::get": "AssetCatalogController_getByCode",
+    "/asset-catalog/materials/{id}/asset-code::patch": "AssetCatalogController_setMaterialAssetCode",
+    "/asset-catalog/facilities/{id}/asset-code::patch": "AssetCatalogController_setFacilityAssetCode",
+    "/inventory/storage-locations::get": "InventoryController_listLocations",
+    "/inventory/storage-locations::post": "InventoryController_createLocation",
+    "/inventory/storage-locations/{id}/revisions::get": "InventoryController_locationRevisions",
+    "/inventory/storage-locations/{id}::get": "InventoryController_getLocation",
+    "/inventory/storage-locations/{id}::put": "InventoryController_updateLocation",
+    "/inventory/storage-locations/{id}/submit::post": "InventoryController_submitLocation",
+    "/inventory/storage-locations/{id}/approve::post": "InventoryController_approveLocation",
+    "/inventory/storage-locations/{id}/request-changes::post": "InventoryController_requestLocationChanges",
+    "/inventory/balances::get": "InventoryController_balances",
+    "/inventory/summary-by-area::get": "InventoryController_summaryByArea",
+    "/inventory/transactions::get": "InventoryController_listTransactions",
+    "/inventory/transactions::post": "InventoryController_transaction",
+    "/inventory/adjustments::post": "InventoryController_adjustment",
+    "/inspection-campaigns::get": "InspectionController_listCampaigns",
+    "/inspection-campaigns::post": "InspectionController_createCampaign",
+    "/inspection-campaigns/{id}/open::post": "InspectionController_openCampaign",
+    "/inspection-campaigns/{id}/close::post": "InspectionController_closeCampaign",
+    "/inspection-campaigns/{id}/progress::get": "InspectionController_progress",
+    "/inspection-sheets::get": "InspectionController_listSheets",
+    "/inspection-sheets::post": "InspectionController_createSheet",
+    "/inspection-sheets/{id}::get": "InspectionController_getSheet",
+    "/inspection-sheets/{id}::put": "InspectionController_updateSheet",
+    "/inspection-sheets/{id}/submit::post": "InspectionController_submitSheet",
+    "/review-tasks::get": "InspectionController_listTasks",
+    "/review-tasks/{id}::get": "InspectionController_getTask",
+    "/review-tasks/{id}/approve::post": "InspectionController_approve",
+    "/review-tasks/{id}/request-revision::post": "InspectionController_requestRevision",
+    "/files::post": "DocumentsController_upload",
+    "/documents::get": "DocumentsController_list",
+    "/files/{id}/download-url::get": "DocumentsController_downloadUrl",
+    "/damage-events::get": "MaintenanceController_listDamages",
+    "/damage-events::post": "MaintenanceController_createDamage",
+    "/damage-events/{id}::put": "MaintenanceController_updateDamage",
+    "/damage-events/{id}/verify::post": "MaintenanceController_verifyDamage",
+    "/maintenance-requests::get": "MaintenanceController_listRequests",
+    "/maintenance-requests::post": "MaintenanceController_createRequest",
+    "/maintenance-requests/{id}::get": "MaintenanceController_getRequest",
+    "/maintenance-requests/{id}/submit::post": "MaintenanceController_submit",
+    "/maintenance-requests/{id}/approve::post": "MaintenanceController_approve",
+    "/maintenance-requests/{id}/start::post": "MaintenanceController_start",
+    "/maintenance-requests/{id}/accept::post": "MaintenanceController_accept",
+    "/maintenance-requests/{id}/close::post": "MaintenanceController_close",
+    "/scenarios::get": "ScenarioController_listScenarios",
+    "/scenarios::post": "ScenarioController_createScenario",
+    "/scenarios/{id}::get": "ScenarioController_getScenario",
+    "/scenarios/{id}/runs::get": "ScenarioController_listRuns",
+    "/scenarios/{id}/runs::post": "ScenarioController_run",
+    "/scenario-runs/{id}::get": "ScenarioController_getRun",
+    "/plans::get": "ScenarioController_listPlans",
+    "/plans::post": "ScenarioController_createPlan",
+    "/plans/compare::post": "ScenarioController_compare",
+    "/plans/{id}/approve::post": "ScenarioController_approve",
+    "/alerts::get": "AlertsController_list",
+    "/alerts/summary::get": "AlertsController_summary",
+    "/alerts/generate::post": "AlertsController_generate",
+    "/alerts/{id}/assign::post": "AlertsController_assign",
+    "/alerts/{id}/close::post": "AlertsController_close",
+    "/search::get": "ReportingController_search",
+    "/reports/templates::get": "ReportingController_listTemplates",
+    "/reports/jobs::get": "ReportingController_listJobs",
+    "/reports/jobs::post": "ReportingController_create",
+    "/reports/jobs/{id}::get": "ReportingController_getJob",
+    "/reports/{id}/download-url::get": "ReportingController_downloadUrl",
+    "/imports::post": "IntegrationController_createImport",
+    "/imports/{id}/validation::get": "IntegrationController_validation",
+    "/imports/{id}/commit::post": "IntegrationController_commit",
+    "/sync/batches::post": "IntegrationController_sync",
+    "/sync/batches/{id}::get": "IntegrationController_getSync",
+    "/barracks::get": "BarracksController_list",
+    "/barracks::post": "BarracksController_create",
+    "/barracks/{id}::get": "BarracksController_get",
+    "/barracks/{id}::put": "BarracksController_update",
+    "/barracks/{id}/revisions::get": "BarracksController_revisions",
+    "/barracks/{id}/submit::post": "BarracksController_submit",
+    "/barracks/{id}/approve::post": "BarracksController_approve",
+    "/barracks/{id}/request-changes::post": "BarracksController_requestChanges",
+    "/approvals::get": "ApprovalsController_pending",
+    "/barracks/{barracksId}/facilities::get": "FacilitiesController_list",
+    "/barracks/{barracksId}/facilities::post": "FacilitiesController_create",
+    "/facilities::get": "FacilitiesController_listAll",
+    "/facilities/{id}::get": "FacilitiesController_get",
+    "/facilities/{id}::put": "FacilitiesController_update",
+    "/facilities/{id}/decommission::post": "FacilitiesController_decommission",
+    "/gis/features::get": "GisController_features",
+    "/gis/search-within::post": "GisController_searchWithin",
+    "/scan/{type}/{code}::get": "LabelsController_resolve",
+    "/labels/{type}/{code}/qr.png::get": "LabelsController_qr",
+    "/labels/{type}/sheet.pdf::get": "LabelsController_sheet",
+    "/land-parcels::get": "LandParcelsController_list",
+    "/land-parcels::post": "LandParcelsController_create",
+    "/land-parcels/{id}::get": "LandParcelsController_get",
+    "/land-parcels/{id}::put": "LandParcelsController_update",
+    "/land-parcels/{id}/revisions::get": "LandParcelsController_revisions",
+    "/land-parcels/{id}/submit::post": "LandParcelsController_submit",
+    "/land-parcels/{id}/approve::post": "LandParcelsController_approve",
+    "/land-parcels/{id}/request-changes::post": "LandParcelsController_requestChanges",
+    "/land-parcels/{id}/markers::get": "LandParcelsController_markers",
+    "/land-parcels/{id}/markers::post": "LandParcelsController_addMarker",
+    "/land-parcels/{id}/markers/{markerId}::delete": "LandParcelsController_removeMarker",
+    "/utilities::get": "UtilitiesController_list",
+    "/utilities::post": "UtilitiesController_create",
+    "/utilities/summary::get": "UtilitiesController_summary",
+    "/utilities/{id}::get": "UtilitiesController_get",
+    "/utilities/{id}::put": "UtilitiesController_update",
+    "/utilities/{id}/readings::get": "UtilitiesController_readings",
+    "/utilities/{id}/readings::post": "UtilitiesController_addReading",
+    "/utilities/{id}/decommission::post": "UtilitiesController_decommission",
+    "/local-resources::get": "LocalResourcesController_list",
+    "/local-resources::post": "LocalResourcesController_create",
+    "/local-resources/nearby::get": "LocalResourcesController_nearby",
+    "/local-resources/{id}::get": "LocalResourcesController_get",
+    "/local-resources/{id}::put": "LocalResourcesController_update",
+    "/local-resources/{id}/deactivate::post": "LocalResourcesController_deactivate",
+    "/projects::get": "ProjectsController_list",
+    "/projects::post": "ProjectsController_create",
+    "/projects/summary::get": "ProjectsController_summary",
+    "/projects/{id}::get": "ProjectsController_get",
+    "/projects/{id}::put": "ProjectsController_update",
+    "/projects/{id}/milestones::get": "ProjectsController_milestones",
+    "/projects/{id}/milestones::post": "ProjectsController_addMilestone",
+    "/projects/{id}/phase::post": "ProjectsController_setPhase",
+    "/projects/{id}/milestones/{milestoneId}::delete": "ProjectsController_removeMilestone",
+    "/budgets::get": "BudgetsController_list",
+    "/budgets::post": "BudgetsController_create",
+    "/budgets/summary::get": "BudgetsController_summary",
+    "/budgets/{id}::get": "BudgetsController_get",
+    "/budgets/{id}::put": "BudgetsController_update",
+    "/budgets/{id}/expenses::get": "BudgetsController_expenses",
+    "/budgets/{id}/expenses::post": "BudgetsController_addExpense",
+    "/budgets/{id}/approve::post": "BudgetsController_approve",
+    "/budgets/{id}/close::post": "BudgetsController_close",
+    "/budgets/{id}/lines::post": "BudgetsController_addLine",
+    "/budgets/{id}/lines/{lineId}::delete": "BudgetsController_removeLine",
+    "/budgets/{id}/lines/{lineId}::put": "BudgetsController_updateLine",
+    "/budgets/{id}/expenses/{expenseId}::delete": "BudgetsController_removeExpense",
+    "/tasks::get": "TasksController_list",
+    "/tasks::post": "TasksController_create",
+    "/tasks/summary::get": "TasksController_summary",
+    "/tasks/{id}::get": "TasksController_get",
+    "/tasks/{id}::put": "TasksController_update",
+    "/tasks/{id}/updates::get": "TasksController_updates",
+    "/tasks/{id}/updates::post": "TasksController_addUpdate",
+    "/tasks/{id}/start::post": "TasksController_start",
+    "/tasks/{id}/submit::post": "TasksController_submit",
+    "/tasks/{id}/accept::post": "TasksController_accept",
+    "/tasks/{id}/reject::post": "TasksController_reject",
+    "/tasks/{id}/cancel::post": "TasksController_cancel",
+    "/inspections::get": "OversightController_list",
+    "/inspections::post": "OversightController_create",
+    "/inspections/summary::get": "OversightController_summary",
+    "/inspections/{id}::get": "OversightController_get",
+    "/inspections/{id}::put": "OversightController_update",
+    "/inspections/{id}/status::post": "OversightController_setStatus",
+    "/inspections/{id}/findings::post": "OversightController_addFinding",
+    "/inspections/{id}/findings/{findingId}::delete": "OversightController_removeFinding",
+    "/inspections/{id}/findings/{findingId}::put": "OversightController_updateFinding",
+    "/inspections/{id}/findings/{findingId}/status/{status}::post": "OversightController_setFindingStatus",
+    "/legal-documents::get": "LegalDocsController_list",
+    "/legal-documents::post": "LegalDocsController_create",
+    "/legal-documents/summary::get": "LegalDocsController_summary",
+    "/legal-documents/{id}::get": "LegalDocsController_get",
+    "/legal-documents/{id}::put": "LegalDocsController_update",
+    "/readiness/summary::get": "ReadinessController_summary",
+    "/readiness/assurance-by-area::get": "ReadinessController_assurance",
+    "/readiness/sites::get": "ReadinessController_listSites",
+    "/readiness/sites::post": "ReadinessController_createSite",
+    "/readiness/sites/{id}::get": "ReadinessController_getSite",
+    "/readiness/sites/{id}::put": "ReadinessController_updateSite",
+    "/readiness/sites/{id}/deactivate::post": "ReadinessController_deactivateSite",
+    "/readiness/recovery::get": "ReadinessController_listRecovery",
+    "/readiness/recovery::post": "ReadinessController_createRecovery",
+    "/readiness/recovery/{id}::get": "ReadinessController_getRecovery",
+    "/readiness/recovery/{id}::put": "ReadinessController_updateRecovery",
+    "/readiness/recovery/{id}/status::post": "ReadinessController_setRecoveryStatus",
+    "/readiness-materials::get": "ReadinessMaterialsController_list",
+    "/readiness-materials::post": "ReadinessMaterialsController_create",
+    "/readiness-materials/copy-from-previous::post": "ReadinessMaterialsController_copyFromPrevious",
+    "/readiness-materials/{id}/revisions::get": "ReadinessMaterialsController_revisions",
+    "/readiness-materials/{id}::get": "ReadinessMaterialsController_get",
+    "/readiness-materials/{id}::put": "ReadinessMaterialsController_update",
+    "/readiness-materials/{id}/lines::put": "ReadinessMaterialsController_saveLines",
+    "/readiness-materials/{id}/submit::post": "ReadinessMaterialsController_submit",
+    "/readiness-materials/{id}/approve::post": "ReadinessMaterialsController_approve",
+    "/readiness-materials/{id}/request-changes::post": "ReadinessMaterialsController_requestChanges",
+    "/logistics-norms::get": "LogisticsNormsController_list",
+    "/logistics-norms/compute::post": "LogisticsNormsController_compute",
+    "/analytics/overview::get": "AnalyticsController_overview",
+    "/analytics/degradation::get": "AnalyticsController_degradation",
+    "/analytics/consumption-anomalies::get": "AnalyticsController_consumptionAnomalies",
+    "/analytics/priorities::get": "AnalyticsController_priorities",
+    "/analytics/data-quality::get": "AnalyticsController_dataQuality",
+    "/dashboard/summary::get": "DashboardController_summary",
+    "/dashboard/potential-by-area::get": "DashboardController_potentialByArea",
+    "/dashboard/commune-readiness::get": "DashboardController_communeReadiness",
+    "/dashboard/command::get": "DashboardController_commandOverview",
+    "/health::get": "HealthController_check"
+  }
+}

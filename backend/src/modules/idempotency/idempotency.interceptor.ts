@@ -10,8 +10,11 @@ import { Observable, from, of, switchMap } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { IdempotencyKey } from './idempotency-key.entity';
 
-// Chỉ tác động khi client gửi header Idempotency-Key trên POST (giao dịch quan trọng).
-// Gửi lại cùng key ⇒ trả lại kết quả đã lưu, không thực thi lại nghiệp vụ.
+// Áp cho MỌI endpoint ghi sổ / phát sinh giao dịch (Sprint 0 §1 GAP-6): khi client
+// gửi header Idempotency-Key trên POST/PUT/PATCH, gửi lại cùng key ⇒ trả lại kết quả
+// đã lưu, không thực thi lại nghiệp vụ (chống trùng do retry mạng).
+const IDEMPOTENT_METHODS = new Set(['POST', 'PUT', 'PATCH']);
+
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
   constructor(
@@ -24,7 +27,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
       .switchToHttp()
       .getRequest<{ method: string; originalUrl: string; headers: Record<string, string> }>();
     const key = req.headers['idempotency-key'];
-    if (req.method !== 'POST' || !key) return next.handle();
+    if (!IDEMPOTENT_METHODS.has(req.method) || !key) return next.handle();
 
     const id = `${key}:${req.method}:${req.originalUrl.split('?')[0]}`;
     return from(this.repo.findOne({ where: { id } })).pipe(
