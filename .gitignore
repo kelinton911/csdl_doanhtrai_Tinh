@@ -9,10 +9,14 @@ build/
 
 # Environment / secrets (NEVER commit real secrets)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!.env.*.example
 *.pem
 *.key
+
+# Local DB backups (contain real data — NEVER commit)
+backups/
 
 # Logs
 logs/

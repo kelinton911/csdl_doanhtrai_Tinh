@@ -1,0 +1,156 @@
+name: csdl-doanhtrai-prod
+
+# ==============================================================================
+# CẤU HÌNH DOCKER COMPOSE SẢN XUẤT HA (HIGH AVAILABILITY TOPOLOGY) - P08
+# - db-master: PostgreSQL 16 + PostGIS 3.4 (Primary DB)
+# - db-slave: PostgreSQL 16 + PostGIS 3.4 (Standby Replica)
+# - redis: Redis 7 (Cache & BullMQ Queue Engine)
+# - minio: MinIO Object Storage (Lưu trữ hồ sơ/biên bản)
+# - tile-server: Máy chủ bản đồ số GIS Offline cho mạng cách ly
+# - backend: NestJS Monolith API
+# - webapp: Vite React Frontend SPA
+# ==============================================================================
+
+services:
+  # 1. Master PostgreSQL/PostGIS (Primary Node)
+  db-master:
+    image: postgis/postgis:16-3.4
+    container_name: csdl-db-master
+    restart: unless-stopped
+    command: >
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+    environment:
+      POSTGRES_USER: ${DB_USER:-csdl}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-csdl_dev_pw}
+      POSTGRES_DB: ${DB_NAME:-csdl_doanhtrai}
+    ports:
+      - "${DB_MASTER_PORT:-5432}:5432"
+    volumes:
+      - db_master_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-csdl} -d ${DB_NAME:-csdl_doanhtrai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Slave PostgreSQL/PostGIS (Standby Replica Node)
+  db-slave:
+    image: postgis/postgis:16-3.4
+    container_name: csdl-db-slave
+    restart: unless-stopped
+    command: >
+      postgres
+      -c hot_standby=on
+    environment:
+      POSTGRES_USER: ${DB_USER:-csdl}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-csdl_dev_pw}
+      POSTGRES_DB: ${DB_NAME:-csdl_doanhtrai}
+    ports:
+      - "${DB_SLAVE_PORT:-5433}:5432"
+    volumes:
+      - db_slave_data:/var/lib/postgresql/data
+    depends_on:
+      db-master:
+        condition: service_healthy
+
+  # 3. Redis Cache & BullMQ Message Queue
+  redis:
+    image: redis:7-alpine
+    container_name: csdl-redis-prod
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_prod_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 4. MinIO Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: csdl-minio-prod
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-csdl}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-csdl_dev_pw}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_prod_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # 5. Offline GIS Tile Server
+  tile-server:
+    image: maptiler/tileserver-gl:latest
+    container_name: csdl-tile-server-prod
+    restart: unless-stopped
+    ports:
+      - "${TILE_SERVER_PORT:-8080}:8080"
+    volumes:
+      - ./tiles:/tiles:ro
+
+  # 6. NestJS Backend API
+  backend:
+    build:
+      context: ./backend
+    container_name: csdl-backend-prod
+    restart: unless-stopped
+    depends_on:
+      db-master:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: 3000
+      API_PREFIX: api/v1
+      DB_HOST: db-master
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-csdl}
+      DB_PASSWORD: ${DB_PASSWORD:-csdl_dev_pw}
+      DB_NAME: ${DB_NAME:-csdl_doanhtrai}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USER: ${MINIO_USER:-csdl}
+      MINIO_PASSWORD: ${MINIO_PASSWORD:-csdl_dev_pw}
+      MINIO_BUCKET: ${MINIO_BUCKET:-csdl-documents}
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "${BACKEND_HOST_PORT:-3010}:3000"
+
+  # 7. Webapp Frontend SPA
+  webapp:
+    build:
+      context: ./webapp
+    container_name: csdl-webapp-prod
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      BACKEND_ORIGIN: http://backend:3000
+    ports:
+      - "${FRONTEND_HOST_PORT:-8000}:5173"
+
+volumes:
+  db_master_data:
+  db_slave_data:
+  redis_prod_data:
+  minio_prod_data:

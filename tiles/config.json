@@ -1,0 +1,24 @@
+{
+  "options": {
+    "paths": {
+      "root": "",
+      "fonts": "fonts",
+      "styles": "styles",
+      "mbtiles": "/tiles"
+    },
+    "frontPage": true
+  },
+  "styles": {
+    "basic": {
+      "style": "basic/style.json",
+      "tilejson": {
+        "type": "overlay"
+      }
+    }
+  },
+  "data": {
+    "vietnam-provinces": {
+      "mbtiles": "doanhtrai_tinh.mbtiles"
+    }
+  }
+}

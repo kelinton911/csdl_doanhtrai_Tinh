@@ -1,0 +1,83 @@
+# ============================================================
+# Hạ tầng cho INSTANCE PHÁT TRIỂN thứ 2 ("phiên bản khác")
+# chạy từ chính thư mục làm việc này — độc lập hoàn toàn với
+# stack :8000 (project "csdl-doanhtrai").
+#
+#   - Project name riêng: csdl-doanhtrai-dev  -> volume tách biệt
+#   - Container name riêng: csdl-dev-*        -> không đụng csdl-*
+#   - Cổng host riêng:      5436/6381/9006/9007/8083
+#
+# Tầng ứng dụng (backend + webapp) chạy NATIVE hot-reload, xem:
+#   scripts/dev-backend.sh  (backend :3100)
+#   scripts/dev-webapp.sh   (webapp  :8100)
+#
+# Dùng:  docker compose -f docker-compose.dev.yml --env-file .env.dev up -d
+# ============================================================
+name: csdl-doanhtrai-dev
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: csdl-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-csdl}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-csdl_dev_pw}
+      POSTGRES_DB: ${DB_NAME:-csdl_doanhtrai}
+    ports:
+      - "${DB_PORT:-5436}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-csdl} -d ${DB_NAME:-csdl_doanhtrai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: csdl-dev-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6381}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: csdl-dev-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-csdl}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-csdl_dev_pw}
+    ports:
+      - "${MINIO_PORT:-9006}:9000"
+      - "${MINIO_CONSOLE_PORT:-9007}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: csdl-dev-adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8083}:8080"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+  redis_data:
+  minio_data:
