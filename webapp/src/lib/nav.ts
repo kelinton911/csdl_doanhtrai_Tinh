@@ -65,6 +65,9 @@ export const NAV: NavItem[] = [
   { to: '/inventory', label: 'Vật chất trên địa bàn', icon: 'box', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
   { to: '/sscd-materials', label: 'Vật chất SSCĐ (theo mức)', icon: 'shield', dom: 'plan', group: 'declare', roles: ['BARRACKS_OFFICER', 'COMMUNE_USER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND', 'REVIEWER'] },
   { to: '/utilities', label: 'Điện · nước · năng lượng', icon: 'wrench', dom: 'repair', group: 'declare' },
+  { to: '/dt02/land', label: 'Hồ sơ điểm đất (DT-02)', icon: 'map', dom: 'geo', group: 'declare', roles: FIELD_ROLES },
+  { to: '/materiel', label: 'Thực lực vật chất (DT-04)', icon: 'box', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
+  { to: '/inventory-documents', label: 'Chứng từ vật chất (DT-05)', icon: 'clipboard', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
 
   // ── Lớp Duyệt & kiểm tra ─────────────────────────────────────
   { to: '/approvals', label: 'Hàng chờ duyệt', icon: 'check', dom: 'audit', group: 'review', roles: REVIEW_ROLES },
@@ -77,6 +80,7 @@ export const NAV: NavItem[] = [
   { to: '/asset-catalog', label: 'Danh mục tài sản BQP', icon: 'clipboard', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
   { to: '/material-groups', label: 'Nhóm ngành vật chất', icon: 'box', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
   { to: '/materials', label: 'Danh mục vật chất', icon: 'clipboard', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
+  { to: '/technical-models', label: 'Hồ sơ kỹ thuật (DT-03)', icon: 'file', dom: 'stock', group: 'catalog', roles: CATALOG_ROLES },
   { to: '/legal-documents', label: 'Văn bản - tiêu chuẩn - định mức', icon: 'file', dom: 'audit', group: 'catalog' },
 
   // ── Lớp Kế hoạch & báo cáo ───────────────────────────────────

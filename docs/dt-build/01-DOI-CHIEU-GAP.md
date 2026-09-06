@@ -376,10 +376,10 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | --- | --- | --- | --- | --- |
 | Sprint 0 | ◑ | 2026-09-06 | (chưa commit) | 9/9 GAP đã code + unit test PASS (88 test, 12 suite). Chờ: chạy migration+seed trên dev, e2e webapp để chốt DoD. |
 | DT-01 | ◑ | 2026-09-06 | (chưa commit) | Backend đủ 10 bảng + 25 API + BR + so sánh phiên bản (15 unit test PASS) + 5 màn hình webapp (tsc + vite build xanh). Chờ: E2E Playwright, migration/seed trên dev, di trú material→material_catalog. |
-| DT-02 | ◑ | 2026-09-06 | (chưa commit) | Backend lớp đất: 3 bảng gap + API /dt02/* + BR-DT02-004/007 + data-quality; 10 unit test PASS. Chờ: bảng nhà/hạ tầng chi tiết, webapp, E2E. |
-| DT-03 | ◑ | 2026-09-06 | (chưa commit) | Backend 10 bảng + ~20 API + máy trạng thái revision + xác minh/completeness; 14 unit test PASS; seed mẫu từ CSV. Chờ: webapp SCR-DT03-01..08, E2E 3 kiểu vật chất. |
-| DT-04 | ◑ | 2026-09-06 | (chưa commit) | Backend sổ cái chuẩn: 7 bảng + 19 API /materiel/* + HC(t) as-of + state machine + snapshot lock + adjustment; 12 unit test PASS; outbox posted. Chờ: import staging, tách/gộp lô, webapp, E2E. |
-| DT-05 | ◑ | 2026-09-06 | (chưa commit) | Backend chứng từ: 5 bảng + 18 API + POST nguyên tử→movement DT-04 + reversal + transfer 2-đầu + khóa kỳ; 10 unit test PASS; outbox posted. Chờ: recall/disposal, webapp, E2E. |
+| DT-02 | ◑ | 2026-09-06 | (chưa commit) | Backend lớp đất (3 bảng + /dt02/* + data-quality, 10 test) + **webapp** LandRegistryPage (phân bổ/biến động timeline/diện tích tại snapshot/DQ). Chờ: bảng nhà/hạ tầng chi tiết, E2E. |
+| DT-03 | ◑ | 2026-09-06 | (chưa commit) | Backend 10 bảng + ~20 API + revision state machine + completeness (14 test) + **webapp** TechnicalModelsPage (thư viện mẫu/revision/publish/độ đầy đủ). Chờ: E2E 3 kiểu vật chất. |
+| DT-04 | ◑ | 2026-09-06 | (chưa commit) | Backend sổ cái (7 bảng + 19 API + HC(t) as-of + snapshot lock, 12 test) + **webapp** MaterielPage (tra HC theo thời điểm + sổ cái + workflow giao dịch). Chờ: import staging, tách/gộp lô, E2E. |
+| DT-05 | ◑ | 2026-09-06 | (chưa commit) | Backend chứng từ (5 bảng + 18 API + POST nguyên tử + transfer + khóa kỳ, 10 test) + **webapp** InventoryDocumentsPage (chứng từ/dòng/duyệt-POST/truy vết + điều chuyển + khóa kỳ). Chờ: recall/disposal, E2E. |
 | DT-06 | ☐ | | | |
 | DT-07 | ☐ | | | |
 | DT-08 | ☐ | | | |

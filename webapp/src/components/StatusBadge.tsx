@@ -53,6 +53,13 @@ const MAP: Record<string, { label: string; tone: Tone; icon: IconName }> = {
   ACKNOWLEDGED: { label: 'Đã ghi nhận', tone: 'info', icon: 'check' },
   ASSIGNED: { label: 'Đã giao', tone: 'warn', icon: 'user' },
   SNOOZED: { label: 'Tạm hoãn', tone: 'neutral', icon: 'clock' },
+  // Sổ cái / chứng từ DT-04/05
+  POSTED: { label: 'Đã ghi sổ', tone: 'ok', icon: 'check' },
+  REVERSED: { label: 'Đã đảo', tone: 'neutral', icon: 'refresh' },
+  CANCELLED: { label: 'Đã hủy', tone: 'neutral', icon: 'lock' },
+  DISPATCHED: { label: 'Đã xuất', tone: 'info', icon: 'upload' },
+  IN_TRANSIT: { label: 'Đang chuyển', tone: 'warn', icon: 'refresh' },
+  RECEIVED: { label: 'Đã nhận', tone: 'ok', icon: 'check' },
   // Danh mục chuẩn DT-01
   VALIDATED: { label: 'Đã kiểm tra', tone: 'info', icon: 'check' },
   VALIDATING: { label: 'Đang kiểm tra', tone: 'warn', icon: 'clock' },

@@ -57,6 +57,11 @@ export class TechnicalController {
     return this.service.createCatalogLink(id, dto, user);
   }
 
+  @Get('technical-models/:id/revisions')
+  listRevisions(@Param('id') id: string) {
+    return this.service.listRevisions(id);
+  }
+
   @Post('technical-models/:id/revisions')
   @Roles(...TECH_WRITERS)
   createRevision(@Param('id') id: string, @Body() dto: CreateRevisionDto, @CurrentUser() user: AuthUser) {

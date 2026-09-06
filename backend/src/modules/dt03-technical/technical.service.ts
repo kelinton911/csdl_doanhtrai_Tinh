@@ -120,6 +120,10 @@ export class TechnicalService {
     );
   }
 
+  async listRevisions(modelId: string): Promise<DesignRevision[]> {
+    return this.revisions.find({ where: { productModelId: modelId }, order: { createdAt: 'DESC' } });
+  }
+
   async getRevision(id: string): Promise<DesignRevision> {
     const r = await this.revisions.findOne({ where: { id } });
     if (!r) throw new NotFoundException(`DATA-001: Không có revision ${id}`);

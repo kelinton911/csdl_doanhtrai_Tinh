@@ -204,6 +204,7 @@
       "post"
     ],
     "/technical-models/{id}/revisions": [
+      "get",
       "post"
     ],
     "/revisions/compare": [
@@ -995,6 +996,7 @@
     "/technical-models/by-catalog/{catalogId}::get": "TechnicalController_modelsByCatalog",
     "/technical-models/{id}::get": "TechnicalController_getModel",
     "/technical-models/{id}/catalog-links::post": "TechnicalController_createCatalogLink",
+    "/technical-models/{id}/revisions::get": "TechnicalController_listRevisions",
     "/technical-models/{id}/revisions::post": "TechnicalController_createRevision",
     "/revisions/compare::get": "TechnicalController_compare",
     "/revisions/{id}::get": "TechnicalController_getRevision",

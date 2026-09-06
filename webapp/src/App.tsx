@@ -69,6 +69,11 @@ const CatalogImportPage = lazy(() => import('./pages/CatalogImportPage').then((m
 const CatalogComparePage = lazy(() => import('./pages/CatalogComparePage').then((m) => ({ default: m.CatalogComparePage })));
 const CatalogChangeRequestPage = lazy(() => import('./pages/CatalogChangeRequestPage').then((m) => ({ default: m.CatalogChangeRequestPage })));
 const CatalogQueuePage = lazy(() => import('./pages/CatalogQueuePage').then((m) => ({ default: m.CatalogQueuePage })));
+// DT-02..05
+const LandRegistryPage = lazy(() => import('./pages/LandRegistryPage').then((m) => ({ default: m.LandRegistryPage })));
+const TechnicalModelsPage = lazy(() => import('./pages/TechnicalModelsPage').then((m) => ({ default: m.TechnicalModelsPage })));
+const MaterielPage = lazy(() => import('./pages/MaterielPage').then((m) => ({ default: m.MaterielPage })));
+const InventoryDocumentsPage = lazy(() => import('./pages/InventoryDocumentsPage').then((m) => ({ default: m.InventoryDocumentsPage })));
 
 function Centered({ text }: { text: string }) {
   return <div style={{ height: '60vh', display: 'grid', placeItems: 'center', color: 'var(--color-neutral-600)' }}>{text}</div>;
@@ -174,6 +179,11 @@ export default function App() {
       <Route path="/catalog/compare" element={<Protected><CatalogComparePage /></Protected>} />
       <Route path="/catalog/change-requests" element={<Protected><CatalogChangeRequestPage /></Protected>} />
       <Route path="/catalog/queue" element={<Protected><CatalogQueuePage /></Protected>} />
+      {/* DT-02..05 */}
+      <Route path="/dt02/land" element={<Protected><LandRegistryPage /></Protected>} />
+      <Route path="/technical-models" element={<Protected><TechnicalModelsPage /></Protected>} />
+      <Route path="/materiel" element={<Protected><MaterielPage /></Protected>} />
+      <Route path="/inventory-documents" element={<Protected><InventoryDocumentsPage /></Protected>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
