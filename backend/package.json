@@ -34,6 +34,7 @@
     "seed:thanh-hoa": "ts-node -r tsconfig-paths/register src/database/seeds/seed-thanh-hoa-full.ts",
     "seed:c3-catalog": "ts-node -r tsconfig-paths/register src/database/seeds/seed-c3-catalog.ts",
     "seed:catalog-dt01": "ts-node -r tsconfig-paths/register src/database/seeds/seed-catalog-dt01.ts",
+    "seed:technical-dt03": "ts-node -r tsconfig-paths/register src/database/seeds/seed-technical-dt03.ts",
     "openapi:snapshot": "ts-node -r tsconfig-paths/register scripts/generate-openapi.ts"
   },
   "dependencies": {

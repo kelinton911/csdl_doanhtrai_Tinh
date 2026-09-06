@@ -172,6 +172,140 @@
     "/catalog/import-batches/{id}/errors": [
       "get"
     ],
+    "/dt02/addresses": [
+      "get",
+      "post"
+    ],
+    "/dt02/land-points/{id}/usage": [
+      "get",
+      "post"
+    ],
+    "/dt02/land-points/{id}/changes": [
+      "get",
+      "post"
+    ],
+    "/dt02/land-points/{id}/area": [
+      "get"
+    ],
+    "/dt02/data-quality": [
+      "get"
+    ],
+    "/technical-models": [
+      "get",
+      "post"
+    ],
+    "/technical-models/by-catalog/{catalogId}": [
+      "get"
+    ],
+    "/technical-models/{id}": [
+      "get"
+    ],
+    "/technical-models/{id}/catalog-links": [
+      "post"
+    ],
+    "/technical-models/{id}/revisions": [
+      "post"
+    ],
+    "/revisions/compare": [
+      "get"
+    ],
+    "/revisions/{id}": [
+      "get"
+    ],
+    "/revisions/{id}/transition": [
+      "post"
+    ],
+    "/revisions/{id}/publish": [
+      "post"
+    ],
+    "/revisions/{id}/documents": [
+      "post"
+    ],
+    "/revisions/{id}/specifications": [
+      "post"
+    ],
+    "/revisions/{id}/boms": [
+      "post"
+    ],
+    "/technical-completeness/{revisionId}": [
+      "get"
+    ],
+    "/documents/{id}/sheets": [
+      "post"
+    ],
+    "/boms/{id}/items": [
+      "post"
+    ],
+    "/boms/{id}/export": [
+      "get"
+    ],
+    "/verification/{entityType}/{id}": [
+      "post"
+    ],
+    "/attributes/{id}/use-as-criterion": [
+      "post"
+    ],
+    "/model-relationships": [
+      "post"
+    ],
+    "/materiel/hc": [
+      "get"
+    ],
+    "/materiel/lots": [
+      "post"
+    ],
+    "/materiel/lots/{id}": [
+      "get"
+    ],
+    "/materiel/assets": [
+      "post"
+    ],
+    "/materiel/assets/by-qr/{value}": [
+      "get"
+    ],
+    "/materiel/assets/{id}": [
+      "get"
+    ],
+    "/materiel/movements": [
+      "get",
+      "post"
+    ],
+    "/materiel/movements/{id}/submit": [
+      "post"
+    ],
+    "/materiel/movements/{id}/approve": [
+      "post"
+    ],
+    "/materiel/movements/{id}/post": [
+      "post"
+    ],
+    "/materiel/movements/{id}/reverse": [
+      "post"
+    ],
+    "/materiel/quality-assessments": [
+      "post"
+    ],
+    "/materiel/quality-history/{lotId}": [
+      "get"
+    ],
+    "/materiel/snapshots": [
+      "post"
+    ],
+    "/materiel/snapshots/{id}/lock": [
+      "post"
+    ],
+    "/materiel/snapshots/{id}/lines": [
+      "get"
+    ],
+    "/materiel/snapshots/{id}/reconciliation": [
+      "get"
+    ],
+    "/materiel/adjustments": [
+      "post"
+    ],
+    "/materiel/adjustments/{id}/approve": [
+      "post"
+    ],
     "/asset-catalog/proposals/batches": [
       "get",
       "post"
@@ -792,6 +926,54 @@
     "/catalog/import-batches::post": "CatalogRegistryController_createImportBatch",
     "/catalog/import-batches/{id}/validate::post": "CatalogRegistryController_validateImportBatch",
     "/catalog/import-batches/{id}/errors::get": "CatalogRegistryController_getImportErrors",
+    "/dt02/addresses::get": "LandRegistryController_listAddresses",
+    "/dt02/addresses::post": "LandRegistryController_createAddress",
+    "/dt02/land-points/{id}/usage::get": "LandRegistryController_listAllocations",
+    "/dt02/land-points/{id}/usage::post": "LandRegistryController_createAllocation",
+    "/dt02/land-points/{id}/changes::get": "LandRegistryController_listChanges",
+    "/dt02/land-points/{id}/changes::post": "LandRegistryController_createChange",
+    "/dt02/land-points/{id}/area::get": "LandRegistryController_areaAtSnapshot",
+    "/dt02/data-quality::get": "LandRegistryController_dataQuality",
+    "/technical-models::get": "TechnicalController_listModels",
+    "/technical-models::post": "TechnicalController_createModel",
+    "/technical-models/by-catalog/{catalogId}::get": "TechnicalController_modelsByCatalog",
+    "/technical-models/{id}::get": "TechnicalController_getModel",
+    "/technical-models/{id}/catalog-links::post": "TechnicalController_createCatalogLink",
+    "/technical-models/{id}/revisions::post": "TechnicalController_createRevision",
+    "/revisions/compare::get": "TechnicalController_compare",
+    "/revisions/{id}::get": "TechnicalController_getRevision",
+    "/revisions/{id}/transition::post": "TechnicalController_transition",
+    "/revisions/{id}/publish::post": "TechnicalController_publish",
+    "/revisions/{id}/documents::post": "TechnicalController_addDocument",
+    "/revisions/{id}/specifications::post": "TechnicalController_addAttribute",
+    "/revisions/{id}/boms::post": "TechnicalController_createBom",
+    "/technical-completeness/{revisionId}::get": "TechnicalController_completeness",
+    "/documents/{id}/sheets::post": "TechnicalController_addSheet",
+    "/boms/{id}/items::post": "TechnicalController_addBomItem",
+    "/boms/{id}/export::get": "TechnicalController_exportBom",
+    "/verification/{entityType}/{id}::post": "TechnicalController_verify",
+    "/attributes/{id}/use-as-criterion::post": "TechnicalController_useAsCriterion",
+    "/model-relationships::post": "TechnicalController_createRelationship",
+    "/materiel/hc::get": "MaterielController_hc",
+    "/materiel/lots::post": "MaterielController_createLot",
+    "/materiel/lots/{id}::get": "MaterielController_getLot",
+    "/materiel/assets::post": "MaterielController_createAsset",
+    "/materiel/assets/by-qr/{value}::get": "MaterielController_getByQr",
+    "/materiel/assets/{id}::get": "MaterielController_getAsset",
+    "/materiel/movements::get": "MaterielController_listMovements",
+    "/materiel/movements::post": "MaterielController_createMovement",
+    "/materiel/movements/{id}/submit::post": "MaterielController_submit",
+    "/materiel/movements/{id}/approve::post": "MaterielController_approve",
+    "/materiel/movements/{id}/post::post": "MaterielController_post",
+    "/materiel/movements/{id}/reverse::post": "MaterielController_reverse",
+    "/materiel/quality-assessments::post": "MaterielController_createQuality",
+    "/materiel/quality-history/{lotId}::get": "MaterielController_qualityHistory",
+    "/materiel/snapshots::post": "MaterielController_createSnapshot",
+    "/materiel/snapshots/{id}/lock::post": "MaterielController_lockSnapshot",
+    "/materiel/snapshots/{id}/lines::get": "MaterielController_snapshotLines",
+    "/materiel/snapshots/{id}/reconciliation::get": "MaterielController_reconciliation",
+    "/materiel/adjustments::post": "MaterielController_createAdjustment",
+    "/materiel/adjustments/{id}/approve::post": "MaterielController_approveAdjustment",
     "/asset-catalog/proposals/batches::get": "AssetProposalController_listBatches",
     "/asset-catalog/proposals/batches::post": "AssetProposalController_createBatch",
     "/asset-catalog/proposals/batches/{id}/export::post": "AssetProposalController_exportBatch",

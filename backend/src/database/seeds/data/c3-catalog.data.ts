@@ -39,21 +39,29 @@ export const C3_CATALOG_SEED: C3SeedRow[] = [
 
   // ---- DT-02 Hồ sơ doanh trại ----
   { c3Code: 'DT-02.00', subsystem: 'DT-02', name: 'Quản lý hồ sơ Doanh trại', description: 'organization, barracks, facilities, land, gis' },
-  { c3Code: 'DT-02.01', subsystem: 'DT-02', name: 'address_snapshot (bảo toàn địa chỉ lịch sử)', businessRule: 'BR-DT02-001' },
-  { c3Code: 'DT-02.02', subsystem: 'DT-02', name: 'land_usage_allocation + kiểm tra tổng ≤ diện tích', businessRule: 'BR-DT02-004' },
-  { c3Code: 'DT-02.03', subsystem: 'DT-02', name: 'storage_location chống vòng lặp + không xóa vị trí có lịch sử', businessRule: 'BR-DT02-019' },
+  { c3Code: 'DT-02.01', subsystem: 'DT-02', name: 'address_snapshot (bảo toàn địa chỉ lịch sử)', businessRule: 'BR-DT02-001', api: 'POST /dt02/addresses', test: 'TC-DT02-002' },
+  { c3Code: 'DT-02.02', subsystem: 'DT-02', name: 'land_usage_allocation + kiểm tra tổng ≤ diện tích', businessRule: 'BR-DT02-004', api: 'POST /dt02/land-points/{id}/usage', test: 'TC-DT02-004' },
+  { c3Code: 'DT-02.03', subsystem: 'DT-02', name: 'storage_location chống vòng lặp + không xóa vị trí có lịch sử', businessRule: 'BR-DT02-019', test: 'TC-DT02-017' },
+  { c3Code: 'DT-02.07', subsystem: 'DT-02', name: 'land_change_event + diện tích tại snapshot', useCase: 'UC-DT02-08/09', businessRule: 'BR-DT02-005/007', api: 'POST /dt02/land-points/{id}/changes; GET .../area', test: 'TC-DT02-007' },
+  { c3Code: 'DT-02.DQ', subsystem: 'DT-02', name: 'Kiểm tra chất lượng dữ liệu DT-02', api: 'GET /dt02/data-quality' },
 
   // ---- DT-03 Hồ sơ kỹ thuật ----
   { c3Code: 'DT-03.00', subsystem: 'DT-03', name: 'Hồ sơ kỹ thuật vật chất' },
-  { c3Code: 'DT-03.01', subsystem: 'DT-03', name: 'product_model + model_catalog_link' },
-  { c3Code: 'DT-03.02', subsystem: 'DT-03', name: 'design_revision (SUPERSEDES, không ghi đè)' },
-  { c3Code: 'DT-03.03', subsystem: 'DT-03', name: 'technical_document + drawing_sheet (file_hash bất biến)' },
+  { c3Code: 'DT-03.01', subsystem: 'DT-03', name: 'product_model + model_catalog_link (1 R00 ↔ N mẫu)', useCase: 'UC-DT03-01', businessRule: 'BR-DT03-002', api: '/technical-models', test: 'TC-DT03-001' },
+  { c3Code: 'DT-03.04', subsystem: 'DT-03', name: 'design_revision (SUPERSEDES, không ghi đè)', useCase: 'UC-DT03-04/14', businessRule: 'BR-DT03-014', api: 'POST /revisions/{id}/publish', test: 'TC-DT03-007/008' },
+  { c3Code: 'DT-03.05', subsystem: 'DT-03', name: 'technical_document + drawing_sheet (file_hash bất biến)', businessRule: 'BR-DT03-005', api: 'POST /revisions/{id}/documents', test: 'TC-DT03-003' },
+  { c3Code: 'DT-03.09', subsystem: 'DT-03', name: 'BOM (raw_name + UNMAPPED)', useCase: 'UC-DT03-09/10', businessRule: 'BR-DT03-005', api: 'POST /boms/{id}/items', test: 'TC-DT03-005' },
+  { c3Code: 'DT-03.13', subsystem: 'DT-03', name: 'source_provenance + xác minh (chỉ VERIFIED dùng tiêu chí)', useCase: 'UC-DT03-13', businessRule: 'BR-DT03-006', api: 'POST /verification/{entityType}/{id}', test: 'TC-DT03-006' },
 
   // ---- DT-04 Thực lực vật chất ----
   { c3Code: 'DT-04.00', subsystem: 'DT-04', name: 'Quản lý thực lực vật chất', description: 'inventory' },
   { c3Code: 'DT-04.01', subsystem: 'DT-04', name: 'inventory_lot vs asset_instance' },
   { c3Code: 'DT-04.02', subsystem: 'DT-04', name: 'HC(t) as-of-time = snapshot + Σ movement APPROVED ≤ t', businessRule: 'BR-DT04-013', api: '/inventory/hc?as_of_time=' },
-  { c3Code: 'DT-04.03', subsystem: 'DT-04', name: 'Giao dịch DRAFT→SUBMITTED→APPROVED→POSTED; chỉ POSTED tác động số dư', businessRule: 'BR-DT04-004' },
+  { c3Code: 'DT-04.03', subsystem: 'DT-04', name: 'Giao dịch DRAFT→SUBMITTED→APPROVED→POSTED; chỉ POSTED tác động số dư', businessRule: 'BR-DT04-004', api: 'POST /materiel/movements/{id}/post|reverse', test: 'TC-DT04-004/005' },
+  { c3Code: 'DT-04.06', subsystem: 'DT-04', name: 'quality_assessment (Σ cấp ≤ HC lô)', businessRule: 'BR-DT04-006', api: 'POST /materiel/quality-assessments', test: 'TC-DT04-008' },
+  { c3Code: 'DT-04.11', subsystem: 'DT-04', name: 'snapshot + lock bất biến', businessRule: 'BR-DT04-011', api: 'POST /materiel/snapshots/{id}/lock', test: 'TC-DT04-016/017' },
+  { c3Code: 'DT-04.13', subsystem: 'DT-04', name: 'inventory_adjustment_request → ADJUSTMENT', businessRule: 'BR-DT04-015', api: 'POST /materiel/adjustments/{id}/approve', test: 'TC-DT04-018' },
+  { c3Code: 'DT-04.HC', subsystem: 'DT-04', name: 'HC(t) as-of cho DT-08 (as_of_time/scope/source/locked)', businessRule: 'BR-DT04-020', api: 'GET /materiel/hc', test: 'TC-DT04-007/020' },
 
   // ---- DT-05 Nhập-xuất-điều chuyển ----
   { c3Code: 'DT-05.00', subsystem: 'DT-05', name: 'Nhập–xuất–điều chuyển' },

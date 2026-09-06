@@ -88,6 +88,14 @@ Route `/catalog/*` + nav "Danh mục chuẩn R00 (DT-01)"; `webapp/src/lib/catal
 | 6 | Cây `storage_location` chống vòng lặp + không xóa vị trí đã có lịch sử vật chất | BR-DT02-019/020 | Cao |
 | 7 | Data-quality checks DQ-DT02-01..12 | §XVI | TB |
 
+**Đã hiện thực (2026-09-06 — module `dt02-land`, code + unit test PASS):**
+3 bảng gap (migration `1753000036000`): `address_snapshot` (bảo toàn huyện lịch sử, không tạo tầng
+huyện — BR-DT02-001/023), `land_usage_allocation` (Σ ≤ diện tích — BR-DT02-004), `land_change_event`
+(diện tích tại snapshot, không sửa kỳ trước — BR-DT02-005/007). API `/dt02/*` (addresses, land-points
+usage/changes/area, data-quality). Domain rules thuần `land-rules.ts` + 10 unit test
+(TC-DT02-003/004/007/017). **Còn lại:** các bảng nhà/hạ tầng/warehouse chi tiết (building*, family_area…),
+màn hình webapp SCR-DT02-01..10, chuỗi E2E.
+
 ---
 
 ## DT-03 — Hồ sơ kỹ thuật vật chất (Quyển III) 🔴
@@ -112,6 +120,17 @@ checksum, presigned). **Chưa có** lớp hồ sơ kỹ thuật số có cấu t
 > Ưu tiên tối thiểu cho MVP DT-03: `product_model`, `design_revision`, `technical_document`,
 > `drawing_sheet`, `source_provenance/verification` để DT-04 gắn model/revision cho lô/tài sản.
 
+**Đã hiện thực (2026-09-06 — module `dt03-technical`, code + unit test PASS):**
+10 bảng (migration `1753000037000`): product_model, model_catalog_link, design_revision,
+technical_document, drawing_sheet, technical_attribute, bom_header, bom_item, source_provenance,
+model_relationship. API `/technical-models`, `/revisions/*` (transition/publish/compare),
+`/documents/{id}/sheets`, `/revisions/{id}/specifications|boms`, `/boms/{id}/items|export`,
+`/verification/{entityType}/{id}`, `/attributes/{id}/use-as-criterion`, `/model-relationships`,
+`/technical-completeness/{id}`. Domain rules thuần `tech-rules.ts` (máy trạng thái revision,
+chống vòng lặp quan hệ thay thế, gate VERIFIED cho tiêu chí, BOM UNMAPPED, trùng hash, độ đầy đủ)
++ 14 unit test (TC-DT03-003/005/006/007/008). Publish supersede đời cũ. Seed mẫu từ CSV `seed:technical-dt03`.
+**Còn lại:** conformity_criterion/label_spec/design_approval; màn hình webapp SCR-DT03-01..08; E2E 3 kiểu vật chất.
+
 ---
 
 ## DT-04 — Quản lý thực lực vật chất (Quyển IV)
@@ -134,6 +153,18 @@ chi tiết chất lượng.
 | 6 | **inventory_import_batch/row** (số dư đầu kỳ qua staging/mapping) | §X | TB |
 | 7 | **inventory_reconciliation** + **inventory_exception** (âm/lệch cache-ledger) | BR-DT04-021 | TB |
 | 8 | Tách/gộp lô giữ tổng HC; asset chỉ ACTIVE tại 1 vị trí/thời điểm | BR-DT04-007/010 | TB |
+
+**Đã hiện thực (2026-09-06 — module `dt04-materiel`, code + unit test PASS):**
+7 bảng (migration `1753000038000`): `inventory_lot`, `asset_instance` (asset_code UNIQUE + QR),
+`materiel_movement` (sổ cái bất biến + state machine + effective_time/posted_at + reversal),
+`materiel_snapshot`+`_line`, `quality_assessment`, `inventory_adjustment_request`. Domain rules thuần
+`materiel-rules.ts` — **HC(t) as-of** (Σ signed POSTED, effective_time ≤ t), signed qty, máy trạng thái
+giao dịch, chống tồn âm, Σ chất lượng ≤ HC, snapshot lock — **12 unit test** (TC-DT04-003/004/007/008/017).
+API `/materiel/*`: `GET /materiel/hc` (kèm as_of_time/scope/source/locked cho DT-08), lots, assets(+by-qr),
+movements (submit/approve/post/reverse), quality, snapshots(+lock/lines/reconciliation), adjustments(+approve).
+Post movement phát outbox `materiel.movement.posted`; duyệt điều chỉnh sinh giao dịch ADJUSTMENT (SYS-BR-02).
+Đặt dưới `/materiel` để cùng tồn tại module `inventory` (M06) cũ.
+**Còn lại:** import staging số dư đầu kỳ, tách/gộp lô, exception; màn hình webapp SCR-DT04-01..12; E2E.
 
 ---
 
@@ -334,9 +365,9 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | --- | --- | --- | --- | --- |
 | Sprint 0 | ◑ | 2026-09-06 | (chưa commit) | 9/9 GAP đã code + unit test PASS (88 test, 12 suite). Chờ: chạy migration+seed trên dev, e2e webapp để chốt DoD. |
 | DT-01 | ◑ | 2026-09-06 | (chưa commit) | Backend đủ 10 bảng + 25 API + BR + so sánh phiên bản (15 unit test PASS) + 5 màn hình webapp (tsc + vite build xanh). Chờ: E2E Playwright, migration/seed trên dev, di trú material→material_catalog. |
-| DT-02 | ☐ | | | |
-| DT-03 | ☐ | | | |
-| DT-04 | ☐ | | | |
+| DT-02 | ◑ | 2026-09-06 | (chưa commit) | Backend lớp đất: 3 bảng gap + API /dt02/* + BR-DT02-004/007 + data-quality; 10 unit test PASS. Chờ: bảng nhà/hạ tầng chi tiết, webapp, E2E. |
+| DT-03 | ◑ | 2026-09-06 | (chưa commit) | Backend 10 bảng + ~20 API + máy trạng thái revision + xác minh/completeness; 14 unit test PASS; seed mẫu từ CSV. Chờ: webapp SCR-DT03-01..08, E2E 3 kiểu vật chất. |
+| DT-04 | ◑ | 2026-09-06 | (chưa commit) | Backend sổ cái chuẩn: 7 bảng + 19 API /materiel/* + HC(t) as-of + state machine + snapshot lock + adjustment; 12 unit test PASS; outbox posted. Chờ: import staging, tách/gộp lô, webapp, E2E. |
 | DT-05 | ☐ | | | |
 | DT-06 | ☐ | | | |
 | DT-07 | ☐ | | | |

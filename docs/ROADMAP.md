@@ -57,6 +57,13 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   as-of helper + response wrapper (Asia/Ho_Chi_Minh), idempotency mở rộng POST/PUT/PATCH,
   **outbox pattern** (`outbox_event` + dispatcher), **C3 catalog** (`/c3-catalog` + seed),
   **OpenAPI contract test** (preview-mode + baseline). Chi tiết: `docs/dt-build/01-DOI-CHIEU-GAP.md`.
+- **DT-01 Danh mục chuẩn R00** ◑ (2026-09-06): 10 bảng + 25 API `/catalog/*` + 5 màn hình webapp.
+- **DT-02 Hồ sơ Doanh trại (lớp đất)** ◑ (2026-09-06): `address_snapshot`/`land_usage_allocation`/
+  `land_change_event` + API `/dt02/*` + diện tích tại snapshot + data-quality (backend, 10 unit test).
+- **DT-03 Hồ sơ kỹ thuật** ◑ (2026-09-06): 10 bảng (product_model/design_revision/technical_document/
+  drawing_sheet/bom/…) + ~20 API + máy trạng thái revision + xác minh nguồn (backend, 14 unit test).
+- **DT-04 Thực lực vật chất** ◑ (2026-09-06): sổ cái `materiel_movement` bất biến + HC(t) as-of
+  (`GET /materiel/hc` cho DT-08) + lô/asset + snapshot lock + điều chỉnh (backend, 12 unit test).
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),

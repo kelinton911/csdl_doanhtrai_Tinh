@@ -40,6 +40,9 @@ import { HealthModule } from './modules/health/health.module';
 import { OutboxModule } from './common/outbox/outbox.module';
 import { C3CatalogModule } from './modules/c3-catalog/c3-catalog.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
+import { Dt02LandModule } from './modules/dt02-land/dt02-land.module';
+import { Dt03TechnicalModule } from './modules/dt03-technical/dt03-technical.module';
+import { Dt04MaterielModule } from './modules/dt04-materiel/dt04-materiel.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/identity/guards/roles.guard';
 import { DataScopeGuard } from './common/scope/data-scope.guard';
@@ -66,6 +69,9 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     OrganizationModule, // M02 — Organization & Area
     MasterDataModule, // M03 — Master Data (danh mục + vật chất)
     CatalogModule, // DT-01 — Danh mục chuẩn R00 versioned (Quyển I)
+    Dt02LandModule, // DT-02 — Hồ sơ Doanh trại: đất (địa chỉ lịch sử/phân bổ/biến động)
+    Dt03TechnicalModule, // DT-03 — Hồ sơ kỹ thuật vật chất (model/revision/bản vẽ/BOM)
+    Dt04MaterielModule, // DT-04 — Thực lực vật chất (sổ cái + HC theo thời điểm + snapshot)
     AssetCatalogModule, // Danh mục tài sản ngành Doanh trại (Phụ lục CV 2837/DT-QLDT)
     InventoryModule, // M06 — Inventory (tồn kho UC-08)
     InspectionModule, // M07 — Inspection & Review (UC-09/10/11)
