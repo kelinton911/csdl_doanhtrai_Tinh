@@ -186,6 +186,17 @@ Post movement phát outbox `materiel.movement.posted`; duyệt điều chỉnh s
 | 6 | **stock_period / period_lock** khóa kỳ, cấm backdate, đối chiếu movement↔balance | BR-DT05-010/026 | TB |
 | 7 | Truy vết ô "tăng/giảm" 01/KK,02/KK → movement → chứng từ → file | BR-DT05-030 | TB (DT-11) |
 
+**Đã hiện thực (2026-09-06 — module `dt05-documents`, code + unit test PASS):**
+5 bảng (migration `1753000039000`): `inventory_document`/`_line`, `posting_batch`, `transfer_order`,
+`stock_period`. **POST nguyên tử** sinh N movement DT-04 (all-or-nothing; kiểm tồn từng dòng giảm →
+`INSUFFICIENT_STOCK` rollback toàn bộ — TC-DT05-002); reversal chứng từ POSTED (BR-DT05-002);
+điều chuyển 2 đầu dispatch→IN_TRANSIT→receive (không cộng trùng HC — BR-DT05-008) + chênh lệch;
+khóa kỳ cấm backdate (BR-DT05-010, `PERIOD_LOCKED`); truy vết chứng từ→movement→sổ cái (BR-DT05-030).
+Domain rules `doc-rules.ts` + **10 unit test** (TC-DT05-003/005/008/009/013). Dùng lại
+`materiel_movement` + máy trạng thái của DT-04; POST phát outbox `inventory.document.posted`.
+API `/inventory-documents/*`, `/transfer-orders/*`, `/stock-periods/*`.
+**Còn lại:** recall/disposal case, document_attachment, đối chiếu Σmovement=Δbalance đầy đủ; webapp SCR-DT05-01..10; E2E.
+
 ---
 
 ## DT-06 — Dự trữ & phân bổ (Quyển VI)
@@ -368,7 +379,7 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | DT-02 | ◑ | 2026-09-06 | (chưa commit) | Backend lớp đất: 3 bảng gap + API /dt02/* + BR-DT02-004/007 + data-quality; 10 unit test PASS. Chờ: bảng nhà/hạ tầng chi tiết, webapp, E2E. |
 | DT-03 | ◑ | 2026-09-06 | (chưa commit) | Backend 10 bảng + ~20 API + máy trạng thái revision + xác minh/completeness; 14 unit test PASS; seed mẫu từ CSV. Chờ: webapp SCR-DT03-01..08, E2E 3 kiểu vật chất. |
 | DT-04 | ◑ | 2026-09-06 | (chưa commit) | Backend sổ cái chuẩn: 7 bảng + 19 API /materiel/* + HC(t) as-of + state machine + snapshot lock + adjustment; 12 unit test PASS; outbox posted. Chờ: import staging, tách/gộp lô, webapp, E2E. |
-| DT-05 | ☐ | | | |
+| DT-05 | ◑ | 2026-09-06 | (chưa commit) | Backend chứng từ: 5 bảng + 18 API + POST nguyên tử→movement DT-04 + reversal + transfer 2-đầu + khóa kỳ; 10 unit test PASS; outbox posted. Chờ: recall/disposal, webapp, E2E. |
 | DT-06 | ☐ | | | |
 | DT-07 | ☐ | | | |
 | DT-08 | ☐ | | | |

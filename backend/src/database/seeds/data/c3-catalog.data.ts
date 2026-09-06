@@ -65,8 +65,10 @@ export const C3_CATALOG_SEED: C3SeedRow[] = [
 
   // ---- DT-05 Nhập-xuất-điều chuyển ----
   { c3Code: 'DT-05.00', subsystem: 'DT-05', name: 'Nhập–xuất–điều chuyển' },
-  { c3Code: 'DT-05.01', subsystem: 'DT-05', name: 'inventory_document/line/movement/posting_batch' },
-  { c3Code: 'DT-05.02', subsystem: 'DT-05', name: 'transfer_order/receipt 2 đầu (IN_TRANSIT)', businessRule: 'BR-DT05-008' },
+  { c3Code: 'DT-05.01', subsystem: 'DT-05', name: 'inventory_document/line/movement/posting_batch (nguyên tử)', useCase: 'UC-DT05-05', businessRule: 'BR-DT05-002', api: 'POST /inventory-documents/{id}/post|reverse', test: 'TC-DT05-002/004' },
+  { c3Code: 'DT-05.05', subsystem: 'DT-05', name: 'transfer_order 2 đầu (IN_TRANSIT, chênh lệch)', useCase: 'UC-DT05-12', businessRule: 'BR-DT05-008', api: 'POST /transfer-orders/{id}/dispatch|receive', test: 'TC-DT05-008/009' },
+  { c3Code: 'DT-05.09', subsystem: 'DT-05', name: 'period_lock cấm backdate', useCase: 'UC-DT05-20', businessRule: 'BR-DT05-010', api: 'POST /stock-periods/{id}/lock', test: 'TC-DT05-013' },
+  { c3Code: 'DT-05.10', subsystem: 'DT-05', name: 'Truy vết chứng từ → movement → sổ cái', businessRule: 'BR-DT05-030', api: 'GET /inventory-documents/{id}/trace' },
 
   // ---- DT-06 Dự trữ & phân bổ ----
   { c3Code: 'DT-06.00', subsystem: 'DT-06', name: 'Dự trữ & phân bổ' },

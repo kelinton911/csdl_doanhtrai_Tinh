@@ -306,6 +306,62 @@
     "/materiel/adjustments/{id}/approve": [
       "post"
     ],
+    "/inventory-documents": [
+      "get",
+      "post"
+    ],
+    "/inventory-documents/{id}": [
+      "get"
+    ],
+    "/inventory-documents/{id}/lines": [
+      "post"
+    ],
+    "/inventory-documents/{id}/submit": [
+      "post"
+    ],
+    "/inventory-documents/{id}/review": [
+      "post"
+    ],
+    "/inventory-documents/{id}/approve": [
+      "post"
+    ],
+    "/inventory-documents/{id}/post": [
+      "post"
+    ],
+    "/inventory-documents/{id}/reverse": [
+      "post"
+    ],
+    "/inventory-documents/{id}/cancel": [
+      "post"
+    ],
+    "/inventory-documents/{id}/trace": [
+      "get"
+    ],
+    "/transfer-orders/in-transit": [
+      "get"
+    ],
+    "/transfer-orders": [
+      "post"
+    ],
+    "/transfer-orders/{id}/dispatch": [
+      "post"
+    ],
+    "/transfer-orders/{id}/receive": [
+      "post"
+    ],
+    "/transfer-orders/{id}/close": [
+      "post"
+    ],
+    "/stock-periods": [
+      "get",
+      "post"
+    ],
+    "/stock-periods/{id}/lock": [
+      "post"
+    ],
+    "/stock-periods/{id}/unlock": [
+      "post"
+    ],
     "/asset-catalog/proposals/batches": [
       "get",
       "post"
@@ -974,6 +1030,26 @@
     "/materiel/snapshots/{id}/reconciliation::get": "MaterielController_reconciliation",
     "/materiel/adjustments::post": "MaterielController_createAdjustment",
     "/materiel/adjustments/{id}/approve::post": "MaterielController_approveAdjustment",
+    "/inventory-documents::get": "DocumentsController_list",
+    "/inventory-documents::post": "DocumentsController_create",
+    "/inventory-documents/{id}::get": "DocumentsController_get",
+    "/inventory-documents/{id}/lines::post": "DocumentsController_addLine",
+    "/inventory-documents/{id}/submit::post": "DocumentsController_submit",
+    "/inventory-documents/{id}/review::post": "DocumentsController_review",
+    "/inventory-documents/{id}/approve::post": "DocumentsController_approve",
+    "/inventory-documents/{id}/post::post": "DocumentsController_post",
+    "/inventory-documents/{id}/reverse::post": "DocumentsController_reverse",
+    "/inventory-documents/{id}/cancel::post": "DocumentsController_cancel",
+    "/inventory-documents/{id}/trace::get": "DocumentsController_trace",
+    "/transfer-orders/in-transit::get": "DocumentsController_inTransit",
+    "/transfer-orders::post": "DocumentsController_createTransfer",
+    "/transfer-orders/{id}/dispatch::post": "DocumentsController_dispatch",
+    "/transfer-orders/{id}/receive::post": "DocumentsController_receive",
+    "/transfer-orders/{id}/close::post": "DocumentsController_close",
+    "/stock-periods::get": "DocumentsController_listPeriods",
+    "/stock-periods::post": "DocumentsController_createPeriod",
+    "/stock-periods/{id}/lock::post": "DocumentsController_lockPeriod",
+    "/stock-periods/{id}/unlock::post": "DocumentsController_unlockPeriod",
     "/asset-catalog/proposals/batches::get": "AssetProposalController_listBatches",
     "/asset-catalog/proposals/batches::post": "AssetProposalController_createBatch",
     "/asset-catalog/proposals/batches/{id}/export::post": "AssetProposalController_exportBatch",

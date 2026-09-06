@@ -64,6 +64,8 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   drawing_sheet/bom/…) + ~20 API + máy trạng thái revision + xác minh nguồn (backend, 14 unit test).
 - **DT-04 Thực lực vật chất** ◑ (2026-09-06): sổ cái `materiel_movement` bất biến + HC(t) as-of
   (`GET /materiel/hc` cho DT-08) + lô/asset + snapshot lock + điều chỉnh (backend, 12 unit test).
+- **DT-05 Nhập–xuất–điều chuyển** ◑ (2026-09-06): `inventory_document` + POST nguyên tử → movement
+  DT-04, reversal, điều chuyển 2 đầu (IN_TRANSIT), khóa kỳ cấm backdate (backend, 10 unit test).
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),
