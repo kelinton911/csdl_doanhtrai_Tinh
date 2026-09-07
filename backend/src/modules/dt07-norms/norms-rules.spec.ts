@@ -5,6 +5,7 @@ import {
   COMMAND_TRANSITIONS,
   DimensionType,
   NormCandidate,
+  NORM_SET_TRANSITIONS,
   NormSourceStatus,
   NormValueType,
   ResolveRequestInput,
@@ -170,6 +171,22 @@ describe('DT-07 norms-rules — bộ chọn định mức deterministic (Quyển
     it('bộ DRAFT/VALIDATED được sửa', () => {
       expect(() => assertNormSetEditable(CatalogVersionStatus.DRAFT)).not.toThrow();
       expect(() => assertNormSetEditable(CatalogVersionStatus.VALIDATED)).not.toThrow();
+    });
+  });
+
+  describe('máy trạng thái bộ định mức (DT-07: DRAFT→PUBLISHED→SUPERSEDED)', () => {
+    it('công bố thẳng từ DRAFT hợp lệ', () => {
+      expect(() =>
+        assertTransition(NORM_SET_TRANSITIONS, CatalogVersionStatus.DRAFT, CatalogVersionStatus.PUBLISHED),
+      ).not.toThrow();
+    });
+    it('PUBLISHED → SUPERSEDED hợp lệ; PUBLISHED → DRAFT không hợp lệ', () => {
+      expect(() =>
+        assertTransition(NORM_SET_TRANSITIONS, CatalogVersionStatus.PUBLISHED, CatalogVersionStatus.SUPERSEDED),
+      ).not.toThrow();
+      expect(() =>
+        assertTransition(NORM_SET_TRANSITIONS, CatalogVersionStatus.PUBLISHED, CatalogVersionStatus.DRAFT),
+      ).toThrow();
     });
   });
 

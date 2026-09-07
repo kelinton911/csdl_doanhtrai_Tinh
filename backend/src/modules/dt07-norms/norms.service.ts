@@ -25,13 +25,14 @@ import {
   NormConflictStatus,
   NormSourceStatus,
   NormValueType,
+  NORM_SET_TRANSITIONS,
   ResolveRequestInput,
   ResolveResult,
   resolveNorm,
   resolveRequestHash,
   assertNormSetEditable,
 } from './norms-rules';
-import { CatalogVersionStatus, CATALOG_VERSION_TRANSITIONS } from '../../common/enums';
+import { CatalogVersionStatus } from '../../common/enums';
 import { ImportBatchStatus, ActiveStatus } from '../catalog/catalog.enums';
 import { assertTransition } from '../../common/enums/assert-transition';
 import { resolveAsOf, toHcmIso } from '../../common/time/as-of';
@@ -219,6 +220,27 @@ export class NormsService {
     return this.norms.find({ where: { normSetVersionId: setVersionId }, order: { createdAt: 'ASC' } });
   }
 
+  // SCR-DT07-08: liệt kê định mức LEGACY_UNVERIFIED (chưa có căn cứ) kèm ngữ cảnh bộ/phiên bản —
+  // cảnh báo khi dùng, KHÔNG được bộ chọn resolve dùng chính thức (BR-DT07-026).
+  listLegacyNorms() {
+    return this.norms
+      .createQueryBuilder('n')
+      .innerJoin('norm_set_version', 'v', 'v.id = n.norm_set_version_id')
+      .innerJoin('norm_set', 's', 's.id = v.norm_set_id')
+      .where('n.source_status = :legacy', { legacy: NormSourceStatus.LEGACY_UNVERIFIED })
+      .select('n.id', 'id')
+      .addSelect('n.material_catalog_id', 'materialCatalogId')
+      .addSelect('n.semantic_param', 'semanticParam')
+      .addSelect('n.value_numeric', 'valueNumeric')
+      .addSelect('n.raw_value', 'rawValue')
+      .addSelect('n.import_batch_id', 'importBatchId')
+      .addSelect('s.set_code', 'setCode')
+      .addSelect('v.version_label', 'versionLabel')
+      .addSelect('v.status', 'versionStatus')
+      .orderBy('s.set_code', 'ASC')
+      .getRawMany();
+  }
+
   private async getNorm(id: string): Promise<MaterialNorm> {
     const n = await this.norms.findOne({ where: { id } });
     if (!n) throw new NotFoundException(`DATA-001: Không có định mức ${id}`);
@@ -249,7 +271,7 @@ export class NormsService {
       const repo = m.getRepository(NormSetVersion);
       const version = await repo.findOne({ where: { id } });
       if (!version) throw new NotFoundException(`DATA-001: Không có phiên bản bộ định mức ${id}`);
-      assertTransition(CATALOG_VERSION_TRANSITIONS, version.status, CatalogVersionStatus.PUBLISHED);
+      assertTransition(NORM_SET_TRANSITIONS, version.status, CatalogVersionStatus.PUBLISHED);
 
       await repo
         .createQueryBuilder()

@@ -42,8 +42,25 @@ export enum NormSourceStatus {
   LEGACY_UNVERIFIED = 'LEGACY_UNVERIFIED', // chưa có căn cứ → KHÔNG dùng cho resolve chính thức
 }
 
-// norm_set_version dùng CatalogVersionStatus chung (§3): DRAFT→VALIDATED→PUBLISHED→SUPERSEDED→ARCHIVED.
+// norm_set_version dùng enum CatalogVersionStatus chung, nhưng luồng DT-07 (Quyển VII §VIII)
+// là DRAFT→PUBLISHED→SUPERSEDED (VALIDATED là bước tùy chọn) — cho phép công bố thẳng từ DRAFT.
 export { CatalogVersionStatus as NormSetStatus };
+
+export const NORM_SET_TRANSITIONS: Record<CatalogVersionStatus, CatalogVersionStatus[]> = {
+  [CatalogVersionStatus.DRAFT]: [
+    CatalogVersionStatus.VALIDATED,
+    CatalogVersionStatus.PUBLISHED,
+    CatalogVersionStatus.ARCHIVED,
+  ],
+  [CatalogVersionStatus.VALIDATED]: [
+    CatalogVersionStatus.PUBLISHED,
+    CatalogVersionStatus.DRAFT,
+    CatalogVersionStatus.ARCHIVED,
+  ],
+  [CatalogVersionStatus.PUBLISHED]: [CatalogVersionStatus.SUPERSEDED, CatalogVersionStatus.ARCHIVED],
+  [CatalogVersionStatus.SUPERSEDED]: [CatalogVersionStatus.ARCHIVED],
+  [CatalogVersionStatus.ARCHIVED]: [],
+};
 
 // ---- Hàng chờ xung đột định mức ----
 export enum NormConflictStatus {

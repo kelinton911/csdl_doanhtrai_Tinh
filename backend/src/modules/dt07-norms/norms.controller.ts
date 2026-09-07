@@ -113,6 +113,11 @@ export class NormsController {
   importNorms(@Body() dto: ImportNormsDto, @CurrentUser() user: AuthUser) {
     return this.service.importNorms(dto, user);
   }
+  @Get('norms/legacy')
+  @ApiOperation({ summary: 'Định mức chưa có căn cứ (LEGACY_UNVERIFIED) — cảnh báo, không dùng resolve' })
+  listLegacyNorms() {
+    return this.service.listLegacyNorms();
+  }
   @Post('norms/:id/scopes')
   @Roles(...WRITERS)
   @ApiOperation({ summary: 'Gắn chiều phạm vi (org/mission/phase…) cho định mức' })
