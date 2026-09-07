@@ -271,7 +271,16 @@ authority-ranks, commands/requirements/assignments/progress. Seed `seed:norms-dt
 văn bản→định mức→publish→resolve→chỉ lệnh). **14 unit test PASS** (TC-DT07-002/007/008/009/016/026
 + most-specific + authority_rank + máy trạng thái chỉ lệnh). Giữ nguyên `logistics-norms` cũ
 (engine HC-KT Khâu 4) — DT-07 là kho định mức chuẩn có căn cứ, không phá dữ liệu cũ.
-**Còn lại:** webapp 8 màn hình (SCR-DT07-01..08), integration test API/transaction, E2E Playwright.
+
+**Migration + seed đã áp trên CẢ 2 DB dev (2026-09-07):** 5435 (stack :8000) và 5436 (instance
+:8100) — `migration:run` #32→#42 + `seed:catalog-dt01`/`seed:norms-dt07`; resolve chạy thật OK
+(mission=ATTACK→SELECTED 15, tổng quát→10, hết hiệu lực/material lạ→NO_RULE).
+
+**Webapp** `NormsPage` (`/norms`, 5 tab, tsc+vite xanh): Thử chọn định mức (form bối cảnh đa chiều →
+SELECTED/NO_RULE/CONFLICT + bảng trace + căn cứ) = SCR-DT07-05; Bộ định mức + công bố + danh sách
+định mức (badge căn cứ) = SCR-DT07-02/03; Xung đột + giải quyết thủ công = SCR-DT07-06; Chỉ lệnh =
+SCR-DT07-07; Văn bản căn cứ = SCR-DT07-01. **Còn lại:** form biên tập/nhập Excel định mức UI
+(SCR-DT07-04) + màn legacy (SCR-DT07-08), integration test API/transaction, E2E Playwright.
 
 ---
 
@@ -417,7 +426,7 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | DT-04 | ◑ | 2026-09-06 | (chưa commit) | Backend sổ cái (7 bảng + 19 API + HC(t) as-of + snapshot lock, 12 test) + **webapp** MaterielPage (tra HC theo thời điểm + sổ cái + workflow giao dịch). Chờ: import staging, tách/gộp lô, E2E. |
 | DT-05 | ◑ | 2026-09-06 | (chưa commit) | Backend chứng từ (5 bảng + 18 API + POST nguyên tử + transfer + khóa kỳ, 10 test) + **webapp** InventoryDocumentsPage (chứng từ/dòng/duyệt-POST/truy vết + điều chuyển + khóa kỳ). Chờ: recall/disposal, E2E. |
 | DT-06 | ◑ | 2026-09-06 | (chưa commit) | Backend phân bổ: 10 bảng + 19 API + Σ exclusive ≤ HC_ALLOCATABLE + PC_SSCĐ cho DT-08 + snapshot lock; 9 unit test PASS. Chờ: ràng buộc realtime DT-05↔hold, webapp, E2E. |
-| DT-07 | ◑ | 2026-09-07 | (chưa commit) | Backend định mức có căn cứ: 17 bảng + migration + bộ chọn `resolveNorm` deterministic (SELECTED/NO_RULE/CONFLICT + trace, không ngầm 0) + `/norms/resolve` cho DT-08 + norm_conflict_case + publish bất biến + import→DRAFT/LEGACY_UNVERIFIED + authority_rank có version + chỉ lệnh/yêu cầu/phân giao/tiến độ + seed; 14 unit test PASS (172/172 toàn suite). Chờ: webapp 8 màn hình, integration/E2E. |
+| DT-07 | ◑ | 2026-09-07 | 48363e6, 96502a9 | Backend định mức có căn cứ: 17 bảng + migration + bộ chọn `resolveNorm` deterministic (SELECTED/NO_RULE/CONFLICT + trace, không ngầm 0) + `/norms/resolve` cho DT-08 + norm_conflict_case + publish bất biến + import→DRAFT/LEGACY_UNVERIFIED + authority_rank có version + chỉ lệnh/yêu cầu/phân giao/tiến độ + seed; 14 unit test PASS (172/172 toàn suite). **Migration+seed đã áp 5435 & 5436**, resolve chạy thật OK. **Webapp** NormsPage `/norms` (5 tab: resolve+trace/bộ định mức+publish/xung đột/chỉ lệnh/văn bản), tsc+vite xanh. Chờ: UI nhập Excel/biên tập (SCR-04) + legacy (SCR-08), integration/E2E. |
 | DT-08 | ☐ | | | |
 | DT-09 | ☐ | | | |
 | DT-10 | ☐ | | | |
