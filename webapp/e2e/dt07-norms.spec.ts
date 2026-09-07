@@ -47,4 +47,25 @@ test.describe.serial('DT-07 — định mức & chỉ lệnh', () => {
     await page.getByRole('button', { name: /Chọn định mức/ }).click();
     await expect(page.getByText('Không có định mức (không tính = 0)')).toBeVisible({ timeout: 15_000 });
   });
+
+  test('quản lý chỉ lệnh: tạo → phát hành → thêm yêu cầu vật chất', async ({ page }) => {
+    await login(page, 'admin');
+    await page.goto('/norms');
+    await page.getByRole('button', { name: 'Chỉ lệnh hậu cần' }).click();
+
+    // Tạo chỉ lệnh (auto chọn vào chi tiết).
+    await page.getByPlaceholder('Tiêu đề').fill('Chỉ lệnh E2E DT-07');
+    await page.getByPlaceholder('Cơ quan ban hành').fill('BTL');
+    await page.getByRole('button', { name: 'Tạo chỉ lệnh' }).click();
+
+    // Phát hành (DRAFT → ISSUED).
+    await page.getByRole('button', { name: 'Phát hành', exact: true }).click();
+    await expect(page.getByText('Đã phát hành').first()).toBeVisible({ timeout: 15_000 });
+
+    // Thêm yêu cầu vật chất → xuất hiện nút "Phân giao" của dòng yêu cầu.
+    await page.getByPlaceholder('material_catalog_id').fill(randomUUID());
+    await page.locator('input[type=number]').first().fill('100');
+    await page.getByRole('button', { name: 'Thêm yêu cầu' }).click();
+    await expect(page.getByRole('button', { name: 'Phân giao' }).first()).toBeVisible({ timeout: 15_000 });
+  });
 });

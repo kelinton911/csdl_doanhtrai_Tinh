@@ -72,6 +72,34 @@ export interface CommandItem {
   status: string;
 }
 
+export interface Requirement {
+  id: string;
+  commandId: string;
+  materialCatalogId: string;
+  requiredQty: string;
+  unitId: string | null;
+  deadline: string | null;
+  normSetVersionId: string | null;
+  materialNormId: string | null;
+}
+
+export interface Assignment {
+  id: string;
+  requirementId: string;
+  organizationId: string;
+  allocatedQty: string;
+  deadline: string | null;
+}
+
+export interface Progress {
+  id: string;
+  assignmentId: string;
+  reportedQty: string;
+  status: string;
+  reportedAt: string | null;
+  note: string | null;
+}
+
 export interface ResolveScope {
   org?: string;
   territory?: string;
@@ -224,6 +252,30 @@ export function useLegacyNorms() {
   });
 }
 
+export function useRequirements(commandId: string | undefined) {
+  return useQuery({
+    enabled: !!commandId,
+    queryKey: ['dt07', 'requirements', commandId],
+    queryFn: async () => (await api.get<Requirement[]>(`/commands/${commandId}/requirements`)).data,
+  });
+}
+
+export function useAssignments(requirementId: string | undefined) {
+  return useQuery({
+    enabled: !!requirementId,
+    queryKey: ['dt07', 'assignments', requirementId],
+    queryFn: async () => (await api.get<Assignment[]>(`/command-requirements/${requirementId}/assignments`)).data,
+  });
+}
+
+export function useProgress(assignmentId: string | undefined) {
+  return useQuery({
+    enabled: !!assignmentId,
+    queryKey: ['dt07', 'progress', assignmentId],
+    queryFn: async () => (await api.get<Progress[]>(`/command-assignments/${assignmentId}/progress`)).data,
+  });
+}
+
 // ---- Actions (ghi) ----
 export async function resolveNorm(body: {
   materialCatalogId: string;
@@ -280,5 +332,34 @@ export interface ImportRow {
 
 export async function importNorms(body: { fileName: string; fileHash: string; normSetVersionId?: string; rows: ImportRow[] }) {
   return (await api.post<{ batch: { id: string; totalRows: number; validRows: number; errorRows: number; status: string }; created: number }>('/norms/import', body)).data;
+}
+
+// Upload file .xlsx/.csv thật (parse server-side, file_hash = sha256).
+export async function uploadNormsFile(file: File, normSetVersionId?: string) {
+  const fd = new FormData();
+  fd.append('file', file);
+  if (normSetVersionId) fd.append('normSetVersionId', normSetVersionId);
+  return (await api.post<{ batch: { id: string; totalRows: number; validRows: number; errorRows: number; status: string }; created: number }>('/norms/import-file', fd)).data;
+}
+
+// ---- Chỉ lệnh hậu cần (SCR-DT07-07) ----
+export async function createCommand(body: { commandNo?: string; title: string; issuingAuthority: string; effectiveDate?: string }) {
+  return (await api.post<CommandItem>('/commands', body)).data;
+}
+
+export async function transitionCommand(id: string, action: 'issue' | 'start' | 'complete') {
+  return (await api.post<CommandItem>(`/commands/${id}/${action}`, {})).data;
+}
+
+export async function addRequirement(commandId: string, body: { materialCatalogId: string; requiredQty: number; unitId?: string; deadline?: string }) {
+  return (await api.post<Requirement>(`/commands/${commandId}/requirements`, body)).data;
+}
+
+export async function addAssignment(requirementId: string, body: { organizationId: string; allocatedQty: number; deadline?: string }) {
+  return (await api.post<Assignment>(`/command-requirements/${requirementId}/assignments`, body)).data;
+}
+
+export async function addProgress(assignmentId: string, body: { reportedQty: number; status?: string; note?: string }) {
+  return (await api.post<Progress>(`/command-assignments/${assignmentId}/progress`, body)).data;
 }
 

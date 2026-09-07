@@ -71,6 +71,9 @@ const MAP: Record<string, { label: string; tone: Tone; icon: IconName }> = {
   LOCKED_ACCOUNT: { label: 'Đã khóa', tone: 'danger', icon: 'lock' },
   EXPIRED: { label: 'Hết hạn', tone: 'danger', icon: 'alert' },
   PUBLISHED: { label: 'Đã phát hành', tone: 'ok', icon: 'check' },
+  // Chỉ lệnh hậu cần DT-07
+  ISSUED: { label: 'Đã phát hành', tone: 'ok', icon: 'check' },
+  COMPLETED: { label: 'Hoàn thành', tone: 'ok', icon: 'check' },
 };
 
 export function StatusBadge({ status }: { status: string | null | undefined }) {

@@ -10,14 +10,21 @@ import {
   DIMENSION_LABEL,
   RESOLVE_STATUS_LABEL,
   SOURCE_STATUS_LABEL,
+  addAssignment,
   addMaterialNorm,
   addNormScopes,
+  addProgress,
+  addRequirement,
+  createCommand,
   createNormSet,
   createNormSetVersion,
   importNorms,
   publishSetVersion,
   resolveConflict,
   resolveNorm,
+  transitionCommand,
+  uploadNormsFile,
+  useAssignments,
   useCalcParams,
   useCommands,
   useConflicts,
@@ -25,9 +32,13 @@ import {
   useNorms,
   useNormDocuments,
   useNormSets,
+  useProgress,
+  useRequirements,
   useSetVersions,
+  type CommandItem,
   type ImportRow,
   type MaterialNorm,
+  type Requirement,
   type ResolveResult,
   type ResolveScope,
 } from '../lib/norms';
@@ -429,29 +440,187 @@ function ConflictsTab({ onInspect }: { onInspect: (material: string, semantic: s
   );
 }
 
-// ============================ Chỉ lệnh ============================
+// ============================ Chỉ lệnh (SCR-DT07-07) ============================
+const COMMAND_ACTIONS: Record<string, { action: 'issue' | 'start' | 'complete'; label: string }> = {
+  DRAFT: { action: 'issue', label: 'Phát hành' },
+  ISSUED: { action: 'start', label: 'Bắt đầu' },
+  IN_PROGRESS: { action: 'complete', label: 'Hoàn thành' },
+};
+
 function CommandsTab() {
+  const qc = useQueryClient();
   const commands = useCommands();
-  if (commands.isLoading) return <Skeleton rows={5} />;
-  if (commands.error) return <ErrorState error={commands.error} />;
+  const [selId, setSelId] = useState<string>();
+  const [form, setForm] = useState({ title: '', issuingAuthority: '', effectiveDate: '' });
+
+  const invCmds = () => qc.invalidateQueries({ queryKey: ['dt07', 'commands'] });
+  const mCreate = useMutation({
+    mutationFn: () => createCommand({ title: form.title.trim(), issuingAuthority: form.issuingAuthority.trim(), effectiveDate: form.effectiveDate || undefined }),
+    onSuccess: (c) => { toast.success(`Đã tạo chỉ lệnh ${c.commandNo}.`); setForm({ title: '', issuingAuthority: '', effectiveDate: '' }); invCmds(); setSelId(c.id); },
+    onError: (e) => toast.problem(e),
+  });
+
   const list = commands.data?.data ?? [];
-  if (list.length === 0) return <EmptyState icon="clipboard" title="Chưa có chỉ lệnh" hint="Tạo qua API /commands." />;
+  const selected = list.find((c) => c.id === selId);
+
   return (
-    <div className="panel" style={{ padding: 14 }}>
-      <table className="table" style={{ width: '100%', fontSize: 13 }}>
-        <thead><tr><th style={{ textAlign: 'left' }}>Số chỉ lệnh</th><th style={{ textAlign: 'left' }}>Tiêu đề</th><th style={{ textAlign: 'left' }}>Cơ quan</th><th style={{ textAlign: 'left' }}>Hiệu lực</th><th>Trạng thái</th></tr></thead>
-        <tbody>
+    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 16, alignItems: 'start' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="panel" style={{ padding: 14 }}>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>Chỉ lệnh mới</div>
+          <input className="input" placeholder="Tiêu đề" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} style={{ width: '100%', marginBottom: 6 }} />
+          <input className="input" placeholder="Cơ quan ban hành" value={form.issuingAuthority} onChange={(e) => setForm({ ...form, issuingAuthority: e.target.value })} style={{ width: '100%', marginBottom: 6 }} />
+          <label className="form-label">Hiệu lực từ</label>
+          <input className="input" type="date" value={form.effectiveDate} onChange={(e) => setForm({ ...form, effectiveDate: e.target.value })} style={{ width: '100%', marginBottom: 8 }} />
+          <button className="btn btn-primary" disabled={!form.title.trim() || !form.issuingAuthority.trim() || mCreate.isPending} onClick={() => mCreate.mutate()} style={{ width: '100%' }}>Tạo chỉ lệnh</button>
+        </div>
+        <div className="panel" style={{ padding: 8 }}>
+          <div className="eyebrow" style={{ padding: '4px 6px' }}>Danh sách</div>
+          {commands.isLoading && <Skeleton rows={4} />}
           {list.map((c) => (
-            <tr key={c.id}>
-              <td className="num">{c.commandNo}</td>
-              <td>{c.title}</td>
-              <td>{c.issuingAuthority}</td>
-              <td className="muted">{c.effectiveDate ?? '—'}</td>
-              <td style={{ textAlign: 'center' }}><StatusBadge status={c.status} /></td>
+            <button key={c.id} className="btn" onClick={() => setSelId(c.id)} style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 4, background: selId === c.id ? 'var(--color-neutral-200)' : undefined }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 6 }}><span style={{ fontWeight: 700, fontSize: 12.5 }}>{c.commandNo}</span><StatusBadge status={c.status} /></div>
+              <div className="muted" style={{ fontSize: 12 }}>{c.title}</div>
+            </button>
+          ))}
+          {!commands.isLoading && list.length === 0 && <div className="muted" style={{ padding: 8, fontSize: 12.5 }}>Chưa có chỉ lệnh.</div>}
+        </div>
+      </div>
+
+      <div>
+        {!selected ? <EmptyState icon="clipboard" title="Chọn hoặc tạo chỉ lệnh" hint="Chọn chỉ lệnh để quản lý yêu cầu vật chất, phân giao và tiến độ." /> : <CommandDetail command={selected} onChanged={invCmds} />}
+      </div>
+    </div>
+  );
+}
+
+function CommandDetail({ command, onChanged }: { command: CommandItem; onChanged: () => void }) {
+  const qc = useQueryClient();
+  const reqs = useRequirements(command.id);
+  const [reqForm, setReqForm] = useState({ materialCatalogId: '', requiredQty: '', deadline: '' });
+  const [openReq, setOpenReq] = useState<string>();
+
+  const act = COMMAND_ACTIONS[command.status];
+  const mTransition = useMutation({
+    mutationFn: () => transitionCommand(command.id, act.action),
+    onSuccess: () => { toast.success(`Đã ${act.label.toLowerCase()} chỉ lệnh.`); onChanged(); },
+    onError: (e) => toast.problem(e),
+  });
+  const mReq = useMutation({
+    mutationFn: () => addRequirement(command.id, { materialCatalogId: reqForm.materialCatalogId.trim(), requiredQty: Number(reqForm.requiredQty), deadline: reqForm.deadline || undefined }),
+    onSuccess: () => { toast.success('Đã thêm yêu cầu vật chất.'); setReqForm({ materialCatalogId: '', requiredQty: '', deadline: '' }); qc.invalidateQueries({ queryKey: ['dt07', 'requirements', command.id] }); },
+    onError: (e) => toast.problem(e),
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="panel" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 16 }}>{command.commandNo}</div>
+            <div style={{ fontSize: 14 }}>{command.title}</div>
+            <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>{command.issuingAuthority} · hiệu lực {command.effectiveDate ?? '—'}</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <StatusBadge status={command.status} />
+            {act && <button className="btn btn-primary" disabled={mTransition.isPending} onClick={() => mTransition.mutate()}>{act.label}</button>}
+          </div>
+        </div>
+      </div>
+
+      <div className="panel" style={{ padding: 14 }}>
+        <div className="eyebrow" style={{ marginBottom: 8 }}>Yêu cầu vật chất (gắn định mức PUBLISHED tại effective_date — BR-DT07-031)</div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 10, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 200 }}><label className="form-label">Mã vật chất (UUID)</label><input className="input" value={reqForm.materialCatalogId} onChange={(e) => setReqForm({ ...reqForm, materialCatalogId: e.target.value })} placeholder="material_catalog_id" style={{ width: '100%' }} /></div>
+          <div><label className="form-label">Số lượng</label><input className="input" type="number" value={reqForm.requiredQty} onChange={(e) => setReqForm({ ...reqForm, requiredQty: e.target.value })} style={{ width: 100 }} /></div>
+          <div><label className="form-label">Hạn</label><input className="input" type="date" value={reqForm.deadline} onChange={(e) => setReqForm({ ...reqForm, deadline: e.target.value })} /></div>
+          <button className="btn" disabled={!reqForm.materialCatalogId.trim() || !reqForm.requiredQty || mReq.isPending} onClick={() => mReq.mutate()}>Thêm yêu cầu</button>
+        </div>
+        <table className="table" style={{ width: '100%', fontSize: 12.5 }}>
+          <thead><tr><th style={{ textAlign: 'left' }}>Vật chất</th><th style={{ textAlign: 'right' }}>SL</th><th style={{ textAlign: 'left' }}>Hạn</th><th>Định mức gắn</th><th></th></tr></thead>
+          <tbody>
+            {(reqs.data ?? []).map((r) => (
+              <tr key={r.id} style={{ background: openReq === r.id ? 'var(--color-neutral-100)' : undefined }}>
+                <td className="num">{r.materialCatalogId.slice(0, 8)}…</td>
+                <td style={{ textAlign: 'right' }} className="num">{Number(r.requiredQty)}</td>
+                <td className="muted">{r.deadline ?? '—'}</td>
+                <td style={{ textAlign: 'center' }}>{r.materialNormId ? <span style={{ color: 'var(--ok-fg)', fontSize: 11.5 }}>✓ đã gắn</span> : <span className="muted" style={{ fontSize: 11.5 }}>—</span>}</td>
+                <td style={{ textAlign: 'right' }}><button className="btn" style={{ padding: '2px 8px' }} onClick={() => setOpenReq(openReq === r.id ? undefined : r.id)}>{openReq === r.id ? 'Ẩn' : 'Phân giao'}</button></td>
+              </tr>
+            ))}
+            {(reqs.data ?? []).length === 0 && <tr><td colSpan={5} className="muted">Chưa có yêu cầu.</td></tr>}
+          </tbody>
+        </table>
+        {openReq && <RequirementDetail requirementId={openReq} />}
+      </div>
+    </div>
+  );
+}
+
+function RequirementDetail({ requirementId }: { requirementId: string }) {
+  const qc = useQueryClient();
+  const assigns = useAssignments(requirementId);
+  const [form, setForm] = useState({ organizationId: '', allocatedQty: '', deadline: '' });
+  const [openAssign, setOpenAssign] = useState<string>();
+
+  const mAssign = useMutation({
+    mutationFn: () => addAssignment(requirementId, { organizationId: form.organizationId.trim(), allocatedQty: Number(form.allocatedQty), deadline: form.deadline || undefined }),
+    onSuccess: () => { toast.success('Đã phân giao.'); setForm({ organizationId: '', allocatedQty: '', deadline: '' }); qc.invalidateQueries({ queryKey: ['dt07', 'assignments', requirementId] }); },
+    onError: (e) => toast.problem(e),
+  });
+
+  return (
+    <div style={{ marginTop: 10, paddingLeft: 12, borderLeft: '2px solid var(--color-neutral-300)' }}>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>Phân giao đơn vị</div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 8, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 180 }}><label className="form-label">Đơn vị (UUID)</label><input className="input" value={form.organizationId} onChange={(e) => setForm({ ...form, organizationId: e.target.value })} placeholder="organization_id" style={{ width: '100%' }} /></div>
+        <div><label className="form-label">SL cấp</label><input className="input" type="number" value={form.allocatedQty} onChange={(e) => setForm({ ...form, allocatedQty: e.target.value })} style={{ width: 100 }} /></div>
+        <button className="btn" disabled={!form.organizationId.trim() || !form.allocatedQty || mAssign.isPending} onClick={() => mAssign.mutate()}>Phân giao</button>
+      </div>
+      <table className="table" style={{ width: '100%', fontSize: 12 }}>
+        <thead><tr><th style={{ textAlign: 'left' }}>Đơn vị</th><th style={{ textAlign: 'right' }}>SL cấp</th><th style={{ textAlign: 'left' }}>Hạn</th><th></th></tr></thead>
+        <tbody>
+          {(assigns.data ?? []).map((a) => (
+            <tr key={a.id} style={{ background: openAssign === a.id ? 'var(--color-neutral-100)' : undefined }}>
+              <td className="num">{a.organizationId.slice(0, 8)}…</td>
+              <td style={{ textAlign: 'right' }} className="num">{Number(a.allocatedQty)}</td>
+              <td className="muted">{a.deadline ?? '—'}</td>
+              <td style={{ textAlign: 'right' }}><button className="btn" style={{ padding: '2px 8px' }} onClick={() => setOpenAssign(openAssign === a.id ? undefined : a.id)}>{openAssign === a.id ? 'Ẩn' : 'Tiến độ'}</button></td>
             </tr>
           ))}
+          {(assigns.data ?? []).length === 0 && <tr><td colSpan={4} className="muted">Chưa phân giao.</td></tr>}
         </tbody>
       </table>
+      {openAssign && <AssignmentProgress assignmentId={openAssign} />}
+    </div>
+  );
+}
+
+function AssignmentProgress({ assignmentId }: { assignmentId: string }) {
+  const qc = useQueryClient();
+  const prog = useProgress(assignmentId);
+  const [form, setForm] = useState({ reportedQty: '', note: '' });
+
+  const mProg = useMutation({
+    mutationFn: () => addProgress(assignmentId, { reportedQty: Number(form.reportedQty), note: form.note || undefined }),
+    onSuccess: () => { toast.success('Đã cập nhật tiến độ.'); setForm({ reportedQty: '', note: '' }); qc.invalidateQueries({ queryKey: ['dt07', 'progress', assignmentId] }); },
+    onError: (e) => toast.problem(e),
+  });
+
+  return (
+    <div style={{ marginTop: 8, paddingLeft: 12, borderLeft: '2px solid var(--color-neutral-300)' }}>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>Tiến độ thực hiện</div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 8, flexWrap: 'wrap' }}>
+        <div><label className="form-label">SL báo cáo</label><input className="input" type="number" value={form.reportedQty} onChange={(e) => setForm({ ...form, reportedQty: e.target.value })} style={{ width: 110 }} /></div>
+        <div style={{ flex: 1, minWidth: 160 }}><label className="form-label">Ghi chú</label><input className="input" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} style={{ width: '100%' }} /></div>
+        <button className="btn" disabled={!form.reportedQty || mProg.isPending} onClick={() => mProg.mutate()}>Cập nhật</button>
+      </div>
+      <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5 }}>
+        {(prog.data ?? []).map((p) => (
+          <li key={p.id} className="muted">{Number(p.reportedQty)} · {p.status}{p.note ? ` — ${p.note}` : ''} {p.reportedAt && <span>({dateTime(p.reportedAt)})</span>}</li>
+        ))}
+        {(prog.data ?? []).length === 0 && <li className="muted">Chưa có báo cáo tiến độ.</li>}
+      </ul>
     </div>
   );
 }
@@ -537,6 +706,11 @@ function EditTab() {
     mutationFn: () => importNorms({ fileName: 'paste.csv', fileHash: `ui-${simpleHash(csv)}-${Date.now()}`, normSetVersionId: versionId, rows: parseCsv(csv) }),
     onSuccess: (r) => { toast.success(`Đã nhập ${r.created} định mức (DRAFT/LEGACY).`); setCsv(''); invNorms(); qc.invalidateQueries({ queryKey: ['dt07', 'legacy'] }); },
     onError: (e) => toast.problem(e),
+  });
+  const mUpload = useMutation({
+    mutationFn: (file: File) => uploadNormsFile(file, versionId),
+    onSuccess: (r) => { toast.success(`Đã nhập ${r.created}/${r.batch.totalRows} dòng từ file (DRAFT/LEGACY).`); invNorms(); qc.invalidateQueries({ queryKey: ['dt07', 'legacy'] }); },
+    onError: (e) => toast.problem(e, 'Không nhập được file'),
   });
 
   const setList = sets.data?.data ?? [];
@@ -637,10 +811,18 @@ function EditTab() {
             </div>
 
             <div className="panel" style={{ padding: 14 }}>
-              <div className="eyebrow" style={{ marginBottom: 8 }}>Nhập nhanh từ CSV (→ DRAFT/LEGACY)</div>
-              <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>Mỗi dòng: <code>materialCatalogId,semanticParam,valueNumeric,rawValue</code></div>
-              <textarea className="input" value={csv} onChange={(e) => setCsv(e.target.value)} rows={5} style={{ width: '100%', fontFamily: 'monospace', fontSize: 12 }} placeholder="uuid,CONSUMPTION_COMBAT,12,12 lít/xe/ngày" />
-              <button className="btn btn-primary" disabled={!csv.trim() || mImport.isPending} onClick={() => mImport.mutate()} style={{ marginTop: 8 }}>Nhập {parseCsv(csv).length ? `(${parseCsv(csv).length} dòng)` : ''}</button>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>Nhập từ file .xlsx / .csv (→ DRAFT/LEGACY)</div>
+              <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>Cột: <code>materialCatalogId, semanticParam, valueNumeric, rawValue, unitId</code> (có/không header đều được). Parse phía máy chủ, file_hash = sha256.</div>
+              <input
+                type="file"
+                accept=".xlsx,.csv"
+                disabled={mUpload.isPending}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) { mUpload.mutate(f); e.target.value = ''; } }}
+                style={{ fontSize: 13, marginBottom: 12 }}
+              />
+              <div className="eyebrow" style={{ marginBottom: 6 }}>Hoặc dán nhanh CSV</div>
+              <textarea className="input" value={csv} onChange={(e) => setCsv(e.target.value)} rows={4} style={{ width: '100%', fontFamily: 'monospace', fontSize: 12 }} placeholder="uuid,CONSUMPTION_COMBAT,12,12 lít/xe/ngày" />
+              <button className="btn btn-primary" disabled={!csv.trim() || mImport.isPending} onClick={() => mImport.mutate()} style={{ marginTop: 8 }}>Nhập CSV {parseCsv(csv).length ? `(${parseCsv(csv).length} dòng)` : ''}</button>
             </div>
           </>
         )}
