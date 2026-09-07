@@ -316,6 +316,30 @@ ngầm 0 → biên tập LEGACY → publish → màn Legacy → resolve NO_RULE;
 | 7 | Workflow scenario + LOCK bất biến; clone/revision khi dữ liệu nguồn đổi | BR-DT08-011/012 | Cao |
 | 8 | So sánh scenario (delta NC + nguyên nhân) | §XIX | TB |
 
+**Đã làm (2026-09-07) — module `dt08-calculation`, engine `dt08-need-v1`:**
+
+- 7 bảng: `calculation_scenario` (scope_json + effective_time + engine_version + revision_no +
+  status DRAFT→CALCULATED→LOCKED + based_on_id + hc_snapshot_id), `calculation_run`
+  (input_hash/output_hash + line/exception count), `material_calculation` (TT_GĐCB/TT_GĐCĐ/TT/
+  PC_SSCĐ/HC/NC/supply_required **lưu riêng**, nullable; rule_status + hc_status),
+  `rule_resolution_snapshot`, `hc_snapshot_ref`, `calculation_trace_node`, `scenario_comparison`.
+- Công thức lõi (hàm thuần, 16 unit test): **TT = TT_GĐCB + TT_GĐCĐ**; **NC = TT + PC_SSCĐ − HC**
+  (âm giữ dấu — BR-DT08-004); **supply_required = max(NC,0)** dẫn xuất (BR-DT08-006).
+- Engine gọi DT-07 `resolve` theo giai đoạn (CONSUMPTION_PREPARATION/COMBAT) → lưu
+  `rule_resolution_snapshot`; NO_RULE/CONFLICT **đánh dấu dòng, không quy 0** (BR-DT08-008). HC lấy
+  từ `hc_snapshot` DT-04 (as-of), thiếu → **NO_HC_SNAPSHOT** (không đọc số dư sống — BR-DT08-021).
+  PC_SSCĐ từ DT-06 `reserveSscd`.
+- input_hash/output_hash + engine_version → **tái lập** (BR-DT08-016/017); LOCK bất biến, revise=clone
+  (BR-DT08-011/012); trace tới nguồn (NORM/RESERVE/HC/FORMULA — BR-DT08-024); so sánh ΔNC
+  (`scenario_comparison`); `GET /runs/{id}/supply-required` cấp cho DT-09; `/runs/{id}/exceptions`.
+- API `/calculation-scenarios` (+`/{id}/run|revise|lock|runs`), `/runs/{id}` (+`/materials`,
+  `/materials/{mid}/trace`, `/supply-required`, `/exceptions`), `/runs/compare?base=&target=`.
+- **Webapp** CalculationPage `/calculation` 3 tab: Kịch bản & chạy (SCR-01/02/07), Bảng kết quả NC +
+  trace + ngoại lệ (SCR-03/04/05), So sánh ΔNC (SCR-06).
+- **Test:** 16 unit + 4 integration (DB thật, `test:int`) + 1 E2E Playwright — **Migration áp 5435 & 5436.**
+
+**DoD DT-08 hoàn tất** — cấp `supply_required` cho DT-09.
+
 ---
 
 ## DT-09 — Nguồn địa bàn & cân đối (Quyển IX)
@@ -439,7 +463,7 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | DT-05 | ◑ | 2026-09-06 | (chưa commit) | Backend chứng từ (5 bảng + 18 API + POST nguyên tử + transfer + khóa kỳ, 10 test) + **webapp** InventoryDocumentsPage (chứng từ/dòng/duyệt-POST/truy vết + điều chuyển + khóa kỳ). Chờ: recall/disposal, E2E. |
 | DT-06 | ◑ | 2026-09-06 | (chưa commit) | Backend phân bổ: 10 bảng + 19 API + Σ exclusive ≤ HC_ALLOCATABLE + PC_SSCĐ cho DT-08 + snapshot lock; 9 unit test PASS. Chờ: ràng buộc realtime DT-05↔hold, webapp, E2E. |
 | DT-07 | **PASS** | 2026-09-07 | 48363e6·96502a9·8490d2b·5d9f70f·d67c6a7·8266960·e11d127 | Backend định mức có căn cứ: 17 bảng + migration + `resolveNorm` deterministic (SELECTED/NO_RULE/CONFLICT + trace, không ngầm 0) + `/norms/resolve` cho DT-08 + norm_conflict_case + publish bất biến + import→DRAFT/LEGACY + **import-file .xlsx/.csv thật (exceljs, sha256)** + authority_rank version + chỉ lệnh đầy đủ (yêu cầu/phân giao/tiến độ) + `/norms/legacy`. **Test:** 174 unit + **7 integration** (DB thật, `test:int`) + **2 E2E** Playwright (PASS backend thật). **Migration+seed áp 5435 & 5436.** **Webapp** NormsPage `/norms` 7 tab phủ đủ SCR-DT07-01..08 (resolve+trace, bộ định mức+publish, biên tập/upload .xlsx/CSV, xung đột, chỉ lệnh master-detail, văn bản, legacy). |
-| DT-08 | ☐ | | | |
+| DT-08 | **PASS** | 2026-09-07 | (đang commit) | Engine tính nhu cầu `dt08-need-v1`: 7 bảng (calculation_scenario/run + material_calculation lưu riêng TT_GĐCB/TT_GĐCĐ/TT/PC_SSCĐ/HC/NC/supply_required + rule_resolution_snapshot + hc_snapshot_ref + calculation_trace_node + scenario_comparison) + **NC = TT + PC_SSCĐ − HC** (âm giữ dấu; supply_required=max(NC,0) dẫn xuất, không quy 0) kết hợp DT-07 `resolve` + HC as-of hc_snapshot DT-04 (thiếu→NO_HC_SNAPSHOT) + PC_SSCĐ DT-06 + NO_RULE/CONFLICT đánh dấu (không auto chọn) + input/output_hash tái lập + LOCK bất biến (revise=clone) + trace tới nguồn + so sánh ΔNC + `/runs/{id}/supply-required` cho DT-09 + `/runs/{id}/exceptions`. **Test:** 16 unit + **4 integration** (DB thật) + **1 E2E** Playwright (PASS backend thật). **Migration áp 5435 & 5436.** **Webapp** CalculationPage `/calculation` 3 tab phủ SCR-DT08-01..07 (kịch bản+chạy+khóa, bảng NC+trace+ngoại lệ, so sánh ΔNC). |
 | DT-09 | ☐ | | | |
 | DT-10 | ☐ | | | |
 | DT-11 | ☐ | | | |

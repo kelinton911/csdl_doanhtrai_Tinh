@@ -74,6 +74,14 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   biến + nhập file .xlsx/.csv thật (exceljs, sha256) → DRAFT/LEGACY_UNVERIFIED + chỉ lệnh đầy đủ
   (yêu cầu/phân giao/tiến độ) + **webapp** NormsPage `/norms` 7 tab (SCR-01..08) + test 174 unit /
   7 integration (DB thật) / 2 E2E Playwright — **DoD PASS**.
+- **DT-08 Tính nhu cầu vật chất** ◑ (2026-09-07): 7 bảng (calculation_scenario/calculation_run/
+  material_calculation/rule_resolution_snapshot/hc_snapshot_ref/calculation_trace_node/scenario_comparison)
+  + engine `dt08-need-v1` tính **NC = TT + PC_SSCĐ − HC** (TT_GĐCB/TT_GĐCĐ lưu riêng; NC âm giữ dấu;
+  `supply_required = max(NC,0)` dẫn xuất — không ngầm 0) kết hợp DT-07 `resolve` + HC as-of
+  `hc_snapshot` (DT-04, thiếu → NO_HC_SNAPSHOT) + PC_SSCĐ (DT-06); NO_RULE/CONFLICT đánh dấu dòng
+  (không auto chọn) + input/output_hash tái lập + LOCK bất biến (revise=clone) + trace tới nguồn
+  + so sánh ΔNC + `GET /runs/{id}/supply-required` cho DT-09 + **webapp** CalculationPage `/calculation`
+  3 tab (SCR-01..07) + test 16 unit / 4 integration (DB thật) / 1 E2E Playwright — **DoD PASS**.
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),
