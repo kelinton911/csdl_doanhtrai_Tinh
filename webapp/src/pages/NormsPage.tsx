@@ -10,28 +10,37 @@ import {
   DIMENSION_LABEL,
   RESOLVE_STATUS_LABEL,
   SOURCE_STATUS_LABEL,
+  addMaterialNorm,
+  addNormScopes,
+  createNormSet,
+  createNormSetVersion,
+  importNorms,
   publishSetVersion,
   resolveConflict,
   resolveNorm,
   useCalcParams,
   useCommands,
   useConflicts,
+  useLegacyNorms,
   useNorms,
   useNormDocuments,
   useNormSets,
   useSetVersions,
+  type ImportRow,
   type MaterialNorm,
   type ResolveResult,
   type ResolveScope,
 } from '../lib/norms';
 
-type Tab = 'resolve' | 'sets' | 'conflicts' | 'commands' | 'docs';
+type Tab = 'resolve' | 'sets' | 'edit' | 'conflicts' | 'commands' | 'docs' | 'legacy';
 const TABS: Array<{ key: Tab; label: string; icon: IconName }> = [
   { key: 'resolve', label: 'Thử chọn định mức', icon: 'target' },
   { key: 'sets', label: 'Bộ định mức', icon: 'grid' },
+  { key: 'edit', label: 'Biên tập & nhập', icon: 'upload' },
   { key: 'conflicts', label: 'Xung đột', icon: 'alert' },
   { key: 'commands', label: 'Chỉ lệnh hậu cần', icon: 'clipboard' },
   { key: 'docs', label: 'Văn bản căn cứ', icon: 'file' },
+  { key: 'legacy', label: 'Legacy chưa xác minh', icon: 'lock' },
 ];
 
 export function NormsPage() {
@@ -68,9 +77,11 @@ export function NormsPage() {
 
       {tab === 'resolve' && <ResolveTab prefill={prefill} />}
       {tab === 'sets' && <SetsTab onPickNorm={goResolve} />}
+      {tab === 'edit' && <EditTab />}
       {tab === 'conflicts' && <ConflictsTab onInspect={goResolve} />}
       {tab === 'commands' && <CommandsTab />}
       {tab === 'docs' && <DocsTab />}
+      {tab === 'legacy' && <LegacyTab />}
     </div>
   );
 }
@@ -441,6 +452,258 @@ function CommandsTab() {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+// ============================ Biên tập & nhập (SCR-DT07-04) ============================
+const DIMENSION_TYPES = ['ORG', 'TERRITORY', 'MISSION', 'PHASE', 'QUALITY', 'SCALE', 'TIME'];
+
+function simpleHash(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(16);
+}
+
+// CSV mỗi dòng: materialCatalogId,semanticParam,valueNumeric,rawValue
+function parseCsv(text: string): ImportRow[] {
+  return text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'))
+    .map((l) => {
+      const [materialCatalogId, semanticParam, valueNumeric, ...rest] = l.split(',').map((c) => c.trim());
+      return {
+        materialCatalogId,
+        semanticParam,
+        valueNumeric: valueNumeric ? Number(valueNumeric) : undefined,
+        rawValue: rest.join(',') || undefined,
+      } as ImportRow;
+    })
+    .filter((r) => r.materialCatalogId && r.semanticParam);
+}
+
+function EditTab() {
+  const qc = useQueryClient();
+  const sets = useNormSets();
+  const params = useCalcParams();
+  const [setId, setSetId] = useState<string>();
+  const versions = useSetVersions(setId);
+  const [versionId, setVersionId] = useState<string>();
+  const norms = useNorms(versionId);
+
+  const [setForm, setSetForm] = useState({ setCode: '', name: '' });
+  const [verForm, setVerForm] = useState({ versionLabel: '', effectiveFrom: '' });
+  const [nm, setNm] = useState({ materialCatalogId: '', semanticParam: 'CONSUMPTION_COMBAT', valueNumeric: '', rawValue: '', sourceReferenceId: '' });
+  const [csv, setCsv] = useState('');
+  const [scope, setScope] = useState({ normId: '', dimensionType: 'MISSION', dimensionValue: '' });
+
+  const invSets = () => qc.invalidateQueries({ queryKey: ['dt07', 'sets'] });
+  const invVers = () => qc.invalidateQueries({ queryKey: ['dt07', 'set-versions', setId] });
+  const invNorms = () => qc.invalidateQueries({ queryKey: ['dt07', 'norms', versionId] });
+
+  const mSet = useMutation({
+    mutationFn: () => createNormSet({ setCode: setForm.setCode.trim(), name: setForm.name.trim() }),
+    onSuccess: (s) => { toast.success('Đã tạo bộ định mức.'); setSetForm({ setCode: '', name: '' }); invSets(); setSetId(s.id); },
+    onError: (e) => toast.problem(e),
+  });
+  const mVer = useMutation({
+    mutationFn: () => createNormSetVersion(setId as string, { versionLabel: verForm.versionLabel.trim(), effectiveFrom: verForm.effectiveFrom || undefined }),
+    onSuccess: (v) => { toast.success('Đã tạo phiên bản (DRAFT).'); setVerForm({ versionLabel: '', effectiveFrom: '' }); invVers(); setVersionId(v.id); },
+    onError: (e) => toast.problem(e),
+  });
+  const mPublish = useMutation({
+    mutationFn: (id: string) => publishSetVersion(id),
+    onSuccess: () => { toast.success('Đã công bố (bất biến).'); invVers(); },
+    onError: (e) => toast.problem(e),
+  });
+  const mNorm = useMutation({
+    mutationFn: () => addMaterialNorm(versionId as string, {
+      materialCatalogId: nm.materialCatalogId.trim(),
+      semanticParam: nm.semanticParam,
+      valueNumeric: nm.valueNumeric ? Number(nm.valueNumeric) : undefined,
+      rawValue: nm.rawValue || undefined,
+      sourceReferenceId: nm.sourceReferenceId.trim() || undefined,
+    }),
+    onSuccess: () => { toast.success(nm.sourceReferenceId ? 'Đã thêm định mức (VERIFIED).' : 'Đã thêm định mức (LEGACY — chưa căn cứ).'); setNm({ ...nm, materialCatalogId: '', valueNumeric: '', rawValue: '' }); invNorms(); },
+    onError: (e) => toast.problem(e),
+  });
+  const mScope = useMutation({
+    mutationFn: () => addNormScopes(scope.normId, [{ dimensionType: scope.dimensionType, dimensionValue: scope.dimensionValue.trim() }]),
+    onSuccess: () => { toast.success('Đã gắn chiều phạm vi.'); setScope({ ...scope, dimensionValue: '' }); },
+    onError: (e) => toast.problem(e),
+  });
+  const mImport = useMutation({
+    mutationFn: () => importNorms({ fileName: 'paste.csv', fileHash: `ui-${simpleHash(csv)}-${Date.now()}`, normSetVersionId: versionId, rows: parseCsv(csv) }),
+    onSuccess: (r) => { toast.success(`Đã nhập ${r.created} định mức (DRAFT/LEGACY).`); setCsv(''); invNorms(); qc.invalidateQueries({ queryKey: ['dt07', 'legacy'] }); },
+    onError: (e) => toast.problem(e),
+  });
+
+  const setList = sets.data?.data ?? [];
+  const selectedVer = (versions.data ?? []).find((v) => v.id === versionId);
+  const editable = selectedVer && (selectedVer.status === 'DRAFT' || selectedVer.status === 'VALIDATED');
+  const semanticOptions = params.data ?? [];
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 16, alignItems: 'start' }}>
+      {/* Cột trái: tạo & chọn bộ */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="panel" style={{ padding: 14 }}>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>Tạo bộ định mức</div>
+          <input className="input" placeholder="Mã bộ (set_code)" value={setForm.setCode} onChange={(e) => setSetForm({ ...setForm, setCode: e.target.value })} style={{ width: '100%', marginBottom: 6 }} />
+          <input className="input" placeholder="Tên bộ" value={setForm.name} onChange={(e) => setSetForm({ ...setForm, name: e.target.value })} style={{ width: '100%', marginBottom: 8 }} />
+          <button className="btn btn-primary" disabled={!setForm.setCode.trim() || !setForm.name.trim() || mSet.isPending} onClick={() => mSet.mutate()} style={{ width: '100%' }}>Tạo bộ</button>
+        </div>
+        <div className="panel" style={{ padding: 8 }}>
+          <div className="eyebrow" style={{ padding: '4px 6px' }}>Chọn bộ</div>
+          {setList.map((s) => (
+            <button key={s.id} className="btn" onClick={() => { setSetId(s.id); setVersionId(undefined); }} style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 4, background: setId === s.id ? 'var(--color-neutral-200)' : undefined }}>
+              <div style={{ fontWeight: 700, fontSize: 13 }}>{s.setCode}</div>
+              <div className="muted" style={{ fontSize: 12 }}>{s.name}</div>
+            </button>
+          ))}
+          {setList.length === 0 && <div className="muted" style={{ padding: 8, fontSize: 12.5 }}>Chưa có bộ nào.</div>}
+        </div>
+      </div>
+
+      {/* Cột phải: phiên bản + định mức + nhập */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {!setId && <EmptyState icon="grid" title="Chọn hoặc tạo bộ định mức" hint="Chọn bộ ở cột trái để thêm phiên bản và định mức." />}
+
+        {setId && (
+          <div className="panel" style={{ padding: 14 }}>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Phiên bản của bộ</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 10, flexWrap: 'wrap' }}>
+              <div><label className="form-label">Nhãn</label><input className="input" value={verForm.versionLabel} onChange={(e) => setVerForm({ ...verForm, versionLabel: e.target.value })} placeholder="v1" /></div>
+              <div><label className="form-label">Hiệu lực từ</label><input className="input" type="date" value={verForm.effectiveFrom} onChange={(e) => setVerForm({ ...verForm, effectiveFrom: e.target.value })} /></div>
+              <button className="btn btn-primary" disabled={!verForm.versionLabel.trim() || mVer.isPending} onClick={() => mVer.mutate()}>Tạo phiên bản</button>
+            </div>
+            <table className="table" style={{ width: '100%', fontSize: 13 }}>
+              <thead><tr><th style={{ textAlign: 'left' }}>Nhãn</th><th style={{ textAlign: 'left' }}>Hiệu lực</th><th>Trạng thái</th><th></th></tr></thead>
+              <tbody>
+                {(versions.data ?? []).map((v) => (
+                  <tr key={v.id} style={{ background: versionId === v.id ? 'var(--color-neutral-100)' : undefined }}>
+                    <td><button className="btn" style={{ padding: '2px 8px' }} onClick={() => setVersionId(v.id)}>{v.versionLabel}</button></td>
+                    <td className="muted">{v.effectiveFrom ?? '—'} → {v.effectiveTo ?? '…'}</td>
+                    <td style={{ textAlign: 'center' }}><StatusBadge status={v.status} /></td>
+                    <td style={{ textAlign: 'right' }}>{(v.status === 'DRAFT' || v.status === 'VALIDATED') && <button className="btn btn-primary" style={{ padding: '2px 10px' }} disabled={mPublish.isPending} onClick={() => mPublish.mutate(v.id)}>Công bố</button>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {versionId && !editable && <EmptyState icon="lock" title="Phiên bản đã công bố — bất biến" hint="Chỉ sửa/nhập được trên phiên bản DRAFT/VALIDATED. Tạo phiên bản mới để chỉnh sửa (BR-DT07-002)." />}
+
+        {versionId && editable && (
+          <>
+            <div className="panel" style={{ padding: 14 }}>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>Thêm định mức (biên tập)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+                <div style={{ gridColumn: '1 / span 2' }}><label className="form-label">Mã vật chất (UUID)</label><input className="input" value={nm.materialCatalogId} onChange={(e) => setNm({ ...nm, materialCatalogId: e.target.value })} placeholder="material_catalog_id" style={{ width: '100%' }} /></div>
+                <div><label className="form-label">Ngữ nghĩa</label>
+                  <select className="input" value={nm.semanticParam} onChange={(e) => setNm({ ...nm, semanticParam: e.target.value })} style={{ width: '100%' }}>
+                    {semanticOptions.map((p) => <option key={p.id} value={p.semanticParam}>{p.semanticParam}</option>)}
+                    {semanticOptions.length === 0 && <option value={nm.semanticParam}>{nm.semanticParam}</option>}
+                  </select>
+                </div>
+                <div><label className="form-label">Giá trị số</label><input className="input" type="number" value={nm.valueNumeric} onChange={(e) => setNm({ ...nm, valueNumeric: e.target.value })} style={{ width: '100%' }} /></div>
+                <div><label className="form-label">Giá trị gốc</label><input className="input" value={nm.rawValue} onChange={(e) => setNm({ ...nm, rawValue: e.target.value })} placeholder="15 lít/xe/ngày" style={{ width: '100%' }} /></div>
+                <div><label className="form-label">ID trích dẫn căn cứ (để VERIFIED)</label><input className="input" value={nm.sourceReferenceId} onChange={(e) => setNm({ ...nm, sourceReferenceId: e.target.value })} placeholder="source_reference_id" style={{ width: '100%' }} /></div>
+              </div>
+              <button className="btn btn-primary" disabled={!nm.materialCatalogId.trim() || mNorm.isPending} onClick={() => mNorm.mutate()}>Thêm định mức</button>
+              <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>Không nhập trích dẫn → định mức là LEGACY_UNVERIFIED, không dùng cho resolve (BR-DT07-026).</div>
+            </div>
+
+            <div className="panel" style={{ padding: 14 }}>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>Định mức trong phiên bản + gắn chiều phạm vi</div>
+              <NormsTableEditable norms={norms.data ?? []} />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginTop: 10, flexWrap: 'wrap' }}>
+                <div><label className="form-label">Định mức</label>
+                  <select className="input" value={scope.normId} onChange={(e) => setScope({ ...scope, normId: e.target.value })}>
+                    <option value="">— chọn —</option>
+                    {(norms.data ?? []).map((n) => <option key={n.id} value={n.id}>{n.id.slice(0, 8)}… · {n.semanticParam}</option>)}
+                  </select>
+                </div>
+                <div><label className="form-label">Chiều</label>
+                  <select className="input" value={scope.dimensionType} onChange={(e) => setScope({ ...scope, dimensionType: e.target.value })}>
+                    {DIMENSION_TYPES.map((d) => <option key={d} value={d}>{DIMENSION_LABEL[d] ?? d}</option>)}
+                  </select>
+                </div>
+                <div><label className="form-label">Giá trị</label><input className="input" value={scope.dimensionValue} onChange={(e) => setScope({ ...scope, dimensionValue: e.target.value })} placeholder="ATTACK" /></div>
+                <button className="btn" disabled={!scope.normId || !scope.dimensionValue.trim() || mScope.isPending} onClick={() => mScope.mutate()}>Gắn chiều</button>
+              </div>
+            </div>
+
+            <div className="panel" style={{ padding: 14 }}>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>Nhập nhanh từ CSV (→ DRAFT/LEGACY)</div>
+              <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>Mỗi dòng: <code>materialCatalogId,semanticParam,valueNumeric,rawValue</code></div>
+              <textarea className="input" value={csv} onChange={(e) => setCsv(e.target.value)} rows={5} style={{ width: '100%', fontFamily: 'monospace', fontSize: 12 }} placeholder="uuid,CONSUMPTION_COMBAT,12,12 lít/xe/ngày" />
+              <button className="btn btn-primary" disabled={!csv.trim() || mImport.isPending} onClick={() => mImport.mutate()} style={{ marginTop: 8 }}>Nhập {parseCsv(csv).length ? `(${parseCsv(csv).length} dòng)` : ''}</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NormsTableEditable({ norms }: { norms: MaterialNorm[] }) {
+  if (norms.length === 0) return <div className="muted" style={{ fontSize: 12.5 }}>Chưa có định mức trong phiên bản này.</div>;
+  return (
+    <table className="table" style={{ width: '100%', fontSize: 12.5 }}>
+      <thead><tr><th style={{ textAlign: 'left' }}>ID</th><th style={{ textAlign: 'left' }}>Vật chất</th><th style={{ textAlign: 'left' }}>Ngữ nghĩa</th><th style={{ textAlign: 'right' }}>Giá trị</th><th>Căn cứ</th></tr></thead>
+      <tbody>
+        {norms.map((n) => (
+          <tr key={n.id}>
+            <td className="num">{n.id.slice(0, 8)}…</td>
+            <td className="num">{n.materialCatalogId.slice(0, 8)}…</td>
+            <td>{n.semanticParam}</td>
+            <td style={{ textAlign: 'right' }} className="num">{n.valueNumeric ?? '—'}</td>
+            <td style={{ textAlign: 'center' }}><span style={{ fontSize: 11.5, color: n.sourceStatus === 'VERIFIED' ? 'var(--ok-fg)' : 'var(--warn-fg)' }}>{SOURCE_STATUS_LABEL[n.sourceStatus] ?? n.sourceStatus}</span></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+// ============================ Legacy chưa xác minh (SCR-DT07-08) ============================
+function LegacyTab() {
+  const legacy = useLegacyNorms();
+  if (legacy.isLoading) return <Skeleton rows={5} />;
+  if (legacy.error) return <ErrorState error={legacy.error} />;
+  const list = legacy.data ?? [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="panel" style={{ padding: 14, borderColor: 'var(--warn-bd)', background: 'var(--warn-bg)', color: 'var(--warn-fg)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <Icon name="alert" size={20} />
+        <div style={{ fontSize: 13.5 }}>
+          <b>Định mức chưa có căn cứ pháp lý (LEGACY_UNVERIFIED).</b> Các định mức này <b>không</b> được bộ chọn <code>resolve</code> dùng chính thức (BR-DT07-026). Hãy gắn trích dẫn căn cứ để chuyển sang VERIFIED.
+        </div>
+      </div>
+      {list.length === 0 ? (
+        <EmptyState icon="check" title="Không có định mức legacy" hint="Mọi định mức đều đã có căn cứ." />
+      ) : (
+        <div className="panel" style={{ padding: 14 }}>
+          <table className="table" style={{ width: '100%', fontSize: 12.5 }}>
+            <thead><tr><th style={{ textAlign: 'left' }}>Bộ</th><th style={{ textAlign: 'left' }}>Phiên bản</th><th style={{ textAlign: 'left' }}>Vật chất</th><th style={{ textAlign: 'left' }}>Ngữ nghĩa</th><th style={{ textAlign: 'right' }}>Giá trị</th><th style={{ textAlign: 'left' }}>Nguồn nhập</th></tr></thead>
+            <tbody>
+              {list.map((n) => (
+                <tr key={n.id}>
+                  <td>{n.setCode}</td>
+                  <td>{n.versionLabel} <span className="muted">({n.versionStatus})</span></td>
+                  <td className="num">{n.materialCatalogId.slice(0, 8)}…</td>
+                  <td>{n.semanticParam}</td>
+                  <td style={{ textAlign: 'right' }} className="num">{n.valueNumeric ?? '—'}</td>
+                  <td className="muted">{n.importBatchId ? 'Nhập Excel/CSV' : 'Nhập tay'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

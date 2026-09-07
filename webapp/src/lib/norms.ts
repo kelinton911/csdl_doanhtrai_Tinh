@@ -123,6 +123,18 @@ export interface ResolveResult {
   } | null;
 }
 
+export interface LegacyNorm {
+  id: string;
+  materialCatalogId: string;
+  semanticParam: string;
+  valueNumeric: string | null;
+  rawValue: string | null;
+  importBatchId: string | null;
+  setCode: string;
+  versionLabel: string;
+  versionStatus: string;
+}
+
 interface Paged<T> {
   data: T[];
   meta: { page: number; size: number; total: number };
@@ -205,6 +217,13 @@ export function useCommands() {
   });
 }
 
+export function useLegacyNorms() {
+  return useQuery({
+    queryKey: ['dt07', 'legacy'],
+    queryFn: async () => (await api.get<LegacyNorm[]>('/norms/legacy')).data,
+  });
+}
+
 // ---- Actions (ghi) ----
 export async function resolveNorm(body: {
   materialCatalogId: string;
@@ -222,3 +241,44 @@ export async function publishSetVersion(id: string) {
 export async function resolveConflict(id: string, body: { resolvedNormId: string; resolutionNote?: string }) {
   return (await api.post<NormConflict>(`/norm-conflicts/${id}/resolve`, body)).data;
 }
+
+// ---- Biên tập / nhập (SCR-DT07-04) ----
+export async function createNormSet(body: { setCode: string; name: string; description?: string }) {
+  return (await api.post<NormSet>('/norm-sets', body)).data;
+}
+
+export async function createNormSetVersion(setId: string, body: { versionLabel: string; documentVersionId?: string; effectiveFrom?: string; effectiveTo?: string }) {
+  return (await api.post<NormSetVersion>(`/norm-sets/${setId}/versions`, body)).data;
+}
+
+export async function addMaterialNorm(
+  versionId: string,
+  body: {
+    materialCatalogId: string;
+    semanticParam: string;
+    valueNumeric?: number;
+    rawValue?: string;
+    unitId?: string;
+    sourceReferenceId?: string;
+    effectiveFrom?: string;
+    effectiveTo?: string;
+  },
+) {
+  return (await api.post<MaterialNorm>(`/norm-set-versions/${versionId}/norms`, body)).data;
+}
+
+export async function addNormScopes(normId: string, dimensions: Array<{ dimensionType: string; dimensionValue: string }>) {
+  return (await api.post(`/norms/${normId}/scopes`, { dimensions })).data;
+}
+
+export interface ImportRow {
+  materialCatalogId: string;
+  semanticParam: string;
+  valueNumeric?: number;
+  rawValue?: string;
+}
+
+export async function importNorms(body: { fileName: string; fileHash: string; normSetVersionId?: string; rows: ImportRow[] }) {
+  return (await api.post<{ batch: { id: string; totalRows: number; validRows: number; errorRows: number; status: string }; created: number }>('/norms/import', body)).data;
+}
+
