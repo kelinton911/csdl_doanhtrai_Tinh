@@ -1,6 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
+import { createHash } from 'crypto';
+import { parseNormsWorkbook } from './norms-import';
 import { NormativeDocument, NormativeDocumentVersion, NormSourceReference } from './entities/normative-document.entity';
 import { NormSet, NormSetVersion } from './entities/norm-set.entity';
 import { MaterialNorm, NormDimension } from './entities/material-norm.entity';
@@ -539,6 +541,22 @@ export class NormsService {
     });
   }
 
+  // Nhập từ FILE thật (.xlsx/.csv) — parse server-side, file_hash = sha256(bytes) (BR-DT07-026).
+  async importNormsFile(
+    file: { originalname: string; buffer: Buffer } | undefined,
+    normSetVersionId: string | undefined,
+    user: AuthUser,
+  ): Promise<{ batch: NormImportBatch; created: number }> {
+    if (!file?.buffer) throw new BadRequestException('VAL-002: Thiếu tệp tải lên');
+    const fileHash = createHash('sha256').update(file.buffer).digest('hex');
+    const rows = await parseNormsWorkbook(file.buffer, file.originalname);
+    if (rows.length === 0) throw new BadRequestException('VAL-003: Tệp không có dòng định mức hợp lệ');
+    return this.importNorms(
+      { fileName: file.originalname, fileHash, normSetVersionId, rows: rows as unknown as Array<Record<string, unknown>> },
+      user,
+    );
+  }
+
   // ======================= Chỉ lệnh hậu cần =======================
   listCommands(q: PaginationQuery) {
     return this.commands
@@ -630,6 +648,14 @@ export class NormsService {
 
   listRequirements(commandId: string) {
     return this.requirements.find({ where: { commandId } });
+  }
+
+  listAssignments(requirementId: string) {
+    return this.assignments.find({ where: { requirementId } });
+  }
+
+  listProgress(assignmentId: string) {
+    return this.progress.find({ where: { assignmentId }, order: { createdAt: 'DESC' } });
   }
 
   async addAssignment(requirementId: string, dto: CreateAssignmentDto, user: AuthUser): Promise<CommandAssignment> {

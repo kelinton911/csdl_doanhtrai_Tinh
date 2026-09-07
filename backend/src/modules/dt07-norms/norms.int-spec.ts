@@ -13,8 +13,10 @@ import { AuthorityRankVersion, CalculationParameter, NormConflictCase, NormSelec
 import { NormImportBatch } from './entities/norm-import.entity';
 import { Command, CommandAssignment, CommandProgress, CommandRequirement, CommandVersion } from './entities/command.entity';
 import { CatalogVersionStatus } from '../../common/enums';
-import { DimensionType, NormConflictStatus, NormValueType } from './norms-rules';
+import { CommandStatus, DimensionType, NormConflictStatus, NormValueType } from './norms-rules';
 import { BusinessException } from '../../common/errors/business-error';
+import { parseNormsWorkbook } from './norms-import';
+import * as ExcelJS from 'exceljs';
 import type { AuthUser } from '../../common/decorators/current-user.decorator';
 
 const RUN = Date.now();
@@ -26,6 +28,7 @@ describe('DT-07 NormsService — integration (DB thật)', () => {
   let svc: NormsService;
   const setIds: string[] = [];
   const versionIds: string[] = [];
+  const commandIds: string[] = [];
   let docId = '';
   let docVersionId = '';
   let refId = '';
@@ -74,6 +77,12 @@ describe('DT-07 NormsService — integration (DB thật)', () => {
       await ds.query('DELETE FROM norm_set_version WHERE id = ANY($1)', [versionIds]);
     }
     if (setIds.length) await ds.query('DELETE FROM norm_set WHERE id = ANY($1)', [setIds]);
+    if (commandIds.length) {
+      await ds.query('DELETE FROM command_progress WHERE assignment_id IN (SELECT a.id FROM command_assignment a JOIN command_requirement r ON r.id = a.requirement_id WHERE r.command_id = ANY($1))', [commandIds]);
+      await ds.query('DELETE FROM command_assignment WHERE requirement_id IN (SELECT id FROM command_requirement WHERE command_id = ANY($1))', [commandIds]);
+      await ds.query('DELETE FROM command_requirement WHERE command_id = ANY($1)', [commandIds]);
+      await ds.query('DELETE FROM command WHERE id = ANY($1)', [commandIds]);
+    }
     await ds.query('DELETE FROM norm_conflict_case WHERE material_catalog_id = $1', [MATERIAL]);
     await ds.query('DELETE FROM norm_import_batch WHERE file_hash LIKE $1', [`ITIMP-${RUN}%`]);
     if (refId) await ds.query('DELETE FROM norm_source_reference WHERE id = $1', [refId]);
@@ -176,5 +185,49 @@ describe('DT-07 NormsService — integration (DB thật)', () => {
     const hash = `ITIMP-${RUN}`;
     await svc.importNorms({ fileName: 'a.xlsx', fileHash: hash, rows: [] }, user);
     await expect(svc.importNorms({ fileName: 'a.xlsx', fileHash: hash, rows: [] }, user)).rejects.toBeTruthy();
+  });
+
+  it('chuỗi chỉ lệnh: requirement gắn định mức PUBLISHED (BR-DT07-031) + assignment + progress + transition', async () => {
+    // Bộ định mức PUBLISHED có VERIFIED norm cho MATERIAL, hiệu lực 2026-01-01.
+    const v = await makeVersion('cmd');
+    await svc.addNorm(v.id, { materialCatalogId: MATERIAL, semanticParam: 'CONSUMPTION_COMBAT', valueNumeric: 20, sourceReferenceId: refId, effectiveFrom: '2026-01-01' }, user);
+    await svc.publishSetVersion(v.id, user);
+
+    const cmd = await svc.createCommand({ title: 'IT command', issuingAuthority: 'BTL', effectiveDate: '2026-06-01' }, user);
+    commandIds.push(cmd.id);
+
+    const req = await svc.addRequirement(cmd.id, { materialCatalogId: MATERIAL, requiredQty: 100 }, user);
+    expect(req.normSetVersionId).toBe(v.id); // BR-DT07-031: gắn đúng bộ PUBLISHED tại effective_date
+    expect(req.materialNormId).toBeTruthy();
+
+    const assign = await svc.addAssignment(req.id, { organizationId: '00000000-0000-0000-0000-0000000d7011', allocatedQty: 60 }, user);
+    const prog = await svc.addProgress(assign.id, { reportedQty: 30 }, user);
+    expect(Number(prog.reportedQty)).toBe(30);
+
+    await svc.transitionCommand(cmd.id, CommandStatus.ISSUED, user);
+    await svc.transitionCommand(cmd.id, CommandStatus.IN_PROGRESS, user);
+    const done = await svc.transitionCommand(cmd.id, CommandStatus.COMPLETED, user);
+    expect(done.status).toBe(CommandStatus.COMPLETED);
+
+    expect((await svc.listAssignments(req.id)).length).toBe(1);
+    expect((await svc.listProgress(assign.id)).length).toBe(1);
+  });
+
+  it('parser đọc .xlsx (exceljs) + .csv (có/không header)', async () => {
+    // .xlsx có header
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('norms');
+    ws.addRow(['materialCatalogId', 'semanticParam', 'valueNumeric', 'rawValue']);
+    ws.addRow([MATERIAL, 'CONSUMPTION_COMBAT', 12, '12 lít/xe/ngày']);
+    ws.addRow([MATERIAL, 'RESERVE_SSCD', 5, '5 cơ số']);
+    const buf = Buffer.from(await wb.xlsx.writeBuffer());
+    const xlsxRows = await parseNormsWorkbook(buf, 'x.xlsx');
+    expect(xlsxRows).toHaveLength(2);
+    expect(xlsxRows[0]).toMatchObject({ materialCatalogId: MATERIAL, semanticParam: 'CONSUMPTION_COMBAT', valueNumeric: 12 });
+
+    // .csv không header (theo vị trí)
+    const csvRows = await parseNormsWorkbook(Buffer.from(`${MATERIAL},CONSUMPTION_COMBAT,9,9 l`, 'utf8'), 'x.csv');
+    expect(csvRows).toHaveLength(1);
+    expect(csvRows[0].valueNumeric).toBe(9);
   });
 });

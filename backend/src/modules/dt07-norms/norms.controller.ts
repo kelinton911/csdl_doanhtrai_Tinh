@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NormsService } from './norms.service';
 import { CommandStatus } from './norms-rules';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
@@ -113,6 +114,18 @@ export class NormsController {
   importNorms(@Body() dto: ImportNormsDto, @CurrentUser() user: AuthUser) {
     return this.service.importNorms(dto, user);
   }
+  @Post('norms/import-file')
+  @Roles(...WRITERS)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Nhập định mức từ file .xlsx/.csv thật → DRAFT/LEGACY (file_hash = sha256)' })
+  importNormsFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('normSetVersionId') normSetVersionId: string | undefined,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.importNormsFile(file, normSetVersionId || undefined, user);
+  }
   @Get('norms/legacy')
   @ApiOperation({ summary: 'Định mức chưa có căn cứ (LEGACY_UNVERIFIED) — cảnh báo, không dùng resolve' })
   listLegacyNorms() {
@@ -203,10 +216,18 @@ export class NormsController {
   addRequirement(@Param('id') id: string, @Body() dto: CreateRequirementDto, @CurrentUser() user: AuthUser) {
     return this.service.addRequirement(id, dto, user);
   }
+  @Get('command-requirements/:id/assignments')
+  listAssignments(@Param('id') id: string) {
+    return this.service.listAssignments(id);
+  }
   @Post('command-requirements/:id/assignments')
   @Roles(...WRITERS)
   addAssignment(@Param('id') id: string, @Body() dto: CreateAssignmentDto, @CurrentUser() user: AuthUser) {
     return this.service.addAssignment(id, dto, user);
+  }
+  @Get('command-assignments/:id/progress')
+  listProgress(@Param('id') id: string) {
+    return this.service.listProgress(id);
   }
   @Post('command-assignments/:id/progress')
   @Roles(...WRITERS)
