@@ -74,6 +74,8 @@ const LandRegistryPage = lazy(() => import('./pages/LandRegistryPage').then((m) 
 const TechnicalModelsPage = lazy(() => import('./pages/TechnicalModelsPage').then((m) => ({ default: m.TechnicalModelsPage })));
 const MaterielPage = lazy(() => import('./pages/MaterielPage').then((m) => ({ default: m.MaterielPage })));
 const InventoryDocumentsPage = lazy(() => import('./pages/InventoryDocumentsPage').then((m) => ({ default: m.InventoryDocumentsPage })));
+// DT-07 — Định mức có căn cứ + selector deterministic + chỉ lệnh (Quyển VII).
+const NormsPage = lazy(() => import('./pages/NormsPage').then((m) => ({ default: m.NormsPage })));
 
 function Centered({ text }: { text: string }) {
   return <div style={{ height: '60vh', display: 'grid', placeItems: 'center', color: 'var(--color-neutral-600)' }}>{text}</div>;
@@ -184,6 +186,8 @@ export default function App() {
       <Route path="/technical-models" element={<Protected><TechnicalModelsPage /></Protected>} />
       <Route path="/materiel" element={<Protected><MaterielPage /></Protected>} />
       <Route path="/inventory-documents" element={<Protected><InventoryDocumentsPage /></Protected>} />
+      {/* DT-07 — Định mức & Chỉ lệnh */}
+      <Route path="/norms" element={<Protected><NormsPage /></Protected>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

@@ -90,6 +90,7 @@ export const NAV: NavItem[] = [
   { to: '/readiness/recovery', label: 'Thiệt hại & khắc phục', icon: 'wrench', dom: 'repair', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'COMMUNE_USER'] },
   { to: '/potential', label: 'Tiềm lực HC-KT', icon: 'target', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
   { to: '/logistics-norms', label: 'Định mức & bảo đảm HC-KT', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
+  { to: '/norms', label: 'Định mức có căn cứ & Chỉ lệnh (DT-07)', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/local-resources', label: 'Nguồn lực huy động', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/commune-readiness', label: 'Mức hoàn chỉnh hồ sơ xã', icon: 'chart', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/budgets', label: 'Kế hoạch & ngân sách', icon: 'chart', dom: 'report', group: 'plan', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REPORT_VIEWER', 'AUDITOR'] },
