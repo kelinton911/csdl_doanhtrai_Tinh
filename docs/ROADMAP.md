@@ -71,8 +71,9 @@ Tổng hợp từ ba tài liệu trong `docs/`:
 - **DT-07 Định mức có căn cứ & Chỉ lệnh** ◑ (2026-09-07): 17 bảng (normative_document/norm_set/
   material_norm + scope đa chiều/selector/authority_rank/conflict_case/command) + bộ chọn `/norms/resolve`
   **deterministic** (SELECTED/NO_RULE/CONFLICT + explanation trace, không ngầm 0) cho DT-08 + publish bất
-  biến + import Excel→DRAFT/LEGACY_UNVERIFIED + chỉ lệnh/phân giao/tiến độ (backend, 14 unit test) +
-  **webapp** NormsPage `/norms` (thử resolve + trace/bộ định mức + công bố/xung đột/chỉ lệnh/văn bản căn cứ).
+  biến + nhập file .xlsx/.csv thật (exceljs, sha256) → DRAFT/LEGACY_UNVERIFIED + chỉ lệnh đầy đủ
+  (yêu cầu/phân giao/tiến độ) + **webapp** NormsPage `/norms` 7 tab (SCR-01..08) + test 174 unit /
+  7 integration (DB thật) / 2 E2E Playwright — **DoD PASS**.
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),

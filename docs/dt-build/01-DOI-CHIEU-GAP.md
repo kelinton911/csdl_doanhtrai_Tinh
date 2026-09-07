@@ -282,11 +282,17 @@ mức (form bối cảnh đa chiều → SELECTED/NO_RULE/CONFLICT + bảng trac
 VERIFIED/LEGACY, gắn chiều phạm vi, nhập nhanh CSV→DRAFT) = SCR-03/04; Xung đột + giải quyết thủ
 công = SCR-06; Chỉ lệnh = SCR-07; Văn bản căn cứ = SCR-01; Legacy chưa xác minh (cảnh báo) = SCR-08.
 
-**Integration test** `norms.int-spec.ts` (`npm run test:int`, DB thật, 5 ca PASS): publish
-supersede+outbox, LOCKED_IMMUTABLE, resolve SELECTED/NO_RULE, CONFLICT ghi case, import dedup 409.
-**E2E Playwright** `e2e/dt07-norms.spec.ts` PASS trên backend thật (resolve NO_RULE không ngầm 0 →
-biên tập LEGACY → publish → màn Legacy → resolve vẫn NO_RULE). **Còn lại (nhỏ):** upload file .xlsx
-thật (hiện nhập qua dán CSV), UI đầy đủ cho chỉ lệnh (hiện chỉ đọc).
+Nhập file **.xlsx/.csv thật**: `POST /norms/import-file` (multipart, exceljs parse server-side,
+file_hash = sha256 bytes) + UI upload trong tab Biên tập (SCR-04 đầy đủ). **Quản lý chỉ lệnh đầy đủ**
+(SCR-07): tạo → phát hành/bắt đầu/hoàn thành → yêu cầu (gắn định mức PUBLISHED) → phân giao → tiến độ
+(+ GET assignments/progress).
+
+**Integration test** `norms.int-spec.ts` (`npm run test:int`, DB thật, **7 ca PASS**): publish
+supersede+outbox, LOCKED_IMMUTABLE, resolve SELECTED/NO_RULE, CONFLICT ghi case, import dedup 409,
+chuỗi chỉ lệnh gắn định mức (BR-DT07-031)+assignment+progress+transition, parser xlsx/csv.
+**E2E Playwright** `e2e/dt07-norms.spec.ts` **2 test PASS** trên backend thật (resolve NO_RULE không
+ngầm 0 → biên tập LEGACY → publish → màn Legacy → resolve NO_RULE; chỉ lệnh tạo→phát hành→yêu cầu).
+**DoD DT-07 hoàn tất** — sẵn sàng làm nguồn định mức cho DT-08.
 
 ---
 
@@ -432,7 +438,7 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | DT-04 | ◑ | 2026-09-06 | (chưa commit) | Backend sổ cái (7 bảng + 19 API + HC(t) as-of + snapshot lock, 12 test) + **webapp** MaterielPage (tra HC theo thời điểm + sổ cái + workflow giao dịch). Chờ: import staging, tách/gộp lô, E2E. |
 | DT-05 | ◑ | 2026-09-06 | (chưa commit) | Backend chứng từ (5 bảng + 18 API + POST nguyên tử + transfer + khóa kỳ, 10 test) + **webapp** InventoryDocumentsPage (chứng từ/dòng/duyệt-POST/truy vết + điều chuyển + khóa kỳ). Chờ: recall/disposal, E2E. |
 | DT-06 | ◑ | 2026-09-06 | (chưa commit) | Backend phân bổ: 10 bảng + 19 API + Σ exclusive ≤ HC_ALLOCATABLE + PC_SSCĐ cho DT-08 + snapshot lock; 9 unit test PASS. Chờ: ràng buộc realtime DT-05↔hold, webapp, E2E. |
-| DT-07 | ◑→PASS | 2026-09-07 | 48363e6·96502a9·8490d2b·5d9f70f·d67c6a7 | Backend định mức có căn cứ: 17 bảng + migration + `resolveNorm` deterministic (SELECTED/NO_RULE/CONFLICT + trace, không ngầm 0) + `/norms/resolve` cho DT-08 + norm_conflict_case + publish bất biến + import→DRAFT/LEGACY + authority_rank version + chỉ lệnh + `/norms/legacy`. **Test:** 174 unit + 5 integration (DB thật, `test:int`) + 1 E2E Playwright (PASS backend thật). **Migration+seed áp 5435 & 5436.** **Webapp** NormsPage `/norms` 7 tab phủ SCR-DT07-01..08 (resolve+trace, bộ định mức+publish, biên tập/nhập CSV, xung đột, chỉ lệnh, văn bản, legacy). Còn nhỏ: upload .xlsx thật (đang dán CSV), UI chỉ lệnh đầy đủ. |
+| DT-07 | **PASS** | 2026-09-07 | 48363e6·96502a9·8490d2b·5d9f70f·d67c6a7·8266960·e11d127 | Backend định mức có căn cứ: 17 bảng + migration + `resolveNorm` deterministic (SELECTED/NO_RULE/CONFLICT + trace, không ngầm 0) + `/norms/resolve` cho DT-08 + norm_conflict_case + publish bất biến + import→DRAFT/LEGACY + **import-file .xlsx/.csv thật (exceljs, sha256)** + authority_rank version + chỉ lệnh đầy đủ (yêu cầu/phân giao/tiến độ) + `/norms/legacy`. **Test:** 174 unit + **7 integration** (DB thật, `test:int`) + **2 E2E** Playwright (PASS backend thật). **Migration+seed áp 5435 & 5436.** **Webapp** NormsPage `/norms` 7 tab phủ đủ SCR-DT07-01..08 (resolve+trace, bộ định mức+publish, biên tập/upload .xlsx/CSV, xung đột, chỉ lệnh master-detail, văn bản, legacy). |
 | DT-08 | ☐ | | | |
 | DT-09 | ☐ | | | |
 | DT-10 | ☐ | | | |
