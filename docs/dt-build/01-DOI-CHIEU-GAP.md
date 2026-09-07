@@ -248,6 +248,31 @@ Dùng lại `materiel_movement` (DT-04) để tính HC. **Còn lại:** ràng bu
 | 7 | Dịch vụ `/norms/resolve` trả SELECTED/NO_RULE/CONFLICT + source trace | BR-DT07-007 | Cao |
 | 8 | Cấm sửa norm PUBLISHED; import Excel chỉ DRAFT; legacy chưa căn cứ → LEGACY_UNVERIFIED | BR-DT07-002/026 | Cao |
 
+**Đã hiện thực (2026-09-07 — module `dt07-norms`, code + unit test PASS):**
+
+17 bảng (migration `1753000041000-NormsDT07` reversible): `normative_document`(+`_version`,
+`norm_source_reference`) · `norm_set`(+`_version`) · `material_norm`+`norm_dimension` (scope
+đa chiều) · `calculation_parameter` · `norm_selector_config` · `authority_rank_version` ·
+`norm_conflict_case` · `norm_import_batch` · `command`(+`_version`/`_requirement`/`_assignment`/
+`_progress`). **Bộ chọn deterministic** (`norms-rules.resolveNorm` — hàm thuần): most-specific-wins
++ tách đồng ưu tiên bằng `authority_rank`; trả `SELECTED | NO_RULE | CONFLICT` **+ explanation
+trace** (chiều khớp/độ đặc thù/hạng cơ quan/lý do loại), **không bao giờ ngầm 0** (BR-DT07-007/008/009).
+`POST /norms/resolve` (DT-08 gọi) gắn `source_reference` khi SELECTED; ghi `norm_conflict_case`
+khi CONFLICT (gom trùng theo hash). `/norm-conflicts/:id/resolve` giải quyết thủ công (không tự chọn).
+Bộ định mức PUBLISHED **bất biến** → publish trong transaction + outbox `norm.set.published`,
+supersede version cùng bộ (BR-DT07-002). Định mức có `source_reference` → VERIFIED, thiếu →
+LEGACY_UNVERIFIED (bị loại khỏi resolve — BR-DT07-026); giữ `raw_value` + ĐVT gốc (BR-DT07-011);
+hết hiệu lực không áp cho as_of (BR-DT07-016). Import Excel → `norm_import_batch` DRAFT +
+material_norm LEGACY_UNVERIFIED. `authority_rank_version` có version, chỉ 1 bản active (BR-DT07-027).
+Chỉ lệnh: vòng đời DRAFT→ISSUED→IN_PROGRESS→COMPLETED; `command_requirement` tự gắn định mức
+PUBLISHED tại `effective_date` (BR-DT07-031). API dưới `/api/v1`: normative-documents, norm-sets,
+norm-set-versions, norms/resolve|import|scopes, norm-conflicts, calculation-parameters,
+authority-ranks, commands/requirements/assignments/progress. Seed `seed:norms-dt07` (chuỗi
+văn bản→định mức→publish→resolve→chỉ lệnh). **14 unit test PASS** (TC-DT07-002/007/008/009/016/026
++ most-specific + authority_rank + máy trạng thái chỉ lệnh). Giữ nguyên `logistics-norms` cũ
+(engine HC-KT Khâu 4) — DT-07 là kho định mức chuẩn có căn cứ, không phá dữ liệu cũ.
+**Còn lại:** webapp 8 màn hình (SCR-DT07-01..08), integration test API/transaction, E2E Playwright.
+
 ---
 
 ## DT-08 — Tính toán nhu cầu (Quyển VIII)
@@ -392,7 +417,7 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | DT-04 | ◑ | 2026-09-06 | (chưa commit) | Backend sổ cái (7 bảng + 19 API + HC(t) as-of + snapshot lock, 12 test) + **webapp** MaterielPage (tra HC theo thời điểm + sổ cái + workflow giao dịch). Chờ: import staging, tách/gộp lô, E2E. |
 | DT-05 | ◑ | 2026-09-06 | (chưa commit) | Backend chứng từ (5 bảng + 18 API + POST nguyên tử + transfer + khóa kỳ, 10 test) + **webapp** InventoryDocumentsPage (chứng từ/dòng/duyệt-POST/truy vết + điều chuyển + khóa kỳ). Chờ: recall/disposal, E2E. |
 | DT-06 | ◑ | 2026-09-06 | (chưa commit) | Backend phân bổ: 10 bảng + 19 API + Σ exclusive ≤ HC_ALLOCATABLE + PC_SSCĐ cho DT-08 + snapshot lock; 9 unit test PASS. Chờ: ràng buộc realtime DT-05↔hold, webapp, E2E. |
-| DT-07 | ☐ | | | |
+| DT-07 | ◑ | 2026-09-07 | (chưa commit) | Backend định mức có căn cứ: 17 bảng + migration + bộ chọn `resolveNorm` deterministic (SELECTED/NO_RULE/CONFLICT + trace, không ngầm 0) + `/norms/resolve` cho DT-08 + norm_conflict_case + publish bất biến + import→DRAFT/LEGACY_UNVERIFIED + authority_rank có version + chỉ lệnh/yêu cầu/phân giao/tiến độ + seed; 14 unit test PASS (172/172 toàn suite). Chờ: webapp 8 màn hình, integration/E2E. |
 | DT-08 | ☐ | | | |
 | DT-09 | ☐ | | | |
 | DT-10 | ☐ | | | |

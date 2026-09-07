@@ -45,6 +45,7 @@ import { Dt03TechnicalModule } from './modules/dt03-technical/dt03-technical.mod
 import { Dt04MaterielModule } from './modules/dt04-materiel/dt04-materiel.module';
 import { Dt05DocumentsModule } from './modules/dt05-documents/dt05-documents.module';
 import { Dt06AllocationModule } from './modules/dt06-allocation/dt06-allocation.module';
+import { Dt07NormsModule } from './modules/dt07-norms/dt07-norms.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/identity/guards/roles.guard';
 import { DataScopeGuard } from './common/scope/data-scope.guard';
@@ -76,6 +77,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     Dt04MaterielModule, // DT-04 — Thực lực vật chất (sổ cái + HC theo thời điểm + snapshot)
     Dt05DocumentsModule, // DT-05 — Chứng từ nhập/xuất/điều chuyển (posting nguyên tử → DT-04)
     Dt06AllocationModule, // DT-06 — Dự trữ & phân bổ (lớp phủ HC; PC_SSCĐ cho DT-08)
+    Dt07NormsModule, // DT-07 — Định mức có căn cứ + selector deterministic (/norms/resolve) + chỉ lệnh
     AssetCatalogModule, // Danh mục tài sản ngành Doanh trại (Phụ lục CV 2837/DT-QLDT)
     InventoryModule, // M06 — Inventory (tồn kho UC-08)
     InspectionModule, // M07 — Inspection & Review (UC-09/10/11)

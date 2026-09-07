@@ -68,6 +68,10 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   DT-04, reversal, điều chuyển 2 đầu (IN_TRANSIT), khóa kỳ cấm backdate (backend, 10 unit test).
 - **DT-06 Dự trữ & phân bổ** ◑ (2026-09-06): allocation_type/hold lớp phủ trên HC + ràng buộc
   Σ exclusive ≤ HC_ALLOCATABLE + PC_SSCĐ (`/reserve/sscd`) cho DT-08 + snapshot (backend, 9 unit test).
+- **DT-07 Định mức có căn cứ & Chỉ lệnh** ◑ (2026-09-07): 17 bảng (normative_document/norm_set/
+  material_norm + scope đa chiều/selector/authority_rank/conflict_case/command) + bộ chọn `/norms/resolve`
+  **deterministic** (SELECTED/NO_RULE/CONFLICT + explanation trace, không ngầm 0) cho DT-08 + publish bất
+  biến + import Excel→DRAFT/LEGACY_UNVERIFIED + chỉ lệnh/phân giao/tiến độ (backend, 14 unit test).
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),
