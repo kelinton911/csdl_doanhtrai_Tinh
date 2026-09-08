@@ -48,6 +48,7 @@ import { Dt06AllocationModule } from './modules/dt06-allocation/dt06-allocation.
 import { Dt07NormsModule } from './modules/dt07-norms/dt07-norms.module';
 import { Dt08CalculationModule } from './modules/dt08-calculation/dt08-calculation.module';
 import { Dt09BalanceModule } from './modules/dt09-balance/dt09-balance.module';
+import { Dt10InventoryCountModule } from './modules/dt10-inventory-count/dt10-inventory-count.module';
 import { JwtAuthGuard } from './modules/identity/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/identity/guards/roles.guard';
 import { DataScopeGuard } from './common/scope/data-scope.guard';
@@ -82,6 +83,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     Dt07NormsModule, // DT-07 — Định mức có căn cứ + selector deterministic (/norms/resolve) + chỉ lệnh
     Dt08CalculationModule, // DT-08 — Engine tính nhu cầu NC=TT+PC_SSCĐ−HC + trace + supply_required (→ DT-09)
     Dt09BalanceModule, // DT-09 — Nguồn địa bàn & cân đối bảo đảm (chống overbooking) + execution → DT-05
+    Dt10InventoryCountModule, // DT-10 — Kiểm kê 3 lớp Book/Physical/Official + chốt official + điều chỉnh → DT-05
     AssetCatalogModule, // Danh mục tài sản ngành Doanh trại (Phụ lục CV 2837/DT-QLDT)
     InventoryModule, // M06 — Inventory (tồn kho UC-08)
     InspectionModule, // M07 — Inspection & Review (UC-09/10/11)

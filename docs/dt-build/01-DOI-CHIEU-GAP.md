@@ -366,21 +366,23 @@ ngầm 0 → biên tập LEGACY → publish → màn Legacy → resolve NO_RULE;
 
 ## DT-10 — Kiểm kê & chốt số liệu (Quyển X)
 
-**Hiện có:** `inspection` (campaign/sheet/line/review-task/variance), `approvals`.
+**Hiện có:** module MỚI `dt10-inventory-count` (tách khỏi `inspection` M07 — M07 chỉ verification UC-09/10/11).
 
-**Đạt:** campaign/sheet/line, variance, review-task, autosave, tách nhiệm vụ, chặn gửi rỗng.
+**Đạt (2026-09-08 — DoD PASS):** kiểm kê 3 lớp độc lập Book/Physical/Official; cutoff + book_snapshot bất biến (checksum); blind count + autosave; recount vòng mới; chất lượng C1–5 (Σ=physical); variance đủ loại; official khóa bất biến + revision có version; điều chỉnh → DT-05 (CONVERSION POSTED, không sửa số dư trực tiếp); report_dataset gắn snapshot_version + reconciliation hậu kiểm.
 
-**GAP (Quyển X):**
+**GAP (Quyển X) — đã đóng:**
 
-| # | Thiếu | Gốc | Ưu tiên |
+| # | Thiếu | Gốc | Trạng thái |
 | --- | --- | --- | --- |
-| 1 | **cutoff_time** + **book_snapshot/line** dựng từ DT-04/05 tại cutoff (bất biến, checksum) | BR-DT10-002/003 | Cao |
-| 2 | Ba lớp độc lập Book / Physical / Official; blind count; recount round (không ghi đè) | BR-DT10-005/008 | Cao |
-| 3 | Kiểm kê chất lượng C1–5, Σ = physical khi bắt buộc; unbooked/missing/location variance | BR-DT10-009/013..015 | Cao |
-| 4 | **official_snapshot + lock** (bất biến, version), revision sau khóa | BR-DT10-019/020 | Cao |
-| 5 | **adjustment_request → DT-05** (không sửa số dư trực tiếp), reconciliation hậu kiểm | BR-DT10-022 | Cao |
-| 6 | **report_dataset** chuẩn (01/KK,02/KK,03/KK,01–06/KKDT) gắn snapshot_version | BR-DT10-025 | Cao (DT-11) |
-| 7 | Loại đợt (PERIODIC/EXTRAORDINARY/HANDOVER/POST_EVENT) + scope đa chiều | PHẦN II | TB |
+| 1 | **cutoff_time** + **book_snapshot/line** dựng từ DT-04 tại cutoff (bất biến, checksum) | BR-DT10-002/003 | ✅ `buildBookSnapshot` (Σ POSTED ≤ cutoff) + `bookSnapshotChecksum` (sha256) + locked |
+| 2 | Ba lớp độc lập Book / Physical / Official; blind count; recount round (không ghi đè) | BR-DT10-005/008 | ✅ 3 bảng snapshot riêng; count_line không có book_qty; `recount` → round mới, giữ round cũ |
+| 3 | Kiểm kê chất lượng C1–5, Σ = physical; unbooked/missing/location variance | BR-DT10-009/013..015 | ✅ `assertQualityTotal` (QUALITY_TOTAL_MISMATCH) + `classifyVariance` đủ 5 loại |
+| 4 | **official_snapshot + lock** (bất biến, version), revision sau khóa | BR-DT10-019/020 | ✅ `official_lock`; sửa khi khóa → LOCKED_IMMUTABLE; `reviseOfficial` → version+1 |
+| 5 | **adjustment_request → DT-05** (không sửa số dư trực tiếp), reconciliation hậu kiểm | BR-DT10-022 | ✅ `approveAdjustment` → DocumentsService CONVERSION → POST; `reconciliation` official↔HC |
+| 6 | **report_dataset** chuẩn (01/KK,02/KK,03/KK,01–06/KKDT) gắn snapshot_version | BR-DT10-025 | ✅ `buildDataset` gắn official version + dataset_hash (cấp DT-11) |
+| 7 | Loại đợt (PERIODIC/EXTRAORDINARY/HANDOVER/POST_EVENT) + scope đa chiều | PHẦN II | ✅ `count_type` + `scope_json` |
+
+**Backend:** 13 bảng (inventory_count_campaign, book_snapshot/_line, count_sheet/count_line, recount_round, count_variance, count_quality_grade, official_snapshot/_line/_lock, count_adjustment_request, report_dataset) + migration reversible `1753000044000` + 26 API. **Test:** 15 unit + 9 integration (DB thật, TC-DT10-002/005/008/009/013/019/022/025) + 1 E2E Playwright. **Webapp** InventoryCountPage `/dt10/inventory-count` 6 bước phủ SCR-DT10-01..10.
 
 ---
 
@@ -467,7 +469,7 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | DT-07 | **PASS** | 2026-09-07 | 48363e6·96502a9·8490d2b·5d9f70f·d67c6a7·8266960·e11d127 | Backend định mức có căn cứ: 17 bảng + migration + `resolveNorm` deterministic (SELECTED/NO_RULE/CONFLICT + trace, không ngầm 0) + `/norms/resolve` cho DT-08 + norm_conflict_case + publish bất biến + import→DRAFT/LEGACY + **import-file .xlsx/.csv thật (exceljs, sha256)** + authority_rank version + chỉ lệnh đầy đủ (yêu cầu/phân giao/tiến độ) + `/norms/legacy`. **Test:** 174 unit + **7 integration** (DB thật, `test:int`) + **2 E2E** Playwright (PASS backend thật). **Migration+seed áp 5435 & 5436.** **Webapp** NormsPage `/norms` 7 tab phủ đủ SCR-DT07-01..08 (resolve+trace, bộ định mức+publish, biên tập/upload .xlsx/CSV, xung đột, chỉ lệnh master-detail, văn bản, legacy). |
 | DT-08 | **PASS** | 2026-09-07 | (đang commit) | Engine tính nhu cầu `dt08-need-v1`: 7 bảng (calculation_scenario/run + material_calculation lưu riêng TT_GĐCB/TT_GĐCĐ/TT/PC_SSCĐ/HC/NC/supply_required + rule_resolution_snapshot + hc_snapshot_ref + calculation_trace_node + scenario_comparison) + **NC = TT + PC_SSCĐ − HC** (âm giữ dấu; supply_required=max(NC,0) dẫn xuất, không quy 0) kết hợp DT-07 `resolve` + HC as-of hc_snapshot DT-04 (thiếu→NO_HC_SNAPSHOT) + PC_SSCĐ DT-06 + NO_RULE/CONFLICT đánh dấu (không auto chọn) + input/output_hash tái lập + LOCK bất biến (revise=clone) + trace tới nguồn + so sánh ΔNC + `/runs/{id}/supply-required` cho DT-09 + `/runs/{id}/exceptions`. **Test:** 16 unit + **4 integration** (DB thật) + **1 E2E** Playwright (PASS backend thật). **Migration áp 5435 & 5436.** **Webapp** CalculationPage `/calculation` 3 tab phủ SCR-DT08-01..07 (kịch bản+chạy+khóa, bảng NC+trace+ngoại lệ, so sánh ΔNC). |
 | DT-09 | ☐ | | | |
-| DT-10 | ☐ | | | |
+| DT-10 | **PASS** | 2026-09-08 | (đang commit) | Module MỚI `dt10-inventory-count` (tách M07 inspection): 13 bảng + migration reversible `1753000044000` + 26 API. Kiểm kê 3 lớp Book/Physical/Official; cutoff→book_snapshot bất biến (Σ POSTED DT-04 ≤ cutoff + sha256 checksum + locked); blind count (count_line không có book_qty) + autosave; recount vòng mới (giữ round cũ); chất lượng C1–5 (Σ=physical→QUALITY_TOTAL_MISMATCH); variance đủ 5 loại (SHORTAGE/SURPLUS/UNBOOKED/MISSING/LOCATION); official khóa bất biến (sửa→LOCKED_IMMUTABLE) + revision có version; điều chỉnh→DT-05 (DocumentsService CONVERSION→POST, KHÔNG sửa số dư trực tiếp — SYS-BR-02); report_dataset gắn snapshot_version + reconciliation. **Test:** 15 unit + **9 integration** (DB thật, TC-DT10-002/005/008/009/013/019/022/025) + **1 E2E** Playwright (chuỗi đầy đủ, PASS backend thật 3099). **Migration reversible áp 5435.** **Webapp** InventoryCountPage `/dt10/inventory-count` 6 bước phủ SCR-DT10-01..10 (cutoff+book, blind+autosave+C1–5, đối chiếu, chốt+khóa, điều chỉnh→DT-05, dataset+hậu kiểm). |
 | DT-11 | ☐ | | | |
 | DT-12 | ☐ | | | |
 | Hardening | ☐ | | | |

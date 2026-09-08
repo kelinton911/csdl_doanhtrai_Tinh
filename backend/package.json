@@ -37,6 +37,7 @@
     "seed:catalog-dt01": "ts-node -r tsconfig-paths/register src/database/seeds/seed-catalog-dt01.ts",
     "seed:technical-dt03": "ts-node -r tsconfig-paths/register src/database/seeds/seed-technical-dt03.ts",
     "seed:norms-dt07": "ts-node -r tsconfig-paths/register src/database/seeds/seed-norms-dt07.ts",
+    "seed:count-dt10": "ts-node -r tsconfig-paths/register src/database/seeds/seed-count-dt10.ts",
     "openapi:snapshot": "ts-node -r tsconfig-paths/register scripts/generate-openapi.ts"
   },
   "dependencies": {

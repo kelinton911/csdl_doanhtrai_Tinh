@@ -92,6 +92,21 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   cập nhật delivered + **snapshot bất biến + fingerprint** khi khóa (BR-DT09-020) + **webapp**
   SourcesPage `/dt09/sources` + BalancePage `/dt09/balance` (SCR-01..09) + test 31 unit / 10 integration
   (DB thật — gồm overbooking song song & snapshot bất biến) / 1 E2E Playwright — **DoD PASS**.
+- **DT-10 Kiểm kê & chốt số liệu** ◑ (2026-09-08): module MỚI `dt10-inventory-count` (tách khỏi M07
+  inspection) — 13 bảng (inventory_count_campaign/book_snapshot(+line)/count_sheet/count_line/
+  recount_round/count_variance/count_quality_grade/official_snapshot(+line)/official_lock/
+  count_adjustment_request/report_dataset) + **kiểm kê 3 lớp độc lập** Book/Physical/Official
+  (BR-DT10-005) + **cutoff → book_snapshot bất biến** (Σ quantity_signed POSTED của sổ cái DT-04
+  ≤ cutoff + checksum sha256 + locked; rebuild→LOCKED_IMMUTABLE — BR-DT10-002/003) + **blind count**
+  (count_line KHÔNG có book_qty) + autosave + **recount vòng mới** (giữ nguyên vòng trước —
+  BR-DT10-008) + **chất lượng C1–5** (Σ=physical→QUALITY_TOTAL_MISMATCH — BR-DT10-009) + **variance
+  đủ 5 loại** SHORTAGE/SURPLUS/UNBOOKED/MISSING/LOCATION + **official khóa bất biến** (sửa→
+  LOCKED_IMMUTABLE) + **revision có version** (BR-DT10-019/020) + **điều chỉnh → DT-05**
+  (`DocumentsService.createDocument` CONVERSION → POST movement ADJUSTMENT theo delta, KHÔNG sửa số
+  dư trực tiếp — BR-DT10-022/SYS-BR-02) + **report_dataset gắn snapshot_version** + reconciliation
+  hậu kiểm (cấp DT-11 — BR-DT10-025) + **webapp** InventoryCountPage `/dt10/inventory-count`
+  (SCR-DT10-01..10) + test 15 unit / **9 integration** (DB thật — TC-DT10-002/005/008/009/013/019/022/025)
+  / 1 E2E Playwright (chuỗi đầy đủ) — **DoD PASS**.
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),

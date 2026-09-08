@@ -79,6 +79,7 @@ const NormsPage = lazy(() => import('./pages/NormsPage').then((m) => ({ default:
 const CalculationPage = lazy(() => import('./pages/CalculationPage').then((m) => ({ default: m.CalculationPage })));
 const SourcesPage = lazy(() => import('./pages/SourcesPage').then((m) => ({ default: m.SourcesPage })));
 const BalancePage = lazy(() => import('./pages/BalancePage').then((m) => ({ default: m.BalancePage })));
+const InventoryCountPage = lazy(() => import('./pages/InventoryCountPage').then((m) => ({ default: m.InventoryCountPage })));
 
 function Centered({ text }: { text: string }) {
   return <div style={{ height: '60vh', display: 'grid', placeItems: 'center', color: 'var(--color-neutral-600)' }}>{text}</div>;
@@ -194,6 +195,7 @@ export default function App() {
       <Route path="/calculation" element={<Protected><CalculationPage /></Protected>} />
       <Route path="/dt09/sources" element={<Protected><SourcesPage /></Protected>} />
       <Route path="/dt09/balance" element={<Protected><BalancePage /></Protected>} />
+      <Route path="/dt10/inventory-count" element={<Protected><InventoryCountPage /></Protected>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
