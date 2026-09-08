@@ -122,6 +122,24 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   + **webapp** ReportPage `/dt11/reports` (SCR-DT11-01..09) + test **17 unit** / **7 integration** (DB thật —
   TC-DT11-002/006/007/009/016/019/021) / **1 E2E** Playwright (chuỗi đầy đủ) — **DoD PASS**.
 
+- **DT-12 Dashboard chỉ huy & hỗ trợ quyết định** ✅ (2026-09-09): module MỚI `dt12-dashboard` — 23 bảng
+  (kpi_definition/kpi_formula_version/kpi_threshold/metric_instance + dim_time/material/org/location/mission/quality
+  + fact_inventory/requirement/balance/count + data_mart_refresh + alert_rule/instance/assignment
+  + decision_session/option/criterion/score/record) + migration reversible `1753000046000` + 30 API (`/api/v1/dt12/*`).
+  **Lớp semantic/KPI** đọc SNAPSHOT CHUẨN của DT-04/06/08/09/10 (chỉ đọc — bất biến) qua `semantic-sources.ts`:
+  7 semantic tách bạch **SEM-HC / HC-AVAILABLE (HC − hold EXCLUSIVE) / RESERVE-SSCĐ / PC-SCD / NC / SUPPLY-REQUIRED /
+  GAP** (Quyển XII PHẦN III). `metric_instance` có **as_of_time + lineage_json + metric_hash tất định** (tái dùng
+  `sha256Hex`) + **freshness** (so `source_version` với phiên bản nguồn hiện tại ⇒ **STALE** khi nguồn mới hơn — TC-006).
+  **AC-15**: KHÔNG tạo "số Dashboard" độc lập — mọi KPI có lineage về snapshot (TC-015), drill-down KPI→dòng nguồn
+  khớp tổng (TC-001). **Data Mart star schema** (6 dim + 4 fact) refresh từ snapshot TRONG transaction + phát
+  **outbox** `DATA_MART_REFRESHED` (dẫn xuất — không sửa tay) + `/data-mart/freshness`. **Alert cấu hình** ngưỡng +
+  severity + SLA, lifecycle **OPEN→ACK→RESOLVED** (RESOLVED bất biến) + gom trùng dedupe (TC-012). **What-if cách ly**
+  `decision_*`: chấm điểm chuẩn hóa + trọng số KHÔNG ghi ngược metric/nguồn vận hành (TC-008). Bản đồ vật chất
+  `@Scoped` theo data-scope (TC-010). Tái dùng nền: `AbstractEntity`, `BusinessException`, `OutboxService`,
+  `buildScopeContext`, `resolveAsOf`. **KHÔNG sửa** `dashboard`/`analytics`/`alerts` cũ (M12/M13) — lớp mới song song.
+  + **webapp** CommandDashboardPage `/dt12/command` (SCR-DT12-01..08) + test **21 unit** / **7 integration** (DB thật —
+  TC-DT12-001/003/006/008/012/015 + Data Mart) / **1 E2E** Playwright (chuỗi đầy đủ, backend thật 3099) — **DoD PASS**.
+
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),
 > `cd webapp && BACKEND_ORIGIN=http://localhost:<cổng> npm run e2e`.
