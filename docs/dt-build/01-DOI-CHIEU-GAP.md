@@ -394,15 +394,29 @@ ngầm 0 → biên tập LEGACY → publish → màn Legacy → resolve NO_RULE;
 
 **GAP (Quyển XI §VIII — Report Engine):**
 
-| # | Thiếu | Gốc | Ưu tiên |
+| # | Thiếu | Gốc | Hiện trạng |
 | --- | --- | --- | --- |
-| 1 | **report_definition + template_version** (mã biểu, layout schema, hiệu lực; danh mục 17 biểu cấu hình, KHÔNG hard-code số lượng) | BR-DT11-004/019 | Cao |
-| 2 | **dataset_definition/field/filter/formula + dataset_instance** (dataset_hash, source_fingerprint) | BR-DT11-006 | Cao |
-| 3 | **dataset_validation** (reconciliation, quality total, NO_DATA≠ZERO≠MISSING_SUBMISSION) | BR-DT11-007/009 | Cao |
-| 4 | Workflow DRAFT→VALIDATED→APPROVED→ISSUED→SUPERSEDED; file có checksum, không ghi đè | BR-DT11-016/017 | Cao |
-| 5 | Tổng hợp nhiều đơn vị (rollup, chống aggregate trùng, drill-down, đơn vị chưa gửi ≠ 0) | BR-DT11-008/020/021 | Cao |
-| 6 | **report_lineage** truy vết ô → dataset → snapshot/giao dịch/định mức | BR-DT11-002 | Cao |
-| 7 | Sinh đủ 01–06/KKDT, 01–03/KK, 01–04/KK-ĐQP, 01/KK-KGĐ, 01–03/KK-NHA từ nguồn chuẩn | §II/§X | Cao |
+| 1 | **report_definition + template_version** (mã biểu, layout schema, hiệu lực; danh mục 17 biểu cấu hình, KHÔNG hard-code số lượng) | BR-DT11-004/019 | ✅ 2 bảng + seed 17 biểu (cấu hình); thêm biểu = 1 dòng, không sửa code (TC-019) |
+| 2 | **dataset_definition/field/filter/formula + dataset_instance** (dataset_hash, source_fingerprint) | BR-DT11-006 | ✅ 4 bảng cấu hình + `dataset_instance` `computeDatasetHash` (bỏ generatedAt ⇒ cùng nguồn trùng hash — TC-006) + `computeSourceFingerprint` |
+| 3 | **dataset_validation** (reconciliation, quality total, NO_DATA≠ZERO≠MISSING_SUBMISSION) | BR-DT11-007/009 | ✅ 3 check; FAIL chặn duyệt (TC-007); `CellState` VALUE/ZERO/NO_DATA/MISSING_SUBMISSION |
+| 4 | Workflow DRAFT→VALIDATED→APPROVED→ISSUED→SUPERSEDED; file có checksum, không ghi đè | BR-DT11-016/017 | ✅ `report_instance` + StorageService sha256; issue lại = version mới, bản cũ SUPERSEDED giữ checksum (TC-016) |
+| 5 | Tổng hợp nhiều đơn vị (rollup, chống aggregate trùng, drill-down, đơn vị chưa gửi ≠ 0) | BR-DT11-008/020/021 | ✅ `report_rollup` UNIQUE(parent,child) + `aggregateRollup` idempotent; MISSING ≠ 0 (TC-009/021) |
+| 6 | **report_lineage** truy vết ô → dataset → snapshot/giao dịch/định mức | BR-DT11-002 | ✅ ghi lineage mọi ô khi phát hành; drill-down `?cell=` (TC-002) |
+| 7 | Sinh đủ 01–06/KKDT, 01–03/KK, 01–04/KK-ĐQP, 01/KK-KGĐ, 01–03/KK-NHA từ nguồn chuẩn | §II/§X | ✅ 17 biểu seed cấu hình; KK/KKDT đấu nối THẬT DT-10 official snapshot; ĐQP/KGĐ/NHA adapter LAND_FORMS (tái dùng land-parcels) |
+
+**Đã hiện thực (2026-09-08 — DoD PASS):** Module MỚI `dt11-report`. **Backend:** 11 bảng (report_definition, report_template_version,
+dataset_definition/field/filter/formula, dataset_instance, dataset_validation, report_instance, report_rollup, report_lineage) +
+migration reversible `1753000045000` + 24 API `/report-definitions · /dataset-definitions · /dataset-instances · /report-instances`.
+Engine cấu hình: biểu (report_definition + template PUBLISHED) → dataset từ **snapshot chuẩn** qua 5 adapter nguồn
+(`report-sources.ts`: DT-10 official_snapshot, DT-04 materiel_snapshot, DT-09 balance_snapshot, DT-08 calculation_run, LAND_FORMS)
+với `dataset_hash` (tái dùng `sha256Hex`/`stable-hash`) + `source_fingerprint` (checksum/hash thượng nguồn) → validate
+reconciliation/quality/completeness (FAIL chặn duyệt) → workflow DRAFT→VALIDATED→APPROVED→ISSUED→SUPERSEDED, file PDF/Excel
+(renderer DejaVuSans + watermark, tái dùng M12) lưu MinIO checksum sha256 bất biến, phát hành lại = version mới (file cũ giữ nguyên)
+→ rollup chống aggregate trùng (đơn vị chưa gửi MISSING ≠ 0) → report_lineage mọi ô (drill-down về dataset→snapshot→giao dịch).
+Mã lỗi: `NO_OFFICIAL_SNAPSHOT/DATA_CONTRACT_MISMATCH/QUALITY_TOTAL_MISMATCH/LOCKED_IMMUTABLE`. **Test:** 17 unit
+(`report-rules.spec.ts`) + **7 integration** (DB thật `report.int-spec.ts` — TC-DT11-002/006/007/009/016/019/021) + **1 E2E**
+Playwright (`dt11-report.spec.ts` — cấu hình biểu→dataset→validate→phát hành checksum→phát hành lại→lineage→rollup, PASS backend thật 3099).
+**Migration + seed (17 biểu + official_snapshot demo) áp DB 5435.** **Webapp** ReportPage `/dt11/reports` phủ SCR-DT11-01..09.
 
 ---
 
@@ -470,6 +484,6 @@ Webapp §5: `webapp/src/lib/errorCodes.ts` (map mã lỗi → i18n) bổ trợ `
 | DT-08 | **PASS** | 2026-09-07 | (đang commit) | Engine tính nhu cầu `dt08-need-v1`: 7 bảng (calculation_scenario/run + material_calculation lưu riêng TT_GĐCB/TT_GĐCĐ/TT/PC_SSCĐ/HC/NC/supply_required + rule_resolution_snapshot + hc_snapshot_ref + calculation_trace_node + scenario_comparison) + **NC = TT + PC_SSCĐ − HC** (âm giữ dấu; supply_required=max(NC,0) dẫn xuất, không quy 0) kết hợp DT-07 `resolve` + HC as-of hc_snapshot DT-04 (thiếu→NO_HC_SNAPSHOT) + PC_SSCĐ DT-06 + NO_RULE/CONFLICT đánh dấu (không auto chọn) + input/output_hash tái lập + LOCK bất biến (revise=clone) + trace tới nguồn + so sánh ΔNC + `/runs/{id}/supply-required` cho DT-09 + `/runs/{id}/exceptions`. **Test:** 16 unit + **4 integration** (DB thật) + **1 E2E** Playwright (PASS backend thật). **Migration áp 5435 & 5436.** **Webapp** CalculationPage `/calculation` 3 tab phủ SCR-DT08-01..07 (kịch bản+chạy+khóa, bảng NC+trace+ngoại lệ, so sánh ΔNC). |
 | DT-09 | ☐ | | | |
 | DT-10 | **PASS** | 2026-09-08 | (đang commit) | Module MỚI `dt10-inventory-count` (tách M07 inspection): 13 bảng + migration reversible `1753000044000` + 26 API. Kiểm kê 3 lớp Book/Physical/Official; cutoff→book_snapshot bất biến (Σ POSTED DT-04 ≤ cutoff + sha256 checksum + locked); blind count (count_line không có book_qty) + autosave; recount vòng mới (giữ round cũ); chất lượng C1–5 (Σ=physical→QUALITY_TOTAL_MISMATCH); variance đủ 5 loại (SHORTAGE/SURPLUS/UNBOOKED/MISSING/LOCATION); official khóa bất biến (sửa→LOCKED_IMMUTABLE) + revision có version; điều chỉnh→DT-05 (DocumentsService CONVERSION→POST, KHÔNG sửa số dư trực tiếp — SYS-BR-02); report_dataset gắn snapshot_version + reconciliation. **Test:** 15 unit + **9 integration** (DB thật, TC-DT10-002/005/008/009/013/019/022/025) + **1 E2E** Playwright (chuỗi đầy đủ, PASS backend thật 3099). **Migration reversible áp 5435.** **Webapp** InventoryCountPage `/dt10/inventory-count` 6 bước phủ SCR-DT10-01..10 (cutoff+book, blind+autosave+C1–5, đối chiếu, chốt+khóa, điều chỉnh→DT-05, dataset+hậu kiểm). |
-| DT-11 | ☐ | | | |
+| DT-11 | **PASS** | 2026-09-08 | (đang commit) | Module MỚI `dt11-report`: 11 bảng + migration reversible `1753000045000` + 24 API. Report Engine cấu hình (report_definition + template_version, seed 17 biểu — không hard-code số lượng, thêm biểu = cấu hình TC-019); dataset từ **snapshot chuẩn** qua 5 adapter (DT-04/08/09/10 official + LAND_FORMS) với `dataset_hash` (bỏ generatedAt ⇒ cùng nguồn trùng — TC-006) + `source_fingerprint`; validate reconciliation/quality/completeness (FAIL chặn duyệt — TC-007); NO_DATA≠ZERO≠MISSING_SUBMISSION; workflow ISSUED file MinIO checksum sha256 bất biến, phát hành lại = version mới giữ file cũ (TC-016); rollup chống aggregate trùng, đơn vị chưa gửi ≠ 0 (TC-009/021); report_lineage mọi ô drill-down (TC-002). **Test:** 17 unit + **7 integration** (DB thật) + **1 E2E** Playwright (PASS backend thật 3099). **Migration + seed áp DB 5435.** **Webapp** ReportPage `/dt11/reports` phủ SCR-DT11-01..09. |
 | DT-12 | ☐ | | | |
 | Hardening | ☐ | | | |

@@ -107,6 +107,20 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   hậu kiểm (cấp DT-11 — BR-DT10-025) + **webapp** InventoryCountPage `/dt10/inventory-count`
   (SCR-DT10-01..10) + test 15 unit / **9 integration** (DB thật — TC-DT10-002/005/008/009/013/019/022/025)
   / 1 E2E Playwright (chuỗi đầy đủ) — **DoD PASS**.
+- **DT-11 Báo cáo & biểu mẫu** ✅ (2026-09-08): module MỚI `dt11-report` — 11 bảng (report_definition/
+  report_template_version/dataset_definition(+field/filter/formula)/dataset_instance/dataset_validation/
+  report_instance/report_rollup/report_lineage) + migration reversible `1753000045000` + 24 API. **Report
+  Engine CẤU HÌNH** (seed 17 biểu report_definition + template PUBLISHED — KHÔNG hard-code số lượng; thêm biểu
+  = cấu hình, không sửa code — BR-DT11-004/019) + **dataset từ snapshot chuẩn** qua 5 adapter (`report-sources.ts`:
+  DT-10 official_snapshot, DT-04 materiel_snapshot, DT-09 balance_snapshot, DT-08 calculation_run, LAND_FORMS) với
+  **dataset_hash** (tái dùng `sha256Hex`; bỏ generatedAt ⇒ cùng nguồn trùng hash — BR-DT11-006) + **source_fingerprint**
+  (checksum/hash thượng nguồn) + **validate** reconciliation/quality/completeness (FAIL chặn duyệt — BR-DT11-007;
+  NO_DATA≠ZERO≠MISSING_SUBMISSION — BR-DT11-009) + **workflow** DRAFT→VALIDATED→APPROVED→ISSUED→SUPERSEDED, file
+  PDF/Excel (DejaVuSans + watermark, tái dùng M12) lưu MinIO **checksum sha256 bất biến**, phát hành lại = version
+  mới giữ file cũ (BR-DT11-016/017) + **rollup** chống aggregate trùng (UNIQUE parent+child), đơn vị chưa gửi
+  MISSING ≠ 0 (BR-DT11-008/020/021) + **report_lineage** mọi ô drill-down về dataset→snapshot→giao dịch (BR-DT11-002)
+  + **webapp** ReportPage `/dt11/reports` (SCR-DT11-01..09) + test **17 unit** / **7 integration** (DB thật —
+  TC-DT11-002/006/007/009/016/019/021) / **1 E2E** Playwright (chuỗi đầy đủ) — **DoD PASS**.
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),

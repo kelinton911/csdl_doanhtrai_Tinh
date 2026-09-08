@@ -29,6 +29,7 @@ const MaintenancePage = lazy(() => import('./pages/MaintenancePage').then((m) =>
 const ScenarioPage = lazy(() => import('./pages/ScenarioPage').then((m) => ({ default: m.ScenarioPage })));
 const AlertsPage = lazy(() => import('./pages/AlertsPage').then((m) => ({ default: m.AlertsPage })));
 const ReportsPage = lazy(() => import('./pages/ReportsPage').then((m) => ({ default: m.ReportsPage })));
+const ReportPage = lazy(() => import('./pages/ReportPage').then((m) => ({ default: m.ReportPage })));
 const PotentialPage = lazy(() => import('./pages/PotentialPage').then((m) => ({ default: m.PotentialPage })));
 const LandParcelsListPage = lazy(() => import('./pages/LandParcelsListPage').then((m) => ({ default: m.LandParcelsListPage })));
 const LandParcelFormPage = lazy(() => import('./pages/LandParcelFormPage').then((m) => ({ default: m.LandParcelFormPage })));
@@ -196,6 +197,7 @@ export default function App() {
       <Route path="/dt09/sources" element={<Protected><SourcesPage /></Protected>} />
       <Route path="/dt09/balance" element={<Protected><BalancePage /></Protected>} />
       <Route path="/dt10/inventory-count" element={<Protected><InventoryCountPage /></Protected>} />
+      <Route path="/dt11/reports" element={<Protected><ReportPage /></Protected>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
