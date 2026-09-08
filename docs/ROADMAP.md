@@ -82,6 +82,16 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   (không auto chọn) + input/output_hash tái lập + LOCK bất biến (revise=clone) + trace tới nguồn
   + so sánh ΔNC + `GET /runs/{id}/supply-required` cho DT-09 + **webapp** CalculationPage `/calculation`
   3 tab (SCR-01..07) + test 16 unit / 4 integration (DB thật) / 1 E2E Playwright — **DoD PASS**.
+- **DT-09 Nguồn địa bàn & cân đối bảo đảm** ◑ (2026-09-08): 12 bảng (territorial_source/source_material/
+  source_verification/verification_evidence/mobilization_assessment/balance_plan/balance_line/
+  source_reservation/execution_request/execution_feedback/balance_snapshot(+line)) + **nhận
+  `supply_required` từ DT-08** (copy, KHÔNG tính lại NC — BR-DT09-009) + vòng đời tin cậy
+  UNVERIFIED→VERIFIED→EXPIRED (VERIFIED ≠ ELIGIBLE) + mobilizable ≤ verified + **candidate 8 bước**
+  (lọc + xếp hạng + lý do loại) + **giữ chỗ chống overbooking** (Σ ACTIVE ≤ available, transaction +
+  pessimistic lock/`row_version`) + Gap + **execution_request → DT-05** (`createDocument`) + feedback
+  cập nhật delivered + **snapshot bất biến + fingerprint** khi khóa (BR-DT09-020) + **webapp**
+  SourcesPage `/dt09/sources` + BalancePage `/dt09/balance` (SCR-01..09) + test 31 unit / 10 integration
+  (DB thật — gồm overbooking song song & snapshot bất biến) / 1 E2E Playwright — **DoD PASS**.
 
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),

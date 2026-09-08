@@ -344,21 +344,23 @@ ngầm 0 → biên tập LEGACY → publish → màn Legacy → resolve NO_RULE;
 
 ## DT-09 — Nguồn địa bàn & cân đối (Quyển IX)
 
-**Hiện có:** `local-resources` (entity `local-resource`), engine assurance trong `scenario`.
+**Hiện có:** `local-resources` (entity `local-resource`) làm master-data; **module `dt09-balance` mới** (Quyển IX) với 12 bảng cân đối.
 
-**Đạt:** khai báo nguồn địa bàn cơ bản; engine cân đối bước đầu.
+**Đạt (2026-09-08 — DoD PASS):** hồ sơ nguồn theo xã/điểm + xác minh + huy động + candidate 8 bước + cân đối chống overbooking + snapshot bất biến.
 
-**GAP (Quyển IX):**
+**GAP (Quyển IX) — ĐÃ ĐÓNG:**
 
-| # | Thiếu | Gốc | Ưu tiên |
+| # | Hạng mục | Gốc | Trạng thái |
 | --- | --- | --- | --- |
-| 1 | **territorial_source / source_site / source_material (+snapshot)** — hồ sơ nguồn theo xã/điểm, effective window | PHẦN III | Cao |
-| 2 | **source_verification + evidence** (UNVERIFIED→VERIFIED→EXPIRED); VERIFIED ≠ ELIGIBLE | BR-DT09-001/002 | Cao |
-| 3 | **mobilization_assessment** (mobilizable_qty ≤ verified_qty, lead_time, ready) | BR-DT09-003 | Cao |
-| 4 | **candidate service** (lọc 8 bước + xếp hạng có giải thích) | PHẦN VII | Cao |
-| 5 | **balance_plan/revision/line + source_reservation** chống overbooking (Σ reservation ≤ available, optimistic locking) | BR-DT09-008 | Cao |
-| 6 | Nhận supply_required từ DT-08, **không** tính lại NC; Gap; execution_request→DT-05 + feedback | BR-DT09-009/028 | Cao |
-| 7 | Snapshot nguồn tại phê duyệt (bất biến) + truy vết đến verification/revision | BR-DT09-020 | TB |
+| 1 | **territorial_source / source_material** (+ liên kết local_resource, effective window) | PHẦN III | ✅ |
+| 2 | **source_verification + verification_evidence** (UNVERIFIED→VERIFIED→EXPIRED; VERIFIED ≠ ELIGIBLE) | BR-DT09-001/002 | ✅ |
+| 3 | **mobilization_assessment** (mobilizable_qty ≤ verified_qty, lead_time, readiness) | BR-DT09-003 | ✅ |
+| 4 | **candidate service** (lọc 8 bước + xếp hạng + lý do loại) | PHẦN VII | ✅ |
+| 5 | **balance_plan/line + source_reservation** chống overbooking (Σ ACTIVE ≤ available; transaction + pessimistic lock + `row_version`) | BR-DT09-008 | ✅ |
+| 6 | Nhận supply_required từ DT-08 (không tính lại NC); Gap; execution_request→DT-05 + feedback | BR-DT09-009/028 | ✅ |
+| 7 | balance_snapshot bất biến tại phê duyệt + `source_fingerprint` (truy vết verification/mobilization) | BR-DT09-020 | ✅ |
+
+**Kiểm thử:** 31 unit (`balance-rules.spec.ts`) + 10 integration DB thật (`balance.int-spec.ts` — gồm 2 giữ chỗ song song vượt available → cái thứ 2 bị chặn, và snapshot bất biến) + 1 E2E Playwright (`dt09-balance.spec.ts`).
 
 ---
 

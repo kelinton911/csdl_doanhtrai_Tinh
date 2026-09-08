@@ -77,6 +77,8 @@ const InventoryDocumentsPage = lazy(() => import('./pages/InventoryDocumentsPage
 // DT-07 — Định mức có căn cứ + selector deterministic + chỉ lệnh (Quyển VII).
 const NormsPage = lazy(() => import('./pages/NormsPage').then((m) => ({ default: m.NormsPage })));
 const CalculationPage = lazy(() => import('./pages/CalculationPage').then((m) => ({ default: m.CalculationPage })));
+const SourcesPage = lazy(() => import('./pages/SourcesPage').then((m) => ({ default: m.SourcesPage })));
+const BalancePage = lazy(() => import('./pages/BalancePage').then((m) => ({ default: m.BalancePage })));
 
 function Centered({ text }: { text: string }) {
   return <div style={{ height: '60vh', display: 'grid', placeItems: 'center', color: 'var(--color-neutral-600)' }}>{text}</div>;
@@ -190,6 +192,8 @@ export default function App() {
       {/* DT-07 — Định mức & Chỉ lệnh */}
       <Route path="/norms" element={<Protected><NormsPage /></Protected>} />
       <Route path="/calculation" element={<Protected><CalculationPage /></Protected>} />
+      <Route path="/dt09/sources" element={<Protected><SourcesPage /></Protected>} />
+      <Route path="/dt09/balance" element={<Protected><BalancePage /></Protected>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
