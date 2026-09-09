@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 // Tự động chọn cổng trống nếu cổng cấu hình đã bị chiếm.
@@ -29,6 +30,9 @@ async function bootstrap() {
 
   const apiPrefix = config.get<string>('apiPrefix') ?? 'api/v1';
   app.setGlobalPrefix(apiPrefix);
+
+  // Security headers (§5 Hardening). Tắt CSP mặc định để không chặn Swagger UI.
+  app.use(helmet({ contentSecurityPolicy: false }));
 
   // Validation toàn cục + chống mass assignment (whitelist).
   app.useGlobalPipes(

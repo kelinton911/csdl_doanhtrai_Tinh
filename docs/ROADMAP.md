@@ -140,6 +140,18 @@ Tổng hợp từ ba tài liệu trong `docs/`:
   + **webapp** CommandDashboardPage `/dt12/command` (SCR-DT12-01..08) + test **21 unit** / **7 integration** (DB thật —
   TC-DT12-001/003/006/008/012/015 + Data Mart) / **1 E2E** Playwright (chuỗi đầy đủ, backend thật 3099) — **DoD PASS**.
 
+- **Hardening (Core) — Tích hợp & nghiệm thu tổng thể** ✅ (2026-09-09): **SYS-BR-08** khép rò rỉ list/search
+  chéo đơn vị — `common/scope/scope-query.ts` (`applyOrgScope`/`applyJsonOrgScope`/`assertReadScope`) áp vào
+  service list/read DT-04…12 + `@Scoped('organization')`/`@CurrentUser` ⇒ 403 `NO_PERMISSION_SCOPE` đồng nhất.
+  **Bất biến SYS-BR-01…08** có bằng chứng `common/invariants/sys-br.spec.ts` (BR-02/03/04/05/07 + tái lập
+  input/output_hash). **Chuỗi vàng** `npm run seed:golden-chain` (DT-01→DT-12 idempotent) + `golden-chain.int-spec.ts`
+  (truy vết chứng từ→movement & lineage biểu→báo cáo không mồ côi, không tồn âm). **Quan trắc §5**: health tổng hợp
+  `/health`(+`/live`/`/ready`) DB/PostGIS/MinIO/outbox; Prometheus `/metrics` (histogram latency + gauge
+  `outbox_backlog`); log correlation-id; **rate-limit** `@nestjs/throttler` + **helmet**. **DQ §6**
+  `/data-quality/system`. **Contract** OpenAPI baseline 425 path (additive). **Test** `npm test` **287 PASS / 28
+  suite** (gồm contract). Không thêm schema; migration DT-xx reversible. Hoãn: load-at-scale, backup mã hóa, di
+  trú M01…M15. Chi tiết `docs/dt-build/99-HARDENING-REPORT.md`.
+
 > **Kiểm thử tự động**: backend Jest (unit domain — data-scope + quy tắc workflow M04),
 > `cd backend && npm test`. Frontend Playwright 5 luồng nghiệp vụ §7 (Chrome hệ thống),
 > `cd webapp && BACKEND_ORIGIN=http://localhost:<cổng> npm run e2e`.

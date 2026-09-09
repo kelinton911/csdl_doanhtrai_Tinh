@@ -104,8 +104,8 @@ export class ReportController {
 
   // ---- dataset_instance ----
   @Get('dataset-instances')
-  listInstances(@Query('datasetDefinitionId') defId?: string) {
-    return this.service.listDatasetInstances(defId);
+  listInstances(@CurrentUser() user: AuthUser, @Query('datasetDefinitionId') defId?: string) {
+    return this.service.listDatasetInstances(defId, user);
   }
 
   @Post('dataset-instances')
@@ -116,8 +116,8 @@ export class ReportController {
   }
 
   @Get('dataset-instances/:id')
-  getInstance(@Param('id') id: string) {
-    return this.service.getDatasetInstance(id);
+  getInstance(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getDatasetInstance(id, user);
   }
 
   @Post('dataset-instances/:id/validate')
@@ -135,8 +135,8 @@ export class ReportController {
   // ---- report_instance ----
   @Get('report-instances')
   @ApiOperation({ summary: 'SCR-DT11-09: Kho báo cáo (version)' })
-  listReports() {
-    return this.service.listReports();
+  listReports(@CurrentUser() user: AuthUser) {
+    return this.service.listReports(user);
   }
 
   @Post('report-instances')
@@ -147,8 +147,8 @@ export class ReportController {
   }
 
   @Get('report-instances/:id')
-  getReport(@Param('id') id: string) {
-    return this.service.getReport(id);
+  getReport(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getReport(id, user);
   }
 
   @Post('report-instances/:id/validate')

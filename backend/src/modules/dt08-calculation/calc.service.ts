@@ -36,6 +36,7 @@ import { resolveAsOf, toHcmIso } from '../../common/time/as-of';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { OutboxService } from '../../common/outbox/outbox.service';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { applyJsonOrgScope, assertReadScope } from '../../common/scope/scope-query';
 import { CreateScenarioDto, ReviseScenarioDto, ScenarioMaterialDto, ScenarioScopeDto } from './dt08.dto';
 
 // Kết quả resolve gom cho một giai đoạn (dùng nội bộ engine).
@@ -75,19 +76,20 @@ export class CalcService {
   }
 
   // ======================= Kịch bản =======================
-  listScenarios(q: PaginationQuery) {
-    return this.scenarios
-      .createQueryBuilder('s')
-      .orderBy('s.created_at', 'DESC')
+  listScenarios(q: PaginationQuery, user?: AuthUser) {
+    const qb = this.scenarios.createQueryBuilder('s').orderBy('s.created_at', 'DESC');
+    applyJsonOrgScope(qb, 's', user, 'scope_json', 'org'); // SYS-BR-08: scope_json.org
+    return qb
       .skip(q.skip)
       .take(q.size)
       .getManyAndCount()
       .then(([data, total]) => paginated(data, total, q));
   }
 
-  async getScenario(id: string): Promise<CalculationScenario> {
+  async getScenario(id: string, user?: AuthUser): Promise<CalculationScenario> {
     const s = await this.scenarios.findOne({ where: { id } });
     if (!s) throw new NotFoundException(`DATA-001: Không có kịch bản ${id}`);
+    assertReadScope(undefined, ((s.scopeJson as Record<string, unknown>)?.org as string) ?? null, user);
     return s;
   }
 

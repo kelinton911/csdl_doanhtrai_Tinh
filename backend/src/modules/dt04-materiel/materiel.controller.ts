@@ -46,8 +46,8 @@ export class MaterielController {
   }
 
   @Get('lots/:id')
-  getLot(@Param('id') id: string) {
-    return this.service.getLot(id);
+  getLot(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getLot(id, user);
   }
 
   // ---- Assets ----
@@ -59,19 +59,24 @@ export class MaterielController {
 
   @Get('assets/by-qr/:value')
   @ApiOperation({ summary: 'Tra tài sản theo mã QR' })
-  getByQr(@Param('value') value: string) {
-    return this.service.getAssetByQr(value);
+  getByQr(@Param('value') value: string, @CurrentUser() user: AuthUser) {
+    return this.service.getAssetByQr(value, user);
   }
 
   @Get('assets/:id')
-  getAsset(@Param('id') id: string) {
-    return this.service.getAsset(id);
+  getAsset(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getAsset(id, user);
   }
 
   // ---- Movements (state machine) ----
   @Get('movements')
-  listMovements(@Query('materialCatalogId') mat: string, @Query('organizationId') org: string) {
-    return this.service.listMovements(mat || undefined, org || undefined);
+  @Scoped('organization')
+  listMovements(
+    @CurrentUser() user: AuthUser,
+    @Query('materialCatalogId') mat: string,
+    @Query('organizationId') org: string,
+  ) {
+    return this.service.listMovements(mat || undefined, org || undefined, user);
   }
 
   @Post('movements')

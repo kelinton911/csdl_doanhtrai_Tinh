@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 import { BusinessError, BusinessException } from '../../common/errors/business-error';
+import { applyJsonOrgScope, assertReadScope } from '../../common/scope/scope-query';
 import { StorageService } from '../storage/storage.service';
 import { ReportDefinition, ReportTemplateVersion } from './entities/report-definition.entity';
 import { DatasetDefinition, DatasetField, DatasetFilter, DatasetFormula } from './entities/dataset-definition.entity';
@@ -296,17 +297,18 @@ export class ReportService {
     );
   }
 
-  listDatasetInstances(datasetDefinitionId?: string): Promise<DatasetInstance[]> {
-    return this.datasetInstances.find({
-      where: datasetDefinitionId ? { datasetDefinitionId } : {},
-      order: { generatedAt: 'DESC' },
-      take: 100,
-    });
+  listDatasetInstances(datasetDefinitionId?: string, user?: AuthUser): Promise<DatasetInstance[]> {
+    // SYS-BR-08: lọc theo phạm vi đơn vị (org nằm trong scope_json).
+    const qb = this.datasetInstances.createQueryBuilder('di');
+    if (datasetDefinitionId) qb.andWhere('di.dataset_definition_id = :d', { d: datasetDefinitionId });
+    applyJsonOrgScope(qb, 'di', user);
+    return qb.orderBy('di.generated_at', 'DESC').take(100).getMany();
   }
 
-  async getDatasetInstance(id: string): Promise<DatasetInstance> {
+  async getDatasetInstance(id: string, user?: AuthUser): Promise<DatasetInstance> {
     const d = await this.datasetInstances.findOne({ where: { id } });
     if (!d) throw new NotFoundException('Không tìm thấy dataset_instance');
+    assertReadScope(undefined, (d.scopeJson?.organizationId as string) ?? null, user);
     return d;
   }
 
@@ -371,13 +373,17 @@ export class ReportService {
     );
   }
 
-  listReports(): Promise<ReportInstance[]> {
-    return this.reports.find({ order: { createdAt: 'DESC' }, take: 100 });
+  listReports(user?: AuthUser): Promise<ReportInstance[]> {
+    // SYS-BR-08: lọc theo phạm vi đơn vị (org nằm trong scope_json).
+    const qb = this.reports.createQueryBuilder('r');
+    applyJsonOrgScope(qb, 'r', user);
+    return qb.orderBy('r.created_at', 'DESC').take(100).getMany();
   }
 
-  async getReport(id: string): Promise<ReportInstance> {
+  async getReport(id: string, user?: AuthUser): Promise<ReportInstance> {
     const r = await this.reports.findOne({ where: { id } });
     if (!r) throw new NotFoundException('Không tìm thấy báo cáo');
+    assertReadScope(undefined, (r.scopeJson?.organizationId as string) ?? null, user);
     return r;
   }
 

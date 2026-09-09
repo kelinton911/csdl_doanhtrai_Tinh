@@ -1,6 +1,7 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ExecutionContext, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { AuditModule } from './modules/audit/audit.module';
@@ -37,6 +38,10 @@ import { ReadinessMaterialsModule } from './modules/readiness-materials/readines
 import { LogisticsNormsModule } from './modules/logistics-norms/logistics-norms.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
+import { DataQualityModule } from './modules/data-quality/data-quality.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
+import { MetricsInterceptor } from './modules/metrics/metrics.interceptor';
+import { LoggingInterceptor } from './common/logging/logging.interceptor';
 import { OutboxModule } from './common/outbox/outbox.module';
 import { C3CatalogModule } from './modules/c3-catalog/c3-catalog.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
@@ -65,6 +70,20 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
       load: [configuration],
       // Nạp .env ở gốc monorepo rồi backend/.env.
       envFilePath: ['../.env', '.env'],
+    }),
+    // Rate-limit toàn cục (§5 Hardening). Bỏ qua health/metrics (probe/scrape tần suất cao).
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: Number(process.env.THROTTLE_TTL_MS ?? 60000),
+          limit: Number(process.env.THROTTLE_LIMIT ?? 300),
+        },
+      ],
+      skipIf: (ctx: ExecutionContext) => {
+        const req = ctx.switchToHttp().getRequest<{ originalUrl?: string; url?: string }>();
+        const url = req.originalUrl ?? req.url ?? '';
+        return url.includes('/health') || url.endsWith('/metrics');
+      },
     }),
     DatabaseModule,
     // Nền tảng xuyên suốt (Pha A): audit append-only, idempotency, object storage.
@@ -116,6 +135,8 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     AnalyticsModule, // M28 (khảo sát) — Phân tích, dự báo & phát hiện bất thường
     DashboardModule, // M12 — Dashboard tổng hợp
     HealthModule,
+    MetricsModule, // Hardening §5 — Prometheus /metrics + interceptor latency/throughput
+    DataQualityModule, // Hardening §6 — DQ toàn hệ (/data-quality/system)
     // Roadmap còn lại: Inventory(M06), Inspection(M07), Documents(M08),
     // Maintenance(M09), Scenario(M10), Reporting/Export(M12), Alert(M13),
     // Integration(M14). Xem docs/ROADMAP.md.
@@ -127,8 +148,13 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     // Row-level data-scope (SYS-BR-08): chạy SAU JwtAuthGuard để có req.user,
     // gắn req.scope + cưỡng chế @Scoped(...).
     { provide: APP_GUARD, useClass: DataScopeGuard },
+    // Rate-limit (§5 Hardening). Chạy sau xác thực; bỏ qua health/metrics qua skipIf.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     // Dịch OptimisticLockVersionMismatchError → 409 STALE_WRITE nhất quán.
     { provide: APP_INTERCEPTOR, useClass: OptimisticLockInterceptor },
+    // Quan trắc: latency/throughput Prometheus + log có correlation-id (§5 Hardening).
+    { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_FILTER, useClass: ProblemExceptionFilter },
   ],
 })

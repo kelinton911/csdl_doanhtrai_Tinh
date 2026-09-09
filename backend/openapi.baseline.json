@@ -421,6 +421,407 @@
     "/slow-moving/evaluate/{ruleId}": [
       "post"
     ],
+    "/normative-documents": [
+      "get",
+      "post"
+    ],
+    "/normative-documents/{id}/versions": [
+      "get",
+      "post"
+    ],
+    "/normative-document-versions/{id}/references": [
+      "get",
+      "post"
+    ],
+    "/norm-sets": [
+      "get",
+      "post"
+    ],
+    "/norm-sets/{id}/versions": [
+      "get",
+      "post"
+    ],
+    "/norm-set-versions/{id}/publish": [
+      "post"
+    ],
+    "/norm-set-versions/{id}/norms": [
+      "get",
+      "post"
+    ],
+    "/norms/resolve": [
+      "post"
+    ],
+    "/norms/import": [
+      "post"
+    ],
+    "/norms/import-file": [
+      "post"
+    ],
+    "/norms/legacy": [
+      "get"
+    ],
+    "/norms/{id}/scopes": [
+      "post"
+    ],
+    "/norm-conflicts": [
+      "get"
+    ],
+    "/norm-conflicts/{id}/resolve": [
+      "post"
+    ],
+    "/calculation-parameters": [
+      "get",
+      "post"
+    ],
+    "/authority-ranks": [
+      "get",
+      "post"
+    ],
+    "/commands": [
+      "get",
+      "post"
+    ],
+    "/commands/{id}": [
+      "get"
+    ],
+    "/commands/{id}/versions": [
+      "post"
+    ],
+    "/commands/{id}/issue": [
+      "post"
+    ],
+    "/commands/{id}/start": [
+      "post"
+    ],
+    "/commands/{id}/complete": [
+      "post"
+    ],
+    "/commands/{id}/requirements": [
+      "get",
+      "post"
+    ],
+    "/command-requirements/{id}/assignments": [
+      "get",
+      "post"
+    ],
+    "/command-assignments/{id}/progress": [
+      "get",
+      "post"
+    ],
+    "/calculation-scenarios": [
+      "get",
+      "post"
+    ],
+    "/calculation-scenarios/{id}": [
+      "get"
+    ],
+    "/calculation-scenarios/{id}/runs": [
+      "get"
+    ],
+    "/calculation-scenarios/{id}/revise": [
+      "post"
+    ],
+    "/calculation-scenarios/{id}/run": [
+      "post"
+    ],
+    "/calculation-scenarios/{id}/lock": [
+      "post"
+    ],
+    "/runs/compare": [
+      "get"
+    ],
+    "/runs/{id}": [
+      "get"
+    ],
+    "/runs/{id}/materials": [
+      "get"
+    ],
+    "/runs/{id}/materials/{mid}/trace": [
+      "get"
+    ],
+    "/runs/{id}/supply-required": [
+      "get"
+    ],
+    "/runs/{id}/exceptions": [
+      "get"
+    ],
+    "/territorial-sources": [
+      "get",
+      "post"
+    ],
+    "/territorial-sources/{id}": [
+      "get",
+      "put"
+    ],
+    "/territorial-sources/{id}/materials": [
+      "get",
+      "post"
+    ],
+    "/source-materials/{id}/verify": [
+      "post"
+    ],
+    "/source-materials/{id}/assess-mobilization": [
+      "post"
+    ],
+    "/balance-plans/{planId}/candidates": [
+      "get"
+    ],
+    "/balance-plans": [
+      "get",
+      "post"
+    ],
+    "/balance-plans/{id}": [
+      "get"
+    ],
+    "/balance-plans/{id}/revise": [
+      "post"
+    ],
+    "/balance-plans/{id}/balance": [
+      "post"
+    ],
+    "/balance-plans/{id}/approve": [
+      "post"
+    ],
+    "/balance-plans/{id}/lock": [
+      "post"
+    ],
+    "/balance-plans/{id}/gap-summary": [
+      "get"
+    ],
+    "/balance-lines/{id}/reservations": [
+      "post"
+    ],
+    "/reservations/{id}/release": [
+      "post"
+    ],
+    "/balance-lines/{id}/execution-requests": [
+      "post"
+    ],
+    "/execution-requests/{id}/feedback": [
+      "post"
+    ],
+    "/count-campaigns": [
+      "get",
+      "post"
+    ],
+    "/count-campaigns/{id}": [
+      "get"
+    ],
+    "/count-campaigns/{id}/cutoff": [
+      "post"
+    ],
+    "/count-campaigns/{id}/build-book-snapshot": [
+      "post"
+    ],
+    "/count-campaigns/{id}/book-snapshot": [
+      "get"
+    ],
+    "/count-campaigns/{id}/sheets": [
+      "get",
+      "post"
+    ],
+    "/count-sheets/{id}": [
+      "get"
+    ],
+    "/count-sheets/{id}/lines": [
+      "put"
+    ],
+    "/count-sheets/{id}/submit": [
+      "post"
+    ],
+    "/count-sheets/{id}/approve": [
+      "post"
+    ],
+    "/count-sheets/{id}/recount": [
+      "post"
+    ],
+    "/count-lines/{id}/quality": [
+      "post"
+    ],
+    "/count-campaigns/{id}/variances": [
+      "get",
+      "post"
+    ],
+    "/variances/{id}/resolve": [
+      "post"
+    ],
+    "/count-campaigns/{id}/official-snapshot": [
+      "get",
+      "post"
+    ],
+    "/count-campaigns/{id}/lock": [
+      "post"
+    ],
+    "/count-campaigns/{id}/unlock": [
+      "post"
+    ],
+    "/count-campaigns/{id}/revise": [
+      "post"
+    ],
+    "/count-campaigns/{id}/adjustment-requests": [
+      "get",
+      "post"
+    ],
+    "/adjustment-requests/{id}/approve": [
+      "post"
+    ],
+    "/count-campaigns/{id}/reconciliation": [
+      "get"
+    ],
+    "/count-campaigns/{id}/datasets": [
+      "get",
+      "post"
+    ],
+    "/report-definitions": [
+      "get",
+      "post"
+    ],
+    "/report-definitions/{id}": [
+      "get"
+    ],
+    "/report-definitions/{id}/template-versions": [
+      "get",
+      "post"
+    ],
+    "/dataset-definitions": [
+      "get",
+      "post"
+    ],
+    "/dataset-definitions/{id}/fields": [
+      "get",
+      "post"
+    ],
+    "/dataset-definitions/{id}/filters": [
+      "get",
+      "post"
+    ],
+    "/dataset-definitions/{id}/formulas": [
+      "get",
+      "post"
+    ],
+    "/dataset-instances": [
+      "get",
+      "post"
+    ],
+    "/dataset-instances/{id}": [
+      "get"
+    ],
+    "/dataset-instances/{id}/validate": [
+      "post"
+    ],
+    "/dataset-instances/{id}/validations": [
+      "get"
+    ],
+    "/report-instances": [
+      "get",
+      "post"
+    ],
+    "/report-instances/{id}": [
+      "get"
+    ],
+    "/report-instances/{id}/validate": [
+      "post"
+    ],
+    "/report-instances/{id}/approve": [
+      "post"
+    ],
+    "/report-instances/{id}/issue": [
+      "post"
+    ],
+    "/report-instances/{id}/reissue": [
+      "post"
+    ],
+    "/report-instances/{id}/download": [
+      "get"
+    ],
+    "/report-instances/{id}/rollup": [
+      "post"
+    ],
+    "/report-instances/{id}/rollup-status": [
+      "get"
+    ],
+    "/report-instances/{id}/lineage": [
+      "get"
+    ],
+    "/dt12/kpi-definitions": [
+      "get",
+      "post"
+    ],
+    "/dt12/kpi-definitions/{id}": [
+      "get"
+    ],
+    "/dt12/kpi-definitions/{id}/formula-versions": [
+      "get",
+      "post"
+    ],
+    "/dt12/kpi-definitions/{id}/thresholds": [
+      "get",
+      "post"
+    ],
+    "/dt12/metrics/compute": [
+      "post"
+    ],
+    "/dt12/metrics": [
+      "get"
+    ],
+    "/dt12/metrics/{id}/lineage": [
+      "get"
+    ],
+    "/dt12/metrics/{id}/drill-down": [
+      "get"
+    ],
+    "/dt12/semantics": [
+      "get"
+    ],
+    "/dt12/data-mart/refresh": [
+      "post"
+    ],
+    "/dt12/data-mart/freshness": [
+      "get"
+    ],
+    "/dt12/alert-rules": [
+      "get",
+      "post"
+    ],
+    "/dt12/alerts/evaluate": [
+      "post"
+    ],
+    "/dt12/alerts": [
+      "get"
+    ],
+    "/dt12/alerts/{id}/ack": [
+      "post"
+    ],
+    "/dt12/alerts/{id}/resolve": [
+      "post"
+    ],
+    "/dt12/alerts/{id}/assign": [
+      "post"
+    ],
+    "/dt12/decision-sessions": [
+      "post"
+    ],
+    "/dt12/decision-sessions/{id}": [
+      "get"
+    ],
+    "/dt12/decision-sessions/{id}/options": [
+      "post"
+    ],
+    "/dt12/decision-sessions/{id}/criteria": [
+      "post"
+    ],
+    "/dt12/decision-sessions/{id}/score": [
+      "post"
+    ],
+    "/dt12/decision-sessions/{id}/record": [
+      "post"
+    ],
+    "/dt12/command-overview": [
+      "get"
+    ],
+    "/dt12/map/materials": [
+      "get"
+    ],
     "/asset-catalog/proposals/batches": [
       "get",
       "post"
@@ -969,7 +1370,16 @@
     "/dashboard/command": [
       "get"
     ],
+    "/health/live": [
+      "get"
+    ],
+    "/health/ready": [
+      "get"
+    ],
     "/health": [
+      "get"
+    ],
+    "/data-quality/system": [
       "get"
     ]
   },
@@ -1130,6 +1540,163 @@
     "/allocation-snapshots/{id}/lines::get": "AllocationController_snapshotLines",
     "/slow-moving/rules::post": "AllocationController_createSlowRule",
     "/slow-moving/evaluate/{ruleId}::post": "AllocationController_evaluateSlow",
+    "/normative-documents::get": "NormsController_listDocuments",
+    "/normative-documents::post": "NormsController_createDocument",
+    "/normative-documents/{id}/versions::get": "NormsController_listDocumentVersions",
+    "/normative-documents/{id}/versions::post": "NormsController_createDocumentVersion",
+    "/normative-document-versions/{id}/references::get": "NormsController_listReferences",
+    "/normative-document-versions/{id}/references::post": "NormsController_addReference",
+    "/norm-sets::get": "NormsController_listSets",
+    "/norm-sets::post": "NormsController_createSet",
+    "/norm-sets/{id}/versions::get": "NormsController_listSetVersions",
+    "/norm-sets/{id}/versions::post": "NormsController_createSetVersion",
+    "/norm-set-versions/{id}/publish::post": "NormsController_publish",
+    "/norm-set-versions/{id}/norms::get": "NormsController_listNorms",
+    "/norm-set-versions/{id}/norms::post": "NormsController_addNorm",
+    "/norms/resolve::post": "NormsController_resolve",
+    "/norms/import::post": "NormsController_importNorms",
+    "/norms/import-file::post": "NormsController_importNormsFile",
+    "/norms/legacy::get": "NormsController_listLegacyNorms",
+    "/norms/{id}/scopes::post": "NormsController_addScopes",
+    "/norm-conflicts::get": "NormsController_listConflicts",
+    "/norm-conflicts/{id}/resolve::post": "NormsController_resolveConflict",
+    "/calculation-parameters::get": "NormsController_listParameters",
+    "/calculation-parameters::post": "NormsController_createParameter",
+    "/authority-ranks::get": "NormsController_listAuthorityRanks",
+    "/authority-ranks::post": "NormsController_createAuthorityRank",
+    "/commands::get": "NormsController_listCommands",
+    "/commands::post": "NormsController_createCommand",
+    "/commands/{id}::get": "NormsController_getCommand",
+    "/commands/{id}/versions::post": "NormsController_createCommandVersion",
+    "/commands/{id}/issue::post": "NormsController_issueCommand",
+    "/commands/{id}/start::post": "NormsController_startCommand",
+    "/commands/{id}/complete::post": "NormsController_completeCommand",
+    "/commands/{id}/requirements::get": "NormsController_listRequirements",
+    "/commands/{id}/requirements::post": "NormsController_addRequirement",
+    "/command-requirements/{id}/assignments::get": "NormsController_listAssignments",
+    "/command-requirements/{id}/assignments::post": "NormsController_addAssignment",
+    "/command-assignments/{id}/progress::get": "NormsController_listProgress",
+    "/command-assignments/{id}/progress::post": "NormsController_addProgress",
+    "/calculation-scenarios::get": "CalcController_listScenarios",
+    "/calculation-scenarios::post": "CalcController_createScenario",
+    "/calculation-scenarios/{id}::get": "CalcController_getScenario",
+    "/calculation-scenarios/{id}/runs::get": "CalcController_listRuns",
+    "/calculation-scenarios/{id}/revise::post": "CalcController_revise",
+    "/calculation-scenarios/{id}/run::post": "CalcController_run",
+    "/calculation-scenarios/{id}/lock::post": "CalcController_lock",
+    "/runs/compare::get": "CalcController_compare",
+    "/runs/{id}::get": "CalcController_getRun",
+    "/runs/{id}/materials::get": "CalcController_runMaterials",
+    "/runs/{id}/materials/{mid}/trace::get": "CalcController_materialTrace",
+    "/runs/{id}/supply-required::get": "CalcController_supplyRequired",
+    "/runs/{id}/exceptions::get": "CalcController_exceptions",
+    "/territorial-sources::get": "SourceController_list",
+    "/territorial-sources::post": "SourceController_create",
+    "/territorial-sources/{id}::get": "SourceController_get",
+    "/territorial-sources/{id}::put": "SourceController_update",
+    "/territorial-sources/{id}/materials::get": "SourceController_listMaterials",
+    "/territorial-sources/{id}/materials::post": "SourceController_addMaterial",
+    "/source-materials/{id}/verify::post": "SourceController_verify",
+    "/source-materials/{id}/assess-mobilization::post": "SourceController_assess",
+    "/balance-plans/{planId}/candidates::get": "SourceController_candidates",
+    "/balance-plans::get": "BalanceController_list",
+    "/balance-plans::post": "BalanceController_create",
+    "/balance-plans/{id}::get": "BalanceController_get",
+    "/balance-plans/{id}/revise::post": "BalanceController_revise",
+    "/balance-plans/{id}/balance::post": "BalanceController_balance",
+    "/balance-plans/{id}/approve::post": "BalanceController_approve",
+    "/balance-plans/{id}/lock::post": "BalanceController_lock",
+    "/balance-plans/{id}/gap-summary::get": "BalanceController_gapSummary",
+    "/balance-lines/{id}/reservations::post": "BalanceController_reserve",
+    "/reservations/{id}/release::post": "BalanceController_release",
+    "/balance-lines/{id}/execution-requests::post": "BalanceController_execute",
+    "/execution-requests/{id}/feedback::post": "BalanceController_feedback",
+    "/count-campaigns::get": "CountController_list",
+    "/count-campaigns::post": "CountController_create",
+    "/count-campaigns/{id}::get": "CountController_get",
+    "/count-campaigns/{id}/cutoff::post": "CountController_cutoff",
+    "/count-campaigns/{id}/build-book-snapshot::post": "CountController_buildBook",
+    "/count-campaigns/{id}/book-snapshot::get": "CountController_bookSnapshot",
+    "/count-campaigns/{id}/sheets::get": "CountController_listSheets",
+    "/count-campaigns/{id}/sheets::post": "CountController_createSheet",
+    "/count-sheets/{id}::get": "CountController_sheetDetail",
+    "/count-sheets/{id}/lines::put": "CountController_updateLines",
+    "/count-sheets/{id}/submit::post": "CountController_submitSheet",
+    "/count-sheets/{id}/approve::post": "CountController_approveSheet",
+    "/count-sheets/{id}/recount::post": "CountController_recount",
+    "/count-lines/{id}/quality::post": "CountController_quality",
+    "/count-campaigns/{id}/variances::get": "CountController_listVariances",
+    "/count-campaigns/{id}/variances::post": "CountController_computeVariances",
+    "/variances/{id}/resolve::post": "CountController_resolveVariance",
+    "/count-campaigns/{id}/official-snapshot::get": "CountController_getOfficial",
+    "/count-campaigns/{id}/official-snapshot::post": "CountController_createOfficial",
+    "/count-campaigns/{id}/lock::post": "CountController_lock",
+    "/count-campaigns/{id}/unlock::post": "CountController_unlock",
+    "/count-campaigns/{id}/revise::post": "CountController_revise",
+    "/count-campaigns/{id}/adjustment-requests::get": "CountController_listAdjustments",
+    "/count-campaigns/{id}/adjustment-requests::post": "CountController_createAdjustment",
+    "/adjustment-requests/{id}/approve::post": "CountController_approveAdjustment",
+    "/count-campaigns/{id}/reconciliation::get": "CountController_reconciliation",
+    "/count-campaigns/{id}/datasets::get": "CountController_listDatasets",
+    "/count-campaigns/{id}/datasets::post": "CountController_buildDataset",
+    "/report-definitions::get": "ReportController_listDefinitions",
+    "/report-definitions::post": "ReportController_createDefinition",
+    "/report-definitions/{id}::get": "ReportController_getDefinition",
+    "/report-definitions/{id}/template-versions::get": "ReportController_listTemplates",
+    "/report-definitions/{id}/template-versions::post": "ReportController_createTemplate",
+    "/dataset-definitions::get": "ReportController_listDatasets",
+    "/dataset-definitions::post": "ReportController_createDataset",
+    "/dataset-definitions/{id}/fields::get": "ReportController_listFields",
+    "/dataset-definitions/{id}/fields::post": "ReportController_addField",
+    "/dataset-definitions/{id}/filters::get": "ReportController_listFilters",
+    "/dataset-definitions/{id}/filters::post": "ReportController_addFilter",
+    "/dataset-definitions/{id}/formulas::get": "ReportController_listFormulas",
+    "/dataset-definitions/{id}/formulas::post": "ReportController_addFormula",
+    "/dataset-instances::get": "ReportController_listInstances",
+    "/dataset-instances::post": "ReportController_generateDataset",
+    "/dataset-instances/{id}::get": "ReportController_getInstance",
+    "/dataset-instances/{id}/validate::post": "ReportController_validateDataset",
+    "/dataset-instances/{id}/validations::get": "ReportController_listValidations",
+    "/report-instances::get": "ReportController_listReports",
+    "/report-instances::post": "ReportController_createReport",
+    "/report-instances/{id}::get": "ReportController_getReport",
+    "/report-instances/{id}/validate::post": "ReportController_validateReport",
+    "/report-instances/{id}/approve::post": "ReportController_approveReport",
+    "/report-instances/{id}/issue::post": "ReportController_issueReport",
+    "/report-instances/{id}/reissue::post": "ReportController_reissueReport",
+    "/report-instances/{id}/download::get": "ReportController_download",
+    "/report-instances/{id}/rollup::post": "ReportController_rollup",
+    "/report-instances/{id}/rollup-status::get": "ReportController_rollupStatus",
+    "/report-instances/{id}/lineage::get": "ReportController_lineage",
+    "/dt12/kpi-definitions::get": "Dt12Controller_listKpis",
+    "/dt12/kpi-definitions::post": "Dt12Controller_createKpi",
+    "/dt12/kpi-definitions/{id}::get": "Dt12Controller_getKpi",
+    "/dt12/kpi-definitions/{id}/formula-versions::get": "Dt12Controller_listFormulas",
+    "/dt12/kpi-definitions/{id}/formula-versions::post": "Dt12Controller_addFormula",
+    "/dt12/kpi-definitions/{id}/thresholds::get": "Dt12Controller_listThresholds",
+    "/dt12/kpi-definitions/{id}/thresholds::post": "Dt12Controller_addThreshold",
+    "/dt12/metrics/compute::post": "Dt12Controller_computeMetric",
+    "/dt12/metrics::get": "Dt12Controller_listMetrics",
+    "/dt12/metrics/{id}/lineage::get": "Dt12Controller_metricLineage",
+    "/dt12/metrics/{id}/drill-down::get": "Dt12Controller_metricDrillDown",
+    "/dt12/semantics::get": "Dt12Controller_semantics",
+    "/dt12/data-mart/refresh::post": "Dt12Controller_refreshDataMart",
+    "/dt12/data-mart/freshness::get": "Dt12Controller_dataMartFreshness",
+    "/dt12/alert-rules::get": "Dt12Controller_listAlertRules",
+    "/dt12/alert-rules::post": "Dt12Controller_createAlertRule",
+    "/dt12/alerts/evaluate::post": "Dt12Controller_evaluateAlerts",
+    "/dt12/alerts::get": "Dt12Controller_listAlerts",
+    "/dt12/alerts/{id}/ack::post": "Dt12Controller_ackAlert",
+    "/dt12/alerts/{id}/resolve::post": "Dt12Controller_resolveAlert",
+    "/dt12/alerts/{id}/assign::post": "Dt12Controller_assignAlert",
+    "/dt12/decision-sessions::post": "Dt12Controller_createSession",
+    "/dt12/decision-sessions/{id}::get": "Dt12Controller_getSession",
+    "/dt12/decision-sessions/{id}/options::post": "Dt12Controller_addOption",
+    "/dt12/decision-sessions/{id}/criteria::post": "Dt12Controller_addCriterion",
+    "/dt12/decision-sessions/{id}/score::post": "Dt12Controller_score",
+    "/dt12/decision-sessions/{id}/record::post": "Dt12Controller_record",
+    "/dt12/command-overview::get": "Dt12Controller_commandOverview",
+    "/dt12/map/materials::get": "Dt12Controller_mapMaterials",
     "/asset-catalog/proposals/batches::get": "AssetProposalController_listBatches",
     "/asset-catalog/proposals/batches::post": "AssetProposalController_createBatch",
     "/asset-catalog/proposals/batches/{id}/export::post": "AssetProposalController_exportBatch",
@@ -1344,6 +1911,9 @@
     "/dashboard/potential-by-area::get": "DashboardController_potentialByArea",
     "/dashboard/commune-readiness::get": "DashboardController_communeReadiness",
     "/dashboard/command::get": "DashboardController_commandOverview",
-    "/health::get": "HealthController_check"
+    "/health/live::get": "HealthController_live",
+    "/health/ready::get": "HealthController_ready",
+    "/health::get": "HealthController_check",
+    "/data-quality/system::get": "DataQualityController_system"
   }
 }

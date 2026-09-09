@@ -24,6 +24,7 @@ import { resolveAsOf } from '../../common/time/as-of';
 import { OutboxService } from '../../common/outbox/outbox.service';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 import { buildScopeContext } from '../../common/scope/scope-context';
+import { applyOrgScope, assertReadScope } from '../../common/scope/scope-query';
 import {
   CreateAdjustmentDto,
   CreateAssetDto,
@@ -81,9 +82,10 @@ export class MaterielService {
     return this.lots.save(this.lots.create({ ...dto, createdBy: this.uid(user), updatedBy: this.uid(user) }));
   }
 
-  async getLot(id: string): Promise<InventoryLot> {
+  async getLot(id: string, user?: AuthUser): Promise<InventoryLot> {
     const lot = await this.lots.findOne({ where: { id } });
     if (!lot) throw new NotFoundException(`DATA-001: Không có lô ${id}`);
+    assertReadScope(undefined, lot.organizationId, user);
     return lot;
   }
 
@@ -93,15 +95,17 @@ export class MaterielService {
     return this.assets.save(this.assets.create({ ...dto, createdBy: this.uid(user), updatedBy: this.uid(user) }));
   }
 
-  async getAsset(id: string): Promise<AssetInstance> {
+  async getAsset(id: string, user?: AuthUser): Promise<AssetInstance> {
     const a = await this.assets.findOne({ where: { id } });
     if (!a) throw new NotFoundException(`DATA-001: Không có tài sản ${id}`);
+    assertReadScope(undefined, a.organizationId, user);
     return a;
   }
 
-  async getAssetByQr(qrValue: string): Promise<AssetInstance> {
+  async getAssetByQr(qrValue: string, user?: AuthUser): Promise<AssetInstance> {
     const a = await this.assets.findOne({ where: { qrValue } });
     if (!a) throw new NotFoundException(`DATA-001: Không có tài sản theo QR ${qrValue}`);
+    assertReadScope(undefined, a.organizationId, user);
     return a;
   }
 
@@ -205,10 +209,11 @@ export class MaterielService {
     });
   }
 
-  async listMovements(materialCatalogId?: string, organizationId?: string) {
+  async listMovements(materialCatalogId?: string, organizationId?: string, user?: AuthUser) {
     const qb = this.movements.createQueryBuilder('m').orderBy('m.effective_time', 'DESC').take(200);
     if (materialCatalogId) qb.andWhere('m.material_catalog_id = :mat', { mat: materialCatalogId });
     if (organizationId) qb.andWhere('m.organization_id = :org', { org: organizationId });
+    applyOrgScope(qb, 'm', user); // SYS-BR-08: sổ cái chỉ trả trong phạm vi đơn vị.
     return qb.getMany();
   }
 

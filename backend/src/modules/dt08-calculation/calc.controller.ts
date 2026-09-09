@@ -19,8 +19,8 @@ export class CalcController {
 
   // ---- Kịch bản ----
   @Get('calculation-scenarios')
-  listScenarios(@Query() q: PaginationQuery) {
-    return this.service.listScenarios(q);
+  listScenarios(@Query() q: PaginationQuery, @CurrentUser() user: AuthUser) {
+    return this.service.listScenarios(q, user);
   }
 
   @Post('calculation-scenarios')
@@ -31,8 +31,8 @@ export class CalcController {
   }
 
   @Get('calculation-scenarios/:id')
-  getScenario(@Param('id') id: string) {
-    return this.service.getScenario(id);
+  getScenario(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getScenario(id, user);
   }
 
   @Get('calculation-scenarios/:id/runs')

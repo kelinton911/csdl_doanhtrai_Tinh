@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, Repository } from 'typeorm';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { applyJsonOrgScope, assertReadScope } from '../../common/scope/scope-query';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { assertTransition } from '../../common/enums/assert-transition';
 import { BusinessError, BusinessException } from '../../common/errors/business-error';
@@ -106,16 +107,18 @@ export class CountService {
     );
   }
 
-  async listCampaigns(q: CampaignQuery) {
+  async listCampaigns(q: CampaignQuery, user?: AuthUser) {
     const qb = this.campaigns.createQueryBuilder('c').orderBy('c.created_at', 'DESC');
     if (q.status) qb.andWhere('c.status = :st', { st: q.status });
+    applyJsonOrgScope(qb, 'c', user); // SYS-BR-08: org trong scope_json
     const [data, total] = await qb.skip(q.skip).take(q.size).getManyAndCount();
     return paginated(data, total, q);
   }
 
-  async getCampaign(id: string): Promise<InventoryCountCampaign> {
+  async getCampaign(id: string, user?: AuthUser): Promise<InventoryCountCampaign> {
     const c = await this.campaigns.findOne({ where: { id } });
     if (!c) throw new NotFoundException(`DATA-001: Không có đợt kiểm kê ${id}`);
+    assertReadScope(undefined, ((c.scopeJson as Record<string, unknown>)?.organizationId as string) ?? null, user);
     return c;
   }
 

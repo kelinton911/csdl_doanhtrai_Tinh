@@ -26,6 +26,7 @@ import { assertTransition } from '../../common/enums/assert-transition';
 import { resolveAsOf } from '../../common/time/as-of';
 import { ActiveStatus } from '../catalog/catalog.enums';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { assertReadScope } from '../../common/scope/scope-query';
 import {
   AddAllocationLineDto,
   CreateAllocationDto,
@@ -109,9 +110,10 @@ export class AllocationService {
     );
   }
 
-  async getAllocation(id: string): Promise<InventoryAllocation> {
+  async getAllocation(id: string, user?: AuthUser): Promise<InventoryAllocation> {
     const a = await this.allocations.findOne({ where: { id } });
     if (!a) throw new NotFoundException(`DATA-001: Không có phân bổ ${id}`);
+    assertReadScope(undefined, a.organizationId, user);
     return a;
   }
 

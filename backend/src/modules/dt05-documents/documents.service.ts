@@ -19,6 +19,8 @@ import {
 } from './doc-rules';
 import { OutboxService } from '../../common/outbox/outbox.service';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { applyOrgScope, assertReadScope } from '../../common/scope/scope-query';
+import { isProvinceWide, scopeOrganizationId } from '../../common/data-scope';
 import { AddLineDto, CreateDocumentDto, CreatePeriodDto, CreateTransferDto } from './dt05.dto';
 
 @Injectable()
@@ -69,9 +71,10 @@ export class DocumentsService {
     );
   }
 
-  async getDocument(id: string): Promise<InventoryDocument> {
+  async getDocument(id: string, user?: AuthUser): Promise<InventoryDocument> {
     const d = await this.docs.findOne({ where: { id } });
     if (!d) throw new NotFoundException(`DATA-001: Không có chứng từ ${id}`);
+    assertReadScope(undefined, d.organizationId, user);
     return d;
   }
 
@@ -100,10 +103,11 @@ export class DocumentsService {
     );
   }
 
-  async listDocuments(status?: string, organizationId?: string) {
+  async listDocuments(status?: string, user?: AuthUser, organizationId?: string) {
     const qb = this.docs.createQueryBuilder('d').orderBy('d.created_at', 'DESC').take(200);
     if (status) qb.andWhere('d.status = :st', { st: status });
     if (organizationId) qb.andWhere('d.organization_id = :org', { org: organizationId });
+    applyOrgScope(qb, 'd', user); // SYS-BR-08: cưỡng chế phạm vi ngay cả khi caller không truyền org.
     return qb.getMany();
   }
 
@@ -257,8 +261,8 @@ export class DocumentsService {
   }
 
   // Truy vết chứng từ → dòng → movement → sổ cái (phục vụ DT-11).
-  async trace(id: string) {
-    const doc = await this.getDocument(id);
+  async trace(id: string, user?: AuthUser) {
+    const doc = await this.getDocument(id, user);
     const lines = await this.lines.find({ where: { documentId: id }, order: { lineNo: 'ASC' } });
     const moveIds = lines.map((l) => l.movementId).filter((x): x is string => !!x);
     const movements = moveIds.length
@@ -365,8 +369,16 @@ export class DocumentsService {
     return this.transfers.save(order);
   }
 
-  async inTransit() {
-    return this.transfers.find({ where: { status: TransferStatus.IN_TRANSIT } });
+  async inTransit(user?: AuthUser) {
+    const qb = this.transfers
+      .createQueryBuilder('t')
+      .where('t.status = :st', { st: TransferStatus.IN_TRANSIT });
+    // SYS-BR-08: điều chuyển 2 đầu — thấy khi đơn vị mình là bên gửi HOẶC bên nhận.
+    if (!isProvinceWide(user)) {
+      const org = scopeOrganizationId(user) ?? '__none__';
+      qb.andWhere('(t.from_org = :org OR t.to_org = :org)', { org });
+    }
+    return qb.getMany();
   }
 
   // ---- Stock periods (khóa kỳ) ----
@@ -395,9 +407,10 @@ export class DocumentsService {
     return this.periods.save(p);
   }
 
-  async listPeriods(organizationId?: string) {
+  async listPeriods(organizationId?: string, user?: AuthUser) {
     const qb = this.periods.createQueryBuilder('p').orderBy('p.period_from', 'DESC');
-    if (organizationId) qb.where('p.organization_id = :org', { org: organizationId });
+    if (organizationId) qb.andWhere('p.organization_id = :org', { org: organizationId });
+    applyOrgScope(qb, 'p', user); // SYS-BR-08
     return qb.getMany();
   }
 }

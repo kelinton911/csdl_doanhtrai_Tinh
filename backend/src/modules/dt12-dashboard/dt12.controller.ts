@@ -83,8 +83,8 @@ export class Dt12Controller {
   @Get('metrics')
   @ApiQuery({ name: 'kpi', required: false })
   @ApiQuery({ name: 'as_of', required: false })
-  listMetrics(@Query('kpi') kpi?: string, @Query('as_of') asOf?: string) {
-    return this.service.listMetrics({ kpiCode: kpi, asOf });
+  listMetrics(@CurrentUser() user: AuthUser, @Query('kpi') kpi?: string, @Query('as_of') asOf?: string) {
+    return this.service.listMetrics({ kpiCode: kpi, asOf }, user);
   }
 
   @Get('metrics/:id/lineage')
@@ -143,8 +143,8 @@ export class Dt12Controller {
   @Get('alerts')
   @ApiQuery({ name: 'status', required: false })
   @ApiQuery({ name: 'severity', required: false })
-  listAlerts(@Query('status') status?: string, @Query('severity') severity?: string) {
-    return this.service.listAlerts({ status, severity });
+  listAlerts(@CurrentUser() user: AuthUser, @Query('status') status?: string, @Query('severity') severity?: string) {
+    return this.service.listAlerts({ status, severity }, user);
   }
 
   @Post('alerts/:id/ack')
@@ -175,8 +175,8 @@ export class Dt12Controller {
   }
 
   @Get('decision-sessions/:id')
-  getSession(@Param('id') id: string) {
-    return this.service.getSessionDetail(id);
+  getSession(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getSessionDetail(id, user);
   }
 
   @Post('decision-sessions/:id/options')

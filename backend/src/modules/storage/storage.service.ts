@@ -52,6 +52,16 @@ export class StorageService implements OnModuleInit {
     }
   }
 
+  // Kiểm tra kết nối object storage (readiness probe §5 Hardening).
+  async healthCheck(): Promise<boolean> {
+    try {
+      await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   // Tải trực tiếp qua backend (tránh cấu hình CORS MinIO). Tính checksum sha256.
   async putObject(
     buffer: Buffer,

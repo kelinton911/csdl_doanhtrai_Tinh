@@ -23,8 +23,8 @@ export class BalanceController {
   constructor(private readonly service: BalanceService) {}
 
   @Get('balance-plans')
-  list(@Query() q: PaginationQuery) {
-    return this.service.listPlans(q);
+  list(@Query() q: PaginationQuery, @CurrentUser() user: AuthUser) {
+    return this.service.listPlans(q, user);
   }
 
   @Post('balance-plans')
@@ -35,8 +35,8 @@ export class BalanceController {
   }
 
   @Get('balance-plans/:id')
-  get(@Param('id') id: string) {
-    return this.service.getPlan(id);
+  get(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getPlan(id, user);
   }
 
   @Post('balance-plans/:id/revise')

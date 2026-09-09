@@ -60,8 +60,8 @@ export class AllocationController {
   }
 
   @Get('allocations/:id')
-  getAllocation(@Param('id') id: string) {
-    return this.service.getAllocation(id);
+  getAllocation(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getAllocation(id, user);
   }
 
   @Post('allocations/:id/lines')

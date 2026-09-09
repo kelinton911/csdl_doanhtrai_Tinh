@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
 import { DocumentStatus } from '../../common/enums';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
+import { Scoped } from '../../common/scope/scope.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../identity/roles';
 import {
@@ -26,19 +27,25 @@ export class DocumentsController {
 
   // ---- Documents ----
   @Get('inventory-documents')
-  list(@Query('status') status: string, @Query('organizationId') org: string) {
-    return this.service.listDocuments(status || undefined, org || undefined);
+  @Scoped('organization')
+  list(
+    @CurrentUser() user: AuthUser,
+    @Query('status') status: string,
+    @Query('organizationId') org: string,
+  ) {
+    return this.service.listDocuments(status || undefined, user, org || undefined);
   }
 
   @Post('inventory-documents')
   @Roles(...WRITERS)
+  @Scoped('organization')
   create(@Body() dto: CreateDocumentDto, @CurrentUser() user: AuthUser) {
     return this.service.createDocument(dto, user);
   }
 
   @Get('inventory-documents/:id')
-  get(@Param('id') id: string) {
-    return this.service.getDocument(id);
+  get(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getDocument(id, user);
   }
 
   @Post('inventory-documents/:id/lines')
@@ -88,14 +95,14 @@ export class DocumentsController {
 
   @Get('inventory-documents/:id/trace')
   @ApiOperation({ summary: 'Truy vết chứng từ → dòng → movement → sổ cái (BR-DT05-030)' })
-  trace(@Param('id') id: string) {
-    return this.service.trace(id);
+  trace(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.trace(id, user);
   }
 
   // ---- Transfer orders (2 đầu) ----
   @Get('transfer-orders/in-transit')
-  inTransit() {
-    return this.service.inTransit();
+  inTransit(@CurrentUser() user: AuthUser) {
+    return this.service.inTransit(user);
   }
 
   @Post('transfer-orders')
@@ -126,12 +133,14 @@ export class DocumentsController {
 
   // ---- Stock periods ----
   @Get('stock-periods')
-  listPeriods(@Query('organizationId') org: string) {
-    return this.service.listPeriods(org || undefined);
+  @Scoped('organization')
+  listPeriods(@CurrentUser() user: AuthUser, @Query('organizationId') org: string) {
+    return this.service.listPeriods(org || undefined, user);
   }
 
   @Post('stock-periods')
   @Roles(...APPROVERS)
+  @Scoped('organization')
   createPeriod(@Body() dto: CreatePeriodDto, @CurrentUser() user: AuthUser) {
     return this.service.createPeriod(dto, user);
   }

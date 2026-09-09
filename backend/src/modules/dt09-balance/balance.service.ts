@@ -35,6 +35,7 @@ import { assertRowVersion } from '../../common/concurrency/optimistic-lock';
 import { BusinessError, BusinessException } from '../../common/errors/business-error';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { applyJsonOrgScope, assertReadScope } from '../../common/scope/scope-query';
 import { CalcService } from '../dt08-calculation/calc.service';
 import { DocumentsService } from '../dt05-documents/documents.service';
 import { InventoryDocumentType } from '../dt05-documents/dt05.enums';
@@ -70,19 +71,20 @@ export class BalanceService {
   }
 
   // ======================= Kế hoạch =======================
-  listPlans(q: PaginationQuery) {
-    return this.plans
-      .createQueryBuilder('p')
-      .orderBy('p.created_at', 'DESC')
+  listPlans(q: PaginationQuery, user?: AuthUser) {
+    const qb = this.plans.createQueryBuilder('p').orderBy('p.created_at', 'DESC');
+    applyJsonOrgScope(qb, 'p', user); // SYS-BR-08: org trong scope_json
+    return qb
       .skip(q.skip)
       .take(q.size)
       .getManyAndCount()
       .then(([data, total]) => paginated(data, total, q));
   }
 
-  async getPlan(id: string) {
+  async getPlan(id: string, user?: AuthUser) {
     const plan = await this.plans.findOne({ where: { id } });
     if (!plan) throw new NotFoundException(`DATA-001: Không có kế hoạch ${id}`);
+    assertReadScope(undefined, ((plan.scopeJson as Record<string, unknown>)?.organizationId as string) ?? null, user);
     const lines = await this.lines.find({ where: { planId: id }, order: { createdAt: 'ASC' } });
     return { ...plan, lines: lines.map((l) => this.lineView(l)) };
   }

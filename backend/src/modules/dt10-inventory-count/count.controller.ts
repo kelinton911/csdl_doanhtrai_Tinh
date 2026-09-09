@@ -31,8 +31,8 @@ export class CountController {
 
   // ---- Đợt kiểm kê ----
   @Get('count-campaigns')
-  list(@Query() q: CampaignQuery) {
-    return this.service.listCampaigns(q);
+  list(@Query() q: CampaignQuery, @CurrentUser() user: AuthUser) {
+    return this.service.listCampaigns(q, user);
   }
 
   @Post('count-campaigns')
@@ -43,8 +43,8 @@ export class CountController {
   }
 
   @Get('count-campaigns/:id')
-  get(@Param('id') id: string) {
-    return this.service.getCampaign(id);
+  get(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.service.getCampaign(id, user);
   }
 
   @Post('count-campaigns/:id/cutoff')

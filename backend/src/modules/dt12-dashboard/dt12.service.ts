@@ -5,6 +5,7 @@ import { DataSource, EntityManager, Repository } from 'typeorm';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 import { BusinessError, BusinessException } from '../../common/errors/business-error';
 import { buildScopeContext } from '../../common/scope/scope-context';
+import { applyJsonOrgScope, assertReadScope } from '../../common/scope/scope-query';
 import { resolveAsOf } from '../../common/time/as-of';
 import { OutboxService } from '../../common/outbox/outbox.service';
 import { KpiDefinition, KpiFormulaVersion } from './entities/kpi-definition.entity';
@@ -276,13 +277,14 @@ export class Dt12Service {
     return Object.assign(m, { latestSourceVersion: cur.sourceVersion });
   }
 
-  async listMetrics(query: { kpiCode?: string; asOf?: string }): Promise<Array<MetricInstance & { latestSourceVersion: string | null }>> {
-    const where: Record<string, unknown> = {};
+  async listMetrics(query: { kpiCode?: string; asOf?: string }, user?: AuthUser): Promise<Array<MetricInstance & { latestSourceVersion: string | null }>> {
+    const qb = this.metrics.createQueryBuilder('mi').orderBy('mi.computed_at', 'DESC').take(100);
     if (query.kpiCode) {
       const kpi = await this.getKpiByCode(query.kpiCode);
-      where.kpiDefinitionId = kpi.id;
+      qb.andWhere('mi.kpi_definition_id = :k', { k: kpi.id });
     }
-    const rows = await this.metrics.find({ where, order: { computedAt: 'DESC' }, take: 100 });
+    applyJsonOrgScope(qb, 'mi', user); // SYS-BR-08: org trong scope_json
+    const rows = await qb.getMany();
     return Promise.all(rows.map((m) => this.withFreshness(m)));
   }
 
@@ -610,11 +612,16 @@ export class Dt12Service {
     return { evaluated, created: created.length, alerts: created };
   }
 
-  listAlerts(filters: { status?: string; severity?: string }): Promise<AlertInstance[]> {
-    const where: Record<string, string> = {};
-    if (filters.status) where.status = filters.status;
-    if (filters.severity) where.severity = filters.severity;
-    return this.alerts.find({ where, order: { severity: 'DESC', createdAt: 'DESC' }, take: 200 });
+  listAlerts(filters: { status?: string; severity?: string }, user?: AuthUser): Promise<AlertInstance[]> {
+    const qb = this.alerts
+      .createQueryBuilder('ai')
+      .orderBy('ai.severity', 'DESC')
+      .addOrderBy('ai.created_at', 'DESC')
+      .take(200);
+    if (filters.status) qb.andWhere('ai.status = :st', { st: filters.status });
+    if (filters.severity) qb.andWhere('ai.severity = :sv', { sv: filters.severity });
+    applyJsonOrgScope(qb, 'ai', user); // SYS-BR-08
+    return qb.getMany();
   }
 
   private async getAlert(id: string): Promise<AlertInstance> {
@@ -785,8 +792,9 @@ export class Dt12Service {
     return rec;
   }
 
-  async getSessionDetail(id: string) {
+  async getSessionDetail(id: string, user?: AuthUser) {
     const session = await this.getSession(id);
+    assertReadScope(undefined, ((session.scopeJson as Record<string, unknown>)?.organizationId as string) ?? null, user);
     const [opts, crits, scoreRows, recs] = await Promise.all([
       this.options.find({ where: { sessionId: id }, order: { optionKey: 'ASC' } }),
       this.criteria.find({ where: { sessionId: id }, order: { criterionKey: 'ASC' } }),
