@@ -1,0 +1,124 @@
+# ==============================================================================
+# STACK TRIỂN KHAI 1 MÁY WINDOWS (OFFLINE / AIR-GAPPED) — CSDL VẬT CHẤT DOANH TRẠI TỈNH
+# ------------------------------------------------------------------------------
+# - Image nạp SẴN từ gói offline (docker load) — KHÔNG build tại máy đích.
+# - Tên image backend/webapp khớp với gói do prepare-offline.sh tạo.
+# - Biến bí mật/cổng đọc từ .env.windows (install.ps1 sinh tự động nếu thiếu).
+# Lệnh: docker compose -f docker-compose.windows.yml --env-file .env.windows up -d
+# ==============================================================================
+name: csdl-doanhtrai
+
+services:
+  # 1) PostgreSQL 16 + PostGIS 3.4 (CSDL không gian)
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: csdl-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-csdl}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-csdl_dev_pw}
+      POSTGRES_DB: ${DB_NAME:-csdl_doanhtrai}
+    ports:
+      - "${DB_PORT_HOST:-5433}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-csdl} -d ${DB_NAME:-csdl_doanhtrai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # 2) Redis 7 (cache / hàng đợi / outbox)
+  redis:
+    image: redis:7-alpine
+    container_name: csdl-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3) MinIO (object storage nội bộ, tương thích S3 — lưu hồ sơ/biên bản)
+  minio:
+    image: minio/minio:latest
+    container_name: csdl-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-csdl}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-csdl_dev_pw}
+    ports:
+      - "${MINIO_PORT_HOST:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT_HOST:-9001}:9001"
+    volumes:
+      - minio_data:/data
+
+  # 4) Máy chủ bản đồ số GIS offline (chỉ chạy khi bật profile "tiles" + có .mbtiles)
+  tile-server:
+    image: maptiler/tileserver-gl:latest
+    container_name: csdl-tile-server
+    restart: unless-stopped
+    ports:
+      - "${TILE_SERVER_PORT_HOST:-8080}:8080"
+    volumes:
+      - ./tiles:/data:ro
+    profiles: ["tiles"]
+
+  # 5) Backend NestJS (tự chờ DB → chạy migration → phục vụ /api/v1)
+  backend:
+    image: ${BACKEND_IMAGE:-csdl-doanhtrai-backend:offline}
+    container_name: csdl-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: 3000
+      API_PREFIX: api/v1
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8000}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-csdl}
+      DB_PASSWORD: ${DB_PASSWORD:-csdl_dev_pw}
+      DB_NAME: ${DB_NAME:-csdl_doanhtrai}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USER: ${MINIO_USER:-csdl}
+      MINIO_PASSWORD: ${MINIO_PASSWORD:-csdl_dev_pw}
+      MINIO_BUCKET: ${MINIO_BUCKET:-csdl-documents}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh-secret}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-7d}
+      RUN_MIGRATIONS: "true"
+    # Mount GIS geojson để bước seed 'chuỗi vàng' đọc được qua ../docs (WORKDIR=/app → /docs).
+    volumes:
+      - ./data/docs:/docs:ro
+    ports:
+      - "${BACKEND_PORT_HOST:-3010}:3000"
+
+  # 6) Webapp (Vite preview + proxy /api → backend). Người dùng chỉ cần cổng này.
+  webapp:
+    image: ${WEBAPP_IMAGE:-csdl-doanhtrai-webapp:offline}
+    container_name: csdl-webapp
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      BACKEND_ORIGIN: http://backend:3000
+    ports:
+      - "${FRONTEND_PORT_HOST:-8000}:5173"
+
+volumes:
+  db_data:
+  redis_data:
+  minio_data:

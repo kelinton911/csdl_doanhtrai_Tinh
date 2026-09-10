@@ -1,0 +1,7 @@
+# Sản phẩm đóng gói (nặng, sinh lại bằng prepare-offline.sh) — không commit.
+dist/
+# Cấu hình chứa bí mật do install.ps1 sinh ra.
+.env.windows
+# Inno Setup output nếu build ngay trong thư mục này.
+Output/
+*.exe
