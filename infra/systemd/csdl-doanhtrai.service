@@ -1,0 +1,25 @@
+# ============================================================================
+#  systemd unit — TỰ CHẠY toàn bộ app CSDL Vật chất Doanh trại khi bật máy.
+#  Bản /home (thư mục làm việc). Dựng cả stack qua profile "app".
+#  Cài đặt:  sudo bash scripts/install-autostart.sh
+#  Thủ công: sudo cp infra/systemd/csdl-doanhtrai.service /etc/systemd/system/ \
+#            && sudo systemctl daemon-reload && sudo systemctl enable --now csdl-doanhtrai
+# ============================================================================
+[Unit]
+Description=CSDL Vat chat Doanh trai Tinh (full app - /home)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/kelinton/P08_Duan_CSDL_doanhtrai_Tinh
+# Dựng hạ tầng + backend + webapp (profile "app"). Idempotent: chạy lại an toàn.
+ExecStart=/usr/bin/docker compose -f docker-compose.yml --profile app up -d
+ExecStop=/usr/bin/docker compose -f docker-compose.yml --profile app stop
+# Không giới hạn thời gian khởi động (lần đầu có thể build/kéo image lâu).
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
