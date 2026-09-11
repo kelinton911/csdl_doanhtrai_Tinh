@@ -4,19 +4,25 @@ import { api } from '../lib/api';
 
 // Ô chọn tìm kiếm cho danh mục lớn (xã/phường, doanh trại…): gõ để lọc, chọn từ gợi ý.
 // endpoint phải hỗ trợ ?search=&size= trả { data: [{id,code,name}] } và GET endpoint/:id trả {name,code}.
+// `params` bổ sung bộ lọc cố định (vd { level:'COMMUNE', provinceCode:'38' }); `disabled` khoá ô chọn.
 export function AsyncPicker({
   endpoint,
   value,
   onChange,
   placeholder,
+  params,
+  disabled,
 }: {
   endpoint: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  params?: Record<string, string | undefined>;
+  disabled?: boolean;
 }) {
   const [term, setTerm] = useState('');
   const [open, setOpen] = useState(false);
+  const paramsKey = JSON.stringify(params ?? {});
 
   const current = useQuery({
     queryKey: ['picker-current', endpoint, value],
@@ -24,9 +30,9 @@ export function AsyncPicker({
     enabled: !!value,
   });
   const results = useQuery({
-    queryKey: ['picker-search', endpoint, term],
-    queryFn: async () => (await api.get(endpoint, { params: { search: term, size: 15 } })).data as { data: Array<{ id: string; code: string; name: string }> },
-    enabled: open && term.trim().length >= 1,
+    queryKey: ['picker-search', endpoint, paramsKey, term],
+    queryFn: async () => (await api.get(endpoint, { params: { ...params, search: term, size: 15 } })).data as { data: Array<{ id: string; code: string; name: string }> },
+    enabled: open && !disabled && term.trim().length >= 1,
   });
 
   const label = value ? `${current.data?.name ?? ''}${current.data?.code ? ` (${current.data.code})` : ''}`.trim() : '';
@@ -36,12 +42,13 @@ export function AsyncPicker({
       <input
         className="input"
         placeholder={placeholder}
+        disabled={disabled}
         value={open ? term : label}
-        onFocus={() => { setOpen(true); setTerm(''); }}
+        onFocus={() => { if (!disabled) { setOpen(true); setTerm(''); } }}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         onChange={(e) => setTerm(e.target.value)}
       />
-      {value && !open && (
+      {value && !open && !disabled && (
         <button type="button" className="btn btn-ghost btn-sm" style={{ position: 'absolute', right: 4, top: 4, padding: '2px 6px' }} onMouseDown={(e) => { e.preventDefault(); onChange(''); }} title="Bỏ chọn">✕</button>
       )}
       {open && term.trim().length >= 1 && (

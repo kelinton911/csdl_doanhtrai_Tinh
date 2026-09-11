@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrganizationService } from './organization.service';
-import { CreateAreaDto } from './dto/area.dto';
+import { CreateAreaDto, ListAreaQuery } from './dto/area.dto';
 import {
   CreateOrganizationDto,
   UpdateOrganizationDto,
@@ -27,9 +27,15 @@ export class OrganizationController {
 
   // ------- Xã/phường -------
   @Get('administrative-areas')
-  @ApiOperation({ summary: 'UC-04: Danh sách xã/phường (phân trang)' })
-  listAreas(@Query() q: PaginationQuery) {
+  @ApiOperation({ summary: 'UC-04: Danh sách địa bàn (lọc theo cấp/tỉnh, tìm kiếm)' })
+  listAreas(@Query() q: ListAreaQuery) {
     return this.service.listAreas(q);
+  }
+
+  @Get('administrative-areas/:id')
+  @ApiOperation({ summary: 'UC-04: Chi tiết địa bàn (id, mã, tên, cấp, tỉnh)' })
+  getArea(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.getArea(id);
   }
 
   @Post('administrative-areas')

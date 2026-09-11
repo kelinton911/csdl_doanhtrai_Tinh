@@ -146,6 +146,18 @@ const POSITIONS: PositionSeed[] = [
     },
   },
   {
+    code: Role.UNIT_USER,
+    name: 'Cán bộ đơn vị trực thuộc Tỉnh',
+    scope: PositionScope.UNIT,
+    level: 3,
+    // Như COMMUNE_USER: khai báo trong phạm vi đơn vị mình (xem/thêm/sửa/xuất), KHÔNG duyệt.
+    grants: (fn) => {
+      if (!DOMAIN(fn)) return null;
+      if (fn.actionType === 'DELETE' || fn.actionType === 'APPROVE') return null;
+      return FunctionScope.UNIT;
+    },
+  },
+  {
     code: Role.REVIEWER,
     name: 'Kiểm duyệt viên',
     scope: PositionScope.PROVINCE,

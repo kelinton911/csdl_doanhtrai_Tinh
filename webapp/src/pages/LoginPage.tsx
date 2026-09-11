@@ -59,6 +59,15 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     badgeFg: 'var(--role-ward)',
   },
   {
+    u: 'trungdoan01',
+    p: 'admin@123',
+    label: 'CB đơn vị trực thuộc',
+    desc: 'Cán bộ đơn vị trực thuộc Tỉnh (Trung đoàn BB địa phương) — khai báo vật chất',
+    roleCode: 'UNIT_USER',
+    badgeBg: 'var(--role-ward-bg)',
+    badgeFg: 'var(--role-ward)',
+  },
+  {
     u: 'kiemduyet',
     p: 'admin@123',
     label: 'Kiểm duyệt viên',

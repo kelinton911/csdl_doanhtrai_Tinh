@@ -71,6 +71,7 @@ async function run() {
     { username: 'chihuy', fullName: 'Chỉ huy tỉnh', roles: [Role.PROVINCIAL_COMMAND] },
     { username: 'hckt', fullName: 'Cán bộ ngành doanh trại', roles: [Role.BARRACKS_OFFICER] },
     { username: 'xa01', fullName: 'Cán bộ Ban CHQS xã A01', roles: [Role.COMMUNE_USER] },
+    { username: 'trungdoan01', fullName: 'Cán bộ Trung đoàn BB địa phương', roles: [Role.UNIT_USER] },
     { username: 'kiemduyet', fullName: 'Kiểm duyệt viên', roles: [Role.REVIEWER] },
     { username: 'kiemtra', fullName: 'Cán bộ kiểm tra - thanh tra', roles: [Role.AUDITOR] },
     { username: 'baocao', fullName: 'Người xem báo cáo', roles: [Role.REPORT_VIEWER] },
@@ -85,6 +86,21 @@ async function run() {
   }
   const officer = await userRepo.findOne({ where: { username: 'hckt' } });
   const authorId = officer?.id ?? null;
+
+  // 2b) Đơn vị trực thuộc Tỉnh (type=UNIT) + gán phạm vi cho tài khoản UNIT_USER trungdoan01.
+  let unit = await orgRepo.findOne({ where: { code: 'E-BBDP-01' } });
+  if (!unit) {
+    unit = await orgRepo.save(
+      orgRepo.create({ code: 'E-BBDP-01', name: 'Trung đoàn bộ binh địa phương (demo)', type: 'UNIT', parentId: province.id, status: 'ACTIVE' }),
+    );
+    console.log('  + Đơn vị trực thuộc:', unit.code);
+  }
+  const trungdoan01 = await userRepo.findOne({ where: { username: 'trungdoan01' } });
+  if (trungdoan01 && !trungdoan01.organizationId) {
+    trungdoan01.organizationId = unit.id;
+    await userRepo.save(trungdoan01);
+    console.log('  + Phạm vi dữ liệu trungdoan01 → Trung đoàn BB địa phương');
+  }
 
   // 3) Địa bàn dùng cho dữ liệu demo.
   // 3a) DỌN các tên GIẢ LẬP cũ (nếu có) để không còn "tên sai" trên bản đồ/danh sách.

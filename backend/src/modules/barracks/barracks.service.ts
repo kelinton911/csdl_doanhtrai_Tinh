@@ -124,11 +124,18 @@ export class BarracksService {
   }
 
   async create(dto: CreateBarracksDto, user: AuthUser): Promise<Barracks> {
-    const dup = await this.repo.findOne({ where: { code: dto.code } });
-    if (dup) throw new ConflictException(`DATA-003: Trùng mã doanh trại ${dto.code}`);
+    // Nhập mã thủ công: kiểm tra trùng ngay để trả lỗi rõ ràng (DATA-003).
+    const manualCode = dto.code?.trim();
+    if (manualCode) {
+      const dup = await this.repo.findOne({ where: { code: manualCode } });
+      if (dup) throw new ConflictException(`DATA-003: Trùng mã doanh trại ${manualCode}`);
+    }
 
-    const entity = this.repo.create({
-      code: dto.code,
+    // Toạ độ mặc định = điểm đại diện (centroid) của xã, để marker bản đồ luôn có dữ liệu.
+    let location = dto.location ?? null;
+    if (!location && dto.areaId) location = await this.centroidOf(dto.areaId);
+
+    const base = {
       name: dto.name,
       areaId: dto.areaId ?? null,
       organizationId: dto.organizationId ?? user.organizationId ?? null,
@@ -136,12 +143,75 @@ export class BarracksService {
       address: dto.address ?? null,
       landArea: (dto.landArea ?? 0).toString(),
       function: dto.function ?? null,
-      location: dto.location ?? null,
+      location,
       workflowStatus: WorkflowStatus.DRAFT,
       createdBy: user.sub,
       updatedBy: user.sub,
-    });
-    return this.repo.save(entity);
+    };
+
+    if (manualCode) {
+      return this.repo.save(this.repo.create({ code: manualCode, ...base }));
+    }
+
+    // Mã tự sinh: DT-<mã tỉnh>-<STT>. Nếu hai người tạo cùng lúc trùng số → unique index
+    // chặn, ta sinh lại số kế tiếp (retry) thay vì báo lỗi cho người dùng.
+    const provinceCode = await this.provinceCodeFor(dto.areaId);
+    for (let attempt = 0; ; attempt++) {
+      const code = await this.nextCode(provinceCode);
+      try {
+        return await this.repo.save(this.repo.create({ code, ...base }));
+      } catch (e) {
+        if (this.isUniqueViolation(e) && attempt < 5) continue;
+        throw e;
+      }
+    }
+  }
+
+  // Suy ra mã tỉnh để đặt tiền tố mã doanh trại: ưu tiên tỉnh của xã đã chọn,
+  // nếu không có xã thì lấy tỉnh duy nhất trong hệ; fallback '00'.
+  private async provinceCodeFor(areaId?: string | null): Promise<string> {
+    if (areaId) {
+      const rows = await this.repo.query(
+        `SELECT COALESCE(province_code, code) AS pc
+           FROM administrative_areas WHERE id = $1`,
+        [areaId],
+      );
+      if (rows?.[0]?.pc) return String(rows[0].pc);
+    }
+    const prov = await this.repo.query(
+      `SELECT code FROM administrative_areas WHERE level = 'PROVINCE' ORDER BY code LIMIT 1`,
+    );
+    return prov?.[0]?.code ? String(prov[0].code) : '00';
+  }
+
+  // Số thứ tự kế tiếp cho tiền tố DT-<tỉnh>-, tính theo giá trị SỐ (an toàn khi vượt 99).
+  private async nextCode(provinceCode: string): Promise<string> {
+    const prefix = `DT-${provinceCode}-`;
+    const rows = await this.repo.query(
+      `SELECT MAX(CAST(substring(code from '([0-9]+)$') AS INTEGER)) AS maxseq
+         FROM barracks WHERE code LIKE $1`,
+      [`${prefix}%`],
+    );
+    const next = (Number(rows?.[0]?.maxseq) || 0) + 1;
+    return `${prefix}${String(next).padStart(2, '0')}`;
+  }
+
+  // Điểm đại diện (GeoJSON Point) của xã để dùng làm toạ độ mặc định của doanh trại.
+  private async centroidOf(
+    areaId: string,
+  ): Promise<{ type: 'Point'; coordinates: [number, number] } | null> {
+    const rows = await this.repo.query(
+      `SELECT ST_AsGeoJSON(centroid) AS g FROM administrative_areas WHERE id = $1`,
+      [areaId],
+    );
+    return rows?.[0]?.g ? JSON.parse(rows[0].g) : null;
+  }
+
+  // Nhận diện lỗi vi phạm unique index của Postgres (mã lỗi 23505).
+  private isUniqueViolation(e: unknown): boolean {
+    if (typeof e !== 'object' || e === null) return false;
+    const err = e as { code?: string; driverError?: { code?: string } };
+    return err.code === '23505' || err.driverError?.code === '23505';
   }
 
   async update(

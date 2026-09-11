@@ -27,41 +27,50 @@ Kho mã liên thông GitHub: `git@github.com:kelinton911/csdl_doanhtrai_Tinh.git
 - **Docker Desktop** + Docker Compose (chạy PostgreSQL/PostGIS, Redis, MinIO)
 - Không cần cài PostgreSQL trên máy — CSDL chạy trong container.
 
-## 3. Khởi chạy nhanh (DEV)
+## 3. Khởi chạy nhanh (DEV trên Ubuntu)
+
+Cách nhanh nhất: chạy CẢ ngăn xếp trong Docker ở **chế độ hot-reload** — sửa code trong
+`backend/` hoặc `webapp/` là container **tự nạp lại ngay**, KHÔNG phải build lại image.
 
 ```bash
-# 0) Chuẩn bị biến môi trường
-cp .env.example .env        # chỉnh cổng/bí mật nếu cần
+cp .env.example .env     # lần đầu: chuẩn bị biến môi trường (chỉnh cổng/bí mật nếu cần)
 
-# 1) Bật hạ tầng (CSDL PostGIS + Redis + MinIO + Adminer)
-docker compose up -d
-
-# 2) Backend
-cd backend
-npm install
-npm run migration:run       # tạo schema (bật PostGIS, bảng users/organizations)
-npm run seed                # tài khoản demo (chỉ DEV)
-npm run start:dev           # http://localhost:3000/api/v1  (tự đổi cổng nếu bận)
-
-# 3) Frontend (cửa sổ khác)
-cd frontend
-npm run dev                 # http://localhost:8000  (tự đổi cổng nếu bận)
+npm run dev:hot          # bật stack :8000 hot-reload (db/redis/minio + backend + webapp)
+npm run dev:hot:logs     # (tuỳ chọn) theo dõi log backend + webapp
 ```
 
-> **Cổng tự động:** cả backend và frontend tự chọn cổng trống kế tiếp nếu cổng cấu
-> hình đang bận — xem dòng log "đã tự chuyển sang cổng …".
+- Giao diện: <http://localhost:8000>  ·  API: <http://localhost:3011/api/v1>  ·  Swagger: `.../api/v1/docs`
+- Lần đầu backend biên dịch TypeScript ~20–40s (nest `--watch`) trước khi sẵn sàng — theo dõi bằng `npm run dev:hot:logs`.
+- Ở chế độ dev KHÔNG có service worker/PWA nên khỏi phải hard-refresh.
 
-### Cổng mặc định
+> **Stack `:8000` có 2 chế độ — đừng nhầm:**
+> - **Hot-reload** (`npm run dev:hot`): dev-server bind-mount source, sửa là hiện ngay → dùng khi ĐANG code.
+> - **Build-sẵn** (`docker compose --profile app up -d --build`): image nướng `dist/` tĩnh, `restart=unless-stopped`
+>   nên tự chạy khi bật máy → dùng để demo/nghiệm thu. Muốn thấy thay đổi phải **build lại image**.
+> - Chuyển qua lại: `npm run dev:hot`  ↔  `npm run dev:hot:restore`.
+
+### Chạy native (Node trực tiếp, không container cho tầng app) — tuỳ chọn
+
+Instance dev thứ 2, cổng riêng (backend :3100 / webapp :8100), DB cô lập :5436 — không đụng stack :8000:
+
+```bash
+bash scripts/dev-infra-up.sh   # hạ tầng cô lập (DB 5436 / Redis 6381 / MinIO 9006 / Adminer 8083)
+bash scripts/dev-seed.sh       # lần đầu: migration + seed
+bash scripts/dev-backend.sh    # backend :3100 (nest --watch)   — cửa sổ 1
+bash scripts/dev-webapp.sh     # webapp  :8100 (vite)           — cửa sổ 2
+```
+
+### Cổng stack :8000 (theo `.env`)
 
 | Dịch vụ | URL | Ghi chú |
 | --- | --- | --- |
-| Frontend | http://localhost:8000 | Giao diện Claude Design |
-| Backend API | http://localhost:3000/api/v1 | REST, phiên bản hóa |
-| Swagger (OpenAPI) | http://localhost:3000/api/v1/docs | Hợp đồng API |
-| PostgreSQL/PostGIS | localhost:**5433** | (5432 dành cho dịch vụ khác trên máy) |
-| Adminer | http://localhost:8081 | Quản trị CSDL cho DEV |
-| MinIO Console | http://localhost:9001 | Object storage |
-| Redis | localhost:6379 | Cache/hàng đợi/outbox |
+| Webapp | http://localhost:8000 | Vite (hot-reload hoặc preview build-sẵn) |
+| Backend API | http://localhost:3011/api/v1 | REST, phiên bản hoá (`BACKEND_HOST_PORT`) |
+| Swagger (OpenAPI) | http://localhost:3011/api/v1/docs | Hợp đồng API |
+| PostgreSQL/PostGIS | localhost:5435 | container `csdl-db` (`DB_PORT`) |
+| Adminer | http://localhost:8082 | Quản trị CSDL cho DEV |
+| MinIO Console | http://localhost:9005 | Object storage (API :9004) |
+| Redis | localhost:6380 | Cache/hàng đợi/outbox |
 
 ### Tài khoản demo (chỉ DEV, dữ liệu giả lập)
 

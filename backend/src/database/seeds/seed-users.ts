@@ -18,6 +18,7 @@ const USERS: Array<{ username: string; fullName: string; roles: Role[] }> = [
   { username: 'chihuy', fullName: 'Chỉ huy tỉnh', roles: [Role.PROVINCIAL_COMMAND] },
   { username: 'hckt', fullName: 'Cán bộ ngành doanh trại', roles: [Role.BARRACKS_OFFICER] },
   { username: 'xa01', fullName: 'Cán bộ Ban CHQS xã A01', roles: [Role.COMMUNE_USER] },
+  { username: 'trungdoan01', fullName: 'Cán bộ Trung đoàn BB địa phương', roles: [Role.UNIT_USER] },
   { username: 'kiemduyet', fullName: 'Kiểm duyệt viên', roles: [Role.REVIEWER] },
   { username: 'kiemtra', fullName: 'Cán bộ kiểm tra - thanh tra', roles: [Role.AUDITOR] },
   { username: 'baocao', fullName: 'Người xem báo cáo', roles: [Role.REPORT_VIEWER] },
@@ -39,6 +40,16 @@ async function run() {
     console.log('  + Tạo đơn vị cấp tỉnh:', province.code);
   }
 
+  // Đơn vị trực thuộc Tỉnh (type=UNIT) để gán cho tài khoản UNIT_USER.
+  let unit = await orgRepo.findOne({ where: { code: 'E-BBDP-01' } });
+  if (!unit) {
+    unit = await orgRepo.save(
+      orgRepo.create({ code: 'E-BBDP-01', name: 'Trung đoàn bộ binh địa phương (demo)', type: 'UNIT', parentId: province.id, status: 'ACTIVE' }),
+    );
+    console.log('  + Tạo đơn vị trực thuộc:', unit.code);
+  }
+  const orgFor = (u: { roles: Role[] }) => (u.roles.includes(Role.UNIT_USER) ? unit!.id : province!.id);
+
   const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
   let created = 0;
   let healed = 0;
@@ -51,7 +62,7 @@ async function run() {
           passwordHash,
           fullName: u.fullName,
           roles: u.roles,
-          organizationId: province.id,
+          organizationId: orgFor(u),
           status: 'ACTIVE',
         }),
       );
@@ -64,7 +75,7 @@ async function run() {
       existing.failedAttempts = 0;
       existing.lockedUntil = null;
       existing.roles = u.roles;
-      if (!existing.organizationId) existing.organizationId = province.id;
+      if (!existing.organizationId) existing.organizationId = orgFor(u);
       await userRepo.save(existing);
       healed++;
       console.log(`  = Reset & mở khóa: ${u.username}`);

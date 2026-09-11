@@ -121,7 +121,7 @@ export interface CandidateOptions {
 
 export interface RankedCandidate extends CandidateRow {
   availableQty: number;
-  score: number;
+  rank: number; // thứ hạng 1-based theo đúng thứ tự xếp hạng (1 = ưu tiên nhất)
 }
 
 // Mã lý do loại (ổn định để test/hiển thị).
@@ -144,7 +144,7 @@ export function rankCandidates(
   rows: CandidateRow[],
   opts: CandidateOptions,
 ): { ranked: RankedCandidate[]; rejected: RejectedCandidate[] } {
-  const ranked: RankedCandidate[] = [];
+  const eligible: Omit<RankedCandidate, 'rank'>[] = [];
   const rejected: RejectedCandidate[] = [];
 
   for (const r of rows) {
@@ -184,15 +184,12 @@ export function rankCandidates(
       rejected.push({ sourceMaterialId: r.sourceMaterialId, reason: 'LEAD_TIME_EXCEEDED' });
       continue;
     }
-    // 8) qua đủ 7 bước → ứng viên; điểm để xếp hạng (cao = tốt hơn)
-    const leadPenalty = r.leadTimeDays ?? 0;
-    const distPenalty = r.distanceKm ?? 0;
-    const score = round3(-r.priority * 1000 - leadPenalty * 10 - distPenalty + available / 1000);
-    ranked.push({ ...r, availableQty: available, score });
+    // 8) qua đủ 7 bước → ứng viên (thứ hạng gán sau khi sắp xếp).
+    eligible.push({ ...r, availableQty: available });
   }
 
   // Ưu tiên: priority nhỏ trước → lead_time nhỏ → khoảng cách nhỏ → available lớn.
-  ranked.sort((a, b) => {
+  eligible.sort((a, b) => {
     if (a.priority !== b.priority) return a.priority - b.priority;
     const la = a.leadTimeDays ?? Number.MAX_SAFE_INTEGER;
     const lb = b.leadTimeDays ?? Number.MAX_SAFE_INTEGER;
@@ -203,6 +200,8 @@ export function rankCandidates(
     return b.availableQty - a.availableQty;
   });
 
+  // Thứ hạng 1-based theo đúng thứ tự đã xếp — nguồn tốt nhất là "ứng viên #1".
+  const ranked: RankedCandidate[] = eligible.map((r, i) => ({ ...r, rank: i + 1 }));
   return { ranked, rejected };
 }
 

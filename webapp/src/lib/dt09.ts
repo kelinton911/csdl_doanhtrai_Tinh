@@ -93,7 +93,7 @@ export interface RankedCandidate {
   leadTimeDays: number | null;
   distanceKm: number | null;
   priority: number;
-  score: number;
+  rank: number;
 }
 
 export interface RejectedCandidate {

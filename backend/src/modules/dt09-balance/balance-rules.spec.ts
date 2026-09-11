@@ -173,6 +173,19 @@ describe('DT-09 balance-rules — quy tắc nghiệp vụ thuần', () => {
       const res = rankCandidates([row({ distanceKm: 999 })], { ...opts, radiusKm: null });
       expect(res.ranked).toHaveLength(1);
     });
+    it('gắn rank 1-based khớp đúng thứ tự xếp hạng', () => {
+      const res = rankCandidates(
+        [
+          row({ sourceMaterialId: 'lo', priority: 200 }),
+          row({ sourceMaterialId: 'hi', priority: 50 }),
+        ],
+        opts,
+      );
+      expect(res.ranked.map((r) => [r.sourceMaterialId, r.rank])).toEqual([
+        ['hi', 1],
+        ['lo', 2],
+      ]);
+    });
   });
 
   describe('TC-DT09-020 — fingerprint & checksum bất biến/tất định', () => {

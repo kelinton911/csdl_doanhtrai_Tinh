@@ -1,0 +1,42 @@
+# Overlay HOT-RELOAD cho stack :8000 — dùng KÈM docker-compose.yml.
+# Biến 2 container app (backend :3011, webapp :8000) từ "image nướng sẵn" thành
+# dev-server bind-mount source: sửa code trên host là container tự nạp lại NGAY,
+# KHÔNG phải build lại image.
+#
+# Dùng (đã có sẵn npm script / launcher gọn hơn):
+#   npm run dev:hot          # bật hot-reload
+#   npm run dev:hot:logs     # theo dõi log backend + webapp
+#   npm run dev:hot:restore  # quay lại bản build-sẵn (production-like)
+#   # hoặc thủ công:
+#   docker compose -p csdl-doanhtrai -f docker-compose.yml -f docker-compose.hotreload.yml --profile app up -d
+#
+# node_modules: dùng volume riêng (nạp từ image Node 22 lúc tạo) để KHÔNG bị
+# node_modules của host đè lên — tránh lệch phiên bản/native binary. Source mount đè phần còn lại.
+services:
+  backend:
+    environment:
+      # Dev: bật chế độ phát triển (log/đường dẫn thân thiện hơn).
+      NODE_ENV: development
+    # Entrypoint vẫn chờ DB + chạy migration trước, rồi exec lệnh này:
+    command: ["npm", "run", "start:dev"]   # = nest start --watch
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+
+  webapp:
+    # Vite dev không cần backend "healthy" mới chạy (proxy /api sẽ nối khi backend sẵn sàng).
+    depends_on:
+      backend:
+        condition: service_started
+    environment:
+      BACKEND_ORIGIN: http://backend:3000
+      # HMR websocket trỏ về cổng host (mặc định 8000) để nạp-nóng qua cổng map.
+      HMR_CLIENT_PORT: "${FRONTEND_HOST_PORT:-8000}"
+    command: ["npx", "vite", "--host", "0.0.0.0", "--port", "5173"]
+    volumes:
+      - ./webapp:/app
+      - webapp_node_modules:/app/node_modules
+
+volumes:
+  backend_node_modules:
+  webapp_node_modules:

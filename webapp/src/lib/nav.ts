@@ -67,6 +67,7 @@ export const NAV: NavItem[] = [
   { to: '/utilities', label: 'Điện · nước · năng lượng', icon: 'wrench', dom: 'repair', group: 'declare' },
   { to: '/dt02/land', label: 'Hồ sơ điểm đất (DT-02)', icon: 'map', dom: 'geo', group: 'declare', roles: FIELD_ROLES },
   { to: '/materiel', label: 'Thực lực vật chất (DT-04)', icon: 'box', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
+  { to: '/material-declarations', label: 'Khai báo vật chất đơn vị', icon: 'clipboard', dom: 'stock', group: 'declare', roles: ['BARRACKS_OFFICER', 'COMMUNE_USER', 'UNIT_USER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND', 'REVIEWER'] },
   { to: '/inventory-documents', label: 'Chứng từ vật chất (DT-05)', icon: 'clipboard', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
 
   // ── Lớp Duyệt & kiểm tra ─────────────────────────────────────

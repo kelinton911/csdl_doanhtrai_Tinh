@@ -11,10 +11,14 @@ import {
 } from 'class-validator';
 
 export class CreateBarracksDto {
-  @ApiProperty({ example: 'DT-001' })
+  @ApiPropertyOptional({
+    example: 'DT-38-01',
+    description: 'Bỏ trống để hệ thống tự sinh mã theo tỉnh: DT-<mã tỉnh>-<STT>.',
+  })
+  @IsOptional()
   @IsString()
   @MinLength(3)
-  code!: string;
+  code?: string;
 
   @ApiProperty({ example: 'Doanh trại giả lập 01' })
   @IsString()

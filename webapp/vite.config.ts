@@ -75,6 +75,12 @@ export default defineConfig(({ mode }) => {
       // host để container publish được ra ngoài (0.0.0.0). Vô hại khi chạy local.
       host: true,
       proxy: apiProxy,
+      // Khi chạy `vite` (dev) TRONG container map cổng (host 8000 → container 5173),
+      // websocket HMR phải trỏ về CỔNG HOST, nếu không nạp-nóng sẽ không kết nối được.
+      // Đặt qua HMR_CLIENT_PORT (overlay hot-reload set = 8000). Chạy local thì bỏ trống.
+      ...(process.env.HMR_CLIENT_PORT
+        ? { hmr: { clientPort: Number(process.env.HMR_CLIENT_PORT) } }
+        : {}),
     },
     // `vite preview` phục vụ bản build tĩnh (dùng cho container webapp của app-stack).
     // Cần proxy riêng vì preview KHÔNG dùng server.proxy.

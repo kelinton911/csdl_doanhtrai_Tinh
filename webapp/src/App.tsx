@@ -16,6 +16,9 @@ const InventoryPage = lazy(() => import('./pages/InventoryPage').then((m) => ({ 
 const CommuneMaterialsPage = lazy(() => import('./pages/CommuneMaterialsPage').then((m) => ({ default: m.CommuneMaterialsPage })));
 const SscdMaterialsPage = lazy(() => import('./pages/SscdMaterialsPage').then((m) => ({ default: m.SscdMaterialsPage })));
 const SscdMaterialDetailPage = lazy(() => import('./pages/SscdMaterialDetailPage').then((m) => ({ default: m.SscdMaterialDetailPage })));
+const MaterialDeclarationsListPage = lazy(() => import('./pages/MaterialDeclarationsListPage').then((m) => ({ default: m.MaterialDeclarationsListPage })));
+const MaterialDeclarationFormPage = lazy(() => import('./pages/MaterialDeclarationFormPage').then((m) => ({ default: m.MaterialDeclarationFormPage })));
+const MaterialDeclarationDetailPage = lazy(() => import('./pages/MaterialDeclarationDetailPage').then((m) => ({ default: m.MaterialDeclarationDetailPage })));
 const LogisticsNormsPage = lazy(() => import('./pages/LogisticsNormsPage').then((m) => ({ default: m.LogisticsNormsPage })));
 const StoragePage = lazy(() => import('./pages/StoragePage').then((m) => ({ default: m.StoragePage })));
 const ApprovalQueuePage = lazy(() => import('./pages/ApprovalQueuePage').then((m) => ({ default: m.ApprovalQueuePage })));
@@ -120,6 +123,10 @@ export default function App() {
       <Route path="/barracks/new" element={<Protected><BarracksFormPage /></Protected>} />
       <Route path="/barracks/:id/edit" element={<Protected><BarracksFormPage /></Protected>} />
       <Route path="/barracks/:id" element={<Protected><BarracksDetailPage /></Protected>} />
+      <Route path="/material-declarations" element={<Protected><MaterialDeclarationsListPage /></Protected>} />
+      <Route path="/material-declarations/new" element={<Protected><MaterialDeclarationFormPage /></Protected>} />
+      <Route path="/material-declarations/:id/edit" element={<Protected><MaterialDeclarationFormPage /></Protected>} />
+      <Route path="/material-declarations/:id" element={<Protected><MaterialDeclarationDetailPage /></Protected>} />
       <Route path="/land-parcels" element={<Protected><LandParcelsListPage /></Protected>} />
       <Route path="/land-parcels/new" element={<Protected><LandParcelFormPage /></Protected>} />
       <Route path="/land-parcels/:id/edit" element={<Protected><LandParcelFormPage /></Protected>} />

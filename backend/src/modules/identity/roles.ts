@@ -4,6 +4,9 @@ export enum Role {
   PROVINCIAL_COMMAND = 'PROVINCIAL_COMMAND',
   BARRACKS_OFFICER = 'BARRACKS_OFFICER',
   COMMUNE_USER = 'COMMUNE_USER',
+  // Cán bộ đơn vị trực thuộc Tỉnh (Trung đoàn bộ binh địa phương…) — giới hạn theo
+  // organizationId (org type=UNIT), khai báo/nhập liệu như COMMUNE_USER.
+  UNIT_USER = 'UNIT_USER',
   REVIEWER = 'REVIEWER',
   REPORT_VIEWER = 'REPORT_VIEWER',
   AUDITOR = 'AUDITOR',

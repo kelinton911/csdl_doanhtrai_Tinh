@@ -210,10 +210,11 @@ function LinePanel({ planId, line, deadlineDays, onDone }: { planId: string; lin
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table className="table">
-              <thead><tr><th>Nguồn</th><th>Khả dụng</th><th>Lead</th><th>KC (km)</th><th></th></tr></thead>
+              <thead><tr><th>#</th><th>Nguồn</th><th>Khả dụng</th><th>Lead</th><th>KC (km)</th><th></th></tr></thead>
               <tbody>
                 {candidates.data!.ranked.map((c) => (
                   <tr key={c.sourceMaterialId}>
+                    <td className="num">{c.rank}</td>
                     <td>{c.sourceName ?? c.sourceCode ?? c.sourceMaterialId.slice(0, 8)}</td>
                     <td>{c.availableQty}</td>
                     <td>{c.leadTimeDays ?? '—'}</td>
@@ -222,7 +223,7 @@ function LinePanel({ planId, line, deadlineDays, onDone }: { planId: string; lin
                   </tr>
                 ))}
                 {!candidates.data!.ranked.length && (
-                  <tr><td colSpan={5} className="muted">Không có nguồn đủ điều kiện.</td></tr>
+                  <tr><td colSpan={6} className="muted">Không có nguồn đủ điều kiện.</td></tr>
                 )}
               </tbody>
             </table>

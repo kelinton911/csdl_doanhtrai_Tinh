@@ -60,6 +60,38 @@ export class LandParcel {
   @Column({ name: 'certificate_no', type: 'varchar', nullable: true })
   certificateNo!: string | null;
 
+  // --- Bộ 5 biểu BCQK Đất Quốc phòng (migration 1753000031000) -----------------
+  // Số điểm (thửa) — biểu 02/03 kiểm kê.
+  @Column({ name: 'point_count', type: 'integer', default: 1 })
+  pointCount!: number;
+
+  @Column({ name: 'certificate_serie', type: 'varchar', nullable: true })
+  certificateSerie!: string | null;
+
+  @Column({ name: 'certificate_issued_at', type: 'date', nullable: true })
+  certificateIssuedAt!: string | null;
+
+  // Bóc tách hiện trạng (m2): quốc phòng / kinh tế / khu gia đình. numeric ⇒ chuỗi.
+  @Column({ name: 'area_defense', type: 'numeric', precision: 14, scale: 2, default: 0 })
+  areaDefense!: string;
+
+  @Column({ name: 'area_economic', type: 'numeric', precision: 14, scale: 2, default: 0 })
+  areaEconomic!: string;
+
+  @Column({ name: 'area_family', type: 'numeric', precision: 14, scale: 2, default: 0 })
+  areaFamily!: string;
+
+  @Column({ name: 'family_has_bqp_approval', type: 'boolean', default: false })
+  familyHasBqpApproval!: boolean;
+
+  @Column({ name: 'legal_docs', type: 'text', nullable: true })
+  legalDocs!: string | null;
+
+  // Nguồn dữ liệu (vd REFERENCE_HAIPHONG_2026) để tách số liệu tham chiếu khỏi production.
+  @Index()
+  @Column({ name: 'data_source', type: 'varchar', nullable: true })
+  dataSource!: string | null;
+
   // Tranh chấp/lấn chiếm: NONE | DISPUTED | ENCROACHED.
   @Index()
   @Column({ name: 'dispute_status', type: 'varchar', default: 'NONE' })

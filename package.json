@@ -13,6 +13,11 @@
     "stack:down": "docker compose --profile app down",
     "stack:logs": "docker compose --profile app logs -f",
 
+    "dev:hot": "bash scripts/dev-hot.sh",
+    "dev:hot:logs": "docker compose -p csdl-doanhtrai -f docker-compose.yml -f docker-compose.hotreload.yml --profile app logs -f backend webapp",
+    "dev:hot:down": "docker compose -p csdl-doanhtrai -f docker-compose.yml -f docker-compose.hotreload.yml --profile app down",
+    "dev:hot:restore": "docker compose -p csdl-doanhtrai -f docker-compose.yml --profile app up -d --build backend webapp",
+
     "infra": "docker compose up -d db redis minio",
     "infra:down": "docker compose down",
 

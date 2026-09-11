@@ -4,10 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { AdministrativeArea } from './entities/administrative-area.entity';
 import { Organization } from '../identity/entities/organization.entity';
-import { CreateAreaDto } from './dto/area.dto';
+import { CreateAreaDto, ListAreaQuery } from './dto/area.dto';
 import {
   CreateOrganizationDto,
   UpdateOrganizationDto,
@@ -25,13 +25,35 @@ export class OrganizationService {
   ) {}
 
   // ------- Xã/phường -------
-  async listAreas(q: PaginationQuery) {
+  // Hỗ trợ lọc theo cấp (PROVINCE/COMMUNE), theo tỉnh (provinceCode) và tìm kiếm mã/tên
+  // để form doanh trại dựng cascade Tỉnh → Xã (không còn trộn lẫn các cấp trong 1 danh sách).
+  async listAreas(q: ListAreaQuery) {
+    // Bộ lọc chung (cấp/tỉnh) áp cho mọi nhánh; tìm kiếm là OR trên mã và tên.
+    const base: FindOptionsWhere<AdministrativeArea> = {};
+    if (q.level) base.level = q.level;
+    if (q.provinceCode) base.provinceCode = q.provinceCode;
+    const where: FindOptionsWhere<AdministrativeArea> | FindOptionsWhere<AdministrativeArea>[] =
+      q.search
+        ? [
+            { ...base, code: ILike(`%${q.search}%`) },
+            { ...base, name: ILike(`%${q.search}%`) },
+          ]
+        : base;
     const [data, total] = await this.areas.findAndCount({
-      order: { code: 'ASC' },
+      where,
+      // PROVINCE trước COMMUNE, sau đó theo mã để danh sách ổn định.
+      order: { level: 'DESC', code: 'ASC' },
       skip: q.skip,
       take: q.size,
     });
     return paginated(data, total, q);
+  }
+
+  // Chi tiết 1 địa bàn (dùng cho ô chọn xã hiển thị nhãn + suy ra tỉnh khi sửa hồ sơ).
+  async getArea(id: string) {
+    const a = await this.areas.findOne({ where: { id } });
+    if (!a) throw new NotFoundException('DATA-001: Không tìm thấy địa bàn');
+    return a;
   }
 
   async createArea(dto: CreateAreaDto) {
