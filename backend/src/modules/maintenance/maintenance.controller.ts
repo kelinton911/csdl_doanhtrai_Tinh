@@ -33,8 +33,8 @@ export class MaintenanceController {
   // ------- Hư hỏng -------
   @Get('damage-events')
   @ApiOperation({ summary: 'UC-13: Danh sách sự kiện hư hỏng' })
-  listDamages(@Query() q: DamageQuery) {
-    return this.service.listDamages(q, { entityId: q.entityId, status: q.status });
+  listDamages(@CurrentUser() user: AuthUser, @Query() q: DamageQuery) {
+    return this.service.listDamages(q, { entityId: q.entityId, status: q.status }, user);
   }
 
   @Post('damage-events')
@@ -61,8 +61,8 @@ export class MaintenanceController {
   // ------- Yêu cầu sửa chữa -------
   @Get('maintenance-requests')
   @ApiOperation({ summary: 'UC-14: Danh sách yêu cầu sửa chữa' })
-  listRequests(@Query() q: MaintenanceQuery) {
-    return this.service.listRequests(q, { status: q.status, barracksId: q.barracksId });
+  listRequests(@CurrentUser() user: AuthUser, @Query() q: MaintenanceQuery) {
+    return this.service.listRequests(q, { status: q.status, barracksId: q.barracksId }, user);
   }
 
   @Get('maintenance-requests/:id')

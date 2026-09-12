@@ -49,11 +49,12 @@ export class FacilitiesController {
   @Get('facilities')
   @ApiOperation({ summary: 'UC-07: Danh sách công trình toàn hệ thống (kèm tên doanh trại)' })
   listAll(
+    @CurrentUser() user: AuthUser,
     @Query() q: PaginationQuery,
     @Query('barracksId') barracksId?: string,
     @Query('search') search?: string,
   ) {
-    return this.service.listAll(q, { barracksId, search });
+    return this.service.listAll(q, { barracksId, search }, user);
   }
 
   @Get('facilities/:id')

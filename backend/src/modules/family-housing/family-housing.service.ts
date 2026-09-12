@@ -18,6 +18,7 @@ import {
 } from '../../common/workflow-transition';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { barracksScope } from '../../common/data-scope';
 
 export interface FamilyHousingFilters {
   search?: string;
@@ -32,7 +33,8 @@ export class FamilyHousingService {
     @InjectRepository(FamilyHousingArea) private readonly repo: Repository<FamilyHousingArea>,
   ) {}
 
-  async list(q: PaginationQuery, filters: FamilyHousingFilters) {
+  async list(q: PaginationQuery, filters: FamilyHousingFilters, user?: AuthUser) {
+    const scope = barracksScope(user);
     const qb = this.repo
       .createQueryBuilder('h')
       .leftJoin('administrative_areas', 'a', 'a.id = h.area_id')
@@ -57,6 +59,13 @@ export class FamilyHousingService {
       if (filters.search) b.andWhere('(h.code ILIKE :s OR h.name ILIKE :s)', { s: `%${filters.search}%` });
       if (filters.workflowStatus) b.andWhere('h.workflow_status = :ws', { ws: filters.workflowStatus });
       if (filters.areaId) b.andWhere('h.area_id = :aid', { aid: filters.areaId });
+      // Phạm vi (SYS-BR-08): cấp xã/đơn vị chỉ thấy khu gia đình trong địa bàn/đơn vị mình.
+      if (scope) {
+        b.andWhere('(h.area_id = ANY(:scAreaIds::uuid[]) OR h.organization_id = :scOrgId)', {
+          scAreaIds: scope.areaIds,
+          scOrgId: scope.organizationId,
+        });
+      }
     };
     applyFilters(qb);
     applyFilters(countQb);

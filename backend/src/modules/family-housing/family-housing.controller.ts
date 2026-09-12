@@ -34,8 +34,8 @@ export class FamilyHousingController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách khu gia đình (phân trang, lọc)' })
-  list(@Query() q: FamilyHousingQuery) {
-    return this.service.list(q, q);
+  list(@CurrentUser() user: AuthUser, @Query() q: FamilyHousingQuery) {
+    return this.service.list(q, q, user);
   }
 
   @Get(':id')

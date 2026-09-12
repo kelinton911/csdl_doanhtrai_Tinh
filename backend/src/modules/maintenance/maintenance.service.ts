@@ -18,6 +18,12 @@ import {
 import { MaintenanceStatus } from '../../common/workflow';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { barracksScope } from '../../common/data-scope';
+
+// Điều kiện lọc phạm vi: bản ghi gắn với doanh trại trong địa bàn/đơn vị của người dùng.
+// Trả về mệnh đề SQL con tham chiếu cột doanh trại (barracksCol) / công trình (facilityCol).
+const COMMUNE_BARRACKS = `SELECT id FROM barracks b_s WHERE b_s.area_id = ANY(:scAreaIds::uuid[]) OR b_s.organization_id = :scOrgId`;
+const COMMUNE_FACILITIES = `SELECT f_s.id FROM facilities f_s JOIN barracks b_f ON b_f.id = f_s.barracks_id WHERE b_f.area_id = ANY(:scAreaIds::uuid[]) OR b_f.organization_id = :scOrgId`;
 
 // M09 — Maintenance & Recovery. UC-13 (hư hỏng), UC-14 (yêu cầu sửa chữa).
 @Injectable()
@@ -28,11 +34,28 @@ export class MaintenanceService {
   ) {}
 
   // ------- Hư hỏng (UC-13) -------
-  async listDamages(q: PaginationQuery, filters: { entityId?: string; status?: string }) {
-    const where: Record<string, string> = {};
-    if (filters.entityId) where.entityId = filters.entityId;
-    if (filters.status) where.status = filters.status;
-    const [data, total] = await this.damages.findAndCount({ where, order: { occurredAt: 'DESC' }, skip: q.skip, take: q.size });
+  async listDamages(
+    q: PaginationQuery,
+    filters: { entityId?: string; status?: string },
+    user?: AuthUser,
+  ) {
+    const qb = this.damages
+      .createQueryBuilder('d')
+      .orderBy('d.occurredAt', 'DESC')
+      .skip(q.skip)
+      .take(q.size);
+    if (filters.entityId) qb.andWhere('d.entity_id = :eid', { eid: filters.entityId });
+    if (filters.status) qb.andWhere('d.status = :st', { st: filters.status });
+    // Phạm vi (SYS-BR-08): chỉ hư hỏng của doanh trại/công trình trong địa bàn/đơn vị mình.
+    const scope = barracksScope(user);
+    if (scope) {
+      qb.andWhere(
+        `((d.entity_type = 'barracks' AND d.entity_id IN (${COMMUNE_BARRACKS}))
+          OR (d.entity_type = 'facility' AND d.entity_id IN (${COMMUNE_FACILITIES})))`,
+        { scAreaIds: scope.areaIds, scOrgId: scope.organizationId },
+      );
+    }
+    const [data, total] = await qb.getManyAndCount();
     return paginated(data, total, q);
   }
 
@@ -74,11 +97,27 @@ export class MaintenanceService {
   }
 
   // ------- Yêu cầu sửa chữa (UC-14) -------
-  async listRequests(q: PaginationQuery, filters: { status?: string; barracksId?: string }) {
-    const where: Record<string, string> = {};
-    if (filters.status) where.status = filters.status;
-    if (filters.barracksId) where.barracksId = filters.barracksId;
-    const [data, total] = await this.requests.findAndCount({ where, order: { createdAt: 'DESC' }, skip: q.skip, take: q.size });
+  async listRequests(
+    q: PaginationQuery,
+    filters: { status?: string; barracksId?: string },
+    user?: AuthUser,
+  ) {
+    const qb = this.requests
+      .createQueryBuilder('r')
+      .orderBy('r.createdAt', 'DESC')
+      .skip(q.skip)
+      .take(q.size);
+    if (filters.status) qb.andWhere('r.status = :st', { st: filters.status });
+    if (filters.barracksId) qb.andWhere('r.barracks_id = :bid', { bid: filters.barracksId });
+    // Phạm vi (SYS-BR-08): chỉ yêu cầu gắn doanh trại/công trình trong địa bàn/đơn vị mình.
+    const scope = barracksScope(user);
+    if (scope) {
+      qb.andWhere(
+        `(r.barracks_id IN (${COMMUNE_BARRACKS}) OR r.facility_id IN (${COMMUNE_FACILITIES}))`,
+        { scAreaIds: scope.areaIds, scOrgId: scope.organizationId },
+      );
+    }
+    const [data, total] = await qb.getManyAndCount();
     return paginated(data, total, q);
   }
 

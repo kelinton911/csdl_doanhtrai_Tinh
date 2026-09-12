@@ -15,6 +15,7 @@ import {
 import { FacilityStatus } from './facility-status';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { barracksScope } from '../../common/data-scope';
 
 // M05 — Facilities. UC-07: quản lý công trình và hạ tầng kỹ thuật.
 @Injectable()
@@ -38,7 +39,11 @@ export class FacilitiesService {
 
   // UC-07: liệt kê công trình toàn hệ thống (kèm tên doanh trại) — phục vụ bộ chọn
   // phạm vi dữ liệu type=FACILITY và tra cứu chung.
-  async listAll(q: PaginationQuery, filters: { barracksId?: string; search?: string }) {
+  async listAll(
+    q: PaginationQuery,
+    filters: { barracksId?: string; search?: string },
+    user?: AuthUser,
+  ) {
     const params: unknown[] = [];
     let where = '';
     if (filters.barracksId) {
@@ -48,6 +53,16 @@ export class FacilitiesService {
     if (filters.search) {
       params.push(`%${filters.search}%`);
       where += ` AND (f.code ILIKE $${params.length} OR f.name ILIKE $${params.length})`;
+    }
+    // Phạm vi dữ liệu (SYS-BR-08): cấp xã/đơn vị chỉ thấy công trình thuộc doanh trại
+    // trong địa bàn/đơn vị mình; vai trò toàn tỉnh (scope=null) không lọc.
+    const scope = barracksScope(user);
+    if (scope) {
+      params.push(scope.areaIds);
+      const a = params.length;
+      params.push(scope.organizationId);
+      const o = params.length;
+      where += ` AND f.barracks_id IN (SELECT id FROM barracks b2 WHERE b2.area_id = ANY($${a}::uuid[]) OR b2.organization_id = $${o})`;
     }
     const rows = await this.repo.query(
       `SELECT f.id, f.code, f.name, f.barracks_id AS "barracksId", b.name AS "barracksName",

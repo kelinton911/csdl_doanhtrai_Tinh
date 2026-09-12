@@ -67,8 +67,8 @@ export class InspectionController {
   // ------- Phiếu kiểm kê -------
   @Get('inspection-sheets')
   @ApiOperation({ summary: 'UC-10: Danh sách phiếu kiểm kê' })
-  listSheets(@Query() q: ListSheetsQuery) {
-    return this.service.listSheets(q, q.campaignId);
+  listSheets(@CurrentUser() user: AuthUser, @Query() q: ListSheetsQuery) {
+    return this.service.listSheets(q, q.campaignId, user);
   }
 
   @Get('inspection-sheets/:id')

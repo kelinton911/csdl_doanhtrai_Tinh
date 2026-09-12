@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { isProvinceWide, scopeAreaIds } from '../../common/data-scope';
 
 // Tổng hợp số liệu cho dashboard chỉ huy (Frontend §6.2). Đọc trực tiếp CSDL.
 // Báo cáo chính thức đọc snapshot (M12); dashboard là tổng quan thời gian thực.
@@ -8,9 +10,20 @@ import { DataSource } from 'typeorm';
 export class DashboardService {
   constructor(@InjectDataSource() private readonly ds: DataSource) {}
 
-  async summary(mode?: string) {
+  // Dashboard tổng hợp: vai trò toàn tỉnh xem toàn bộ; cấp xã/đơn vị chỉ thấy dữ liệu đơn vị
+  // mình (SYS-BR-08) — nếu không CommuneWorkspace sẽ lộ số liệu doanh trại toàn tỉnh.
+  async summary(mode?: string, user?: AuthUser) {
     const m = ['NORMAL', 'SSCD', 'SCENARIO'].includes(mode ?? '') ? (mode as string) : 'NORMAL';
-    const [barracks] = await this.ds.query(`
+    // org = null ⇒ toàn tỉnh (không lọc); ngược lại lọc theo đơn vị (thiếu org ⇒ '__none__' = rỗng).
+    const org = isProvinceWide(user) ? null : user?.organizationId ?? '__none__';
+    const p = org ? [org] : [];
+    const bWhere = org ? 'WHERE organization_id = $1' : '';
+    // Công trình thuộc doanh trại của đơn vị (facilities không có organization_id).
+    const fScope = org ? 'barracks_id IN (SELECT id FROM barracks WHERE organization_id = $1)' : '';
+    const fWhere = fScope ? `WHERE ${fScope}` : '';
+
+    const [barracks] = await this.ds.query(
+      `
       SELECT
         COUNT(*)::int AS total,
         COUNT(*) FILTER (WHERE workflow_status = 'APPROVED')::int AS approved,
@@ -18,23 +31,34 @@ export class DashboardService {
         COUNT(*) FILTER (WHERE workflow_status = 'DRAFT')::int AS draft,
         COALESCE(SUM(declared_capacity), 0)::int AS capacity,
         COALESCE(SUM(land_area), 0)::numeric AS land_area
-      FROM barracks
-    `);
-    const [facilities] = await this.ds.query(`
+      FROM barracks ${bWhere}
+    `,
+      p,
+    );
+    const [facilities] = await this.ds.query(
+      `
       SELECT
         COUNT(*)::int AS total,
         COUNT(*) FILTER (WHERE status = 'IN_USE')::int AS in_use,
         COUNT(*) FILTER (WHERE status = 'DECOMMISSIONED')::int AS decommissioned
-      FROM facilities
-    `);
-    const byCondition = await this.ds.query(`
+      FROM facilities ${fWhere}
+    `,
+      p,
+    );
+    const byCondition = await this.ds.query(
+      `
       SELECT COALESCE(condition, 'CHUA_DANH_GIA') AS condition, COUNT(*)::int AS count
-      FROM facilities GROUP BY 1 ORDER BY 2 DESC
-    `);
-    const byStatus = await this.ds.query(`
+      FROM facilities ${fWhere} GROUP BY 1 ORDER BY 2 DESC
+    `,
+      p,
+    );
+    const byStatus = await this.ds.query(
+      `
       SELECT workflow_status AS status, COUNT(*)::int AS count
-      FROM barracks GROUP BY 1
-    `);
+      FROM barracks ${bWhere} GROUP BY 1
+    `,
+      p,
+    );
     const [materials] = await this.ds.query(`
       SELECT COUNT(*)::int AS total,
              COUNT(*) FILTER (WHERE status = 'PUBLISHED')::int AS published
@@ -58,7 +82,10 @@ export class DashboardService {
     // 5 vấn đề cần xử lý (Frontend §6.2) — suy ra từ dữ liệu.
     const topIssues: Array<{ severity: string; title: string; count: number }> = [];
     const [poor] = await this.ds.query(
-      `SELECT COUNT(*)::int AS c FROM facilities WHERE condition = 'POOR' AND status = 'IN_USE'`,
+      `SELECT COUNT(*)::int AS c FROM facilities WHERE condition = 'POOR' AND status = 'IN_USE'${
+        fScope ? ` AND ${fScope}` : ''
+      }`,
+      p,
     );
     if (poor.c > 0)
       topIssues.push({ severity: 'danger', title: 'Công trình chất lượng kém đang khai thác', count: poor.c });
@@ -67,7 +94,10 @@ export class DashboardService {
     if (barracks.draft > 0)
       topIssues.push({ severity: 'info', title: 'Hồ sơ doanh trại còn ở trạng thái nháp', count: barracks.draft });
     const [noFac] = await this.ds.query(
-      `SELECT COUNT(*)::int AS c FROM barracks b WHERE NOT EXISTS (SELECT 1 FROM facilities f WHERE f.barracks_id = b.id)`,
+      `SELECT COUNT(*)::int AS c FROM barracks b WHERE NOT EXISTS (SELECT 1 FROM facilities f WHERE f.barracks_id = b.id)${
+        org ? ' AND b.organization_id = $1' : ''
+      }`,
+      p,
     );
     if (noFac.c > 0)
       topIssues.push({ severity: 'warn', title: 'Doanh trại chưa khai báo công trình', count: noFac.c });
@@ -176,8 +206,16 @@ export class DashboardService {
   // M15 — So sánh mức độ hoàn chỉnh & độ tươi hồ sơ doanh trại giữa các địa bàn cấp xã.
   // Điểm hoàn chỉnh mỗi hồ sơ = tỉ lệ 10 tiêu chí (tên/địa chỉ/địa bàn/đơn vị/sức chứa/
   // diện tích/công năng/toạ độ/có công trình/có ảnh). "Chưa cập nhật" = updated_at quá staleDays.
-  async communeReadiness(staleDaysRaw?: string) {
+  async communeReadiness(staleDaysRaw?: string, user?: AuthUser) {
     const staleDays = Math.min(Math.max(parseInt(staleDaysRaw ?? '90', 10) || 90, 1), 3650);
+    // Cấp xã/đơn vị chỉ so sánh trong địa bàn được giao (data_scopes AREA); toàn tỉnh xem tất cả.
+    const areaIds = isProvinceWide(user) ? null : scopeAreaIds(user);
+    const params: unknown[] = [staleDays];
+    let areaClause = '';
+    if (areaIds) {
+      params.push(areaIds);
+      areaClause = ' AND a.id = ANY($2::uuid[])';
+    }
     const rows = await this.ds.query(
       `
       SELECT a.id, a.code, a.name, a.type,
@@ -203,11 +241,11 @@ export class DashboardService {
           ) * 10 AS completeness
         FROM barracks bx
       ) b ON b.area_id = a.id
-      WHERE a.status = 'ACTIVE' AND a.type IN ('COMMUNE', 'WARD', 'SPECIAL_ZONE')
+      WHERE a.status = 'ACTIVE' AND a.type IN ('COMMUNE', 'WARD', 'SPECIAL_ZONE')${areaClause}
       GROUP BY a.id, a.code, a.name, a.type
       ORDER BY (COUNT(b.id) = 0), avg_completeness ASC, stale_count DESC, a.code ASC
     `,
-      [staleDays],
+      params,
     );
 
     return {

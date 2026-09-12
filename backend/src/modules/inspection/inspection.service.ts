@@ -19,6 +19,7 @@ import {
 import { InspectionStatus, SheetStatus } from '../../common/workflow';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { barracksScope } from '../../common/data-scope';
 import { AuditService } from '../audit/audit.service';
 
 const EDITABLE_SHEET = [SheetStatus.DRAFT, SheetStatus.NEEDS_REVISION];
@@ -111,9 +112,22 @@ export class InspectionService {
   }
 
   // ------- Phiếu kiểm kê (UC-10) -------
-  async listSheets(q: PaginationQuery, campaignId?: string) {
-    const where = campaignId ? { campaignId } : {};
-    const [data, total] = await this.sheets.findAndCount({ where, order: { createdAt: 'DESC' }, skip: q.skip, take: q.size });
+  async listSheets(q: PaginationQuery, campaignId?: string, user?: AuthUser) {
+    const qb = this.sheets
+      .createQueryBuilder('s')
+      .orderBy('s.createdAt', 'DESC')
+      .skip(q.skip)
+      .take(q.size);
+    if (campaignId) qb.andWhere('s.campaign_id = :cid', { cid: campaignId });
+    // Phạm vi (SYS-BR-08): cấp xã/đơn vị chỉ thấy phiếu kiểm kê của doanh trại mình.
+    const scope = barracksScope(user);
+    if (scope) {
+      qb.andWhere(
+        's.barracks_id IN (SELECT id FROM barracks b_s WHERE b_s.area_id = ANY(:scAreaIds::uuid[]) OR b_s.organization_id = :scOrgId)',
+        { scAreaIds: scope.areaIds, scOrgId: scope.organizationId },
+      );
+    }
+    const [data, total] = await qb.getManyAndCount();
     return paginated(data, total, q);
   }
 
