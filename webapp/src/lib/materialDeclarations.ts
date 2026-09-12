@@ -7,10 +7,29 @@ export interface DeclarationLine {
   id: string;
   declarationId: string;
   materialCatalogId: string;
+  // Mã/tên CHUẨN từ material_catalog (backend bơm kèm khi GET chi tiết) — để hiển thị
+  // tách bạch với "tên gọi khác" (aliasUsed) do xã tự đặt.
+  materialCode?: string | null;
+  materialName?: string | null;
   aliasUsed: string | null;
   unitId: string | null;
   reservePurpose: string;
   quantity: string;
+  // Biến động kỳ (02/KK)
+  openingQty: string;
+  increaseQty: string;
+  decreaseQty: string;
+  closingQty: string;
+  // Tách vị trí tồn
+  inUseQty: string;
+  ministryStoreQty: string;
+  unitStoreQty: string;
+  // Giá trị (1000đ) + quy trọng lượng
+  openingValue: string | null;
+  increaseValue: string | null;
+  decreaseValue: string | null;
+  closingValue: string | null;
+  convertedWeight: string | null;
   qtyGrade1: string;
   qtyGrade2: string;
   qtyGrade3: string;
@@ -21,6 +40,11 @@ export interface DeclarationLine {
   sortOrder: number;
 }
 
+export interface LineWarning {
+  lineId: string;
+  messages: string[];
+}
+
 export interface Declaration {
   id: string;
   code: string;
@@ -28,6 +52,7 @@ export interface Declaration {
   organizationId: string | null;
   areaId: string | null;
   storageLocationId: string | null;
+  barracksId: string | null;
   periodLabel: string | null;
   workflowStatus: string;
   note: string | null;
@@ -36,7 +61,7 @@ export interface Declaration {
   createdBy: string | null;
 }
 
-export type DeclarationDetail = Declaration & { lines: DeclarationLine[] };
+export type DeclarationDetail = Declaration & { lines: DeclarationLine[]; warnings?: LineWarning[] };
 
 export interface AmendmentRequest {
   id: string;
@@ -64,10 +89,11 @@ export const RESERVE_PURPOSE_LABEL: Record<string, string> = {
   CHAM_LUAN_CHUYEN: 'Chậm luân chuyển',
 };
 
-export function useDeclarations() {
+export function useDeclarations(barracksId?: string) {
   return useQuery({
-    queryKey: ['material-declarations'],
-    queryFn: async () => (await api.get<Declaration[]>('/material-declarations')).data,
+    queryKey: ['material-declarations', barracksId ?? 'all'],
+    queryFn: async () =>
+      (await api.get<Declaration[]>('/material-declarations', { params: barracksId ? { barracksId } : undefined })).data,
     placeholderData: keepPreviousData,
   });
 }

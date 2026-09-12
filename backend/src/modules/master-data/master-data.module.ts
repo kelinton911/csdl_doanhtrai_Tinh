@@ -4,6 +4,8 @@ import { Catalog } from './entities/catalog.entity';
 import { Material } from './entities/material.entity';
 import { MaterialVersion } from './entities/material-version.entity';
 import { AssetCatalogItem } from '../asset-catalog/entities/asset-catalog-item.entity';
+import { MaterialCatalog } from '../catalog/entities/material-catalog.entity';
+import { UnitOfMeasure } from '../catalog/entities/unit-of-measure.entity';
 import { MasterDataService } from './master-data.service';
 import { MasterDataController } from './master-data.controller';
 import { MaterialGroupService } from './material-group.service';
@@ -13,7 +15,9 @@ import { MaterialGroupController } from './material-group.controller';
 // quản lý nhóm vật chất (ngành → nhóm con). Đọc AssetCatalogItem để ràng buộc
 // định danh vật chất phải chọn từ danh mục chuẩn BQP (quyết định C).
 @Module({
-  imports: [TypeOrmModule.forFeature([Catalog, Material, MaterialVersion, AssetCatalogItem])],
+  imports: [
+    TypeOrmModule.forFeature([Catalog, Material, MaterialVersion, AssetCatalogItem, MaterialCatalog, UnitOfMeasure]),
+  ],
   controllers: [MasterDataController, MaterialGroupController],
   providers: [MasterDataService, MaterialGroupService],
   exports: [MasterDataService],

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { toast } from '../lib/toast';
 import { PageHeader } from '../components/PageHeader';
@@ -29,6 +29,7 @@ export function MaterialDeclarationDetailPage() {
   const amendments = useAmendments(id);
   const decl = detail.data;
   const [amendOpen, setAmendOpen] = useState(false);
+  const [syncOpen, setSyncOpen] = useState(false);
 
   const canDeclare = hasRole(...DECLARERS);
   const canApprove = hasRole(...APPROVERS);
@@ -72,6 +73,9 @@ export function MaterialDeclarationDetailPage() {
               <button className="btn btn-ghost" disabled={act.isPending} onClick={() => act.mutate('request-changes')}>Trả lại</button>
               <button className="btn btn-primary" disabled={act.isPending} onClick={() => act.mutate('approve')}><Icon name="check" size={15} /> Duyệt</button>
             </>
+          )}
+          {decl.workflowStatus === 'APPROVED' && (canDeclare || canApprove) && (
+            <button className="btn" onClick={() => setSyncOpen(true)}><Icon name="box" size={15} /> Đồng bộ tồn kho</button>
           )}
           {canDeclare && decl.workflowStatus === 'APPROVED' && (
             <button className="btn btn-primary" onClick={() => setAmendOpen(true)}><Icon name="edit" size={15} /> Đề nghị sửa</button>
@@ -141,6 +145,9 @@ export function MaterialDeclarationDetailPage() {
       {amendOpen && id && (
         <AmendmentModal declarationId={id} onClose={() => setAmendOpen(false)} onDone={() => { setAmendOpen(false); invalidate(); }} />
       )}
+      {syncOpen && (
+        <SyncInventoryModal declarationId={id!} onClose={() => setSyncOpen(false)} onDone={() => { setSyncOpen(false); invalidate(); }} />
+      )}
     </>
   );
 }
@@ -194,6 +201,34 @@ function AmendmentModal({ declarationId, onClose, onDone }: { declarationId: str
           <button type="submit" className="btn btn-primary" disabled={mut.isPending || requestedChanges.trim().length < 3 || reason.trim().length < 3}>Tạo đề nghị</button>
         </div>
       </form>
+    </Modal>
+  );
+}
+
+// P3 "Khai một lần": đồng bộ số cuối kỳ của bản khai đã DUYỆT vào tồn kho (chọn kho hoặc để tự động).
+function SyncInventoryModal({ declarationId, onClose, onDone }: { declarationId: string; onClose: () => void; onDone: () => void }) {
+  const [loc, setLoc] = useState('');
+  const locs = useQuery({
+    queryKey: ['storage-locations', 'sync'],
+    queryFn: async () => (await api.get('/inventory/storage-locations', { params: { size: 200 } })).data as { data: Array<{ id: string; name: string; barracksName?: string | null }> },
+  });
+  const mut = useMutation({
+    mutationFn: async () => (await api.post(`/material-declarations/${declarationId}/sync-inventory`, { storageLocationId: loc || undefined })).data as { synced: number },
+    onSuccess: (r) => { toast.success(`Đã đồng bộ ${r.synced} mã vào tồn kho.`); onDone(); },
+    onError: (e) => toast.problem(e, 'Đồng bộ thất bại'),
+  });
+  return (
+    <Modal open title="Đồng bộ tồn kho từ bản khai" onClose={onClose} width={520}>
+      <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>Ghi số <b>cuối kỳ</b> của từng dòng vào tồn kho (bút toán điều chỉnh, có vết). Để trống kho = tự chọn kho gắn bản khai/doanh trại.</p>
+      <label className="field-label">Kho đích</label>
+      <select className="input" value={loc} onChange={(e) => setLoc(e.target.value)}>
+        <option value="">— Tự động (theo bản khai/doanh trại) —</option>
+        {(locs.data?.data ?? []).map((l) => <option key={l.id} value={l.id}>{l.name}{l.barracksName ? ` · ${l.barracksName}` : ''}</option>)}
+      </select>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+        <button className="btn" onClick={onClose}>Hủy</button>
+        <button className="btn btn-primary" disabled={mut.isPending} onClick={() => mut.mutate()}><Icon name="box" size={14} /> {mut.isPending ? 'Đang đồng bộ…' : 'Đồng bộ'}</button>
+      </div>
     </Modal>
   );
 }

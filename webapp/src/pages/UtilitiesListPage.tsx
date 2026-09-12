@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { toast } from '../lib/toast';
@@ -8,9 +8,14 @@ import { DataTable, type Column } from '../components/DataTable';
 import { Pagination } from '../components/Pagination';
 import { ErrorState } from '../components/States';
 import { Icon } from '../components/Icon';
+import { ImportRecordsModal } from '../components/ImportRecordsModal';
 import { num } from '../lib/format';
 import { downloadCsv, type CsvColumn } from '../lib/csv';
 import { CATEGORY_LABEL, CATEGORY_COLOR, KIND_LABEL, STATUS_LABEL, statusColor } from '../lib/utility';
+
+const UTIL_TEMPLATE =
+  'code,name,category,kind,capacity,capacityUnit,reserveVolume,reserveUnit,fuelType,status\n' +
+  'DN-99,Trạm biến áp mẫu,ELECTRICITY,TRANSFORMER,250,kVA,0,,,OPERATIONAL';
 
 interface Row {
   id: string;
@@ -55,10 +60,12 @@ export function CategoryChip({ category }: { category: string }) {
 // M11 — Danh sách hệ thống hạ tầng kỹ thuật (điện/nước/nhiên liệu).
 export function UtilitiesListPage() {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
+  const [showImport, setShowImport] = useState(false);
   const size = 15;
 
   const q = useQuery({
@@ -108,9 +115,14 @@ export function UtilitiesListPage() {
         title="Điện · Nước · Năng lượng"
         description="Quản lý nguồn điện, trạm biến áp, máy phát, nguồn/bể nước, nhiên liệu; ghi chỉ số tiêu thụ và khả năng tự bảo đảm."
         actions={
+          <>
+          <button className="btn" onClick={() => setShowImport(true)}>
+            <Icon name="upload" size={16} /> Nhập Excel/CSV
+          </button>
           <button className="btn btn-primary" onClick={() => nav('/utilities/new')}>
             <Icon name="plus" size={16} /> Thêm hệ thống
           </button>
+          </>
         }
       />
 
@@ -142,6 +154,17 @@ export function UtilitiesListPage() {
           <DataTable columns={columns} rows={q.data?.data} loading={q.isLoading} rowKey={(r) => r.id} onRowClick={(r) => nav(`/utilities/${r.id}`)} emptyTitle="Chưa có hệ thống" emptyHint="Thêm hệ thống điện/nước/nhiên liệu hoặc đổi bộ lọc." />
           <Pagination page={page} size={size} total={q.data?.meta.total ?? 0} onPage={setPage} />
         </>
+      )}
+
+      {showImport && (
+        <ImportRecordsModal
+          target="utilities"
+          title="Nhập hệ thống điện/nước/nhiên liệu từ Excel/CSV"
+          hint="Bắt buộc thêm: category (ELECTRICITY/WATER/FUEL), kind. Tuỳ chọn: capacity, capacityUnit, reserveVolume, reserveUnit, fuelType, status."
+          templateCsv={UTIL_TEMPLATE}
+          onClose={() => setShowImport(false)}
+          onDone={() => qc.invalidateQueries({ queryKey: ['utilities'] })}
+        />
       )}
     </>
   );

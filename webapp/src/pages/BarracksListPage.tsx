@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { toast } from '../lib/toast';
@@ -9,8 +9,12 @@ import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
 import { ErrorState } from '../components/States';
 import { Icon } from '../components/Icon';
+import { ImportRecordsModal } from '../components/ImportRecordsModal';
 import { num } from '../lib/format';
 import { downloadCsv, type CsvColumn } from '../lib/csv';
+
+const BARRACKS_TEMPLATE =
+  'code,name,address,function,lat,lng\nDT-38-99,Doanh trại mẫu,Khu vực 1,Đơn vị bộ binh,,';
 
 interface Row {
   id: string;
@@ -36,9 +40,11 @@ const QUICK = [
 // Danh sách doanh trại (Frontend §6.4) — bảng mạnh, bộ lọc nhanh, tìm kiếm.
 export function BarracksListPage() {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [showImport, setShowImport] = useState(false);
   const size = 15;
 
   const q = useQuery({
@@ -93,9 +99,14 @@ export function BarracksListPage() {
         title="Danh sách doanh trại"
         description="Hồ sơ gốc của từng doanh trại: địa bàn, đơn vị quản lý, diện tích, công trình, trạng thái dữ liệu."
         actions={
-          <button className="btn btn-primary" onClick={() => nav('/barracks/new')}>
-            <Icon name="plus" size={16} /> Tạo hồ sơ
-          </button>
+          <>
+            <button className="btn" onClick={() => setShowImport(true)}>
+              <Icon name="upload" size={16} /> Nhập Excel/CSV
+            </button>
+            <button className="btn btn-primary" onClick={() => nav('/barracks/new')}>
+              <Icon name="plus" size={16} /> Tạo hồ sơ
+            </button>
+          </>
         }
       />
 
@@ -148,6 +159,17 @@ export function BarracksListPage() {
           />
           <Pagination page={page} size={size} total={q.data?.meta.total ?? 0} onPage={setPage} />
         </>
+      )}
+
+      {showImport && (
+        <ImportRecordsModal
+          target="barracks"
+          title="Nhập doanh trại từ Excel/CSV"
+          hint="Cột tuỳ chọn: address, function, lat, lng."
+          templateCsv={BARRACKS_TEMPLATE}
+          onClose={() => setShowImport(false)}
+          onDone={() => qc.invalidateQueries({ queryKey: ['barracks'] })}
+        />
       )}
     </>
   );

@@ -55,6 +55,7 @@ export const NAV: NavItem[] = [
   { to: '/map', label: 'Bản đồ doanh trại', icon: 'map', dom: 'geo', group: 'command' },
   { to: '/tasks', label: 'Kế hoạch công tác & nhiệm vụ', icon: 'clipboard', dom: 'cmd', group: 'command', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'COMMUNE_USER', 'REVIEWER'] },
   { to: '/commune-materials', label: 'Vật chất chung của xã', icon: 'box', dom: 'stock', group: 'command', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
+  { to: '/province-materials', label: 'Vật chất thường xuyên của Tỉnh', icon: 'box', dom: 'stock', group: 'command', roles: ['PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'SYS_ADMIN', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
 
   // ── Lớp Khai báo thực địa (việc hằng ngày của xã) ────────────
   { to: '/land-parcels', label: 'Khu đất quốc phòng', icon: 'map', dom: 'geo', group: 'declare' },
@@ -69,6 +70,7 @@ export const NAV: NavItem[] = [
   { to: '/materiel', label: 'Thực lực vật chất (DT-04)', icon: 'box', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
   { to: '/material-declarations', label: 'Khai báo vật chất đơn vị', icon: 'clipboard', dom: 'stock', group: 'declare', roles: ['BARRACKS_OFFICER', 'COMMUNE_USER', 'UNIT_USER', 'SYS_ADMIN', 'PROVINCIAL_COMMAND', 'REVIEWER'] },
   { to: '/inventory-documents', label: 'Chứng từ vật chất (DT-05)', icon: 'clipboard', dom: 'stock', group: 'declare', roles: FIELD_ROLES },
+  { to: '/commune-potential', label: 'Khai báo tiềm lực HC-KT', icon: 'target', dom: 'plan', group: 'declare', roles: ['COMMUNE_USER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'REVIEWER'] },
 
   // ── Lớp Duyệt & kiểm tra ─────────────────────────────────────
   { to: '/approvals', label: 'Hàng chờ duyệt', icon: 'check', dom: 'audit', group: 'review', roles: REVIEW_ROLES },
@@ -90,6 +92,8 @@ export const NAV: NavItem[] = [
   { to: '/readiness/sites', label: 'Địa điểm sơ tán/bố trí', icon: 'map', dom: 'plan', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'REVIEWER'] },
   { to: '/readiness/recovery', label: 'Thiệt hại & khắc phục', icon: 'wrench', dom: 'repair', group: 'plan', roles: ['BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN', 'COMMUNE_USER'] },
   { to: '/potential', label: 'Tiềm lực HC-KT', icon: 'target', dom: 'cmd', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
+  { to: '/kvpt-materials', label: 'Vật chất khu vực phòng thủ (KVPT)', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
+  { to: '/sscd-allocations', label: 'Phương án vật chất SSCĐ (Tỉnh)', icon: 'shield', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/logistics-norms', label: 'Định mức & bảo đảm HC-KT', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'COMMUNE_USER', 'REVIEWER', 'REPORT_VIEWER', 'AUDITOR'] },
   { to: '/norms', label: 'Định mức có căn cứ & Chỉ lệnh (DT-07)', icon: 'target', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER'] },
   { to: '/calculation', label: 'Tính nhu cầu vật chất (DT-08)', icon: 'chart', dom: 'plan', group: 'plan', roles: ['SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER', 'REVIEWER', 'REPORT_VIEWER'] },

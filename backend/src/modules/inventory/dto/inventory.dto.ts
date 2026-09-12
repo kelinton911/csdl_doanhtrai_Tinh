@@ -10,6 +10,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { PaginationQuery, SearchQuery } from '../../../common/dto/pagination.dto';
+import { SITE_TYPE_CODES } from '../site-type';
 
 // Mã phân loại kho theo điều lệ ký hiệu quân sự (09-2011, Mục S — xem REF-2026-003).
 // Ngành = chữ TRONG ký hiệu; Cấp = HÌNH NỀN ký hiệu.
@@ -57,6 +58,22 @@ export class InventorySummaryQuery {
   categoryCode?: string;
 }
 
+// Cuộn "nguồn vật chất thường xuyên của Tỉnh" tách theo loại địa điểm nguồn (site_type).
+export class ProvinceRoutineSummaryQuery {
+  @ApiPropertyOptional({
+    enum: SITE_TYPE_CODES,
+    description: 'Lọc theo 1 loại địa điểm nguồn; bỏ trống = tất cả loại nguồn',
+  })
+  @IsOptional()
+  @IsIn(SITE_TYPE_CODES)
+  siteType?: string;
+
+  @ApiPropertyOptional({ description: 'Lọc theo mã nhóm ngành vật chất (category_code)' })
+  @IsOptional()
+  @IsString()
+  categoryCode?: string;
+}
+
 // Lọc danh sách kho (kèm tìm kiếm mã/tên + trạng thái workflow).
 export class ListStorageLocationsQuery extends SearchQuery {
   @ApiPropertyOptional({ description: 'Lọc theo trạng thái workflow (vd PENDING_REVIEW)' })
@@ -96,6 +113,15 @@ export class CreateStorageLocationDto {
   @IsOptional()
   @IsIn(STORAGE_CAP_CODES)
   cap?: string;
+
+  @ApiPropertyOptional({
+    enum: SITE_TYPE_CODES,
+    description:
+      'Loại địa điểm nguồn: XA/DON_VI_TRUC_THUOC/KHO_TINH/CAN_CU_CHIEN_DAU/PHAN_CAN_CU/CAN_CU_HCKT_BI_MAT',
+  })
+  @IsOptional()
+  @IsIn(SITE_TYPE_CODES)
+  siteType?: string;
 
   @ApiPropertyOptional({ description: 'Khối lượng (tấn) ghi trong ký hiệu', minimum: 0 })
   @IsOptional()

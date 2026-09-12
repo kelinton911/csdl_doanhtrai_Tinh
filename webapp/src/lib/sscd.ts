@@ -18,3 +18,15 @@ export function previousReadinessState(s: string): ReadinessState | null {
   const i = READINESS_STATES.indexOf(s as ReadinessState);
   return i > 0 ? READINESS_STATES[i - 1] : null;
 }
+
+// Feature 03 — Phương án phân cấp lượng SSCĐ (top-down cấp Tỉnh): chỉ 3 trạng thái SSCĐ.
+export const SSCD_ALLOCATION_STATES = ['TANG_CUONG', 'CAO', 'TOAN_BO'] as const;
+export type SscdAllocationState = (typeof SSCD_ALLOCATION_STATES)[number];
+
+// Các cấp phân bổ lượng (khớp cột backend readiness_allocation_lines).
+export const ALLOCATION_TIERS = [
+  { key: 'qtyKhoTinh', label: 'Kho Tỉnh' },
+  { key: 'qtyXa', label: 'Xã' },
+  { key: 'qtyTrungDoan', label: 'Trung đoàn' },
+  { key: 'qtyCanCu', label: 'Căn cứ' },
+] as const;

@@ -26,8 +26,49 @@ export class MaterialDeclarationLine extends AbstractEntity {
   @Column({ name: 'reserve_purpose', type: 'varchar', default: ReservePurpose.THUONG_XUYEN })
   reservePurpose!: ReservePurpose;
 
+  // Số lượng cuối kỳ (tương thích ngược); service giữ đồng bộ quantity = closingQty.
   @Column({ type: 'numeric', precision: 18, scale: 3, default: 0 })
   quantity!: string;
+
+  // Biến động kỳ (02/KK): cuối kỳ = đầu kỳ + tăng − giảm (đối chiếu cảnh báo, không khóa cứng).
+  @Column({ name: 'opening_qty', type: 'numeric', precision: 18, scale: 3, default: 0 })
+  openingQty!: string;
+
+  @Column({ name: 'increase_qty', type: 'numeric', precision: 18, scale: 3, default: 0 })
+  increaseQty!: string;
+
+  @Column({ name: 'decrease_qty', type: 'numeric', precision: 18, scale: 3, default: 0 })
+  decreaseQty!: string;
+
+  @Column({ name: 'closing_qty', type: 'numeric', precision: 18, scale: 3, default: 0 })
+  closingQty!: string;
+
+  // Tách vị trí tồn (02/KK): cuối kỳ = đang dùng + kho Bộ-Ngành + kho đơn vị.
+  @Column({ name: 'in_use_qty', type: 'numeric', precision: 18, scale: 3, default: 0 })
+  inUseQty!: string;
+
+  @Column({ name: 'ministry_store_qty', type: 'numeric', precision: 18, scale: 3, default: 0 })
+  ministryStoreQty!: string;
+
+  @Column({ name: 'unit_store_qty', type: 'numeric', precision: 18, scale: 3, default: 0 })
+  unitStoreQty!: string;
+
+  // Giá trị (1000đ) — tùy chọn.
+  @Column({ name: 'opening_value', type: 'numeric', precision: 18, scale: 3, nullable: true })
+  openingValue!: string | null;
+
+  @Column({ name: 'increase_value', type: 'numeric', precision: 18, scale: 3, nullable: true })
+  increaseValue!: string | null;
+
+  @Column({ name: 'decrease_value', type: 'numeric', precision: 18, scale: 3, nullable: true })
+  decreaseValue!: string | null;
+
+  @Column({ name: 'closing_value', type: 'numeric', precision: 18, scale: 3, nullable: true })
+  closingValue!: string | null;
+
+  // Quy trọng lượng (vật tư quy đổi) — tùy loại.
+  @Column({ name: 'converted_weight', type: 'numeric', precision: 18, scale: 3, nullable: true })
+  convertedWeight!: string | null;
 
   @Column({ name: 'qty_grade_1', type: 'numeric', precision: 18, scale: 3, default: 0 })
   qtyGrade1!: string;

@@ -17,3 +17,19 @@ export function previousState(state: string): ReadinessState | null {
   const i = READINESS_STATES.indexOf(state as ReadinessState);
   return i > 0 ? READINESS_STATES[i - 1] : null;
 }
+
+// Feature 03 — Phương án phân cấp lượng vật chất SSCĐ do cấp Tỉnh xây dựng (top-down).
+// CHỈ gồm 3 trạng thái SSCĐ (không có "Thường xuyên") — mỗi trạng thái một bảng riêng.
+export const SSCD_ALLOCATION_STATES = ['TANG_CUONG', 'CAO', 'TOAN_BO'] as const;
+export type SscdAllocationState = (typeof SSCD_ALLOCATION_STATES)[number];
+
+// Các cấp phân bổ lượng (phân cấp lượng) — cột trên mỗi dòng vật chất.
+export const ALLOCATION_TIERS = ['KHO_TINH', 'XA', 'TRUNG_DOAN', 'CAN_CU'] as const;
+export type AllocationTier = (typeof ALLOCATION_TIERS)[number];
+
+export const ALLOCATION_TIER_LABEL: Record<AllocationTier, string> = {
+  KHO_TINH: 'Kho của Tỉnh',
+  XA: 'Xã',
+  TRUNG_DOAN: 'Trung đoàn địa phương',
+  CAN_CU: 'Căn cứ',
+};

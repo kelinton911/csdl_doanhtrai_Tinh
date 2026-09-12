@@ -7,13 +7,21 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MaterialDeclarationService } from './material-declaration.service';
 import {
+  BulkLinesDto,
+  CarryForwardDto,
   CreateAmendmentDto,
   CreateDeclarationDto,
   CreateLineDto,
+  CreateTemplateDto,
+  DuplicateDeclarationDto,
   ReviewDecisionDto,
   UpdateDeclarationDto,
   UpdateLineDto,
@@ -82,9 +90,9 @@ export class MaterialDeclarationController {
 
   // ---- Bản khai báo ----
   @Get()
-  @ApiOperation({ summary: 'Danh sách bản khai báo (lọc theo phạm vi đơn vị)' })
-  list(@CurrentUser() user: AuthUser) {
-    return this.service.list(user);
+  @ApiOperation({ summary: 'Danh sách bản khai báo (lọc theo phạm vi đơn vị; tùy chọn theo doanh trại)' })
+  list(@CurrentUser() user: AuthUser, @Query('barracksId') barracksId?: string) {
+    return this.service.list(user, barracksId);
   }
 
   @Post()
@@ -93,6 +101,27 @@ export class MaterialDeclarationController {
   @ApiOperation({ summary: 'Tạo bản khai báo (DRAFT)' })
   create(@Body() dto: CreateDeclarationDto, @CurrentUser() user: AuthUser) {
     return this.service.create(dto, user);
+  }
+
+  // ---- Biểu mẫu định mức (đặt TRƯỚC :id để không bị nuốt route) ----
+  @Get('templates')
+  @ApiOperation({ summary: 'Danh sách biểu mẫu định mức (bộ mã vật chất chuẩn)' })
+  listTemplates() {
+    return this.service.listTemplates();
+  }
+
+  @Post('templates')
+  @Roles(...DECLARERS)
+  @ApiOperation({ summary: 'Lưu biểu mẫu định mức từ bộ mã vật chất' })
+  createTemplate(@Body() dto: CreateTemplateDto, @CurrentUser() user: AuthUser) {
+    return this.service.createTemplate(dto, user);
+  }
+
+  @Delete('templates/:tid')
+  @Roles(...DECLARERS)
+  @ApiOperation({ summary: 'Xóa biểu mẫu định mức' })
+  deleteTemplate(@Param('tid', ParseUUIDPipe) tid: string) {
+    return this.service.deleteTemplate(tid);
   }
 
   @Get(':id')
@@ -132,6 +161,53 @@ export class MaterialDeclarationController {
     return this.service.addLine(id, dto, user);
   }
 
+  @Post(':id/lines/bulk')
+  @Roles(...DECLARERS)
+  @ApiOperation({ summary: 'Lưu hàng loạt dòng (nhập bảng/dán Excel): thêm/sửa theo id + xóa deleteIds' })
+  bulkLines(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: BulkLinesDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.bulkUpsertLines(id, dto, user);
+  }
+
+  @Post(':id/lines/import')
+  @Roles(...DECLARERS)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Import Excel/CSV dòng vật chất (dryRun=true để soát lỗi trước khi ghi)' })
+  importLines(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('dryRun') dryRun: string,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.importLines(id, file, dryRun === 'true' || dryRun === '1', user);
+  }
+
+  @Post(':id/carry-forward')
+  @Roles(...DECLARERS)
+  @ApiOperation({ summary: 'Kế thừa dòng từ bản khai báo kỳ trước (đầu kỳ = cuối kỳ nguồn)' })
+  carryForward(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CarryForwardDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.carryForward(id, dto, user);
+  }
+
+  @Post(':id/duplicate')
+  @Roles(...DECLARERS)
+  @ApiOperation({ summary: 'Nhân bản bản khai báo (tạo DRAFT mới + copy toàn bộ dòng)' })
+  duplicate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DuplicateDeclarationDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.duplicate(id, dto, user);
+  }
+
   @Post(':id/submit')
   @Roles(...DECLARERS)
   @ApiOperation({ summary: 'Gửi duyệt (DRAFT/CHANGES_REQUESTED → PENDING_REVIEW)' })
@@ -144,6 +220,17 @@ export class MaterialDeclarationController {
   @ApiOperation({ summary: 'Duyệt (→APPROVED, khóa). Người lập không tự duyệt.' })
   approve(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
     return this.service.approve(id, user);
+  }
+
+  @Post(':id/sync-inventory')
+  @Roles(Role.SYS_ADMIN, Role.PROVINCIAL_COMMAND, Role.BARRACKS_OFFICER, Role.COMMUNE_USER)
+  @ApiOperation({ summary: 'Khai một lần: đồng bộ số cuối kỳ của bản khai ĐÃ DUYỆT vào tồn kho' })
+  syncInventory(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body('storageLocationId') storageLocationId: string | undefined,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.syncToInventory(id, storageLocationId, user);
   }
 
   @Post(':id/request-changes')

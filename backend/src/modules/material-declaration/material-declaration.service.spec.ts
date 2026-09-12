@@ -27,6 +27,8 @@ describe('MaterialDeclarationService — guards', () => {
   let lines: MockRepo;
   let revisions: MockRepo;
   let amendments: MockRepo;
+  let catalog: MockRepo;
+  let aliases: MockRepo;
   let service: MaterialDeclarationService;
 
   beforeEach(() => {
@@ -34,13 +36,20 @@ describe('MaterialDeclarationService — guards', () => {
     lines = repoMock();
     revisions = repoMock();
     amendments = repoMock();
+    catalog = repoMock();
+    aliases = repoMock();
     const dataSource = { transaction: jest.fn() } as unknown as DataSource;
     service = new MaterialDeclarationService(
       repo as unknown as Repository<MaterialDeclaration>,
       lines as unknown as Repository<MaterialDeclarationLine>,
       revisions as unknown as Repository<MaterialDeclarationRevision>,
       amendments as unknown as Repository<DeclarationAmendmentRequest>,
+      catalog as unknown as Repository<any>,
+      aliases as unknown as Repository<any>,
+      repoMock() as unknown as Repository<any>,
       dataSource,
+      {} as any,
+      {} as any,
     );
   });
 
@@ -76,5 +85,34 @@ describe('MaterialDeclarationService — guards', () => {
     amendments.findOne!.mockResolvedValue({ id: 'a1', organizationId: 'orgA', status: WorkflowStatus.PENDING_REVIEW, submittedBy: 'u2' });
     const self: AuthUser = { sub: 'u2', username: 'u2', roles: ['REVIEWER'], organizationId: null } as AuthUser;
     await expect(service.approveAmendment('a1', self)).rejects.toThrow(ForbiddenException);
+  });
+
+  // --- 02/KK: đối chiếu cảnh báo + tính cuối kỳ ---
+  const zeros = () => ({
+    openingQty: '0', increaseQty: '0', decreaseQty: '0', closingQty: '0',
+    inUseQty: '0', ministryStoreQty: '0', unitStoreQty: '0',
+    qtyGrade1: '0', qtyGrade2: '0', qtyGrade3: '0', qtyGrade4: '0', qtyGrade5: '0',
+  });
+
+  it('reconcileLine: khớp công thức → không cảnh báo', () => {
+    const line = { ...zeros(), openingQty: '100', increaseQty: '20', decreaseQty: '5', closingQty: '115' } as any;
+    expect(service.reconcileLine(line)).toHaveLength(0);
+  });
+
+  it('reconcileLine: cuối kỳ lệch đầu kỳ + tăng − giảm → cảnh báo', () => {
+    const line = { ...zeros(), openingQty: '100', increaseQty: '20', decreaseQty: '5', closingQty: '999' } as any;
+    expect(service.reconcileLine(line).join(' ')).toContain('đầu kỳ + tăng');
+  });
+
+  it('reconcileLine: tổng vị trí kho lệch cuối kỳ → cảnh báo', () => {
+    const line = { ...zeros(), closingQty: '100', inUseQty: '40', ministryStoreQty: '30', unitStoreQty: '10' } as any;
+    expect(service.reconcileLine(line).join(' ')).toContain('vị trí kho');
+  });
+
+  it('finalizeLine: bỏ trống cuối kỳ → tự tính = đầu kỳ + tăng − giảm; quantity đồng bộ', () => {
+    const line = { openingQty: '100', increaseQty: '20', decreaseQty: '5' } as any;
+    (service as any).finalizeLine(line, { openingQty: 100, increaseQty: 20, decreaseQty: 5 });
+    expect(Number(line.closingQty)).toBeCloseTo(115);
+    expect(line.quantity).toBe(line.closingQty);
   });
 });

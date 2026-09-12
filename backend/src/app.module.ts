@@ -28,6 +28,7 @@ import { LabelsModule } from './modules/labels/labels.module';
 import { LandParcelsModule } from './modules/land-parcels/land-parcels.module';
 import { UtilitiesModule } from './modules/utilities/utilities.module';
 import { LocalResourcesModule } from './modules/local-resources/local-resources.module';
+import { CommunePotentialModule } from './modules/commune-potential/commune-potential.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { BudgetsModule } from './modules/budgets/budgets.module';
 import { TasksModule } from './modules/tasks/tasks.module';
@@ -125,6 +126,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     LandParcelsModule, // M04 (khảo sát) — Hồ sơ khu đất quốc phòng
     UtilitiesModule, // M11 (khảo sát) — Điện/Nước/Năng lượng
     LocalResourcesModule, // M16 (khảo sát) — Nguồn lực huy động tại địa phương
+    CommunePotentialModule, // M17 — Tiềm lực HC-KT khu vực cấp xã
     ProjectsModule, // M13 (khảo sát) — Xây dựng cơ bản & dự án đầu tư
     BudgetsModule, // M14 (khảo sát) — Kế hoạch & ngân sách doanh trại
     TasksModule, // M21 (khảo sát) — Kế hoạch công tác & giao nhiệm vụ

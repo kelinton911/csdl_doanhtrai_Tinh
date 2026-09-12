@@ -36,6 +36,12 @@ export class StorageLocation {
   @Column({ name: 'cap', type: 'varchar', nullable: true })
   cap!: string | null;
 
+  // Loại địa điểm nguồn (site-type.ts) — tách "nguồn vật chất thường xuyên của Tỉnh"
+  // theo từng loại nguồn (xã/đơn vị/kho Tỉnh/căn cứ...). CAN_CU_HCKT_BI_MAT chỉ cấp Tỉnh thấy.
+  @Index()
+  @Column({ name: 'site_type', type: 'varchar', nullable: true })
+  siteType!: string | null;
+
   @Column({ name: 'capacity_tons', type: 'numeric', precision: 12, scale: 2, nullable: true })
   capacityTons!: string | null;
 

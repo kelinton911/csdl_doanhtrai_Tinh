@@ -8,6 +8,7 @@ import { UnitOfMeasure } from './entities/unit-of-measure.entity';
 import { CatalogVersionStatus, CATALOG_VERSION_TRANSITIONS } from '../../common/enums';
 import { assertTransition } from '../../common/enums/assert-transition';
 import { paginated } from '../../common/dto/pagination.dto';
+import { normalizeText } from '../../common/tabular';
 import { OutboxService } from '../../common/outbox/outbox.service';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
 import {
@@ -97,7 +98,14 @@ export class CatalogService {
     const qb = this.items.createQueryBuilder('i').orderBy('i.code', 'ASC').skip(q.skip).take(q.size);
     if (q.versionId) qb.andWhere('i.version_id = :v', { v: q.versionId });
     if (q.parentId) qb.andWhere('i.parent_id = :p', { p: q.parentId });
-    if (q.search) qb.andWhere('(i.code ILIKE :s OR i.name ILIKE :s)', { s: `%${q.search}%` });
+    // rootsOnly: lấy các nút gốc của phiên bản (parent_id IS NULL) — điểm vào cho picker duyệt cây.
+    if (q.rootsOnly) qb.andWhere('i.parent_id IS NULL');
+    if (q.search) {
+      qb.andWhere('(i.code ILIKE :s OR i.name ILIKE :s OR i.search_key ILIKE :sn)', {
+        s: `%${q.search}%`,
+        sn: `%${normalizeText(q.search)}%`,
+      });
+    }
     const [data, total] = await qb.getManyAndCount();
     return paginated(data, total, q);
   }
@@ -110,6 +118,20 @@ export class CatalogService {
 
   async getChildren(id: string): Promise<MaterialCatalog[]> {
     return this.items.find({ where: { parentId: id }, order: { code: 'ASC' } });
+  }
+
+  // Tất cả node LÁ dưới một nhóm (đệ quy) — phục vụ "Thêm cả nhóm" khi khai báo.
+  async getLeaves(id: string): Promise<Array<{ id: string; code: string; name: string; unitId: string | null }>> {
+    return this.dataSource.query(
+      `WITH RECURSIVE sub AS (
+         SELECT id, parent_id, is_leaf, code, name, unit_id FROM material_catalog WHERE id = $1
+         UNION ALL
+         SELECT c.id, c.parent_id, c.is_leaf, c.code, c.name, c.unit_id
+         FROM material_catalog c JOIN sub s ON c.parent_id = s.id
+       )
+       SELECT id, code, name, unit_id AS "unitId" FROM sub WHERE is_leaf = true ORDER BY code LIMIT 1000`,
+      [id],
+    );
   }
 
   // BR-DT01-002/004/005 + BR-DT01-001: parent tồn tại, không vòng lặp, mã duy nhất/phiên bản.
@@ -183,9 +205,10 @@ export class CatalogService {
   // ---- Tìm kiếm mã/tên/alias (GET /catalog/search) ----
   async search(q: string) {
     const like = `%${q}%`;
+    const likeNorm = `%${normalizeText(q)}%`; // gõ không dấu → khớp search_key đã chuẩn hóa
     const byItem = await this.items
       .createQueryBuilder('i')
-      .where('i.code ILIKE :s OR i.name ILIKE :s', { s: like })
+      .where('i.code ILIKE :s OR i.name ILIKE :s OR i.search_key ILIKE :sn', { s: like, sn: likeNorm })
       .orderBy('i.code', 'ASC')
       .take(50)
       .getMany();

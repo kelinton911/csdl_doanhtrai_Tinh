@@ -18,6 +18,7 @@ import {
 import { PaginationQuery, SearchQuery } from '../../common/dto/pagination.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../identity/roles';
+import { Scoped } from '../../common/scope/scope.decorator';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Barracks (M04)')
@@ -46,6 +47,7 @@ export class BarracksController {
 
   @Post()
   @Roles(Role.COMMUNE_USER, Role.BARRACKS_OFFICER)
+  @Scoped('organization')
   @ApiOperation({ summary: 'UC-05: Tạo hồ sơ doanh trại (DRAFT)' })
   create(@Body() dto: CreateBarracksDto, @CurrentUser() user: AuthUser) {
     return this.service.create(dto, user);
@@ -53,6 +55,7 @@ export class BarracksController {
 
   @Put(':id')
   @Roles(Role.COMMUNE_USER, Role.BARRACKS_OFFICER)
+  @Scoped('organization')
   @ApiOperation({ summary: 'UC-05: Cập nhật hồ sơ nháp' })
   update(
     @Param('id', ParseUUIDPipe) id: string,

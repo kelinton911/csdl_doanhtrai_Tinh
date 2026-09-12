@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, toProblem } from '../lib/api';
 import { toast } from '../lib/toast';
+import { useAuth } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
 import { Skeleton } from '../components/States';
 import { Icon } from '../components/Icon';
@@ -31,7 +32,12 @@ export function BarracksFormPage() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const { id } = useParams();
+  const { profile, hasRole } = useAuth();
   const isEdit = !!id;
+  // Chỉ vai trò phạm vi toàn tỉnh mới được chọn đơn vị quản lý bất kỳ. Cấp xã/đơn vị
+  // bị KHÓA về đúng đơn vị của mình — tránh khai báo "lạc" đơn vị khác rồi hồ sơ biến
+  // mất khỏi danh sách theo phạm vi (backend cũng chặn bằng @Scoped('organization')).
+  const canPickOrg = hasRole('SYS_ADMIN', 'PROVINCIAL_COMMAND', 'BARRACKS_OFFICER');
   const [form, setForm] = useState({ ...EMPTY });
   // false = để hệ thống tự sinh mã; true = người dùng tự nhập mã.
   const [manualCode, setManualCode] = useState(false);
@@ -83,6 +89,14 @@ export function BarracksFormPage() {
   }, [areaDetail.data, form.provinceCode]);
 
   const orgs = useQuery({ queryKey: ['orgs'], queryFn: async () => (await api.get('/organizations', { params: { size: 200 } })).data as { data: Option[] } });
+
+  // Cấp xã/đơn vị: mặc định đơn vị quản lý = đơn vị của tài khoản (khóa cứng bên dưới).
+  useEffect(() => {
+    if (!isEdit && !canPickOrg && profile?.organizationId && !form.organizationId) {
+      setForm((f) => ({ ...f, organizationId: profile.organizationId! }));
+    }
+  }, [isEdit, canPickOrg, profile?.organizationId, form.organizationId]);
+  const ownOrgName = (orgs.data?.data ?? []).find((o) => o.id === profile?.organizationId)?.name ?? 'Đơn vị của bạn';
 
   const save = useMutation({
     mutationFn: async () => {
@@ -184,10 +198,14 @@ export function BarracksFormPage() {
           <input className="input" value={form.name} onChange={set('name')} placeholder="Tên doanh trại" />
         </Field>
         <Field label="Đơn vị quản lý">
-          <select className="input" value={form.organizationId} onChange={set('organizationId')}>
-            <option value="">— Chọn —</option>
-            {(orgs.data?.data ?? []).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-          </select>
+          {canPickOrg ? (
+            <select className="input" value={form.organizationId} onChange={set('organizationId')}>
+              <option value="">— Chọn —</option>
+              {(orgs.data?.data ?? []).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+            </select>
+          ) : (
+            <input className="input" value={ownOrgName} disabled title="Cấp xã chỉ khai báo cho đơn vị của mình" />
+          )}
         </Field>
         <Field label="Địa chỉ">
           <input className="input" value={form.address} onChange={set('address')} placeholder="Thôn/khu vực" />

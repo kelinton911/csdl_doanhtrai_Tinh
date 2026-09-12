@@ -129,6 +129,25 @@ export function useCatalogItems(versionId: string | undefined) {
   });
 }
 
+// Nút gốc của một phiên bản (parent_id IS NULL) — điểm vào cho picker duyệt cây.
+export function useCatalogRoots(versionId: string | undefined) {
+  return useQuery({
+    enabled: !!versionId,
+    queryKey: ['catalog', 'roots', versionId],
+    queryFn: async () =>
+      (await api.get<Paged<CatalogItem>>('/catalog/items', { params: { versionId, rootsOnly: true, size: 200 } })).data.data,
+  });
+}
+
+// Con trực tiếp của một nút (trả tất cả, không phân trang) — dùng để thu hẹp dần.
+export function useCatalogChildren(parentId: string | undefined) {
+  return useQuery({
+    enabled: !!parentId,
+    queryKey: ['catalog', 'children', parentId],
+    queryFn: async () => (await api.get<CatalogItem[]>(`/catalog/items/${parentId}/children`)).data,
+  });
+}
+
 export function useCatalogItem(id: string | undefined) {
   return useQuery({
     enabled: !!id,

@@ -14,8 +14,11 @@ const BarracksFormPage = lazy(() => import('./pages/BarracksFormPage').then((m) 
 const BarracksDetailPage = lazy(() => import('./pages/BarracksDetailPage').then((m) => ({ default: m.BarracksDetailPage })));
 const InventoryPage = lazy(() => import('./pages/InventoryPage').then((m) => ({ default: m.InventoryPage })));
 const CommuneMaterialsPage = lazy(() => import('./pages/CommuneMaterialsPage').then((m) => ({ default: m.CommuneMaterialsPage })));
+const ProvinceMaterialsPage = lazy(() => import('./pages/ProvinceMaterialsPage').then((m) => ({ default: m.ProvinceMaterialsPage })));
 const SscdMaterialsPage = lazy(() => import('./pages/SscdMaterialsPage').then((m) => ({ default: m.SscdMaterialsPage })));
 const SscdMaterialDetailPage = lazy(() => import('./pages/SscdMaterialDetailPage').then((m) => ({ default: m.SscdMaterialDetailPage })));
+const SscdAllocationPlansPage = lazy(() => import('./pages/SscdAllocationPlansPage').then((m) => ({ default: m.SscdAllocationPlansPage })));
+const SscdAllocationDetailPage = lazy(() => import('./pages/SscdAllocationDetailPage').then((m) => ({ default: m.SscdAllocationDetailPage })));
 const MaterialDeclarationsListPage = lazy(() => import('./pages/MaterialDeclarationsListPage').then((m) => ({ default: m.MaterialDeclarationsListPage })));
 const MaterialDeclarationFormPage = lazy(() => import('./pages/MaterialDeclarationFormPage').then((m) => ({ default: m.MaterialDeclarationFormPage })));
 const MaterialDeclarationDetailPage = lazy(() => import('./pages/MaterialDeclarationDetailPage').then((m) => ({ default: m.MaterialDeclarationDetailPage })));
@@ -44,6 +47,9 @@ const UtilityDetailPage = lazy(() => import('./pages/UtilityDetailPage').then((m
 const LocalResourcesListPage = lazy(() => import('./pages/LocalResourcesListPage').then((m) => ({ default: m.LocalResourcesListPage })));
 const LocalResourceFormPage = lazy(() => import('./pages/LocalResourceFormPage').then((m) => ({ default: m.LocalResourceFormPage })));
 const LocalResourceDetailPage = lazy(() => import('./pages/LocalResourceDetailPage').then((m) => ({ default: m.LocalResourceDetailPage })));
+const CommunePotentialListPage = lazy(() => import('./pages/CommunePotentialListPage').then((m) => ({ default: m.CommunePotentialListPage })));
+const KvptMaterialsPage = lazy(() => import('./pages/KvptMaterialsPage').then((m) => ({ default: m.KvptMaterialsPage })));
+const CommunePotentialFormPage = lazy(() => import('./pages/CommunePotentialFormPage').then((m) => ({ default: m.CommunePotentialFormPage })));
 const ProjectsListPage = lazy(() => import('./pages/ProjectsListPage').then((m) => ({ default: m.ProjectsListPage })));
 const ProjectFormPage = lazy(() => import('./pages/ProjectFormPage').then((m) => ({ default: m.ProjectFormPage })));
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage').then((m) => ({ default: m.ProjectDetailPage })));
@@ -139,6 +145,10 @@ export default function App() {
       <Route path="/local-resources/new" element={<Protected><LocalResourceFormPage /></Protected>} />
       <Route path="/local-resources/:id/edit" element={<Protected><LocalResourceFormPage /></Protected>} />
       <Route path="/local-resources/:id" element={<Protected><LocalResourceDetailPage /></Protected>} />
+      <Route path="/commune-potential" element={<Protected><CommunePotentialListPage /></Protected>} />
+      <Route path="/commune-potential/new" element={<Protected><CommunePotentialFormPage /></Protected>} />
+      <Route path="/commune-potential/:id/edit" element={<Protected><CommunePotentialFormPage /></Protected>} />
+      <Route path="/kvpt-materials" element={<Protected><KvptMaterialsPage /></Protected>} />
       <Route path="/projects" element={<Protected><ProjectsListPage /></Protected>} />
       <Route path="/projects/new" element={<Protected><ProjectFormPage /></Protected>} />
       <Route path="/projects/:id/edit" element={<Protected><ProjectFormPage /></Protected>} />
@@ -167,8 +177,11 @@ export default function App() {
       <Route path="/analytics" element={<Protected><AnalyticsPage /></Protected>} />
       <Route path="/inventory" element={<Protected><InventoryPage /></Protected>} />
       <Route path="/commune-materials" element={<Protected><CommuneMaterialsPage /></Protected>} />
+      <Route path="/province-materials" element={<Protected><ProvinceMaterialsPage /></Protected>} />
       <Route path="/sscd-materials" element={<Protected><SscdMaterialsPage /></Protected>} />
       <Route path="/sscd-materials/:id" element={<Protected><SscdMaterialDetailPage /></Protected>} />
+      <Route path="/sscd-allocations" element={<Protected><SscdAllocationPlansPage /></Protected>} />
+      <Route path="/sscd-allocations/:id" element={<Protected><SscdAllocationDetailPage /></Protected>} />
       <Route path="/logistics-norms" element={<Protected><LogisticsNormsPage /></Protected>} />
       <Route path="/storage" element={<Protected><StoragePage /></Protected>} />
       <Route path="/approvals" element={<Protected><ApprovalQueuePage /></Protected>} />

@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { toast } from '../lib/toast';
+import { useAuth } from '../lib/auth';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, type Column } from '../components/DataTable';
 import { Icon } from '../components/Icon';
@@ -25,6 +27,9 @@ const catLabel = (r: SummaryRow) => r.categoryName ?? r.categoryCode ?? '— (ch
 // Khâu 1 — "Vật chất chung của xã": tổng hợp tồn kho thực theo xã × nhóm ngành.
 // Lọc theo từng xã hoặc bỏ trống = tổng toàn tỉnh (theo phạm vi dữ liệu của người dùng).
 export function CommuneMaterialsPage() {
+  const nav = useNavigate();
+  const { can } = useAuth();
+  const canManage = can('COMMUNE_USER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
   const [areaId, setAreaId] = useState('');
 
   const areas = useQuery({
@@ -75,6 +80,16 @@ export function CommuneMaterialsPage() {
         eyebrow="Vật chất chung của xã"
         title="Tổng hợp vật chất tồn theo xã"
         description="Gộp tồn kho thực (đã ghi sổ) từ các kho/trạm trên địa bàn theo xã × nhóm ngành. Chọn một xã để xem riêng, hoặc để trống để xem tổng toàn tỉnh."
+        actions={canManage ? (
+          <>
+            <button className="btn" onClick={() => nav('/inventory')} title="Điều chỉnh tồn / ghi giao dịch theo từng vật chất">
+              <Icon name="box" size={16} /> Điều chỉnh tồn
+            </button>
+            <button className="btn btn-primary" onClick={() => nav('/material-declarations/new')} title="Khai báo vật chất theo danh mục chuẩn (chọn mã + tên gọi khác)">
+              <Icon name="plus" size={16} /> Khai báo vật chất
+            </button>
+          </>
+        ) : undefined}
       />
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 14, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -104,7 +119,10 @@ export function CommuneMaterialsPage() {
         />
       )}
       <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
-        Lưu ý: "Tổng lượng tồn" cộng gộp mọi đơn vị tính nên chỉ mang tính tham khảo; số liệu chính xác xem theo từng vật chất ở mục "Vật chất trên địa bàn".
+        Bảng này TỔNG HỢP từ dữ liệu đã ghi sổ — không nhập trực tiếp tại đây. Để nhập/điều chỉnh:
+        dùng <b>“Khai báo vật chất”</b> (theo danh mục chuẩn TC HC-KT, có cột “tên gọi khác”) hoặc
+        <b> “Điều chỉnh tồn”</b> (ghi giao dịch/kiểm kê theo từng vật chất ở “Vật chất trên địa bàn”).
+        “Tổng lượng tồn” cộng gộp mọi đơn vị tính nên chỉ mang tính tham khảo.
       </p>
     </>
   );

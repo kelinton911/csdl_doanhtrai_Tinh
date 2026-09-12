@@ -14,6 +14,7 @@ import {
   CreateCatalogDto,
   CreateMaterialDto,
   ListMaterialsQuery,
+  MaterialFromCatalogDto,
   UpdateCatalogDto,
   UpdateMaterialDto,
 } from './dto/master-data.dto';
@@ -36,6 +37,13 @@ export class MasterDataController {
     return this.service.listMaterials(q, q.category, q.search);
   }
 
+  // Đặt TRƯỚC materials/:id để không bị route param nuốt.
+  @Get('materials/federated-search')
+  @ApiOperation({ summary: 'Tìm liên thông: vật chất kho (R00) + danh mục Quân nhu — cho một ô chọn duy nhất' })
+  federatedSearch(@Query('q') q: string) {
+    return this.service.federatedSearch(q ?? '');
+  }
+
   @Get('materials/:id/versions')
   @ApiOperation({ summary: 'UC-07: Lịch sử phiên bản vật chất (để đối chiếu/diff)' })
   getMaterialVersions(@Param('id', ParseUUIDPipe) id: string) {
@@ -53,6 +61,13 @@ export class MasterDataController {
   @ApiOperation({ summary: 'UC-07: Tạo vật chất (DRAFT)' })
   createMaterial(@Body() dto: CreateMaterialDto, @CurrentUser() user: AuthUser) {
     return this.service.createMaterial(dto, user);
+  }
+
+  @Post('materials/from-catalog')
+  @Roles(Role.BARRACKS_OFFICER, Role.COMMUNE_USER, Role.SYS_ADMIN)
+  @ApiOperation({ summary: 'Bắc cầu mã danh mục (Quân nhu) sang vật chất để nhập kho' })
+  materialFromCatalog(@Body() dto: MaterialFromCatalogDto, @CurrentUser() user: AuthUser) {
+    return this.service.ensureMaterialFromCatalog(dto.materialCatalogId, user);
   }
 
   @Put('materials/:id')

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { toast } from '../lib/toast';
@@ -9,9 +9,14 @@ import { Pagination } from '../components/Pagination';
 import { StatusBadge } from '../components/StatusBadge';
 import { ErrorState } from '../components/States';
 import { Icon } from '../components/Icon';
+import { ImportRecordsModal } from '../components/ImportRecordsModal';
 import { num } from '../lib/format';
 import { downloadCsv, type CsvColumn } from '../lib/csv';
 import { USAGE_LABEL, LEGAL_LABEL, DISPUTE_LABEL, disputeColor } from '../lib/landParcel';
+
+const LAND_TEMPLATE =
+  'code,name,address,landArea,usageStatus,legalStatus,disputeStatus,certificateNo,lat,lng\n' +
+  'KD-38-99,Khu đất mẫu,Xã ABC,10000,IN_USE,PENDING,NONE,,,';
 
 interface Row {
   id: string;
@@ -49,10 +54,12 @@ function DisputeChip({ status }: { status: string }) {
 // M04 — Danh sách hồ sơ khu đất quốc phòng.
 export function LandParcelsListPage() {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [dispute, setDispute] = useState('');
+  const [showImport, setShowImport] = useState(false);
   const size = 15;
 
   const q = useQuery({
@@ -109,9 +116,14 @@ export function LandParcelsListPage() {
         title="Hồ sơ khu đất quốc phòng"
         description="Quản lý khu đất, ranh giới, mốc giới, nguồn gốc & hồ sơ pháp lý, tình trạng tranh chấp/lấn chiếm."
         actions={
-          <button className="btn btn-primary" onClick={() => nav('/land-parcels/new')}>
-            <Icon name="plus" size={16} /> Tạo hồ sơ khu đất
-          </button>
+          <>
+            <button className="btn" onClick={() => setShowImport(true)}>
+              <Icon name="upload" size={16} /> Nhập Excel/CSV
+            </button>
+            <button className="btn btn-primary" onClick={() => nav('/land-parcels/new')}>
+              <Icon name="plus" size={16} /> Tạo hồ sơ khu đất
+            </button>
+          </>
         }
       />
 
@@ -167,6 +179,17 @@ export function LandParcelsListPage() {
           />
           <Pagination page={page} size={size} total={q.data?.meta.total ?? 0} onPage={setPage} />
         </>
+      )}
+
+      {showImport && (
+        <ImportRecordsModal
+          target="land-parcels"
+          title="Nhập khu đất từ Excel/CSV"
+          hint="Cột tuỳ chọn: address, landArea, usageStatus, legalStatus, disputeStatus, certificateNo, lat, lng."
+          templateCsv={LAND_TEMPLATE}
+          onClose={() => setShowImport(false)}
+          onDone={() => qc.invalidateQueries({ queryKey: ['land-parcels'] })}
+        />
       )}
     </>
   );

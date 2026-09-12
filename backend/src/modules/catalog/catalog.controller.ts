@@ -70,6 +70,12 @@ export class CatalogController {
     return this.service.getChildren(id);
   }
 
+  @Get('items/:id/leaves')
+  @ApiOperation({ summary: 'Tất cả mã lá dưới một nhóm (để "thêm cả nhóm")' })
+  getLeaves(@Param('id') id: string) {
+    return this.service.getLeaves(id);
+  }
+
   @Post('items')
   @Roles(Role.SYS_ADMIN, Role.PROVINCIAL_COMMAND) // BR-DT01-007 (TC-DT01-004).
   @ApiOperation({ summary: 'Thêm mã vào phiên bản nháp (parent tồn tại, không vòng lặp, mã duy nhất)' })

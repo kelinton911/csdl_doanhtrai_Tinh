@@ -12,6 +12,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { EvidenceDrawer } from '../components/EvidenceDrawer';
 import { DataTable, type Column } from '../components/DataTable';
 import { Modal } from '../components/Modal';
+import type { Declaration } from '../lib/materialDeclarations';
 import { Skeleton, ErrorState, EmptyState } from '../components/States';
 import { Icon } from '../components/Icon';
 import { num, dateTime, currency } from '../lib/format';
@@ -34,6 +35,7 @@ interface Barracks {
   function: string | null;
   declaredCapacity: number;
   workflowStatus: string;
+  areaId: string | null;
   areaName: string | null;
   orgName: string | null;
   updatedAt: string;
@@ -66,6 +68,7 @@ const TABS = [
   'Công trình',
   'Hạ tầng kỹ thuật',
   'Trang bị & Vật chất',
+  'Khai báo vật chất',
   'Hồ sơ Pháp lý',
   'Bản vẽ & Ảnh (MinIO)',
   'Lịch sử Kiểm kê',
@@ -96,10 +99,14 @@ export function BarracksDetailPage() {
   const [decommission, setDecommission] = useState<Facility | null>(null);
   const [invLoc, setInvLoc] = useState('');
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [khoModal, setKhoModal] = useState(false);
+  const [addMat, setAddMat] = useState(false);
+  const [txn, setTxn] = useState<{ balance: Balance; mode: 'IN' | 'OUT' | 'ADJUST' } | null>(null);
 
   const facType = useCatalog('facility-type');
   const grade = useCatalog('quality-grade');
   const canManageFacility = can('COMMUNE_USER', 'BARRACKS_OFFICER');
+  const canManageInventory = can('COMMUNE_USER', 'BARRACKS_OFFICER', 'SYS_ADMIN');
 
   const b = useQuery({
     queryKey: ['barracks', id],
@@ -141,6 +148,13 @@ export function BarracksDetailPage() {
     queryKey: ['maint-requests', 'barracks', id],
     queryFn: async () => (await api.get('/maintenance-requests', { params: { barracksId: id, size: 100 } })).data as { data: MaintReq[] },
     enabled: tab === 'Sửa chữa & Khôi phục',
+  });
+
+  // Bản khai báo vật chất gắn theo doanh trại (dùng picker cây Quân nhu ở form).
+  const declarations = useQuery({
+    queryKey: ['material-declarations', 'barracks', id],
+    queryFn: async () => (await api.get<Declaration[]>('/material-declarations', { params: { barracksId: id } })).data,
+    enabled: tab === 'Khai báo vật chất',
   });
 
   // M11 — Hạ tầng kỹ thuật THẬT của doanh trại (thay dữ liệu cứng trước đây).
@@ -219,6 +233,24 @@ export function BarracksDetailPage() {
     { key: 'onhand', header: 'Tồn sổ', render: (b) => num(b.onHand), align: 'right', mono: true },
     { key: 'unit', header: 'ĐVT', render: (b) => b.unitCode ?? '—' },
     { key: 'var', header: 'Chênh lệch', render: (b) => <span className="num" style={{ color: b.variance == null || b.variance === 0 ? 'var(--color-neutral-600)' : 'var(--danger-fg)', fontWeight: 600 }}>{b.variance == null ? '—' : (b.variance > 0 ? '+' : '') + num(b.variance)}</span>, align: 'right' },
+    ...(canManageInventory
+      ? [{
+          key: 'act', header: '', align: 'right' as const, render: (b: Balance) => (
+            <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+              <button className="btn btn-sm" title="Ghi nhập kho" onClick={() => setTxn({ balance: b, mode: 'IN' })}><Icon name="plus" size={13} /></button>
+              <button className="btn btn-sm" title="Ghi xuất kho" onClick={() => setTxn({ balance: b, mode: 'OUT' })}><Icon name="download" size={13} /></button>
+              <button className="btn btn-sm" title="Điều chỉnh kiểm kê" onClick={() => setTxn({ balance: b, mode: 'ADJUST' })}><Icon name="clipboard" size={13} /></button>
+            </div>
+          ),
+        } as Column<Balance>]
+      : []),
+  ];
+  const declCols: Column<Declaration>[] = [
+    { key: 'code', header: 'Mã', render: (r) => r.code, mono: true, width: 150 },
+    { key: 'title', header: 'Tiêu đề', render: (r) => <span style={{ fontWeight: 600 }}>{r.title}</span> },
+    { key: 'period', header: 'Kỳ', render: (r) => r.periodLabel ?? '—' },
+    { key: 'updated', header: 'Cập nhật', render: (r) => new Date(r.updatedAt).toLocaleDateString('vi-VN'), align: 'right', mono: true, width: 110 },
+    { key: 'status', header: 'Trạng thái', render: (r) => <StatusBadge status={r.workflowStatus} /> },
   ];
   const maintCols: Column<MaintReq>[] = [
     { key: 'code', header: 'Mã', render: (r) => r.code, mono: true, width: 110 },
@@ -408,10 +440,18 @@ export function BarracksDetailPage() {
       {/* Tab 4: Trang bị & Vật chất */}
       {tab === 'Trang bị & Vật chất' && (
         <>
+          {canManageInventory && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 12 }}>
+              <button className="btn btn-sm" onClick={() => setKhoModal(true)}><Icon name="plus" size={14} /> Tạo kho</button>
+              {barracksLocs.length > 0 && (
+                <button className="btn btn-sm btn-primary" disabled={!effectiveLoc} onClick={() => setAddMat(true)}><Icon name="box" size={14} /> Thêm vật chất vào kho</button>
+              )}
+            </div>
+          )}
           {locs.isLoading ? (
             <Skeleton rows={5} />
           ) : barracksLocs.length === 0 ? (
-            <EmptyState icon="box" title="Chưa có kho tại doanh trại" hint="Tạo kho ở mục 'Vật chất và vật tư' và gán cho doanh trại này để theo dõi tồn kho." />
+            <EmptyState icon="box" title="Chưa có kho tại doanh trại" hint={canManageInventory ? "Bấm 'Tạo kho' để lập kho cho doanh trại này rồi thêm vật chất." : "Doanh trại này chưa khai báo kho vật chất."} />
           ) : (
             <>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 12 }}>
@@ -420,9 +460,32 @@ export function BarracksDetailPage() {
                   {barracksLocs.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
               </div>
-              <DataTable columns={balCols} rows={balances.data?.data} loading={balances.isLoading} rowKey={(b) => `${b.materialId}-${b.storageLocationId}`} emptyTitle="Kho chưa có tồn" emptyHint="Nhập/xuất vật chất ở mục Vật chất và vật tư." />
+              <DataTable columns={balCols} rows={balances.data?.data} loading={balances.isLoading} rowKey={(b) => `${b.materialId}-${b.storageLocationId}`} emptyTitle="Kho chưa có tồn" emptyHint={canManageInventory ? "Bấm 'Thêm vật chất vào kho' để ghi nhập tồn đầu." : "Kho này chưa có tồn."} />
             </>
           )}
+        </>
+      )}
+
+      {/* Tab: Khai báo vật chất (bản khai gắn doanh trại — dùng picker cây Quân nhu) */}
+      {tab === 'Khai báo vật chất' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div className="eyebrow">Bản khai báo vật chất gắn với doanh trại này</div>
+            {canManageInventory && (
+              <button className="btn btn-sm btn-primary" onClick={() => nav(`/material-declarations/new?barracksId=${id}`)}>
+                <Icon name="plus" size={14} /> Tạo bản khai báo
+              </button>
+            )}
+          </div>
+          <DataTable
+            columns={declCols}
+            rows={declarations.data}
+            loading={declarations.isLoading}
+            rowKey={(r) => r.id}
+            onRowClick={(r) => nav(`/material-declarations/${r.id}`)}
+            emptyTitle="Chưa có bản khai báo"
+            emptyHint="Bấm 'Tạo bản khai báo' để lập bản khai vật chất cho doanh trại (chọn vật chất theo cây Quân nhu)."
+          />
         </>
       )}
 
@@ -607,6 +670,29 @@ export function BarracksDetailPage() {
           onDone={() => { setDecommission(null); qc.invalidateQueries({ queryKey: ['barracks', id, 'facilities'] }); }}
         />
       )}
+      {khoModal && (
+        <CreateKhoModal
+          barracksId={id!}
+          areaId={d.areaId ?? null}
+          onClose={() => setKhoModal(false)}
+          onDone={() => { setKhoModal(false); qc.invalidateQueries({ queryKey: ['storage-locations', 'all'] }); toast.success('Đã tạo kho cho doanh trại (nháp).'); }}
+        />
+      )}
+      {addMat && effectiveLoc && (
+        <AddMaterialModal
+          storageLocationId={effectiveLoc}
+          onClose={() => setAddMat(false)}
+          onDone={() => { setAddMat(false); qc.invalidateQueries({ queryKey: ['inventory-balances', effectiveLoc] }); toast.success('Đã ghi nhập vật chất vào kho.'); }}
+        />
+      )}
+      {txn && (
+        <InvTxnModal
+          balance={txn.balance}
+          mode={txn.mode}
+          onClose={() => setTxn(null)}
+          onDone={() => { setTxn(null); qc.invalidateQueries({ queryKey: ['inventory-balances', effectiveLoc] }); toast.success('Đã ghi bút toán kho.'); }}
+        />
+      )}
     </>
   );
 }
@@ -700,5 +786,152 @@ function ConditionChip({ code, label }: { code: string | null; label: string }) 
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span style={{ width: 8, height: 8, borderRadius: '50%', background: c }} /> {label}
     </span>
+  );
+}
+
+// Tạo kho gắn trực tiếp doanh trại (POST /inventory/storage-locations kèm barracksId).
+function CreateKhoModal({ barracksId, areaId, onClose, onDone }: { barracksId: string; areaId: string | null; onClose: () => void; onDone: () => void }) {
+  const [f, setF] = useState({ code: '', name: '', capacityTons: '' });
+  const [error, setError] = useState<string | null>(null);
+  const create = useMutation({
+    mutationFn: async () =>
+      api.post('/inventory/storage-locations', {
+        code: f.code,
+        name: f.name,
+        barracksId,
+        areaId: areaId ?? undefined,
+        nganh: 'QN',
+        cap: 'DOANH_TRAI',
+        capacityTons: f.capacityTons ? Number(f.capacityTons) : undefined,
+      }),
+    onSuccess: onDone,
+    onError: (e) => setError(toProblem(e).title),
+  });
+  return (
+    <Modal open title="Tạo kho cho doanh trại" onClose={onClose}>
+      {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ flex: 1 }}><label className="field-label">Mã kho</label><input className="input" value={f.code} onChange={(e) => setF((s) => ({ ...s, code: e.target.value }))} placeholder="KHO-DT-…" /></div>
+          <div style={{ flex: 2 }}><label className="field-label">Tên kho</label><input className="input" value={f.name} onChange={(e) => setF((s) => ({ ...s, name: e.target.value }))} placeholder="Kho vật chất…" /></div>
+        </div>
+        <div style={{ width: 170 }}><label className="field-label">Sức chứa (tấn)</label><input className="input num" type="number" min={0} value={f.capacityTons} onChange={(e) => setF((s) => ({ ...s, capacityTons: e.target.value }))} /></div>
+        <p className="muted" style={{ fontSize: 12, margin: 0 }}>Kho tạo ở trạng thái nháp, gắn trực tiếp doanh trại này (ký hiệu ngành QN · cấp doanh trại).</p>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+          <button className="btn" onClick={onClose}>Hủy</button>
+          <button className="btn btn-primary" disabled={f.code.length < 2 || f.name.length < 2 || create.isPending} onClick={() => create.mutate()}>Tạo kho</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+interface FedResult { code: string; name: string; unitCode: string | null; materialId: string | null; materialCatalogId: string | null; source: string }
+
+// Thêm vật chất vào kho = ghi nhập kho (POST /inventory/transactions type IN — tự tạo dòng tồn nếu chưa có).
+// MỘT ô tìm liên thông: vật chất kho (R00) + danh mục Quân nhu. Mã Quân nhu được bắc cầu sang materials khi ghi.
+function AddMaterialModal({ storageLocationId, onClose, onDone }: { storageLocationId: string; onClose: () => void; onDone: () => void }) {
+  const [q, setQ] = useState('');
+  const [sel, setSel] = useState<FedResult | null>(null);
+  const [qty, setQty] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const results = useQuery({
+    enabled: !sel && q.trim().length > 1,
+    queryKey: ['fed-material-search', q],
+    queryFn: async () => (await api.get<FedResult[]>('/materials/federated-search', { params: { q: q.trim() } })).data,
+  });
+  const add = useMutation({
+    mutationFn: async () => {
+      // Phân giải ra materials.id: sẵn có (R00) hoặc bắc cầu từ mã danh mục Quân nhu.
+      let materialId = sel!.materialId;
+      if (!materialId && sel!.materialCatalogId) {
+        materialId = ((await api.post('/materials/from-catalog', { materialCatalogId: sel!.materialCatalogId })).data as { id: string }).id;
+      }
+      return api.post(
+        '/inventory/transactions',
+        { materialId, storageLocationId, type: 'IN', quantity: Number(qty) },
+        { headers: { 'Idempotency-Key': `IN-${materialId}-${storageLocationId}-${Date.now()}` } },
+      );
+    },
+    onSuccess: onDone,
+    onError: (e) => setError(toProblem(e).title),
+  });
+  return (
+    <Modal open title="Thêm vật chất vào kho (ghi nhập)" onClose={onClose}>
+      {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
+      {!sel ? (
+        <div>
+          <label className="field-label">Tìm vật chất (kho R00 + Quân nhu — gõ mã hoặc tên, có/không dấu)</label>
+          <input className="input" value={q} autoFocus onChange={(e) => setQ(e.target.value)} placeholder="Nhập mã hoặc tên vật chất…" />
+          <div style={{ maxHeight: 260, overflow: 'auto', marginTop: 8 }}>
+            {q.trim().length <= 1 ? (
+              <div className="muted" style={{ padding: 10, fontSize: 13 }}>Nhập ít nhất 2 ký tự.</div>
+            ) : results.isLoading ? (
+              <div className="muted" style={{ padding: 10, fontSize: 13 }}>Đang tìm…</div>
+            ) : !results.data?.length ? (
+              <div className="muted" style={{ padding: 10, fontSize: 13 }}>Không có kết quả.</div>
+            ) : (
+              results.data.map((m) => (
+                <button key={`${m.source}-${m.code}`} type="button" className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'flex-start', gap: 8 }} onClick={() => setSel(m)}>
+                  <span className="num" style={{ minWidth: 150, color: 'var(--color-neutral-600)' }}>{m.code}</span>
+                  <span style={{ flex: 1, textAlign: 'left' }}>{m.name}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: m.source === 'QN' ? 'var(--color-accent-700)' : 'var(--color-neutral-500)' }}>{m.source === 'QN' ? 'Quân nhu' : 'R00'}</span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ fontSize: 13.5 }}>
+            <b>{sel.name}</b> <span className="num muted">({sel.code})</span>
+            <span className="muted" style={{ marginLeft: 6, fontSize: 11 }}>{sel.source === 'QN' ? 'Quân nhu' : 'R00'}</span>
+            <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8 }} onClick={() => setSel(null)}>Chọn lại</button>
+          </div>
+          <div><label className="field-label">Số lượng nhập {sel.unitCode ? `(${sel.unitCode})` : ''}</label><input className="input num" type="number" min={0} value={qty} autoFocus onChange={(e) => setQty(e.target.value)} placeholder="0" /></div>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
+        <button className="btn" onClick={onClose}>Hủy</button>
+        <button className="btn btn-primary" disabled={!sel || !qty || Number(qty) <= 0 || add.isPending} onClick={() => add.mutate()}>Ghi nhập kho</button>
+      </div>
+    </Modal>
+  );
+}
+
+// Nhập / xuất / kiểm kê một dòng tồn có sẵn (tái dùng API như trang Vật chất trên địa bàn).
+function InvTxnModal({ balance, mode, onClose, onDone }: { balance: Balance; mode: 'IN' | 'OUT' | 'ADJUST'; onClose: () => void; onDone: () => void }) {
+  const [qty, setQty] = useState('');
+  const [note, setNote] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const title = mode === 'IN' ? 'Ghi nhập kho' : mode === 'OUT' ? 'Ghi xuất kho' : 'Điều chỉnh kiểm kê';
+  const mut = useMutation({
+    mutationFn: async () => {
+      const key = `${mode}-${balance.materialId}-${balance.storageLocationId}-${Date.now()}`;
+      if (mode === 'ADJUST') {
+        return api.post('/inventory/adjustments', { materialId: balance.materialId, storageLocationId: balance.storageLocationId, countedQuantity: Number(qty), note: note || undefined }, { headers: { 'Idempotency-Key': key } });
+      }
+      return api.post('/inventory/transactions', { materialId: balance.materialId, storageLocationId: balance.storageLocationId, type: mode, quantity: Number(qty), note: note || undefined }, { headers: { 'Idempotency-Key': key } });
+    },
+    onSuccess: onDone,
+    onError: (e) => setError(toProblem(e).title),
+  });
+  return (
+    <Modal open title={title} onClose={onClose}>
+      <div style={{ marginBottom: 14, fontSize: 13.5 }}>
+        <b>{balance.materialName}</b> ({balance.materialCode})
+        <div className="muted" style={{ marginTop: 4 }}>Tồn sổ hiện tại: <span className="num">{num(balance.onHand)}</span> {balance.unitCode ?? ''}</div>
+      </div>
+      {error && <div style={{ marginBottom: 12, color: 'var(--danger-fg)', display: 'flex', gap: 6, alignItems: 'center' }}><Icon name="alert" size={15} /> {error}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div><label className="field-label">{mode === 'ADJUST' ? 'Số kiểm kê thực tế' : 'Số lượng'}</label><input className="input num" type="number" value={qty} autoFocus onChange={(e) => setQty(e.target.value)} placeholder="0" /></div>
+        <div><label className="field-label">Ghi chú</label><input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Chứng từ / lý do…" /></div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+          <button className="btn" onClick={onClose}>Hủy</button>
+          <button className="btn btn-primary" disabled={!qty || mut.isPending} onClick={() => mut.mutate()}>Xác nhận</button>
+        </div>
+      </div>
+    </Modal>
   );
 }

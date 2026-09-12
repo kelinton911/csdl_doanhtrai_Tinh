@@ -14,7 +14,7 @@ import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { Skeleton, EmptyState } from '../components/States';
 import { Modal } from '../components/Modal';
-import { MaterialPicker } from '../components/MaterialPicker';
+import { CascadingMaterialPicker } from '../components/CascadingMaterialPicker';
 import { Icon } from '../components/Icon';
 
 // SCR-DT04-05/10 — Sổ cái thực lực + tra HC theo thời điểm (HC(t) drill-down).
@@ -49,7 +49,7 @@ export function MaterielPage() {
       <div className="panel" style={{ padding: 14, marginBottom: 16, display: 'grid', gap: 12 }}>
         <div style={{ maxWidth: 480 }}>
           <div className="muted" style={{ fontSize: 13, marginBottom: 4 }}>Vật chất</div>
-          <MaterialPicker value={matId} label={matLabel} onPick={(id, l) => { setMatId(id); setMatLabel(l); setHc(null); }} />
+          <CascadingMaterialPicker value={matId} label={matLabel} onPick={(id, l) => { setMatId(id); setMatLabel(l); setHc(null); }} />
         </div>
         {matId && (
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap' }}>

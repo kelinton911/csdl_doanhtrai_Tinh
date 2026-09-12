@@ -26,6 +26,11 @@ export class MaterialDeclaration extends AbstractEntity {
   @Column({ name: 'storage_location_id', type: 'uuid', nullable: true })
   storageLocationId!: string | null;
 
+  // Doanh trại gắn bản khai báo (tùy chọn) — để lập & xem theo từng doanh trại.
+  @Index()
+  @Column({ name: 'barracks_id', type: 'uuid', nullable: true })
+  barracksId!: string | null;
+
   // Kỳ khai báo (vd "Quý I/2026") — tự do, phục vụ lọc/hiển thị.
   @Column({ name: 'period_label', type: 'varchar', nullable: true })
   periodLabel!: string | null;

@@ -12,9 +12,12 @@ import { AssetCatalogPicker } from '../components/AssetCatalogPicker';
 import type { AssetNode } from '../lib/assetCatalog';
 import { displayName, shortPath } from '../lib/assetCatalog';
 import { Icon } from '../components/Icon';
+import { ImportRecordsModal } from '../components/ImportRecordsModal';
 import { ErrorState, Skeleton, EmptyState } from '../components/States';
 import { dateTime } from '../lib/format';
 import { downloadCsv, type CsvColumn } from '../lib/csv';
+
+const MATERIALS_TEMPLATE = 'code,name,categoryCode,unitCode\nVC-999,Tên vật chất,LUONG-THUC,KG';
 
 // M03 — Danh mục vật chất (UC-07): tạo (nháp) → sửa khi chưa phát hành → phát hành (bất biến).
 interface Material {
@@ -47,6 +50,7 @@ export function MaterialsPage() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Material | null>(null);
   const [versionsOf, setVersionsOf] = useState<Material | null>(null);
+  const [showImport, setShowImport] = useState(false);
   const size = 15;
   const cat = useCatalog('material-category');
   const unit = useCatalog('unit-of-measure');
@@ -116,7 +120,10 @@ export function MaterialsPage() {
         eyebrow="Vật chất và vật tư"
         title="Danh mục vật chất"
         description="Danh mục chuẩn dùng chung cho tồn kho, kiểm kê và báo cáo. Mã duy nhất; đã phát hành thì bất biến — sửa phải tạo phiên bản mới."
-        actions={<button className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Thêm vật chất</button>}
+        actions={<>
+          <button className="btn" onClick={() => setShowImport(true)}><Icon name="upload" size={16} /> Nhập Excel/CSV</button>
+          <button className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Thêm vật chất</button>
+        </>}
       />
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 14, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -138,6 +145,16 @@ export function MaterialsPage() {
         </>
       )}
 
+      {showImport && (
+        <ImportRecordsModal
+          target="materials"
+          title="Nhập vật chất từ Excel/CSV"
+          hint="Cột tuỳ chọn: categoryCode, unitCode."
+          templateCsv={MATERIALS_TEMPLATE}
+          onClose={() => setShowImport(false)}
+          onDone={() => qc.invalidateQueries({ queryKey: ['materials'] })}
+        />
+      )}
       {creating && <MaterialModal onClose={() => setCreating(false)} onDone={() => { setCreating(false); qc.invalidateQueries({ queryKey: ['materials'] }); }} />}
       {editing && <MaterialModal id={editing.id} onClose={() => setEditing(null)} onDone={() => { setEditing(null); qc.invalidateQueries({ queryKey: ['materials'] }); }} />}
       {versionsOf && <VersionsModal material={versionsOf} onClose={() => setVersionsOf(null)} />}

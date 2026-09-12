@@ -42,5 +42,8 @@ Thumbs.db
 # Docker volumes (local data)
 infra/data/
 
+# Dữ liệu thô thu thập (155MB+) — KHÔNG commit vào repo mã nguồn
+thu thập CSDL/
+
 # Log build tự động khi kết thúc session (hook SessionEnd)
 .claude-build.log

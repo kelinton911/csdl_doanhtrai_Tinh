@@ -42,4 +42,8 @@ export class MaterialCatalog extends AbstractEntity {
 
   @Column({ name: 'source_row_no', type: 'int', nullable: true })
   sourceRowNo!: number | null;
+
+  // Tên đã chuẩn hóa (bỏ dấu) để tìm "gõ không dấu" — khớp normalizeText() ở tabular.ts.
+  @Column({ name: 'search_key', type: 'text', nullable: true })
+  searchKey!: string | null;
 }

@@ -16,7 +16,7 @@ import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { Skeleton, EmptyState } from '../components/States';
 import { Modal } from '../components/Modal';
-import { MaterialPicker } from '../components/MaterialPicker';
+import { CascadingMaterialPicker } from '../components/CascadingMaterialPicker';
 import { Icon } from '../components/Icon';
 
 // SCR-DT05-01/07/09/10 — Chứng từ nhập/xuất, duyệt & POST, khóa kỳ, truy vết.
@@ -241,7 +241,7 @@ function AddLineModal({ docId, onClose, onDone }: { docId: string; onClose: () =
       <form onSubmit={(e) => { e.preventDefault(); if (matId) mut.mutate(); }} style={{ display: 'grid', gap: 12 }}>
         <div>
           <div className="muted" style={{ fontSize: 13, marginBottom: 4 }}>Vật chất</div>
-          <MaterialPicker value={matId} label={matLabel} onPick={(id, l) => { setMatId(id); setMatLabel(l); }} />
+          <CascadingMaterialPicker value={matId} label={matLabel} onPick={(id, l) => { setMatId(id); setMatLabel(l); }} />
         </div>
         <label style={{ display: 'grid', gap: 4 }}>
           <span className="muted" style={{ fontSize: 13 }}>Số lượng</span>

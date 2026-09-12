@@ -14,8 +14,11 @@ import { Facility } from '../facilities/entities/facility.entity';
 import { FacilityStatus } from '../facilities/facility-status';
 import { StorageLocation } from '../inventory/entities/storage-location.entity';
 import { MapPoi } from '../gis/entities/map-poi.entity';
+import { LandParcel } from '../land-parcels/entities/land-parcel.entity';
+import { UtilitySystem } from '../utilities/entities/utility-system.entity';
 import { EDITABLE_STATUSES, WorkflowStatus } from '../../common/workflow';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { parseTabular } from '../../common/tabular';
 
 // Một mục trong lô đồng bộ offline (M26).
 interface SyncItem {
@@ -43,7 +46,18 @@ const QUALITY_GRADE_COLS = ['grade1', 'grade2', 'grade3', 'grade4', 'grade5'];
 const TARGETS: Record<string, TargetCfg> = {
   materials: { required: ['code', 'name'], optional: ['categoryCode', 'unitCode'], hasGeom: false },
   barracks: { required: ['code', 'name'], optional: ['address', 'function', 'lat', 'lng'], hasGeom: true },
-  'storage-locations': { required: ['code', 'name'], optional: ['type', 'lat', 'lng'], hasGeom: true },
+  'land-parcels': {
+    required: ['code', 'name'],
+    optional: ['address', 'landArea', 'landUseType', 'usageStatus', 'legalStatus', 'disputeStatus', 'certificateNo', 'lat', 'lng'],
+    hasGeom: true,
+    numeric: ['landArea'],
+  },
+  'storage-locations': { required: ['code', 'name'], optional: ['type', 'nganh', 'cap', 'capacityTons', 'lat', 'lng'], hasGeom: true },
+  utilities: {
+    required: ['code', 'name', 'category', 'kind'],
+    optional: ['capacity', 'capacityUnit', 'reserveVolume', 'reserveUnit', 'fuelType', 'status', 'lat', 'lng'],
+    hasGeom: true,
+  },
   pois: { required: ['code', 'name'], optional: ['category', 'symbol_code', 'province_code', 'lat', 'lng'], hasGeom: true },
   // Chi tiết kiểm kê chất lượng (gap 1+3): materialCode/storageCode → stock_quality_details.
   'stock-quality': {
@@ -58,15 +72,6 @@ const TARGETS: Record<string, TargetCfg> = {
 // Khung toạ độ Việt Nam (thô) để bắt lỗi lat/lng nhập nhầm.
 const VN_LAT = [8.0, 24.0];
 const VN_LNG = [102.0, 110.0];
-
-// Tách CSV đơn giản (không hỗ trợ dấu phẩy trong ô có ngoặc kép — dùng mẫu chuẩn của hệ thống).
-function parseCsv(text: string): { headers: string[]; rows: string[][] } {
-  const lines = text.replace(/\r/g, '').split('\n').filter((l) => l.trim().length > 0);
-  if (lines.length === 0) return { headers: [], rows: [] };
-  const headers = lines[0].split(',').map((h) => h.trim());
-  const rows = lines.slice(1).map((l) => l.split(',').map((c) => c.trim()));
-  return { headers, rows };
-}
 
 function geoPoint(lng: number, lat: number) {
   return { type: 'Point' as const, coordinates: [lng, lat] };
@@ -83,6 +88,8 @@ export class IntegrationService {
     @InjectRepository(Facility) private readonly facilities: Repository<Facility>,
     @InjectRepository(StorageLocation) private readonly storage: Repository<StorageLocation>,
     @InjectRepository(MapPoi) private readonly pois: Repository<MapPoi>,
+    @InjectRepository(LandParcel) private readonly landParcels: Repository<LandParcel>,
+    @InjectRepository(UtilitySystem) private readonly utilities: Repository<UtilitySystem>,
     private readonly ds: DataSource,
   ) {}
 
@@ -90,6 +97,10 @@ export class IntegrationService {
     switch (target) {
       case 'barracks':
         return this.barracks as unknown as Repository<{ code: string }>;
+      case 'land-parcels':
+        return this.landParcels as unknown as Repository<{ code: string }>;
+      case 'utilities':
+        return this.utilities as unknown as Repository<{ code: string }>;
       case 'storage-locations':
         return this.storage as unknown as Repository<{ code: string }>;
       case 'pois':
@@ -104,11 +115,11 @@ export class IntegrationService {
     const cfg = TARGETS[target];
     if (!cfg) {
       throw new BadRequestException(
-        'VAL-001: target hỗ trợ: materials | barracks | storage-locations | pois | stock-quality',
+        'VAL-001: target hỗ trợ: materials | barracks | land-parcels | storage-locations | utilities | pois | stock-quality',
       );
     }
-    if (!file) throw new BadRequestException('VAL-001: Thiếu tệp CSV');
-    const { headers, rows } = parseCsv(file.buffer.toString('utf8'));
+    if (!file) throw new BadRequestException('VAL-001: Thiếu tệp nhập');
+    const { headers, rows } = await parseTabular(file);
     for (const r of cfg.required) {
       if (!headers.includes(r)) throw new BadRequestException(`VAL-001: Thiếu cột bắt buộc "${r}"`);
     }
@@ -170,6 +181,13 @@ export class IntegrationService {
       } else {
         if (!code) { errors.push({ row: rowNo, column: 'code', message: 'Thiếu mã' }); rec.__valid = false; }
         if (!name) { errors.push({ row: rowNo, column: 'name', message: 'Thiếu tên' }); rec.__valid = false; }
+        // Cột bắt buộc ngoài code/name (vd category/kind của điện-nước) — kiểm theo từng dòng.
+        for (const col of cfg.required) {
+          if (col === 'code' || col === 'name') continue;
+          const v = (cell(cells, col) ?? '').trim();
+          rec[col] = v || null;
+          if (!v) { errors.push({ row: rowNo, column: col, message: `Thiếu ${col}` }); rec.__valid = false; }
+        }
         if (code && (existingCodes.has(code) || seen.has(code))) {
           errors.push({ row: rowNo, column: 'code', message: `Trùng mã ${code}` });
           rec.__valid = false;
@@ -294,12 +312,51 @@ export class IntegrationService {
               updatedBy: user.sub,
             }),
           );
+        } else if (target === 'land-parcels') {
+          await m.getRepository(LandParcel).save(
+            m.getRepository(LandParcel).create({
+              code: r.code as string,
+              name: r.name as string,
+              address: (r.address as string) ?? null,
+              landArea: r.landArea == null || r.landArea === '' ? '0' : String(Number(r.landArea) || 0),
+              landUseType: (r.landUseType as string) ?? null,
+              usageStatus: (r.usageStatus as string) || 'IN_USE',
+              legalStatus: (r.legalStatus as string) || 'PENDING',
+              disputeStatus: (r.disputeStatus as string) || 'NONE',
+              certificateNo: (r.certificateNo as string) ?? null,
+              location: loc,
+              workflowStatus: WorkflowStatus.DRAFT,
+              createdBy: user.sub,
+              updatedBy: user.sub,
+            }),
+          );
+        } else if (target === 'utilities') {
+          await m.getRepository(UtilitySystem).save(
+            m.getRepository(UtilitySystem).create({
+              code: r.code as string,
+              name: r.name as string,
+              category: r.category as string,
+              kind: r.kind as string,
+              capacity: r.capacity == null || r.capacity === '' ? '0' : String(Number(r.capacity) || 0),
+              capacityUnit: (r.capacityUnit as string) ?? null,
+              reserveVolume: r.reserveVolume == null || r.reserveVolume === '' ? '0' : String(Number(r.reserveVolume) || 0),
+              reserveUnit: (r.reserveUnit as string) ?? null,
+              fuelType: (r.fuelType as string) ?? null,
+              status: (r.status as string) || 'OPERATIONAL',
+              location: loc,
+              createdBy: user.sub,
+              updatedBy: user.sub,
+            }),
+          );
         } else if (target === 'storage-locations') {
           await m.getRepository(StorageLocation).save(
             m.getRepository(StorageLocation).create({
               code: r.code as string,
               name: r.name as string,
               type: (r.type as string) ?? null,
+              nganh: (r.nganh as string) ?? null,
+              cap: (r.cap as string) ?? null,
+              capacityTons: r.capacityTons == null || r.capacityTons === '' ? null : String(Number(r.capacityTons) || 0),
               location: loc,
               status: 'ACTIVE',
               createdBy: user.sub,

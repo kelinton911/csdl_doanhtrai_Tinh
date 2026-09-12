@@ -11,8 +11,13 @@ import { Modal } from '../components/Modal';
 import { Icon } from '../components/Icon';
 import { StatusBadge } from '../components/StatusBadge';
 import { ErrorState } from '../components/States';
+import { ImportRecordsModal } from '../components/ImportRecordsModal';
 import { EDITABLE_STATUSES } from '../lib/workflow';
 import { buildKhoSymbol } from '../lib/milSymbols';
+import { SITE_TYPES, SITE_TYPE_LABEL } from '../lib/siteType';
+
+const STORAGE_TEMPLATE =
+  'code,name,type,nganh,cap,capacityTons,lat,lng\nKHO-A01,Kho mẫu,KHO-TONG,LT,XA,50,,';
 
 // Ký hiệu quân sự thu nhỏ của một kho (điều lệ Mục S) — dùng trong bảng + xem trước.
 function KhoSymbol({ nganh, cap, tons, planned, size = 26 }: { nganh?: string | null; cap?: string | null; tons?: number | null; planned?: boolean; size?: number }) {
@@ -46,6 +51,7 @@ export function StoragePage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const size = 15;
   const canManage = can('BARRACKS_OFFICER', 'COMMUNE_USER', 'SYS_ADMIN');
   const canReview = can('REVIEWER', 'BARRACKS_OFFICER', 'PROVINCIAL_COMMAND', 'SYS_ADMIN');
@@ -105,7 +111,10 @@ export function StoragePage() {
         eyebrow="Khai báo địa bàn"
         title="Kho trạm"
         description="Xã khai báo kho/trạm trên địa bàn; gửi chỉ huy xã duyệt. Kho đã duyệt là dữ liệu chính thức để cấp Tỉnh nắm."
-        actions={canManage ? <button className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Khai báo kho</button> : undefined}
+        actions={canManage ? <>
+          <button className="btn" onClick={() => setShowImport(true)}><Icon name="upload" size={16} /> Nhập Excel/CSV</button>
+          <button className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Khai báo kho</button>
+        </> : undefined}
       />
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 14, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -127,6 +136,16 @@ export function StoragePage() {
       )}
 
       {creating && <CreateStorageModal onClose={() => setCreating(false)} onDone={() => { setCreating(false); qc.invalidateQueries({ queryKey: ['storage-list'] }); }} />}
+      {showImport && (
+        <ImportRecordsModal
+          target="storage-locations"
+          title="Nhập kho trạm từ Excel/CSV"
+          hint="Cột tuỳ chọn: type, nganh, cap, capacityTons, lat, lng."
+          templateCsv={STORAGE_TEMPLATE}
+          onClose={() => setShowImport(false)}
+          onDone={() => qc.invalidateQueries({ queryKey: ['storage-list'] })}
+        />
+      )}
     </>
   );
 }
@@ -136,7 +155,8 @@ function CreateStorageModal({ onClose, onDone }: { onClose: () => void; onDone: 
   const nganhCat = useCatalog('storage-location-nganh');
   const capCat = useCatalog('storage-location-cap');
   const areas = useQuery({ queryKey: ['areas'], queryFn: async () => (await api.get('/administrative-areas', { params: { size: 200 } })).data as { data: AreaOpt[] } });
-  const [f, setF] = useState({ code: '', name: '', type: '', nganh: '', cap: '', capacityTons: '', areaId: '' });
+  const barracks = useQuery({ queryKey: ['barracks', 'options'], queryFn: async () => (await api.get('/barracks', { params: { size: 200 } })).data as { data: { id: string; code: string; name: string }[] } });
+  const [f, setF] = useState({ code: '', name: '', type: '', nganh: '', cap: '', siteType: '', capacityTons: '', areaId: '', barracksId: '' });
   const [error, setError] = useState<string | null>(null);
   const create = useMutation({
     mutationFn: async () => api.post('/inventory/storage-locations', {
@@ -145,8 +165,10 @@ function CreateStorageModal({ onClose, onDone }: { onClose: () => void; onDone: 
       type: f.type || undefined,
       nganh: f.nganh || undefined,
       cap: f.cap || undefined,
+      siteType: f.siteType || undefined,
       capacityTons: f.capacityTons ? Number(f.capacityTons) : undefined,
       areaId: f.areaId || undefined,
+      barracksId: f.barracksId || undefined,
     }),
     onSuccess: () => { toast.success('Đã khai báo kho (nháp).'); onDone(); },
     onError: (e) => setError(toProblem(e).title),
@@ -162,6 +184,10 @@ function CreateStorageModal({ onClose, onDone }: { onClose: () => void; onDone: 
         <div style={{ display: 'flex', gap: 10 }}>
           <div style={{ flex: 1 }}><label className="field-label">Loại kho</label><select className="input" value={f.type} onChange={(e) => setF((s) => ({ ...s, type: e.target.value }))}><option value="">—</option>{type.items.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
           <div style={{ flex: 1 }}><label className="field-label">Địa bàn (xã/phường)</label><select className="input" value={f.areaId} onChange={(e) => setF((s) => ({ ...s, areaId: e.target.value }))}><option value="">—</option>{(areas.data?.data ?? []).map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ flex: 1 }}><label className="field-label">Thuộc doanh trại (tùy chọn)</label><select className="input" value={f.barracksId} onChange={(e) => setF((s) => ({ ...s, barracksId: e.target.value }))}><option value="">— Kho độc lập —</option>{(barracks.data?.data ?? []).map((b) => <option key={b.id} value={b.id}>{b.code} · {b.name}</option>)}</select></div>
+          <div style={{ flex: 1 }}><label className="field-label">Loại địa điểm nguồn</label><select className="input" value={f.siteType} onChange={(e) => setF((s) => ({ ...s, siteType: e.target.value }))} title="Phân loại nguồn để cuộn cấp Tỉnh (xã/đơn vị/kho Tỉnh/căn cứ)"><option value="">—</option>{SITE_TYPES.map((s) => <option key={s} value={s}>{SITE_TYPE_LABEL[s]}</option>)}</select></div>
         </div>
         {/* Ký hiệu quân sự (điều lệ Mục S): ngành = chữ trong ký hiệu, cấp = hình nền, tấn ghi trong ký hiệu. */}
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>

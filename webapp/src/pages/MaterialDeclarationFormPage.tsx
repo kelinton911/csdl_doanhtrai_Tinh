@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { toast } from '../lib/toast';
 import { PageHeader } from '../components/PageHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
-import { MaterialPicker } from '../components/MaterialPicker';
+import { AsyncPicker } from '../components/AsyncPicker';
+import { DeclarationGrid } from '../components/DeclarationGrid';
+import { ImportLinesModal } from '../components/ImportLinesModal';
 import { Icon } from '../components/Icon';
 import { Skeleton } from '../components/States';
-import {
-  RESERVE_PURPOSE_LABEL,
-  useDeclaration,
-  type DeclarationLine,
-} from '../lib/materialDeclarations';
+import { useDeclaration, useDeclarations } from '../lib/materialDeclarations';
 
 const EDITABLE = ['DRAFT', 'CHANGES_REQUESTED'];
 
-// Tạo/sửa bản khai báo vật chất + CRUD dòng (theo danh mục chuẩn) + gửi duyệt.
+interface Org { id: string; name: string }
+
+// Tạo/sửa bản khai báo vật chất: header + lưới nhập dòng (dán Excel) + import/kế thừa/nhân bản + gửi duyệt.
 export function MaterialDeclarationFormPage() {
   const { id } = useParams();
+  const [sp] = useSearchParams();
+  const barracksIdParam = sp.get('barracksId'); // đến từ trang doanh trại → gắn bản khai vào doanh trại
   const nav = useNavigate();
   const qc = useQueryClient();
   const isEdit = !!id;
@@ -30,21 +32,35 @@ export function MaterialDeclarationFormPage() {
   const [title, setTitle] = useState('');
   const [periodLabel, setPeriodLabel] = useState('');
   const [note, setNote] = useState('');
-  const [lineModal, setLineModal] = useState<DeclarationLine | 'new' | null>(null);
+  const [organizationId, setOrganizationId] = useState('');
+  const [areaId, setAreaId] = useState('');
+  const [showImport, setShowImport] = useState(false);
+  const [showCarry, setShowCarry] = useState(false);
+  const [showDup, setShowDup] = useState(false);
 
   useEffect(() => {
     if (decl) {
       setTitle(decl.title);
       setPeriodLabel(decl.periodLabel ?? '');
       setNote(decl.note ?? '');
+      setOrganizationId(decl.organizationId ?? '');
+      setAreaId(decl.areaId ?? '');
     }
   }, [decl]);
 
+  const orgs = useQuery({ queryKey: ['orgs'], queryFn: async () => (await api.get('/organizations', { params: { size: 200 } })).data as { data: Org[] } });
+
   const saveHeader = useMutation({
     mutationFn: async () => {
-      const body = { title, periodLabel: periodLabel || undefined, note: note || undefined };
+      const body = {
+        title,
+        periodLabel: periodLabel || undefined,
+        note: note || undefined,
+        organizationId: organizationId || undefined,
+        areaId: areaId || undefined,
+      };
       if (isEdit) return (await api.put(`/material-declarations/${id}`, body)).data;
-      return (await api.post('/material-declarations', body)).data;
+      return (await api.post('/material-declarations', { ...body, barracksId: barracksIdParam || undefined })).data;
     },
     onSuccess: (d: { id: string }) => {
       toast.success('Đã lưu bản khai báo.');
@@ -52,12 +68,6 @@ export function MaterialDeclarationFormPage() {
       if (!isEdit) nav(`/material-declarations/${d.id}/edit`);
     },
     onError: (e) => toast.problem(e, 'Lưu thất bại'),
-  });
-
-  const deleteLine = useMutation({
-    mutationFn: async (lineId: string) => api.delete(`/material-declarations/lines/${lineId}`),
-    onSuccess: () => { toast.success('Đã xóa dòng.'); qc.invalidateQueries({ queryKey: ['material-declarations', id] }); },
-    onError: (e) => toast.problem(e, 'Xóa dòng thất bại'),
   });
 
   const submit = useMutation({
@@ -68,14 +78,17 @@ export function MaterialDeclarationFormPage() {
 
   if (isEdit && detail.isLoading) return <Skeleton rows={6} />;
 
+  const warnings = decl?.warnings ?? [];
+
   return (
     <>
       <PageHeader
         eyebrow="Khai báo vật chất"
         title={isEdit ? `Sửa: ${decl?.title ?? ''}` : 'Tạo bản khai báo mới'}
-        description="Chọn vật chất theo danh mục chuẩn (có thể gõ tên gọi khác). Toàn quyền nhập/sửa/xóa khi chưa duyệt."
+        description="Nhập theo danh mục chuẩn dạng bảng (dán được từ Excel). Toàn quyền nhập/sửa/xóa khi chưa duyệt."
         actions={<>
           {decl && <StatusBadge status={decl.workflowStatus} />}
+          {isEdit && decl && <button className="btn btn-ghost btn-sm" onClick={() => setShowDup(true)}><Icon name="clipboard" size={14} /> Nhân bản</button>}
           <button className="btn btn-ghost" onClick={() => nav(isEdit ? `/material-declarations/${id}` : '/material-declarations')}>Đóng</button>
         </>}
       />
@@ -88,8 +101,8 @@ export function MaterialDeclarationFormPage() {
       )}
 
       {/* Thông tin chung */}
-      <div className="panel" style={{ padding: 14, marginBottom: 16, display: 'grid', gap: 12, maxWidth: 640 }}>
-        <label style={{ display: 'grid', gap: 4 }}>
+      <div className="panel" style={{ padding: 14, marginBottom: 16, display: 'grid', gap: 12, gridTemplateColumns: '1fr 1fr', maxWidth: 860 }}>
+        <label style={{ display: 'grid', gap: 4, gridColumn: '1 / -1' }}>
           <span className="muted" style={{ fontSize: 13 }}>Tên bản khai báo *</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} disabled={!editable} placeholder="VD: Khai báo vật chất Quý I/2026" />
         </label>
@@ -98,50 +111,57 @@ export function MaterialDeclarationFormPage() {
           <input value={periodLabel} onChange={(e) => setPeriodLabel(e.target.value)} disabled={!editable} placeholder="VD: Quý I/2026" />
         </label>
         <label style={{ display: 'grid', gap: 4 }}>
+          <span className="muted" style={{ fontSize: 13 }}>Đơn vị khai báo</span>
+          <select value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} disabled={!editable}>
+            <option value="">— Theo đơn vị của tôi —</option>
+            {(orgs.data?.data ?? []).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+          </select>
+        </label>
+        <div style={{ display: 'grid', gap: 4 }}>
+          <span className="muted" style={{ fontSize: 13 }}>Địa bàn (xã/phường)</span>
+          <AsyncPicker endpoint="/administrative-areas" value={areaId} onChange={setAreaId} params={{ level: 'COMMUNE' }} disabled={!editable} placeholder="Gõ tên/mã xã…" />
+        </div>
+        <label style={{ display: 'grid', gap: 4 }}>
           <span className="muted" style={{ fontSize: 13 }}>Ghi chú</span>
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} disabled={!editable} rows={2} />
+          <input value={note} onChange={(e) => setNote(e.target.value)} disabled={!editable} />
         </label>
         {editable && (
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8 }}>
             <button className="btn btn-primary" disabled={saveHeader.isPending || title.trim().length < 3} onClick={() => saveHeader.mutate()}>
-              {isEdit ? 'Lưu thay đổi' : 'Lưu nháp'}
+              {isEdit ? 'Lưu thông tin chung' : 'Lưu nháp & nhập dòng'}
             </button>
           </div>
         )}
       </div>
 
-      {/* Dòng vật chất — chỉ khi đã có bản khai báo */}
-      {isEdit && decl && (
-        <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: '1px solid var(--color-neutral-200)' }}>
-            <b>Dòng vật chất ({decl.lines.length})</b>
-            {editable && <button className="btn btn-primary btn-sm" onClick={() => setLineModal('new')}><Icon name="plus" size={14} /> Thêm dòng</button>}
+      {/* Cảnh báo đối chiếu (đã lưu) */}
+      {warnings.length > 0 && (
+        <div className="panel" style={{ padding: 12, marginBottom: 16, border: '1px solid var(--warn-bd)', background: 'var(--warn-bg)', color: 'var(--warn-fg)' }}>
+          <div style={{ fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
+            <Icon name="alert" size={15} /> {warnings.length} dòng có cảnh báo đối chiếu (không chặn gửi duyệt)
           </div>
-          {decl.lines.length === 0 ? (
-            <div className="muted" style={{ padding: 16, fontSize: 13 }}>Chưa có dòng vật chất. Bấm "Thêm dòng" để khai báo theo danh mục chuẩn.</div>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
-              <thead><tr style={{ textAlign: 'left', color: 'var(--color-neutral-600)', fontSize: 12 }}>
-                <th style={{ padding: '8px 12px' }}>Vật chất</th><th>Mục đích</th><th style={{ textAlign: 'right' }}>Số lượng</th><th style={{ textAlign: 'right' }}>C1–C5</th>{editable && <th></th>}
-              </tr></thead>
-              <tbody>
-                {decl.lines.map((l) => (
-                  <tr key={l.id} style={{ borderTop: '1px solid var(--color-neutral-200)' }}>
-                    <td style={{ padding: '8px 12px' }}>{l.aliasUsed ?? l.materialCatalogId}</td>
-                    <td>{RESERVE_PURPOSE_LABEL[l.reservePurpose] ?? l.reservePurpose}</td>
-                    <td className="num" style={{ textAlign: 'right' }}>{Number(l.quantity).toLocaleString('vi-VN')}</td>
-                    <td className="num" style={{ textAlign: 'right' }}>{[l.qtyGrade1, l.qtyGrade2, l.qtyGrade3, l.qtyGrade4, l.qtyGrade5].map((g) => Number(g)).join('/')}</td>
-                    {editable && (
-                      <td style={{ textAlign: 'right', padding: '8px 12px', whiteSpace: 'nowrap' }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setLineModal(l)}>Sửa</button>
-                        <button className="btn btn-ghost btn-sm" disabled={deleteLine.isPending} onClick={() => deleteLine.mutate(l.id)}>Xóa</button>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <ul style={{ margin: 0, paddingLeft: 20, fontSize: 12.5 }}>
+            {warnings.slice(0, 5).map((w) => <li key={w.lineId}>{w.messages.join('; ')}</li>)}
+            {warnings.length > 5 && <li>… và {warnings.length - 5} dòng khác</li>}
+          </ul>
+        </div>
+      )}
+
+      {/* Lưới dòng vật chất — chỉ khi đã có bản khai báo */}
+      {isEdit && decl && (
+        <div className="panel" style={{ padding: 14 }}>
+          {editable && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+              <button className="btn btn-sm" onClick={() => setShowImport(true)}><Icon name="upload" size={14} /> Nhập Excel/CSV</button>
+              <button className="btn btn-sm" onClick={() => setShowCarry(true)}><Icon name="refresh" size={14} /> Kế thừa kỳ trước</button>
+            </div>
           )}
+          <DeclarationGrid
+            key={decl.updatedAt + String(decl.lines.length)}
+            declarationId={decl.id}
+            lines={decl.lines}
+            editable={editable}
+          />
         </div>
       )}
 
@@ -154,89 +174,81 @@ export function MaterialDeclarationFormPage() {
         </div>
       )}
 
-      {lineModal && id && (
-        <LineModal
+      {showImport && id && (
+        <ImportLinesModal
           declarationId={id}
-          line={lineModal === 'new' ? null : lineModal}
-          onClose={() => setLineModal(null)}
-          onDone={() => { setLineModal(null); qc.invalidateQueries({ queryKey: ['material-declarations', id] }); }}
+          onClose={() => setShowImport(false)}
+          onDone={() => { setShowImport(false); qc.invalidateQueries({ queryKey: ['material-declarations', id] }); }}
         />
+      )}
+      {showCarry && id && (
+        <CarryForwardModal declarationId={id} currentId={id} onClose={() => setShowCarry(false)} onDone={() => { setShowCarry(false); qc.invalidateQueries({ queryKey: ['material-declarations', id] }); }} />
+      )}
+      {showDup && id && (
+        <DuplicateModal declarationId={id} defaultTitle={`${decl?.title ?? ''} (bản sao)`} onClose={() => setShowDup(false)} onDone={(newId) => { setShowDup(false); nav(`/material-declarations/${newId}/edit`); }} />
       )}
     </>
   );
 }
 
-const PURPOSES = Object.keys(RESERVE_PURPOSE_LABEL);
-
-// Form thêm/sửa một dòng vật chất (chọn theo danh mục chuẩn + chất lượng C1–C5).
-function LineModal({ declarationId, line, onClose, onDone }: {
-  declarationId: string; line: DeclarationLine | null; onClose: () => void; onDone: () => void;
+// Kế thừa dòng từ một bản khai báo kỳ trước (nên đã duyệt).
+function CarryForwardModal({ declarationId, currentId, onClose, onDone }: {
+  declarationId: string; currentId: string; onClose: () => void; onDone: () => void;
 }) {
-  const [matId, setMatId] = useState<string | null>(line?.materialCatalogId ?? null);
-  const [matLabel, setMatLabel] = useState<string | null>(line?.aliasUsed ?? null);
-  const [reservePurpose, setPurpose] = useState(line?.reservePurpose ?? 'THUONG_XUYEN');
-  const [quantity, setQuantity] = useState(line ? String(Number(line.quantity)) : '');
-  const [grades, setGrades] = useState<string[]>(
-    line ? [line.qtyGrade1, line.qtyGrade2, line.qtyGrade3, line.qtyGrade4, line.qtyGrade5].map((g) => String(Number(g))) : ['', '', '', '', ''],
-  );
-  const [note, setNote] = useState(line?.note ?? '');
-
+  const list = useDeclarations();
+  const [sourceId, setSourceId] = useState('');
+  const sources = (list.data ?? []).filter((d) => d.id !== currentId);
   const mut = useMutation({
-    mutationFn: async () => {
-      const body = {
-        materialCatalogId: matId,
-        aliasUsed: matLabel ?? undefined,
-        reservePurpose,
-        quantity: quantity ? Number(quantity) : 0,
-        qtyGrade1: Number(grades[0] || 0),
-        qtyGrade2: Number(grades[1] || 0),
-        qtyGrade3: Number(grades[2] || 0),
-        qtyGrade4: Number(grades[3] || 0),
-        qtyGrade5: Number(grades[4] || 0),
-        note: note || undefined,
-      };
-      if (line) return api.put(`/material-declarations/lines/${line.id}`, body);
-      return api.post(`/material-declarations/${declarationId}/lines`, body);
-    },
-    onSuccess: () => { toast.success(line ? 'Đã cập nhật dòng.' : 'Đã thêm dòng.'); onDone(); },
-    onError: (e) => toast.problem(e, 'Lưu dòng thất bại'),
+    mutationFn: async () => api.post(`/material-declarations/${declarationId}/carry-forward`, { sourceDeclarationId: sourceId }),
+    onSuccess: () => { toast.success('Đã kế thừa dòng từ kỳ trước.'); onDone(); },
+    onError: (e) => toast.problem(e, 'Kế thừa thất bại'),
   });
-
   return (
-    <Modal open title={line ? 'Sửa dòng vật chất' : 'Thêm dòng vật chất'} onClose={onClose} width={560}>
-      <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} style={{ display: 'grid', gap: 12 }}>
-        <div style={{ display: 'grid', gap: 4 }}>
-          <span className="muted" style={{ fontSize: 13 }}>Vật chất (danh mục chuẩn) *</span>
-          <MaterialPicker value={matId} label={matLabel} onPick={(id2, l) => { setMatId(id2); setMatLabel(l); }} />
+    <Modal open title="Kế thừa dòng từ kỳ trước" onClose={onClose} width={560}>
+      <div style={{ display: 'grid', gap: 12 }}>
+        <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+          Chọn bản khai báo nguồn (nên đã DUYỆT). Hệ thống nạp toàn bộ dòng với <b>đầu kỳ = cuối kỳ nguồn</b>, tăng/giảm = 0.
+        </p>
+        <select value={sourceId} onChange={(e) => setSourceId(e.target.value)}>
+          <option value="">— Chọn bản nguồn —</option>
+          {sources.map((d) => <option key={d.id} value={d.id}>{d.title} {d.periodLabel ? `(${d.periodLabel})` : ''} — {d.workflowStatus}</option>)}
+        </select>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={onClose}>Hủy</button>
+          <button className="btn btn-primary" disabled={!sourceId || mut.isPending} onClick={() => mut.mutate()}>Kế thừa</button>
         </div>
+      </div>
+    </Modal>
+  );
+}
+
+// Nhân bản bản khai báo (tạo DRAFT mới + copy dòng).
+function DuplicateModal({ declarationId, defaultTitle, onClose, onDone }: {
+  declarationId: string; defaultTitle: string; onClose: () => void; onDone: (newId: string) => void;
+}) {
+  const [title, setTitle] = useState(defaultTitle);
+  const [periodLabel, setPeriodLabel] = useState('');
+  const mut = useMutation({
+    mutationFn: async () => (await api.post(`/material-declarations/${declarationId}/duplicate`, { title, periodLabel: periodLabel || undefined })).data as { id: string },
+    onSuccess: (d) => { toast.success('Đã nhân bản.'); onDone(d.id); },
+    onError: (e) => toast.problem(e, 'Nhân bản thất bại'),
+  });
+  return (
+    <Modal open title="Nhân bản bản khai báo" onClose={onClose} width={520}>
+      <div style={{ display: 'grid', gap: 12 }}>
         <label style={{ display: 'grid', gap: 4 }}>
-          <span className="muted" style={{ fontSize: 13 }}>Mục đích dự trữ</span>
-          <select value={reservePurpose} onChange={(e) => setPurpose(e.target.value)}>
-            {PURPOSES.map((p) => <option key={p} value={p}>{RESERVE_PURPOSE_LABEL[p]}</option>)}
-          </select>
+          <span className="muted" style={{ fontSize: 13 }}>Tên bản mới *</span>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} />
         </label>
         <label style={{ display: 'grid', gap: 4 }}>
-          <span className="muted" style={{ fontSize: 13 }}>Số lượng</span>
-          <input type="number" step="0.001" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
-        </label>
-        <div style={{ display: 'grid', gap: 4 }}>
-          <span className="muted" style={{ fontSize: 13 }}>Số lượng theo cấp chất lượng (C1 → C5)</span>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {grades.map((g, i) => (
-              <input key={i} type="number" step="0.001" value={g} placeholder={`C${i + 1}`} style={{ width: 84 }}
-                onChange={(e) => setGrades((prev) => prev.map((v, j) => (j === i ? e.target.value : v)))} />
-            ))}
-          </div>
-        </div>
-        <label style={{ display: 'grid', gap: 4 }}>
-          <span className="muted" style={{ fontSize: 13 }}>Ghi chú</span>
-          <input value={note} onChange={(e) => setNote(e.target.value)} />
+          <span className="muted" style={{ fontSize: 13 }}>Kỳ khai báo</span>
+          <input value={periodLabel} onChange={(e) => setPeriodLabel(e.target.value)} placeholder="VD: Quý II/2026" />
         </label>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button type="button" className="btn btn-ghost" onClick={onClose}>Hủy</button>
-          <button type="submit" className="btn btn-primary" disabled={mut.isPending || !matId}>Lưu</button>
+          <button className="btn btn-ghost" onClick={onClose}>Hủy</button>
+          <button className="btn btn-primary" disabled={title.trim().length < 3 || mut.isPending} onClick={() => mut.mutate()}>Nhân bản</button>
         </div>
-      </form>
+      </div>
     </Modal>
   );
 }

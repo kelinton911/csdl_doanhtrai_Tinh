@@ -19,7 +19,8 @@ import {
 } from './dto/inventory.dto';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
-import { barracksScope } from '../../common/data-scope';
+import { barracksScope, isProvinceWide } from '../../common/data-scope';
+import { SECRET_SITE_TYPES } from './site-type';
 import { WorkflowStatus } from '../../common/workflow';
 import {
   assertEditable,
@@ -58,6 +59,7 @@ export class InventoryService {
       .addSelect('l.type', 'type')
       .addSelect('l.nganh', 'nganh')
       .addSelect('l.cap', 'cap')
+      .addSelect('l.site_type', 'siteType')
       .addSelect('l.capacity_tons', 'capacityTons')
       .addSelect('l.barracks_id', 'barracksId')
       .addSelect('l.area_id', 'areaId')
@@ -107,6 +109,7 @@ export class InventoryService {
         type: dto.type ?? null,
         nganh: dto.nganh ?? null,
         cap: dto.cap ?? null,
+        siteType: dto.siteType ?? null,
         capacityTons: dto.capacityTons != null ? String(dto.capacityTons) : null,
         barracksId: dto.barracksId ?? null,
         areaId: dto.areaId ?? null,
@@ -126,6 +129,7 @@ export class InventoryService {
     if (dto.type !== undefined) l.type = dto.type;
     if (dto.nganh !== undefined) l.nganh = dto.nganh;
     if (dto.cap !== undefined) l.cap = dto.cap;
+    if (dto.siteType !== undefined) l.siteType = dto.siteType;
     if (dto.capacityTons !== undefined)
       l.capacityTons = dto.capacityTons != null ? String(dto.capacityTons) : null;
     if (dto.barracksId !== undefined) l.barracksId = dto.barracksId;
@@ -292,6 +296,66 @@ export class InventoryService {
       totalOnHand: string;
     }>();
     return rows.map((r) => ({
+      areaId: r.areaId,
+      areaName: r.areaName,
+      categoryCode: r.categoryCode,
+      categoryName: r.categoryName,
+      materialKinds: Number(r.materialKinds),
+      totalOnHand: Number(r.totalOnHand),
+    }));
+  }
+
+  // Cuộn "nguồn vật chất thường xuyên của Tỉnh" — tách theo LOẠI ĐỊA ĐIỂM NGUỒN (site_type)
+  // × xã × nhóm ngành. "Thường xuyên" = tồn thực tế hiện có (stock_balances.on_hand);
+  // KVPT/SSCĐ nằm ở module riêng nên không lọc ở đây.
+  // An ninh: căn cứ HC-KT bí mật chỉ hiện cho vai trò xem toàn tỉnh (isProvinceWide).
+  async summaryByAreaAndSiteType(filters: { siteType?: string; categoryCode?: string }, user?: AuthUser) {
+    const scope = barracksScope(user);
+    const qb = this.dataSource
+      .createQueryBuilder()
+      .select('l.site_type', 'siteType')
+      .addSelect('a.id', 'areaId')
+      .addSelect('a.name', 'areaName')
+      .addSelect('m.category_code', 'categoryCode')
+      .addSelect('cat.name', 'categoryName')
+      .addSelect('COUNT(DISTINCT sb.material_id)', 'materialKinds')
+      .addSelect('COALESCE(SUM(sb.on_hand), 0)', 'totalOnHand')
+      .from(StockBalance, 'sb')
+      .leftJoin('storage_locations', 'l', 'l.id = sb.storage_location_id')
+      .leftJoin('administrative_areas', 'a', 'a.id = l.area_id')
+      .leftJoin('materials', 'm', 'm.id = sb.material_id')
+      .leftJoin('catalogs', 'cat', "cat.type = 'material-category' AND cat.code = m.category_code")
+      .groupBy('l.site_type')
+      .addGroupBy('a.id')
+      .addGroupBy('a.name')
+      .addGroupBy('m.category_code')
+      .addGroupBy('cat.name')
+      .orderBy('l.site_type', 'ASC')
+      .addOrderBy('a.name', 'ASC')
+      .addOrderBy('cat.name', 'ASC');
+    if (filters.siteType) qb.andWhere('l.site_type = :stype', { stype: filters.siteType });
+    if (filters.categoryCode) qb.andWhere('m.category_code = :cc', { cc: filters.categoryCode });
+    // Chặn căn cứ mật với người dùng không xem toàn tỉnh.
+    if (!isProvinceWide(user))
+      qb.andWhere('(l.site_type IS NULL OR l.site_type <> ALL(:secret::varchar[]))', {
+        secret: SECRET_SITE_TYPES,
+      });
+    if (scope)
+      qb.andWhere('(l.area_id = ANY(:areaIds::uuid[]) OR l.organization_id = :orgId)', {
+        areaIds: scope.areaIds,
+        orgId: scope.organizationId,
+      });
+    const rows = await qb.getRawMany<{
+      siteType: string | null;
+      areaId: string | null;
+      areaName: string | null;
+      categoryCode: string | null;
+      categoryName: string | null;
+      materialKinds: string;
+      totalOnHand: string;
+    }>();
+    return rows.map((r) => ({
+      siteType: r.siteType,
       areaId: r.areaId,
       areaName: r.areaName,
       categoryCode: r.categoryCode,

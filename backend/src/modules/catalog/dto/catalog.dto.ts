@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -107,6 +108,12 @@ export class CreateImportBatchDto {
 export class ItemQuery extends SearchQuery {
   @ApiPropertyOptional() @IsOptional() @IsUUID() versionId?: string;
   @ApiPropertyOptional() @IsOptional() @IsUUID() parentId?: string;
+  // Chỉ lấy nút gốc (parent_id IS NULL) của phiên bản — điểm vào cho picker duyệt cây.
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  rootsOnly?: boolean;
 }
 
 export class CompareQuery {

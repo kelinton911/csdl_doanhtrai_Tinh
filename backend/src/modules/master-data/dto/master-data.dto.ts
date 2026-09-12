@@ -5,10 +5,18 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   Min,
   MinLength,
 } from 'class-validator';
 import { PaginationQuery } from '../../../common/dto/pagination.dto';
+
+// Bắc cầu 1 mã danh mục (Quân nhu…) sang bảng vật chất để nhập kho.
+export class MaterialFromCatalogDto {
+  @ApiProperty()
+  @IsUUID()
+  materialCatalogId!: string;
+}
 
 export class ListMaterialsQuery extends PaginationQuery {
   @ApiPropertyOptional()

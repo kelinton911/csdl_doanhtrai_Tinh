@@ -10,6 +10,8 @@ import { Catalog } from './entities/catalog.entity';
 import { Material } from './entities/material.entity';
 import { MaterialVersion } from './entities/material-version.entity';
 import { AssetCatalogItem } from '../asset-catalog/entities/asset-catalog-item.entity';
+import { MaterialCatalog } from '../catalog/entities/material-catalog.entity';
+import { UnitOfMeasure } from '../catalog/entities/unit-of-measure.entity';
 import {
   CreateCatalogDto,
   CreateMaterialDto,
@@ -18,6 +20,7 @@ import {
 } from './dto/master-data.dto';
 import { PaginationQuery, paginated } from '../../common/dto/pagination.dto';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { normalizeText } from '../../common/tabular';
 
 // Loại danh mục do module Nhóm ngành vật chất (/material-groups) sở hữu — chặn
 // ghi qua đường danh mục chung để tránh 2 nguồn CRUD trên cùng bảng catalogs.
@@ -31,7 +34,71 @@ export class MasterDataService {
     @InjectRepository(Material) private readonly materials: Repository<Material>,
     @InjectRepository(MaterialVersion) private readonly versions: Repository<MaterialVersion>,
     @InjectRepository(AssetCatalogItem) private readonly assetItems: Repository<AssetCatalogItem>,
+    @InjectRepository(MaterialCatalog) private readonly materialCatalog: Repository<MaterialCatalog>,
+    @InjectRepository(UnitOfMeasure) private readonly units: Repository<UnitOfMeasure>,
   ) {}
+
+  // Bắc cầu một mã trong danh mục Quân nhu (material_catalog) sang bảng vật chất (materials) để
+  // có thể nhập kho/theo dõi tồn. Idempotent theo code; đánh dấu OUT_OF_SCOPE (ngành khác Doanh trại).
+  async ensureMaterialFromCatalog(materialCatalogId: string, user: AuthUser): Promise<Material> {
+    const cat = await this.materialCatalog.findOne({ where: { id: materialCatalogId } });
+    if (!cat) throw new NotFoundException(`DATA-001: Không có mã danh mục ${materialCatalogId}`);
+
+    const existing = await this.materials.findOne({ where: { code: cat.code } });
+    if (existing) return existing;
+
+    const unitCode = cat.unitId
+      ? (await this.units.findOne({ where: { id: cat.unitId } }))?.code ?? null
+      : null;
+    const categoryCode = cat.parentId
+      ? (await this.materialCatalog.findOne({ where: { id: cat.parentId } }))?.code ?? null
+      : null;
+
+    const material = await this.materials.save(
+      this.materials.create({
+        code: cat.code,
+        name: cat.name,
+        unitCode,
+        categoryCode,
+        status: 'PUBLISHED',
+        assetCodeStatus: 'OUT_OF_SCOPE',
+        attributes: { source: 'QUAN_NHU', catalogVersionId: cat.versionId, catalogCode: cat.code },
+        createdBy: user.sub,
+        updatedBy: user.sub,
+      }),
+    );
+    await this.snapshotMaterial(material, 'IMPORT_FROM_CATALOG', user.sub);
+    return material;
+  }
+
+  // Tìm liên thông một ô: gộp vật chất kho (materials/R00) + danh mục Quân nhu (material_catalog).
+  // Mỗi kết quả mang materialId (nếu từ materials) hoặc materialCatalogId (nếu từ catalog) để nơi gọi
+  // tự phân giải (kho: dùng materialId, hoặc bắc cầu từ materialCatalogId).
+  async federatedSearch(q: string) {
+    const term = (q ?? '').trim();
+    if (term.length < 2) return [];
+    const like = `%${term}%`;
+    const nk = `%${normalizeText(term)}%`;
+    const src = (code: string) => (code.startsWith('Y2') ? 'QN' : 'R00');
+    const mats = await this.materials
+      .createQueryBuilder('m')
+      .where('(m.code ILIKE :s OR m.name ILIKE :s)', { s: like })
+      .orderBy('m.code', 'ASC')
+      .take(25)
+      .getMany();
+    // Chỉ lấy mục danh mục CHƯA có trong materials (tránh trùng vì R00 nay có ở cả 2 bảng).
+    const cats = await this.materialCatalog
+      .createQueryBuilder('c')
+      .where('c.is_leaf = true AND (c.code ILIKE :s OR c.name ILIKE :s OR c.search_key ILIKE :nk)', { s: like, nk })
+      .andWhere('c.code NOT IN (SELECT code FROM materials)')
+      .orderBy('c.code', 'ASC')
+      .take(25)
+      .getMany();
+    return [
+      ...mats.map((m) => ({ code: m.code, name: m.name, unitCode: m.unitCode, materialId: m.id, materialCatalogId: null as string | null, source: src(m.code) })),
+      ...cats.map((c) => ({ code: c.code, name: c.name, unitCode: null as string | null, materialId: null as string | null, materialCatalogId: c.id, source: src(c.code) })),
+    ];
+  }
 
   // Nhóm ngành vật chất chỉ được quản lý ở module riêng (material-group) — một nguồn CRUD.
   private ensureCatalogWritable(type: string) {

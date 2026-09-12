@@ -8,11 +8,13 @@ import {
   InventoryFilterQuery,
   InventorySummaryQuery,
   ListStorageLocationsQuery,
+  ProvinceRoutineSummaryQuery,
   StorageReviewDto,
   UpdateStorageLocationDto,
 } from './dto/inventory.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../identity/roles';
+import { Scoped } from '../../common/scope/scope.decorator';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 
 // M06 — Inventory (UC-08). Idempotency-Key áp dụng cho các POST phát sinh tồn.
@@ -31,6 +33,7 @@ export class InventoryController {
 
   @Post('storage-locations')
   @Roles(Role.BARRACKS_OFFICER, Role.COMMUNE_USER, Role.SYS_ADMIN)
+  @Scoped('organization')
   @ApiOperation({ summary: 'Xã khai báo kho (DRAFT)' })
   createLocation(@Body() dto: CreateStorageLocationDto, @CurrentUser() user: AuthUser) {
     return this.service.createLocation(dto, user);
@@ -50,6 +53,7 @@ export class InventoryController {
 
   @Put('storage-locations/:id')
   @Roles(Role.BARRACKS_OFFICER, Role.COMMUNE_USER, Role.SYS_ADMIN)
+  @Scoped('organization')
   @ApiOperation({ summary: 'Cập nhật hồ sơ kho (chưa chốt)' })
   updateLocation(
     @Param('id', ParseUUIDPipe) id: string,
@@ -98,6 +102,21 @@ export class InventoryController {
   @ApiOperation({ summary: 'Vật chất chung của xã: tổng hợp tồn theo xã (lọc 1 xã hoặc tổng toàn tỉnh)' })
   summaryByArea(@Query() q: InventorySummaryQuery, @CurrentUser() user: AuthUser) {
     return this.service.summaryByArea({ areaId: q.areaId, categoryCode: q.categoryCode }, user);
+  }
+
+  @Get('province-routine-summary')
+  @ApiOperation({
+    summary:
+      'Nguồn vật chất thường xuyên của Tỉnh: cuộn tồn tách theo loại địa điểm nguồn (xã/đơn vị/kho Tỉnh/căn cứ)',
+  })
+  provinceRoutineSummary(
+    @Query() q: ProvinceRoutineSummaryQuery,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.summaryByAreaAndSiteType(
+      { siteType: q.siteType, categoryCode: q.categoryCode },
+      user,
+    );
   }
 
   @Get('transactions')
