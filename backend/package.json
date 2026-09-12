@@ -35,6 +35,7 @@
     "seed:thanh-hoa": "ts-node -r tsconfig-paths/register src/database/seeds/seed-thanh-hoa-full.ts",
     "seed:rbac": "ts-node -r tsconfig-paths/register src/database/seeds/seed-rbac.ts",
     "seed:users": "ts-node -r tsconfig-paths/register src/database/seeds/seed-users.ts",
+    "seed:commune-xa01": "ts-node -r tsconfig-paths/register src/database/seeds/seed-commune-xa01.ts",
     "seed:c3-catalog": "ts-node -r tsconfig-paths/register src/database/seeds/seed-c3-catalog.ts",
     "seed:catalog-dt01": "ts-node -r tsconfig-paths/register src/database/seeds/seed-catalog-dt01.ts",
     "seed:technical-dt03": "ts-node -r tsconfig-paths/register src/database/seeds/seed-technical-dt03.ts",
